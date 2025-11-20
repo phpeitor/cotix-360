@@ -1,5 +1,5 @@
-# XINTRA Elephpant 🐘🎟️
-[![forthebadge](http://forthebadge.com/images/badges/uses-css.svg)](https://www.linkedin.com/in/drphp/)
+# BORON Cotix-360 🐘
+[![forthebadge](http://forthebadge.com/images/badges/made-with-javascript.svg)](https://www.linkedin.com/in/drphp/)
 [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](https://www.linkedin.com/in/drphp/)
 
 Para utilizar este proyecto sigue estos pasos:
@@ -8,8 +8,8 @@ Para utilizar este proyecto sigue estos pasos:
 
 1. **Clonar este repositorio**
 ```bash
-git clone https://github.com/phpeitor/xintra-elephpant.git
-cd xintra-elephpant
+git clone https://github.com/phpeitor/cotix-360.git
+cd cotix-360
 ```
 2. **Ejecutar comando**
 ```bash
