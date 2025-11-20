@@ -58,7 +58,6 @@ try {
             curl_close($ch);
         }
 
-        // Guardar registro de la sesión
         $obj->guardar_session([
             'tipo' => 'IN',
             'id_user' => $data['IDPERSONAL'],

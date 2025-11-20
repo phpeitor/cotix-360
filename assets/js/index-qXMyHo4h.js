@@ -16018,10 +16018,61 @@ const au = "Login Machine",
 			},
 			Yt = () => {
 				ot.value = !0, yt.value !== B.length * Ct && (yt.value = B.length * Ct)
-			},
-			Gt = Dt => (vt("Checking..."), setTimeout(() => {
-				vt(Hd), Ht === dm ? S.fire() : Pt.fire()
-			}, 1500), Dt.preventDefault(), !1);
+			};
+			const Gt = async (e) => {
+				e.preventDefault();
+				
+				vt("Checking...");
+				ot.value = true;
+
+				const usuario = B.trim();
+				const password = Ht.trim();
+
+				if (!usuario || !password) {
+					alertify.warning("⚠️ Ingrese usuario y contraseña");
+					ot.value = false;
+					vt(Hd);
+					return;
+				}
+
+				const formData = new FormData();
+				formData.append("usuario", usuario);
+				formData.append("password", password);
+
+				try {
+					const res = await fetch("controller/acceso.php", {
+						method: "POST",
+						body: formData
+					});
+
+					const data = await res.json();
+
+					if (data.ok) {
+						S.fire();
+						alertify.success("✅ Acceso correcto, redirigiendo...");
+
+						vt("Ingresando...");
+
+						setTimeout(() => {
+							window.location.href = "home.php";
+						}, 1000);
+
+					} else {
+						Pt.fire();
+						alertify.error(data.message || "❌ Usuario o contraseña incorrectos");
+						vt(Hd);
+					}
+
+				} catch (err) {
+					Pt.fire();
+					alertify.error("❌ Error al conectar con el servidor");
+					console.error(err);
+					vt(Hd);
+				} finally {
+					ot.value = false;
+				}
+			};
+
 		return Rn.jsx("div", {
 			className: "login-form-component-root",
 			children: Rn.jsxs("div", {

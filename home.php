@@ -1,10 +1,11 @@
-
+<?php
+  require_once __DIR__ . "/controller/check_session.php";
+?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
-    <title>Dashboard | Boron - Responsive Neubrutalism Bootstrap 5 Admin Dashboard</title>
+    <title>Dashboard | Cotix360 Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description" />
     <meta content="Coderthemes" name="author" />
@@ -16,12 +17,8 @@
 </head>
 
 <body>
-    <!-- Begin page -->
     <div class="wrapper">
-
         <div class="sidenav-menu">
-
-            <!-- Brand Logo -->
             <a href="index.html" class="logo">
                 <span class="logo-light">
                     <span class="logo-lg"><img src="./assets/images/logo.png" alt="logo"></span>
@@ -34,19 +31,15 @@
                 </span>
             </a>
 
-            <!-- Sidebar Hover Menu Toggle Button -->
             <button class="button-sm-hover">
                 <i class="ti ti-circle align-middle"></i>
             </button>
 
-            <!-- Full Sidebar Menu Close Button -->
             <button class="button-close-fullsidebar">
                 <i class="ti ti-x align-middle"></i>
             </button>
 
             <div data-simplebar>
-
-                <!--- Sidenav Menu -->
                 <ul class="side-nav">
 
                     <li class="side-nav-item">
@@ -2268,18 +2261,9 @@
                     </div>
                 </div>
             </footer>
-            <!-- end Footer -->
-
         </div>
-
-        <!-- ============================================================== -->
-        <!-- End Page content -->
-        <!-- ============================================================== -->
-
     </div>
-    <!-- END wrapper -->
 
-    <!-- Theme Settings -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="theme-settings-offcanvas">
         <div class="d-flex align-items-center gap-2 px-3 py-3 offcanvas-header border-bottom border-dashed">
             <h5 class="flex-grow-1 mb-0">Theme Settings</h5>
@@ -2558,5 +2542,4 @@
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/dashboard-sales.js"></script>
 </body>
-
 </html>
