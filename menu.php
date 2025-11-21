@@ -33,7 +33,7 @@
 
             <li class="side-nav-item">
                 <a href="usuarios.php" class="side-nav-link">
-                    <span class="menu-icon"><i class="ti ti-message-filled"></i></span>
+                    <span class="menu-icon"><i class="ti ti-user"></i></span>
                     <span class="menu-text"> Usuarios </span>
                 </a>
             </li>

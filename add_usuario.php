@@ -61,12 +61,66 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
-                                <h4 class="header-title mb-0">Base Users</h4>
-                                <button type="button" class="btn btn-primary mb-0" onclick="window.location.href='add_usuario.php'">Registrar</button>
+                                <h4 class="header-title mb-0">Registrar Usuario</h4>
+                                <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='usuarios.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                             </div>
 
                             <div class="card-body">
-                                <div id="table-gridjs"></div>
+                                <form class="needs-validation" novalidate="">
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label" for="nombres">Nombres</label>
+                                            <input type="text" class="form-control" id="nombres" placeholder="First name" required="">
+                                            <div class="valid-feedback">Looks good!</div>
+                                        </div>
+
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label" for="apellidos">Apellidos</label>
+                                            <input type="text" class="form-control" id="apellidos" placeholder="Last name" required="">
+                                            <div class="valid-feedback">Looks good!</div>
+                                        </div>
+
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label" for="validationCustomUsername">Documento</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text" id="inputGroupPrepend">DNI</span>
+                                                <input type="text" class="form-control" id="validationCustomUsername" placeholder="Username" aria-describedby="inputGroupPrepend" required="">
+                                                <div class="invalid-feedback">Please choose a username.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label" for="validationCustom03">City</label>
+                                            <input type="text" class="form-control" id="validationCustom03" placeholder="City" required="">
+                                            <div class="invalid-feedback">Please provide a valid city.</div>
+                                        </div>
+
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label" for="validationCustom04">State</label>
+                                            <input type="text" class="form-control" id="validationCustom04" placeholder="State" required="">
+                                            <div class="invalid-feedback">Please provide a valid state.</div>
+                                        </div>
+
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label" for="validationCustom05">Zip</label>
+                                            <input type="text" class="form-control" id="validationCustom05" placeholder="Zip" required="">
+                                            <div class="invalid-feedback">Please provide a valid zip.</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="invalidCheck" required="">
+                                            <label class="form-check-label form-label" for="invalidCheck">
+                                                Agree to terms and conditions
+                                            </label>
+                                            <div class="invalid-feedback">You must agree before submitting.</div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary" type="submit">Enviar</button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -368,7 +422,6 @@
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
-    <script src="./assets/js/table-gridjs.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
