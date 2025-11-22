@@ -69,44 +69,49 @@
                                 <form class="needs-validation" novalidate="">
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
+                                            <label class="form-label" for="documento">Documento</label>
+                                            <input type="number" class="form-control" id="documento" placeholder="12345678" required="" min="9999999" max="9999999999">
+                                            <div class="invalid-feedback">Please provide a document.</div>
+                                        </div>
+
+                                        <div class="col-md-4 mb-3">
                                             <label class="form-label" for="nombres">Nombres</label>
-                                            <input type="text" class="form-control" id="nombres" placeholder="First name" required="">
+                                            <input type="text" class="form-control" id="nombres" placeholder="First name" required="" maxlength="70">
                                             <div class="valid-feedback">Looks good!</div>
                                         </div>
 
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label" for="apellidos">Apellidos</label>
-                                            <input type="text" class="form-control" id="apellidos" placeholder="Last name" required="">
+                                            <input type="text" class="form-control" id="apellidos" placeholder="Last name" required="" maxlength="70">
                                             <div class="valid-feedback">Looks good!</div>
-                                        </div>
-
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label" for="validationCustomUsername">Documento</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text" id="inputGroupPrepend">DNI</span>
-                                                <input type="text" class="form-control" id="validationCustomUsername" placeholder="Username" aria-describedby="inputGroupPrepend" required="">
-                                                <div class="invalid-feedback">Please choose a username.</div>
-                                            </div>
                                         </div>
                                     </div>
 
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label" for="validationCustom03">City</label>
-                                            <input type="text" class="form-control" id="validationCustom03" placeholder="City" required="">
-                                            <div class="invalid-feedback">Please provide a valid city.</div>
+                                            <label class="form-label" for="email">Email</label>
+                                            <input type="email" class="form-control" id="email" placeholder="example@dominio.com" required="" maxlength="70">
+                                            <div class="invalid-feedback">Please provide a valid email.</div>
                                         </div>
 
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label" for="validationCustom04">State</label>
-                                            <input type="text" class="form-control" id="validationCustom04" placeholder="State" required="">
-                                            <div class="invalid-feedback">Please provide a valid state.</div>
+                                            <label class="form-label" for="telefono">Teléfono</label>
+                                            <input type="text" class="form-control" data-toggle="input-mask" data-mask-format="999999999" inputmode="text" min="100000000" max="999999999" id="telefono" placeholder="123456789" required="">
+                                            <div class="invalid-feedback">Please provide a valid phone.</div>
                                         </div>
 
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label" for="validationCustom05">Zip</label>
-                                            <input type="text" class="form-control" id="validationCustom05" placeholder="Zip" required="">
-                                            <div class="invalid-feedback">Please provide a valid zip.</div>
+                                            <label class="form-label" for="sexo">Sexo</label>
+                                            <div class="form-check">
+                                                <input type="radio" id="customRadio1" name="sexo" class="form-check-input" required="" value="1">
+                                                <label class="form-check-label" for="customRadio1">Masculino</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input type="radio" id="customRadio2" name="sexo" class="form-check-input" value="2" required="">
+                                                <label class="form-check-label" for="customRadio2">Femenino</label>
+                                            </div>
+                                            
+                                            <div class="invalid-feedback">Please select an option.</div>
                                         </div>
                                     </div>
 
