@@ -96,7 +96,7 @@
 
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label" for="telefono">Teléfono</label>
-                                            <input type="text" class="form-control" data-toggle="input-mask" data-mask-format="999999999" inputmode="text" min="100000000" max="999999999" id="telefono" placeholder="123456789" required="">
+                                            <input type="number" class="form-control" data-toggle="input-mask" data-mask-format="999999999" inputmode="number" min="99999999" id="telefono" placeholder="123456789" required="">
                                             <div class="invalid-feedback">Please provide a valid phone.</div>
                                         </div>
 
