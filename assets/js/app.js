@@ -91,6 +91,16 @@ class App {
 			}, !1)
 		})
 	}
+    initRadioValidation() {
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const form = radio.closest('form');
+                if (form) {
+                    form.classList.add('was-validated');
+                }
+            });
+        });
+    }
 	initFormAdvance() {
 		document.querySelectorAll('[data-toggle="input-mask"]').forEach(e => {
 			var t = e.getAttribute("data-mask-format").toString().replaceAll("0", "9");
@@ -116,7 +126,7 @@ class App {
 		})
 	}
 	init() {
-		this.initComponents(), this.initPortletCard(), this.initMultiDropdown(), this.initLeftSidebar(), this.initTopbarMenu(), this.initfullScreenListener(), this.initFormValidation(), this.initFormAdvance()
+		this.initComponents(), this.initPortletCard(), this.initMultiDropdown(), this.initLeftSidebar(), this.initTopbarMenu(), this.initfullScreenListener(), this.initFormValidation(), this.initRadioValidation(), this.initFormAdvance()
 	}
 }
 class ThemeCustomizer {
