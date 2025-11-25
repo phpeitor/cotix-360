@@ -66,7 +66,7 @@
                             </div>
 
                             <div class="card-body">
-                                <form class="needs-validation form-add-user" novalidate="">
+                                <form class="needs-validation form-upd-user" novalidate="">
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label" for="documento">Documento</label>
@@ -90,7 +90,7 @@
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label" for="email">Email</label>
-                                            <input type="email" class="form-control" id="email" mame="email" placeholder="example@dominio.com" required="" maxlength="70">
+                                            <input type="email" class="form-control" id="email" name="email" placeholder="example@dominio.com" required="" maxlength="70">
                                             <div class="invalid-feedback">Please provide a valid email.</div>
                                         </div>
 

@@ -1,7 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
   const forms = document.querySelectorAll(
-    ".form-add-user, .ti-custom-validation-item, .ti-custom-validation-ticket"
+    ".form-add-user"
   );
+  const form = document.querySelector("form.form-upd-user");
+  const params = new URLSearchParams(window.location.search);
+  const hash = params.get("hash");
+
+
+  if (hash && form.classList.contains("form-upd-user")) {
+    cargarUsuario(hash);
+  }
 
   forms.forEach((form) => {
     form.addEventListener("submit", async (e) => {
@@ -120,3 +128,43 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+async function cargarUsuario(hash) {
+    try {
+        const res = await fetch(`controller/get_usuario.php?hash=${hash}`);
+        const json = await res.json();
+
+        if (!json.ok) {
+            alertify.error(json.message || "Usuario no encontrado");
+            return;
+        }
+
+        const u = json.data;
+        document.querySelector('#nombres').value = u.NOMBRES || '';
+        document.querySelector('#apellidos').value = u.APELLIDOS || '';
+        document.querySelector('#documento').value = u.DOC || '';
+        document.querySelector('#email').value = u.EMAIL || '';
+        document.querySelector('#telefono').value = u.TLF || '';
+        document.querySelectorAll('input[name="sexo"]').forEach(r => {
+            r.checked = parseInt(r.value) === parseInt(u.SEXO);
+        });
+
+        /*const toggle = document.querySelector('#estadoToggle');
+        const estadoInput = document.querySelector('#estadoInput');
+
+        if (toggle && estadoInput) {
+            if (parseInt(u.IDESTADO) === 1) {
+                toggle.classList.add('on');
+                estadoInput.value = '1';
+            } else {
+                toggle.classList.remove('on');
+                estadoInput.value = '0';
+            }
+        }
+
+        inicializarToggle();*/
+
+    } catch (err) {
+        console.error("❌ Error al cargar usuario:", err);
+    }
+}
