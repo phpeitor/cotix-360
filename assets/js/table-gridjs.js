@@ -122,9 +122,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const id = btnDelete.dataset.id;
             if (!id) return;
 
-            if (!confirm("¿Seguro que deseas eliminar el registro " + id + "?")) {
-                return;
-            }
+            const confirmed = await new Promise((resolve) => {
+                alertify.confirm(
+                    "Confirmar eliminación",
+                    "¿Seguro que deseas eliminar el registro " + id + "?",
+                    function () { resolve(true); },    // OK
+                    function () { resolve(false); }    // Cancelar
+                );
+            });
+
+            if (!confirmed) return;
 
             try {
                 const res = await fetch("controller/delete_usuario.php", {
@@ -138,7 +145,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (json.ok) {
                     alertify.success("✅ Registro suspendido correctamente");
 
-                    // Recargar tabla Grid.js
                     grid.updateConfig({
                         server: {
                             url: "controller/table_usuario.php",

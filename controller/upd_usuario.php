@@ -22,7 +22,7 @@ try {
         'email'     => $_POST['email'] ?? '',
         'telefono'  => $_POST['telefono'] ?? '',
         'sexo'      => $_POST['sexo'] ?? 0,
-        'estado'    => ($_POST['estado'] ?? '0') === '1' ? 1 : 0,
+        'estado'    => isset($_POST['estado']) ? 1 : 0,
     ];
 
     $usuario = new Usuario();

@@ -61,7 +61,7 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
-                                <h4 class="header-title mb-0">Registrar Usuario</h4>
+                                <h4 class="header-title mb-0">Modificar Usuario </h4>
                                 <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='usuarios.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                             </div>
 
@@ -100,30 +100,24 @@
                                             <div class="invalid-feedback">Please provide a valid phone.</div>
                                         </div>
 
-                                        <div class="col-md-4 mb-3">
+                                        <div class="col-md-2 mb-3">
                                             <label class="form-label d-block">Sexo</label>
-
                                             <input type="radio" class="form-check-input" id="sexo1" name="sexo" required value="1">
                                             <label for="sexo1" class="ms-1">Masculino</label><br>
-
                                             <input type="radio" class="form-check-input" id="sexo2" name="sexo" required value="2">
                                             <label for="sexo2" class="ms-1">Femenino</label>
-
                                             <div class="invalid-feedback">
                                                 Please select an option.
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="mb-3">
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" id="invalidCheck" required="">
-                                            <label class="form-check-label form-label" for="invalidCheck">
-                                                Agree to terms and conditions
-                                            </label>
-                                            <div class="invalid-feedback">You must agree before submitting.</div>
+                                        <div class="col-md-2 mb-3">
+                                            <label class="form-label d-block">Estado</label>
+                                            <input type="checkbox" id="switch3" name="estado" data-switch="success" />
+                                            <label for="switch3" data-on-label="Yes" data-off-label="No"></label></h4>
                                         </div>
                                     </div>
+
                                     <button class="btn btn-primary" type="submit">Enviar</button>
                                 </form>
                             </div>
