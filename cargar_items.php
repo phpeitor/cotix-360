@@ -65,7 +65,6 @@
                             </div>
 
                             <div class="card-body"> 
-
                                 <form class="needs-validation form-cargar-item" novalidate="">
                                     <div class="row">
                                         <div class="col-md-8 mb-3">
@@ -77,7 +76,6 @@
                                         </div>
                                     </div>
                                 </form>
-
                             </div>
                         </div>
                     </div>
@@ -378,7 +376,7 @@
 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
-    <script src="./assets/js/form-validation.js?v=1.0"></script>
+    <script src="./assets/js/form-carga.js?v=1.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

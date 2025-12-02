@@ -53,7 +53,7 @@
                         </li>
                         <li class="side-nav-item">
                             <a href="items.php" class="side-nav-link">
-                                <span class="menu-text">Items</span>
+                                <span class="menu-text">Lista</span>
                             </a>
                         </li>
                     </ul>

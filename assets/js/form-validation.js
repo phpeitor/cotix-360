@@ -78,6 +78,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+
+  
 });
 
 async function cargarUsuario(hash) {
