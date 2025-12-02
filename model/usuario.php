@@ -55,9 +55,9 @@ class Usuario {
         $usuario = strtolower($primerNombre . '.' . $primerApellido);
 
         $sql = "INSERT INTO personal 
-                (APELLIDOS, NOMBRES, EMAIL, DOC, TLF, SEXO, USUARIO, PASSWORD, fecha_registro, IDSUCURSAL, IDESTADO, CARGO, fecha_baja, id_cartera)
+                (APELLIDOS, NOMBRES, EMAIL, DOC, TLF, SEXO, USUARIO, PASSWORD, fecha_registro, IDESTADO)
                 VALUES 
-                (:apellidos, :nombres, :email, :documento, :telefono, :sexo, :usuario, MD5(:documento), :fecha_registro, 5, 1, 5, '1900-01-01 00:00:00', 5)";
+                (:apellidos, :nombres, :email, :documento, :telefono, :sexo, :usuario, MD5(:documento), :fecha_registro, 1)";
         $stmt = $this->conn->prepare($sql);
 
         $stmt->bindValue(':nombres',   $data['nombres'] ?? '');
@@ -91,7 +91,6 @@ class Usuario {
                 *,
                 CONCAT(nombres,' ',apellidos) AS nombre_completo
                 FROM personal
-                WHERE IDSUCURSAL = 5 AND APELLIDOS <>'ERROR' AND IDPERSONAL > 1
                 ORDER BY idpersonal DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
