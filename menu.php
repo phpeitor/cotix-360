@@ -41,24 +41,19 @@
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarEcommerce" aria-expanded="false" aria-controls="sidebarEcommerce" class="side-nav-link">
                     <span class="menu-icon"><i class="ti ti-basket-filled"></i></span>
-                    <span class="menu-text"> Productos </span>
+                    <span class="menu-text"> Items </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarEcommerce">
                     <ul class="sub-menu">
                         <li class="side-nav-item">
-                            <a href="apps-ecommerce-products.html" class="side-nav-link">
-                                <span class="menu-text">Products</span>
+                            <a href="cargar_items.php" class="side-nav-link">
+                                <span class="menu-text">Cargar</span>
                             </a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="apps-ecommerce-products-grid.html" class="side-nav-link">
-                                <span class="menu-text">Products Grid</span>
-                            </a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="apps-ecommerce-product-details.html" class="side-nav-link">
-                                <span class="menu-text">Product Details</span>
+                            <a href="items.php" class="side-nav-link">
+                                <span class="menu-text">Items</span>
                             </a>
                         </li>
                     </ul>
