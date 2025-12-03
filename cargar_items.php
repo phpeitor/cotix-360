@@ -80,6 +80,10 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="row" id="cards-container"></div>
+                <div id="pagination-container"></div>
+                
             </div>
 
             <footer class="footer">

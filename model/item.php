@@ -89,9 +89,19 @@ class Item {
         }
     }
 
-    public function table_personal(): array{
+    public function table_item(): array{
          $sql = "SELECT *
                 FROM item
+                ORDER BY id DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+     public function table_carga(): array{
+         $sql = "SELECT *
+                FROM carga
+                where estado=1
                 ORDER BY id DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
