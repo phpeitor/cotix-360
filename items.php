@@ -1,5 +1,13 @@
 <?php
   require_once __DIR__ . "/controller/check_session.php";
+  require_once __DIR__ . "/model/item.php";
+
+  $selects = new Item();
+  $bases = $selects->select_bases();
+  $grupos = $selects->select_grupo_descuento();
+  $clases = $selects->select_clase_producto();
+  $categorias = $selects->select_categoria_producto();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,6 +74,50 @@
                             </div>
 
                             <div class="card-body">
+
+                                <div class="row mb-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Base</label>
+                                        <select id="filterBase" class="form-select">
+                                            <option value="">-- Todas --</option>
+                                            <?php foreach ($bases as $b): ?>
+                                                <option value="<?= $b['id'] ?>"><?= $b['base'] ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label">Grupo Descuento</label>
+                                        <select id="filterGrupo" class="form-select">
+                                            <option value="">-- Todos --</option>
+                                            <?php foreach ($grupos as $b): ?>
+                                                <option value="<?= $b['grupo_descuento'] ?>"><?= $b['grupo_descuento'] ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label">Clase Producto</label>
+                                        <select id="filterClase" class="form-select">
+                                            <option value="">-- Todas --</option>
+                                            <?php foreach ($clases as $b): ?>
+                                                <option value="<?= $b['clase_producto'] ?>"><?= $b['clase_producto'] ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label">Categoría Producto</label>
+                                        <select id="filterCategoria" class="form-select">
+                                            <option value="">-- Todas --</option>
+                                            <?php foreach ($categorias as $b): ?>
+                                                <option value="<?= $b['categoria_producto'] ?>"><?= $b['categoria_producto'] ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+
+                                </div>
+
                                 <div id="table-gridjs"></div>
                             </div>
                         </div>

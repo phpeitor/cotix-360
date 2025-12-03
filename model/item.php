@@ -1,5 +1,5 @@
 <?php
-require_once "../database/conexion.php";
+require_once __DIR__ . '/../database/conexion.php';
 
 class Item {
     private PDO $conn;
@@ -89,20 +89,88 @@ class Item {
         }
     }
 
-    public function table_item(): array{
+    public function table_item($base = null, $grupo = null, $clase = null, $categoria = null): array
+    {
+        $sql = "SELECT * FROM item WHERE 1=1";
+        $params = [];
+
+        if ($base) {
+            $sql .= " AND id_carga = ?";
+            $params[] = $base;
+        }
+
+        if ($grupo) {
+            $sql .= " AND grupo_descuento = ?";
+            $params[] = $grupo;
+        }
+
+        if ($clase) {
+            $sql .= " AND clase_producto = ?";
+            $params[] = $clase;
+        }
+
+        if ($categoria) {
+            $sql .= " AND categoria_producto = ?";
+            $params[] = $categoria;
+        }
+
+        $sql .= " ORDER BY id DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function table_carga(): array{
          $sql = "SELECT *
-                FROM item
+                FROM carga
+                where estado=1
                 ORDER BY id DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-     public function table_carga(): array{
-         $sql = "SELECT *
+    public function select_bases(): array{
+         $sql = "SELECT id,nombre_file as base
                 FROM carga
                 where estado=1
+                group by id,nombre_file
                 ORDER BY id DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function select_grupo_descuento(): array{
+         $sql = "SELECT grupo_descuento, count(1) as ctd 
+                FROM item a
+                left join carga b on a.id_carga=b.id
+                where estado=1
+                group by grupo_descuento";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function select_clase_producto(): array{
+         $sql = "SELECT clase_producto, count(1) as ctd 
+                FROM item a
+                left join carga b on a.id_carga=b.id
+                where estado=1
+                group by clase_producto";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function select_categoria_producto(): array{
+         $sql = "SELECT categoria_producto, count(1) as ctd 
+                FROM item a
+                left join carga b on a.id_carga=b.id
+                where estado=1
+                group by categoria_producto";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -19,9 +19,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 width: "200px"
             },
             {
+                id: "moneda",
+                hidden: true
+            },
+            {
                 id: "precio_unitario",
                 name: "Precio",
-                width: "80px"
+                width: "80px",
+                formatter: (cell, row) => {
+                    const moneda = row.cells[3].data;
+                    return gridjs.html(`<span>${cell} ${moneda}</span>`);
+                }
             },
             {
                 id: "grupo_descuento",
