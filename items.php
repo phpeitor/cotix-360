@@ -53,7 +53,7 @@
 
                  <div class="page-title-head d-flex align-items-sm-center flex-sm-row flex-column gap-2">
                     <div class="flex-grow-1">
-                        <h4 class="fs-18 text-uppercase fw-bold mb-0">Usuarios</h4>
+                        <h4 class="fs-18 text-uppercase fw-bold mb-0">Items</h4>
                     </div>
 
                     <div class="text-end">
@@ -70,7 +70,7 @@
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
                                 <h4 class="header-title mb-0">Base Items</h4>
-                                <button type="button" class="btn btn-primary mb-0" onclick="window.location.href='cargar_items.php'">Files</button>
+                                <a href="#" id="btn_buscar" class="btn btn-sm rounded-pill btn-info"><i class="ti ti-search fs-22"></i> Buscar</a>
                             </div>
 
                             <div class="card-body">

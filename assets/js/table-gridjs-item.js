@@ -1,5 +1,32 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+     // --- SELECTS ---
+    const filterBase = document.getElementById("filterBase");
+    const filterGrupo = document.getElementById("filterGrupo");
+    const filterClase = document.getElementById("filterClase");
+    const filterCategoria = document.getElementById("filterCategoria");
+
+    // --- FUNCIÓN PARA RECARGAR TABLA ---
+    function loadTable() {
+        const params = new URLSearchParams({
+            base: filterBase.value,
+            grupo: filterGrupo.value,
+            clase: filterClase.value,
+            categoria: filterCategoria.value
+        });
+
+        grid.updateConfig({
+            server: {
+                url: "controller/table_item.php?" + params.toString(),
+                method: "GET",
+                then: data => data
+            }
+        }).forceRender();
+    }
+
+    // --- BOTÓN BUSCAR ---
+    document.getElementById("btn_buscar").addEventListener("click", loadTable);
+
     const grid = new gridjs.Grid({
         columns: [
             {
@@ -69,13 +96,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         ],
-
         server: {
             url: "controller/table_item.php",
             method: "GET",
             then: (data) => data 
         },
-
         search: true,
         sort: true,
         pagination: {
@@ -87,7 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("click", async (e) => {
 
-        // --- BOTÓN EDITAR ---
         const btnEdit = e.target.closest(".btn-edit");
         if (btnEdit) {
             const idHash = btnEdit.getAttribute("data-hash");
@@ -97,7 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // --- BOTÓN ELIMINAR ---
         const btnDelete = e.target.closest(".btn-delete");
         if (btnDelete) {
             const id = btnDelete.dataset.id;
@@ -145,6 +168,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
             return;
         }
-
     });
 });
