@@ -4,7 +4,6 @@ require_once __DIR__ . '/../model/item.php';
 
 try {
     $id = $_GET['id'] ?? null;
-
     $item = new Item();
     $data = $item->obtenerItems($id);
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

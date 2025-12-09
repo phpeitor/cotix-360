@@ -70,7 +70,7 @@
                             </div>
 
                             <div class="card-body">
-                                <form class="needs-validation form-add-user" novalidate="">
+                                <form class="needs-validation form-calculo" novalidate="">
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label">Base</label>
@@ -84,7 +84,8 @@
 
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label">Item</label>
-                                            <select id="filterItem" class="form-select">
+                                            <select id="choices-single-default" data-choices class="form-select" name="choices-single-default">
+                                                <option value="">-- Seleccione base --</option>
                                             </select>
                                             
                                         </div>
@@ -394,6 +395,7 @@
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.0"></script>
     <script src="./assets/js/form-validation.js?v=1.0"></script>
+    <script src="./assets/js/form-calculo.js?v=1.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
