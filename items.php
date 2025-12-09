@@ -74,7 +74,7 @@
                             </div>
 
                             <div class="card-body">
-
+                                <input type="hidden" id="filterMd5">
                                 <div class="row mb-3">
                                     <div class="col-md-3">
                                         <label class="form-label">Base</label>

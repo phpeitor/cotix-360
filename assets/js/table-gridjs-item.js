@@ -1,19 +1,31 @@
 document.addEventListener("DOMContentLoaded", () => {
-
-     // --- SELECTS ---
     const filterBase = document.getElementById("filterBase");
     const filterGrupo = document.getElementById("filterGrupo");
     const filterClase = document.getElementById("filterClase");
     const filterCategoria = document.getElementById("filterCategoria");
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashParam = urlParams.get("id");
 
-    // --- FUNCIÓN PARA RECARGAR TABLA ---
+    if (hashParam && /^[a-f0-9]{32}$/i.test(hashParam)) {
+        console.log("Detectado hash MD5 en URL:", hashParam);
+        document.getElementById("filterMd5").value = hashParam;
+        setTimeout(() => {
+            document.getElementById("btn_buscar").click();
+        }, 300);
+    }
+
     function loadTable() {
+        const md5Value = document.getElementById("filterMd5").value;
+
         const params = new URLSearchParams({
             base: filterBase.value,
             grupo: filterGrupo.value,
             clase: filterClase.value,
             categoria: filterCategoria.value
         });
+
+        // agregar solo si vino un hash
+        if (md5Value) params.append("md5_id", md5Value);
 
         grid.updateConfig({
             server: {
@@ -24,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }).forceRender();
     }
 
-    // --- BOTÓN BUSCAR ---
     document.getElementById("btn_buscar").addEventListener("click", loadTable);
 
     const grid = new gridjs.Grid({

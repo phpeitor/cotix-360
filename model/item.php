@@ -89,7 +89,7 @@ class Item {
         }
     }
 
-    public function table_item($base = null, $grupo = null, $clase = null, $categoria = null): array
+    public function table_item($base = null, $grupo = null, $clase = null, $categoria = null, $md5_id = null): array
     {
         $sql = "SELECT * FROM item WHERE 1=1";
         $params = [];
@@ -112,6 +112,11 @@ class Item {
         if ($categoria) {
             $sql .= " AND categoria_producto = ?";
             $params[] = $categoria;
+        }
+
+        if ($md5_id) {
+            $sql .= " AND MD5(id_carga) = ?";
+            $params[] = $md5_id;
         }
 
         $sql .= " ORDER BY id DESC";

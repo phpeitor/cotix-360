@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
                               <small class="text-muted">${carga.fecha_registro}</small>
                           </p>
 
-                          <a href="detalle_carga.php?id=${carga.id}" class="btn btn-primary">Ver</a>
+                          <a href="items.php?id=${md5(String(carga.id))}" class="btn btn-primary">Ver</a>
                       </div>
                   </div>
               </div>
