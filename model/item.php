@@ -181,6 +181,16 @@ class Item {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function obtenerItems(int $id): ?array {
+        $sql = "SELECT modelo, descripcion, precio_unitario, peso, pais_origen
+                FROM item
+                WHERE id_carga = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $id);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function obtenerPorHash(string $hash): ?array {
         $sql = "SELECT *
                 FROM item
