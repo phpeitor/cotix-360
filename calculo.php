@@ -107,9 +107,14 @@
                                             <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:box-bold-duotone" class="text-danger"></iconify-icon> <span class="text-dark">Total Peso : </span> <span id="total_peso">0.00</span></p>
                                         </div>
                                         <div class="col-lg-3 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-bold" class="text-success"></iconify-icon> <span class="text-dark">Total FOB : </span> <span id="total_fob">0.00</span></p>
+                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-outline" class="text-success"></iconify-icon> <span class="text-dark">Total FOB : </span> <span id="total_fob">0.00</span></p>
                                         </div>
-                                        
+                                        <div class="col-lg-3 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-broken" class="text-warning"></iconify-icon> <span class="text-dark">Flete : </span> <span id="total_flete">0.00</span></p>
+                                        </div>
+                                        <div class="col-lg-3 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-broken" class="text-info"></iconify-icon> <span class="text-dark">Gastos : </span> <span id="total_gasto">0.00</span></p>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="table-responsive">

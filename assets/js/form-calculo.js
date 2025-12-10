@@ -8,6 +8,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalItemsEl = document.getElementById("total_item");
     const totalPesoEl = document.getElementById("total_peso");
     const totalFobEl = document.getElementById("total_fob");
+    const totalFleteEl = document.getElementById("total_flete");
+
+
+    let fleteTable = [];
+
+    fetch("controller/get_flete.php")
+        .then(res => res.json())
+        .then(data => fleteTable = data)
+        .catch(err => console.error("Error cargando flete:", err));
+
+    function calcularFlete(totalPeso) {
+        if (fleteTable.length === 0) return 0;
+
+        for (const row of fleteTable) {
+            if (parseFloat(row.peso) >= totalPeso) {
+                return parseFloat(row.flete);
+            }
+        }
+
+        return parseFloat(fleteTable[fleteTable.length - 1].flete);
+    }
 
     /* ---------------------------------------------------
        FUNCIÓN: RE-CALCULAR TOTALES
@@ -30,6 +51,9 @@ document.addEventListener("DOMContentLoaded", () => {
         totalItemsEl.textContent = totalItems;
         totalPesoEl.textContent = totalPeso.toFixed(2);
         totalFobEl.textContent = totalFob.toFixed(2);
+
+        const flete = calcularFlete(totalPeso);
+        totalFleteEl.textContent = flete.toFixed(2);
     }
 
     /* ---------------------------------------------------
