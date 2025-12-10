@@ -2,134 +2,138 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const baseSelect = document.getElementById("filterBase");
     const itemSelect = document.getElementById("choices-single-default");
-
-    const btnAdd = document.querySelector(".btn.btn-sm.btn-primary.rounded-circle.btn-icon");
+    const btnAdd = document.getElementById("btnAdd");
     const tbody = document.querySelector("table.table tbody");
 
-    // ---------------------------
-    // CARGAR ITEMS SEGÚN LA BASE
-    // ---------------------------
+    const totalItemsEl = document.getElementById("total_item");
+    const totalPesoEl = document.getElementById("total_peso");
+    const totalFobEl = document.getElementById("total_fob");
+
+    /* ---------------------------------------------------
+       FUNCIÓN: RE-CALCULAR TOTALES
+    --------------------------------------------------- */
+    function recalculateTotals() {
+        let totalItems = 0;
+        let totalPeso = 0;
+        let totalFob = 0;
+
+        tbody.querySelectorAll("tr").forEach(tr => {
+            const qty = parseInt(tr.querySelector("input").value);
+            const peso = parseFloat(tr.dataset.peso);
+            const precio = parseFloat(tr.dataset.precio);
+
+            totalItems += qty;
+            totalPeso += peso * qty;
+            totalFob += precio * qty;
+        });
+
+        totalItemsEl.textContent = totalItems;
+        totalPesoEl.textContent = totalPeso.toFixed(2);
+        totalFobEl.textContent = totalFob.toFixed(2);
+    }
+
+    /* ---------------------------------------------------
+       FUNCIÓN: LOGO ALEATORIO
+    --------------------------------------------------- */
+    function getRandomLogo() {
+        const n = Math.floor(Math.random() * 9) + 1; // 1 al 9
+        return `assets/images/products/logo/logo-${n}.svg`;
+    }
+
+    /* ---------------------------------------------------
+       EVITAR AGREGAR DUPLICADOS
+    --------------------------------------------------- */
+    function itemAlreadyAdded(modelo) {
+        return [...tbody.querySelectorAll("tr")].some(tr => tr.dataset.modelo === modelo);
+    }
+
+    /* ---------------------------------------------------
+       CARGAR ITEMS SEGÚN BASE
+    --------------------------------------------------- */
     baseSelect.addEventListener("change", async () => {
 
         const baseId = baseSelect.value;
-        const choices = itemSelect.choicesInstance; // ✔ correcto
+        const choices = itemSelect.choicesInstance;
 
         try {
             choices.clearChoices();
 
-            if (!baseId) {
-                choices.setChoices(
-                    [
-                        {
-                            value: "",
-                            label: "-- Seleccione base --",
-                            disabled: true,
-                            selected: true
-                        }
-                    ],
-                    "value",
-                    "label",
-                    true
-                );
-                return;
-            }
+            choices.setChoices([{ value: "", label: "-- Seleccione item --", disabled: true, selected: true }], "value", "label", true);
 
-            // placeholder inicial
-            choices.setChoices(
-                [
-                    {
-                        value: "",
-                        label: "-- Seleccione item --",
-                        disabled: true,
-                        selected: true
-                    }
-                ],
-                "value",
-                "label",
-                true
-            );
+            if (!baseId) return;
 
-            // Cargar datos de items
             const res = await fetch(`controller/get_select_item.php?id=${baseId}`);
             const data = await res.json();
 
-            if (data.length > 0) {
-                choices.setChoices(
-                    data.map(i => ({
-                        value: i.modelo,
-                        label: i.modelo,
-                        customProperties: {
-                            descripcion: i.descripcion,
-                            categoria: i.categoria_producto,
-                            grupo: i.grupo_descuento,
-                            clase: i.clase_producto,
-                            peso: i.peso,
-                            precio: i.precio_unitario,
-                            moneda: i.moneda,
-                            status: i.status,
-                            pais: i.pais_origen
-                        }
-                    })),
-                    "value",
-                    "label",
-                    false
-                );
-            }
-
-        } catch (error) {
-            console.error("Error al cargar ítems:", error);
-
-            choices.clearChoices();
             choices.setChoices(
-                [
-                    {
-                        value: "",
-                        label: "-- Error al cargar items --",
-                        disabled: true,
-                        selected: true
+                data.map(i => ({
+                    value: i.modelo,
+                    label: i.modelo,
+                    customProperties: {
+                        descripcion: i.descripcion,
+                        categoria: i.categoria_producto,
+                        grupo: i.grupo_descuento,
+                        clase: i.clase_producto,
+                        peso: parseFloat(i.peso),
+                        precio: parseFloat(i.precio_unitario),
+                        moneda: i.moneda,
+                        status: i.status,
+                        pais: i.pais_origen
                     }
-                ],
+                })),
                 "value",
                 "label",
-                true
+                false
             );
+
+        } catch (error) {
+            console.error(error);
+            alertify.error("Error al cargar items");
         }
     });
 
-    // ---------------------------
-    // BOTÓN + : AGREGAR A TABLA
-    // ---------------------------
+    /* ---------------------------------------------------
+       BOTÓN + → AGREGAR ITEM
+    --------------------------------------------------- */
     btnAdd.addEventListener("click", () => {
 
-        const selected = itemSelect.choicesInstance.getValue(); // devuelve OBJETO
-        console.log("SELECTED =>", selected);
+        const selected = itemSelect.choicesInstance.getValue();
 
         if (!selected || !selected.value) {
             alertify.error("Seleccione un item");
             return;
         }
 
+        const modelo = selected.value;
         const item = selected.customProperties;
+
         if (!item) {
-            alertify.error("Error: el item no tiene datos asociados.");
+            alertify.error("El item no contiene información válida");
             return;
         }
 
-        console.log("ITEM =>", item);
+        // Validación de duplicado
+        if (itemAlreadyAdded(modelo)) {
+            alertify.error("Este item ya fue agregado");
+            return;
+        }
 
         // Crear fila
         const tr = document.createElement("tr");
+        tr.dataset.modelo = modelo;
+        tr.dataset.peso = item.peso;
+        tr.dataset.precio = item.precio;
 
         tr.innerHTML = `
             <td>
                 <div class="d-flex align-items-center">
                     <div class="avatar-md flex-shrink-0 me-2">
                         <span class="avatar-title bg-primary-subtle rounded-circle">
-                            <img src="assets/images/products/logo/logo-8.svg" alt="" height="22">
+                            <img src="${getRandomLogo()}" alt="" height="22">
                         </span>
                     </div>
                     <div>
-                        <span class="text-muted fs-12">${selected.value}</span> <br>
+                        <span class="text-muted fs-12">${modelo}</span><br>
                         <h5 class="fs-14 mt-1">${item.descripcion}</h5>
                     </div>
                 </div>
@@ -149,15 +153,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             </td>
 
-            <td>
-                <span class="text-muted fs-12">Peso</span>
-                <h5 class="fs-14 mt-1 fw-normal">${item.peso}</h5>
-            </td>
-
-            <td>
-                <span class="text-muted fs-12">Precio Uni.</span>
-                <h5 class="fs-14 mt-1 fw-normal">${item.precio} ${item.moneda}</h5>
-            </td>
+            <td><span class="text-muted fs-12">Peso</span><h5 class="fs-14 mt-1 fw-normal">${item.peso}</h5></td>
+            <td><span class="text-muted fs-12">Precio Uni.</span><h5 class="fs-14 mt-1 fw-normal">${item.precio} ${item.moneda}</h5></td>
 
             <td>
                 <span class="text-muted fs-12">Status</span>
@@ -167,21 +164,46 @@ document.addEventListener("DOMContentLoaded", () => {
                 </h5>
             </td>
 
-            <td style="width: 30px;">
-                <div class="dropdown">
-                    <a href="#" class="dropdown-toggle text-muted card-drop p-0" data-bs-toggle="dropdown">
-                        <i class="ti ti-dots-vertical"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end">
-                        <a href="javascript:void(0);" class="dropdown-item btnDeleteItem">Eliminar</a>
-                        <a href="javascript:void(0);" class="dropdown-item">Detalle</a>
-                    </div>
-                </div>
+            <td>
+                <a href="javascript:void(0)" class="text-danger btnDeleteItem">
+                    <i class="ti ti-trash fs-18"></i>
+                </a>
             </td>
         `;
 
         tbody.appendChild(tr);
         alertify.success("Item agregado");
+
+        recalculateTotals();
+    });
+
+    /* ---------------------------------------------------
+       EVENTO GLOBAL: + / – / eliminar
+    --------------------------------------------------- */
+    tbody.addEventListener("click", (e) => {
+
+        // SUMAR
+        if (e.target.classList.contains("plus")) {
+            const input = e.target.parentNode.querySelector("input");
+            input.value = parseInt(input.value) + 1;
+            recalculateTotals();
+        }
+
+        // RESTAR
+        if (e.target.classList.contains("minus")) {
+            const input = e.target.parentNode.querySelector("input");
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+                recalculateTotals();
+            }
+        }
+
+        // ELIMINAR ITEM
+        if (e.target.closest(".btnDeleteItem")) {
+            e.target.closest("tr").remove();
+            recalculateTotals();
+            alertify.error("Item eliminado");
+        }
     });
 
 });

@@ -99,15 +99,15 @@
 
                             <div class="card-body p-0">
                                 <div class="bg-success bg-opacity-10 py-1 text-center">
-                                    <p class="m-0"><b>0</b> item(s) agregados</p>
+                                    <p class="m-0"><b id="total_item">0</b> item(s) agregados</p>
                                 </div>
                                 <div class="border border-dashed p-2 rounded text-center">
                                     <div class="row">
                                         <div class="col-lg-3 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:box-bold-duotone" class="text-danger"></iconify-icon> <span class="text-dark">Total Peso : </span> 0.00</p>
+                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:box-bold-duotone" class="text-danger"></iconify-icon> <span class="text-dark">Total Peso : </span> <span id="total_peso">0.00</span></p>
                                         </div>
                                         <div class="col-lg-3 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-bold" class="text-success"></iconify-icon> <span class="text-dark">Total FOB : </span> 0.00</p>
+                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-bold" class="text-success"></iconify-icon> <span class="text-dark">Total FOB : </span> <span id="total_fob">0.00</span></p>
                                         </div>
                                         
                                     </div>
@@ -115,56 +115,7 @@
                                 <div class="table-responsive">
                                     <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">
                                         <tbody>
-                                            <!--<tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="avatar-md flex-shrink-0 me-2">
-                                                            <span class="avatar-title bg-primary-subtle rounded-circle">
-                                                                <img src="assets/images/products/logo/logo-8.svg" alt="" height="22">
-                                                            </span>
-                                                        </div>
-                                                        <div>
-                                                            <span class="text-muted fs-12">modelo</span> <br>
-                                                            <h5 class="fs-14 mt-1">descripcion</h5>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span class="text-muted fs-12">categoria_producto</span>
-                                                    <h5 class="fs-14 mt-1 fw-normal">grupo_descuento</h5>
-                                                </td>
-                                                <td>
-                                                    <span class="text-muted fs-12">Cantidad</span> <br>
-                                                     <div data-touchspin class="input-step border bg-body-secondary p-1 mt-1 rounded-pill d-inline-flex overflow-visible">
-                                                        <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
-                                                        <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="1" min="0" max="100" readonly="">
-                                                        <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span class="text-muted fs-12">Peso</span> <br>
-                                                    <h5 class="fs-14 mt-1 fw-normal">0</h5>
-                                                </td>
-                                                <td>
-                                                    <span class="text-muted fs-12">Precio Uni.</span>
-                                                    <h5 class="fs-14 mt-1 fw-normal">952</h5>
-                                                </td>
-                                                <td>
-                                                    <span class="text-muted fs-12">Status</span>
-                                                    <h5 class="fs-14 mt-1 fw-normal"><i class="ti ti-circle-filled fs-12 text-success"></i> Active</h5>
-                                                </td>
-                                                <td style="width: 30px;">
-                                                    <div class="dropdown">
-                                                        <a href="#" class="dropdown-toggle text-muted drop-arrow-none card-drop p-0" data-bs-toggle="dropdown" aria-expanded="false">
-                                                            <i class="ti ti-dots-vertical"></i>
-                                                        </a>
-                                                        <div class="dropdown-menu dropdown-menu-end">
-                                                            <a href="javascript:void(0);" class="dropdown-item">Eliminar</a>
-                                                            <a href="javascript:void(0);" class="dropdown-item">Detalle</a>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>-->
+                                            
                                         </tbody>
                                     </table>
                                 </div> 
