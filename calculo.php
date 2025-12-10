@@ -66,7 +66,7 @@
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
                                 <h4 class="header-title mb-0">Plantilla de Cálculo</h4>
-                                <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='usuarios.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
+                                <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='items.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                             </div>
 
                             <div class="card-body">
@@ -90,7 +90,7 @@
                                         </div>
                                         <div class="col-md-4 mb-3">
                                             <div class="p-lg-3">
-                                                <a href="javascript:void(0);" class="btn btn-sm btn-primary rounded-circle btn-icon"><i class="ti ti-plus"></i></a>
+                                                <a href="javascript:void(0);" class="btn btn-sm btn-primary rounded-circle btn-icon" id="btnAdd"><i class="ti ti-plus"></i></a>
                                             </div>
                                         </div>
                                     </div>
@@ -100,19 +100,22 @@
                             <div class="card-body p-0">
                                 <div class="bg-success bg-opacity-10 py-1 text-center">
                                     <p class="m-0"><b>0</b> item(s) agregados</p>
-                                    <p class="mb-2">
-                                        <iconify-icon icon="solar:box-bold-duotone" class="text-danger"></iconify-icon>
-                                        Total Peso
-                                        <i class="ti ti-arrow-right"></i>
-                                        <span class="badge bg-light-subtle rounded-pill text-dark border fs-12 py-1 px-2">
-                                            0
-                                        </span>
-                                    </p>
+                                </div>
+                                <div class="border border-dashed p-2 rounded text-center">
+                                    <div class="row">
+                                        <div class="col-lg-3 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:box-bold-duotone" class="text-danger"></iconify-icon> <span class="text-dark">Total Peso : </span> 0.00</p>
+                                        </div>
+                                        <div class="col-lg-3 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-bold" class="text-success"></iconify-icon> <span class="text-dark">Total FOB : </span> 0.00</p>
+                                        </div>
+                                        
+                                    </div>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">
                                         <tbody>
-                                            <tr>
+                                            <!--<tr>
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <div class="avatar-md flex-shrink-0 me-2">
@@ -161,7 +164,7 @@
                                                         </div>
                                                     </div>
                                                 </td>
-                                            </tr>
+                                            </tr>-->
                                         </tbody>
                                     </table>
                                 </div> 
@@ -171,7 +174,7 @@
                                 <div class="align-items-center justify-content-between row text-center text-sm-start">
                                     <div class="col-sm">
                                         <div class="text-muted">
-                                            Showing <span class="fw-semibold">5</span> of <span class="fw-semibold">15</span> Results
+                                            Showing <span class="fw-semibold">1</span> of <span class="fw-semibold">10</span> Results
                                         </div>
                                     </div>
                                     <div class="col-sm-auto mt-3 mt-sm-0">
@@ -492,9 +495,8 @@
     </div>
 
     <script src="./assets/js/vendor.min.js"></script>
-    <script src="./assets/js/app.js?v=1.0"></script>
-    <script src="./assets/js/form-validation.js?v=1.0"></script>
-    <script src="./assets/js/form-calculo.js?v=1.0"></script>
+    <script src="./assets/js/app.js?v=1.7"></script>
+    <script src="./assets/js/form-calculo.js?v=3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

@@ -29,7 +29,7 @@
                 </a>
             </li>
 
-            <li class="side-nav-title mt-2">Users & Customers</li>
+            <li class="side-nav-title mt-2">Users & Items</li>
 
             <li class="side-nav-item">
                 <a href="usuarios.php" class="side-nav-link">
@@ -65,89 +65,20 @@
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarExtendedUI" aria-expanded="false" aria-controls="sidebarExtendedUI" class="side-nav-link">
                     <span class="menu-icon"><i class="ti ti-alien-filled"></i></span>
-                    <span class="menu-text"> Extended UI </span>
+                    <span class="menu-text"> Plantillas UI </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarExtendedUI">
                     <ul class="sub-menu">
                         <li class="side-nav-item">
-                            <a href="extended-dragula.html" class="side-nav-link">
-                                <span class="menu-text">Dragula</span>
+                            <a href="calculo.php" class="side-nav-link">
+                                <span class="menu-text">Cálculo</span>
                             </a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="extended-sweetalerts.html" class="side-nav-link">
-                                <span class="menu-text">Sweet Alerts</span>
+                            <a href="#" class="side-nav-link">
+                                <span class="menu-text">Alertas</span>
                             </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-            <li class="side-nav-title mt-2">
-                More
-            </li>
-        
-            <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarMultiLevel" aria-expanded="false" aria-controls="sidebarMultiLevel" class="side-nav-link">
-                    <span class="menu-icon"><i class="ti ti-box-multiple-3"></i></span>
-                    <span class="menu-text"> Multi Level </span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="sidebarMultiLevel">
-                    <ul class="sub-menu">
-                        <li class="side-nav-item">
-                            <a data-bs-toggle="collapse" href="#sidebarSecondLevel" aria-expanded="false" aria-controls="sidebarSecondLevel" class="side-nav-link">
-                                <span class="menu-text"> Second Level </span>
-                                <span class="menu-arrow"></span>
-                            </a>
-                            <div class="collapse" id="sidebarSecondLevel">
-                                <ul class="sub-menu">
-                                    <li class="side-nav-item">
-                                        <a href="javascript: void(0);" class="side-nav-link">
-                                            <span class="menu-text">Item 1</span>
-                                        </a>
-                                    </li>
-                                    <li class="side-nav-item">
-                                        <a href="javascript: void(0);" class="side-nav-link">
-                                            <span class="menu-text">Item 2</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
-                        <li class="side-nav-item">
-                            <a data-bs-toggle="collapse" href="#sidebarThirdLevel" aria-expanded="false" aria-controls="sidebarThirdLevel" class="side-nav-link">
-                                <span class="menu-text"> Third Level </span>
-                                <span class="menu-arrow"></span>
-                            </a>
-                            <div class="collapse" id="sidebarThirdLevel">
-                                <ul class="sub-menu">
-                                    <li class="side-nav-item">
-                                        <a href="javascript: void(0);" class="side-nav-link">Item 1</a>
-                                    </li>
-                                    <li class="side-nav-item">
-                                        <a data-bs-toggle="collapse" href="#sidebarFourthLevel" aria-expanded="false" aria-controls="sidebarFourthLevel" class="side-nav-link">
-                                            <span class="menu-text"> Item 2 </span>
-                                            <span class="menu-arrow"></span>
-                                        </a>
-                                        <div class="collapse" id="sidebarFourthLevel">
-                                            <ul class="sub-menu">
-                                                <li class="side-nav-item">
-                                                    <a href="javascript: void(0);" class="side-nav-link">
-                                                        <span class="menu-text">Item 2.1</span>
-                                                    </a>
-                                                </li>
-                                                <li class="side-nav-item">
-                                                    <a href="javascript: void(0);" class="side-nav-link">
-                                                        <span class="menu-text">Item 2.2</span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
                         </li>
                     </ul>
                 </div>

@@ -182,7 +182,18 @@ class Item {
     }
 
     public function obtenerItems(int $id): ?array {
-        $sql = "SELECT modelo, descripcion, precio_unitario, peso, pais_origen
+        $sql = "SELECT 
+                id,
+                modelo,
+                descripcion,
+                categoria_producto,
+                grupo_descuento,
+                clase_producto,
+                precio_unitario,
+                moneda,
+                peso,
+                pais_origen,
+                status
                 FROM item
                 WHERE id_carga = :id";
         $stmt = $this->conn->prepare($sql);
