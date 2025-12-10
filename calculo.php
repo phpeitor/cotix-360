@@ -49,7 +49,7 @@
 
                  <div class="page-title-head d-flex align-items-sm-center flex-sm-row flex-column gap-2">
                     <div class="flex-grow-1">
-                        <h4 class="fs-18 text-uppercase fw-bold mb-0">Plantilla</h4>
+                        <h4 class="fs-18 text-uppercase fw-bold mb-0">Templates</h4>
                     </div>
 
                     <div class="text-end">
@@ -65,7 +65,7 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
-                                <h4 class="header-title mb-0">Plantilla </h4>
+                                <h4 class="header-title mb-0">Plantilla de Cálculo</h4>
                                 <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='usuarios.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                             </div>
 
@@ -75,7 +75,7 @@
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label">Base</label>
                                             <select id="filterBase" class="form-select">
-                                                <option value="">-- Todas --</option>
+                                                <option value="">-- Seleccione --</option>
                                                 <?php foreach ($bases as $b): ?>
                                                     <option value="<?= $b['id'] ?>"><?= $b['base'] ?></option>
                                                 <?php endforeach; ?>
@@ -87,15 +87,114 @@
                                             <select id="choices-single-default" data-choices class="form-select" name="choices-single-default">
                                                 <option value="">-- Seleccione base --</option>
                                             </select>
-                                            
                                         </div>
-
+                                        <div class="col-md-4 mb-3">
+                                            <div class="p-lg-3">
+                                                <a href="javascript:void(0);" class="btn btn-sm btn-primary rounded-circle btn-icon"><i class="ti ti-plus"></i></a>
+                                            </div>
+                                        </div>
                                     </div>
-
-                                    <button class="btn btn-primary" type="submit">Enviar</button>
                                 </form>
                             </div>
+
+                            <div class="card-body p-0">
+                                <div class="bg-success bg-opacity-10 py-1 text-center">
+                                    <p class="m-0"><b>0</b> item(s) agregados</p>
+                                    <p class="mb-2">
+                                        <iconify-icon icon="solar:box-bold-duotone" class="text-danger"></iconify-icon>
+                                        Total Peso
+                                        <i class="ti ti-arrow-right"></i>
+                                        <span class="badge bg-light-subtle rounded-pill text-dark border fs-12 py-1 px-2">
+                                            0
+                                        </span>
+                                    </p>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-md flex-shrink-0 me-2">
+                                                            <span class="avatar-title bg-primary-subtle rounded-circle">
+                                                                <img src="assets/images/products/logo/logo-8.svg" alt="" height="22">
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <span class="text-muted fs-12">modelo</span> <br>
+                                                            <h5 class="fs-14 mt-1">descripcion</h5>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="text-muted fs-12">categoria_producto</span>
+                                                    <h5 class="fs-14 mt-1 fw-normal">grupo_descuento</h5>
+                                                </td>
+                                                <td>
+                                                    <span class="text-muted fs-12">Cantidad</span> <br>
+                                                     <div data-touchspin class="input-step border bg-body-secondary p-1 mt-1 rounded-pill d-inline-flex overflow-visible">
+                                                        <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
+                                                        <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="1" min="0" max="100" readonly="">
+                                                        <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="text-muted fs-12">Peso</span> <br>
+                                                    <h5 class="fs-14 mt-1 fw-normal">0</h5>
+                                                </td>
+                                                <td>
+                                                    <span class="text-muted fs-12">Precio Uni.</span>
+                                                    <h5 class="fs-14 mt-1 fw-normal">952</h5>
+                                                </td>
+                                                <td>
+                                                    <span class="text-muted fs-12">Status</span>
+                                                    <h5 class="fs-14 mt-1 fw-normal"><i class="ti ti-circle-filled fs-12 text-success"></i> Active</h5>
+                                                </td>
+                                                <td style="width: 30px;">
+                                                    <div class="dropdown">
+                                                        <a href="#" class="dropdown-toggle text-muted drop-arrow-none card-drop p-0" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="ti ti-dots-vertical"></i>
+                                                        </a>
+                                                        <div class="dropdown-menu dropdown-menu-end">
+                                                            <a href="javascript:void(0);" class="dropdown-item">Eliminar</a>
+                                                            <a href="javascript:void(0);" class="dropdown-item">Detalle</a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div> 
+                            </div> 
+
+                            <div class="card-footer border-0">
+                                <div class="align-items-center justify-content-between row text-center text-sm-start">
+                                    <div class="col-sm">
+                                        <div class="text-muted">
+                                            Showing <span class="fw-semibold">5</span> of <span class="fw-semibold">15</span> Results
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-auto mt-3 mt-sm-0">
+                                        <ul class="pagination pagination-boxed pagination-sm mb-0 justify-content-center">
+                                            <li class="page-item disabled">
+                                                <a href="#" class="page-link"><i class="ti ti-chevron-left"></i></a>
+                                            </li>
+                                            <li class="page-item active">
+                                                <a href="#" class="page-link">1</a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a href="#" class="page-link">2</a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a href="#" class="page-link"><i class="ti ti-chevron-right"></i></a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div> 
+                            </div>
+
                         </div>
+
                     </div>
                 </div>
             </div>

@@ -4,39 +4,76 @@ document.addEventListener("DOMContentLoaded", () => {
 
     baseSelect.addEventListener("change", async () => {
         const baseId = baseSelect.value;
-
-        const choices = itemSelect.choicesInstance; // ← instancia real
-
-        // limpiar items
-        choices.clearStore();     // limpia el store interno
-        choices.clearChoices();   // limpia las opciones
-        choices.clearInput();     // limpia la vista
-
-        if (!baseId) {
-            choices.setChoices([{ value: "", label: "-- Seleccione base --", disabled: true }], "value", "label", true);
-            return;
-        }
+        const choices = itemSelect.choicesInstance;
 
         try {
-            const res = await fetch(`controller/get_select_item.php?id=${baseId}`);
-            const data = await res.json();
-
-            if (!data || data.length === 0) {
-                choices.setChoices([{ value: "", label: "-- Sin items --", disabled: true }], "value", "label", true);
+            choices.clearChoices();
+            if (!baseId) {
+                choices.setChoices(
+                    [
+                        { 
+                            value: "", 
+                            label: "-- Seleccione base --", 
+                            disabled: true, 
+                            selected: true 
+                        }
+                    ],
+                    "value",
+                    "label",
+                    true
+                );
                 return;
             }
 
             choices.setChoices(
-                data.map(item => ({
-                    value: item.modelo,
-                    label: item.modelo
-                })),
-                "value", "label", true
+                [
+                    { 
+                        value: "", 
+                        label: "-- Seleccione item --", 
+                        disabled: true, 
+                        selected: true 
+                    }
+                ],
+                "value",
+                "label",
+                true
             );
 
-        } catch (e) {
-            console.error("Error cargando items:", e);
-            choices.setChoices([{ value: "", label: "Error cargando items", disabled: true }], "value", "label", true);
+            // Cargar items vía fetch
+            const res = await fetch(`controller/get_select_item.php?id=${baseId}`);
+            const data = await res.json();
+
+            // Agregar items si existen
+            if (data.length > 0) {
+                choices.setChoices(
+                    data.map(i => ({
+                        value: i.modelo,
+                        label: i.modelo
+                    })),
+                    "value",
+                    "label",
+                    false
+                );
+            }
+        } catch (error) {
+            console.error("Error al cargar ítems:", error);
+
+            // Dejar un placeholder de error
+            choices.clearChoices();
+            choices.setChoices(
+                [
+                    { 
+                        value: "", 
+                        label: "-- Error al cargar items --", 
+                        disabled: true, 
+                        selected: true 
+                    }
+                ],
+                "value",
+                "label",
+                true
+            );
         }
     });
+
 });
