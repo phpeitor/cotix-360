@@ -1,10 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-
     const baseSelect = document.getElementById("filterBase");
     const itemSelect = document.getElementById("choices-single-default");
     const btnAdd = document.getElementById("btnAdd");
     const tbody = document.querySelector("table.table tbody");
-
     const totalItemsEl = document.getElementById("total_item");
     const totalPesoEl = document.getElementById("total_peso");
     const totalFobEl = document.getElementById("total_fob");
@@ -49,10 +47,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Si excede los rangos, devolver el mayor costo
         return parseFloat(gastoTable[gastoTable.length - 1].costo);
     }
-
 
     /* ---------------------------------------------------
        FUNCIÓN: RE-CALCULAR TOTALES
