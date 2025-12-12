@@ -210,6 +210,14 @@ class Item {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+     public function obtenerGastos(): ?array {
+        $sql = "SELECT *
+                FROM gastos";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function obtenerPorHash(string $hash): ?array {
         $sql = "SELECT *
                 FROM item

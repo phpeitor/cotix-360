@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalPesoEl = document.getElementById("total_peso");
     const totalFobEl = document.getElementById("total_fob");
     const totalFleteEl = document.getElementById("total_flete");
-
+    const totalGastoEl = document.getElementById("total_gasto");
 
     let fleteTable = [];
 
@@ -17,6 +17,13 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(res => res.json())
         .then(data => fleteTable = data)
         .catch(err => console.error("Error cargando flete:", err));
+
+    let gastoTable = [];
+
+    fetch("controller/get_gastos.php")
+        .then(res => res.json())
+        .then(data => gastoTable  = data)
+        .catch(err => console.error("Error cargando gastos:", err));
 
     function calcularFlete(totalPeso) {
         if (fleteTable.length === 0) return 0;
@@ -29,6 +36,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return parseFloat(fleteTable[fleteTable.length - 1].flete);
     }
+
+    function calcularGasto(totalFob) {
+        if (gastoTable.length === 0) return 0;
+
+        for (const row of gastoTable) {
+            const min = parseFloat(row.valor_inicial);
+            const max = parseFloat(row.valor_final);
+
+            if (totalFob >= min && totalFob <= max) {
+                return parseFloat(row.costo);
+            }
+        }
+
+        // Si excede los rangos, devolver el mayor costo
+        return parseFloat(gastoTable[gastoTable.length - 1].costo);
+    }
+
 
     /* ---------------------------------------------------
        FUNCIÓN: RE-CALCULAR TOTALES
@@ -54,6 +78,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const flete = calcularFlete(totalPeso);
         totalFleteEl.textContent = flete.toFixed(2);
+
+        const gasto = calcularGasto(totalFob);
+        totalGastoEl.textContent = gasto.toFixed(2);
     }
 
     /* ---------------------------------------------------
