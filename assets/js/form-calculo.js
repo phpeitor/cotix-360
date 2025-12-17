@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalFobEl = document.getElementById("total_fob");
     const totalFleteEl = document.getElementById("total_flete");
     const totalGastoEl = document.getElementById("total_gasto");
+    const totalPeruEl = document.getElementById("total_peru");
+    const totalFactorEl = document.getElementById("total_factor");
 
     let fleteTable = [];
 
@@ -77,6 +79,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const gasto = calcularGasto(totalFob);
         totalGastoEl.textContent = gasto.toFixed(2);
+
+        
+        const totalPeru = totalFob + flete + gasto;
+        totalPeruEl.textContent = totalPeru.toFixed(2);
+
+        const factor = totalFob > 0
+            ? (totalFob + flete) / totalFob
+            : 0;
+
+        totalFactorEl.textContent = factor.toFixed(4);
     }
 
     /* ---------------------------------------------------
