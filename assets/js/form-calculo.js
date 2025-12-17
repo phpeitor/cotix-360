@@ -80,15 +80,28 @@ document.addEventListener("DOMContentLoaded", () => {
         const gasto = calcularGasto(totalFob);
         totalGastoEl.textContent = gasto.toFixed(2);
 
-        
         const totalPeru = totalFob + flete + gasto;
         totalPeruEl.textContent = totalPeru.toFixed(2);
 
-        const factor = totalFob > 0
-            ? (totalFob + flete) / totalFob
+        const rawFactor = totalFob > 0
+            ? (gasto + flete) / totalFob
             : 0;
 
-        totalFactorEl.textContent = factor.toFixed(4);
+        const displayFactor = Number(rawFactor.toFixed(4));
+        totalFactorEl.textContent = displayFactor.toFixed(4);
+
+        /* ==========================
+        FACTOR PRECIO POR ITEM
+        ========================== */
+
+        tbody.querySelectorAll("tr").forEach(tr => {
+            const precio = parseFloat(tr.dataset.precio);
+            const precioFactor =  decimalAdjust('round',precio * decimalAdjust('round',rawFactor,'-4'),'-2');
+            /*const x= decimalAdjust('round',rawFactor,'-4')
+            console.log({precio, x, precioFactor});*/
+
+            tr.querySelector(".factor-precio").textContent = precioFactor;
+        });
     }
 
     /* ---------------------------------------------------
@@ -214,7 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <td><span class="text-muted fs-12">Peso</span><h5 class="fs-14 mt-1 fw-normal">${item.peso}</h5></td>
             <td><span class="text-muted fs-12">Precio Uni.</span><h5 class="fs-14 mt-1 fw-normal">${item.precio} ${item.moneda}</h5></td>
-
+            <td><span class="text-muted fs-12">Factor Precio</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
             <td>
                 <span class="text-muted fs-12">Status</span>
                 <h5 class="fs-14 mt-1 fw-normal">

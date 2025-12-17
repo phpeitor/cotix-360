@@ -131,7 +131,7 @@
                                     </table>
                                 </div> 
                             </div> 
-
+                            
                             <div class="card-footer border-0">
                                 <div class="align-items-center justify-content-between row text-center text-sm-start">
                                     <div class="col-sm">
@@ -147,9 +147,9 @@
                                             <li class="page-item active">
                                                 <a href="#" class="page-link">1</a>
                                             </li>
-                                            <li class="page-item">
+                                            <!--<li class="page-item">
                                                 <a href="#" class="page-link">2</a>
-                                            </li>
+                                            </li>-->
                                             <li class="page-item">
                                                 <a href="#" class="page-link"><i class="ti ti-chevron-right"></i></a>
                                             </li>
@@ -157,7 +157,7 @@
                                     </div>
                                 </div> 
                             </div>
-
+                            -
                         </div>
 
                     </div>
