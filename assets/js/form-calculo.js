@@ -71,6 +71,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const rows = tbody.querySelectorAll("tr");
 
+        if (rows.length === 0) {
+            totalItemsEl.textContent = "0";
+            totalPesoEl.textContent = "0.00";
+            totalFobEl.textContent = "0.00";
+            totalFleteEl.textContent = "0.00";
+            totalGastoEl.textContent = "0.00";
+            totalPeruEl.textContent  = "0.00";
+            totalFactorEl.textContent = "0.0000";
+            return;
+        }
+
         /* ==========================
         1️⃣ ACUMULAR TOTALES
         ========================== */

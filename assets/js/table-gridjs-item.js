@@ -3,8 +3,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const filterGrupo = document.getElementById("filterGrupo");
     const filterClase = document.getElementById("filterClase");
     const filterCategoria = document.getElementById("filterCategoria");
+    const filtrosRow = document.getElementById("filtros");
+    const filterMd5Input = document.getElementById("filterMd5");
     const urlParams = new URLSearchParams(window.location.search);
     const hashParam = urlParams.get("id");
+
+    const isMd5 = (val) => /^[a-f0-9]{32}$/i.test(val);
+    if (
+        (filterMd5Input && isMd5(filterMd5Input.value)) ||
+        (hashParam && isMd5(hashParam))
+    ) {
+        console.log("MD5 detectado, eliminando filtros");
+        filtrosRow?.remove();
+    }
+
 
     if (hashParam && /^[a-f0-9]{32}$/i.test(hashParam)) {
         console.log("Detectado hash MD5 en URL:", hashParam);
@@ -24,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
             categoria: filterCategoria.value
         });
 
-        // agregar solo si vino un hash
         if (md5Value) params.append("md5_id", md5Value);
 
         grid.updateConfig({
