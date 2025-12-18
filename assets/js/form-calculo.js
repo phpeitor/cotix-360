@@ -55,12 +55,26 @@ document.addEventListener("DOMContentLoaded", () => {
     /* ---------------------------------------------------
        FUNCIÓN: RE-CALCULAR TOTALES
     --------------------------------------------------- */
+
+    function getMargenByGrupo(grupo) {
+        if (!grupo) return 0.32;
+        const g = grupo.toString().toLowerCase();
+        if (g.includes("1")) return 0.25;
+        if (g.includes("2")) return 0.15;
+        return 0.32;
+    }
+
     function recalculateTotals() {
         let totalItems = 0;
         let totalPeso = 0;
         let totalFob = 0;
 
-        tbody.querySelectorAll("tr").forEach(tr => {
+        const rows = tbody.querySelectorAll("tr");
+
+        /* ==========================
+        1️⃣ ACUMULAR TOTALES
+        ========================== */
+        rows.forEach(tr => {
             const qty = parseInt(tr.querySelector("input").value);
             const peso = parseFloat(tr.dataset.peso);
             const precio = parseFloat(tr.dataset.precio);
@@ -87,20 +101,53 @@ document.addEventListener("DOMContentLoaded", () => {
             ? (gasto + flete) / totalFob
             : 0;
 
-        const displayFactor = Number(rawFactor.toFixed(4));
-        totalFactorEl.textContent = displayFactor.toFixed(4);
+        totalFactorEl.textContent = rawFactor.toFixed(4);
 
         /* ==========================
-        FACTOR PRECIO POR ITEM
+        2️⃣ CÁLCULOS POR FILA
         ========================== */
+        rows.forEach(tr => {
 
-        tbody.querySelectorAll("tr").forEach(tr => {
             const precio = parseFloat(tr.dataset.precio);
-            const precioFactor =  decimalAdjust('round',precio * decimalAdjust('round',rawFactor,'-4'),'-2');
-            /*const x= decimalAdjust('round',rawFactor,'-4')
-            console.log({precio, x, precioFactor});*/
+            const grupo  = tr.dataset.grupo;
 
-            tr.querySelector(".factor-precio").textContent = precioFactor;
+            // Factor PU
+            const factorPU = decimalAdjust(
+                'round',
+                precio * decimalAdjust('round', rawFactor, '-4'),
+                '-2'
+            );
+            tr.querySelector(".factor-precio").textContent = factorPU.toFixed(2);
+
+            // Precio M
+            const precioM = decimalAdjust(
+                'round',
+                precio + factorPU,
+                '-2'
+            );
+            tr.querySelector(".precio-m").textContent = precioM.toFixed(2);
+
+            // Margen
+            const margen = getMargenByGrupo(grupo);
+            tr.querySelector(".margen").textContent =
+                (margen * 100).toFixed(0) + "%";
+
+            // Utilidad
+            const utilidad = decimalAdjust(
+                'round',
+                precioM * margen,
+                '-2'
+            );
+            tr.querySelector(".utilidad").textContent = utilidad.toFixed(2);
+
+            // Precio Cliente
+            const precioCliente = decimalAdjust(
+                'round',
+                precioM + utilidad,
+                '-2'
+            );
+            tr.querySelector(".precio-cliente").textContent =
+                precioCliente.toFixed(2);
         });
     }
 
@@ -195,6 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tr.dataset.modelo = modelo;
         tr.dataset.peso = item.peso;
         tr.dataset.precio = item.precio;
+        tr.dataset.grupo = item.grupo;
 
         tr.innerHTML = `
             <td>
@@ -227,7 +275,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <td><span class="text-muted fs-12">Peso</span><h5 class="fs-14 mt-1 fw-normal">${item.peso}</h5></td>
             <td><span class="text-muted fs-12">Precio Uni.</span><h5 class="fs-14 mt-1 fw-normal">${item.precio} ${item.moneda}</h5></td>
-            <td><span class="text-muted fs-12">Factor Precio</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
+            <td><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
+            <td><span class="text-muted fs-12">Precio M</span><h5 class="fs-14 mt-1 fw-normal precio-m">0.00</h5></td>
+            <td><span class="text-muted fs-12">Margen</span><h5 class="fs-14 mt-1 fw-normal margen">0.00</h5></td>
+            <td><span class="text-muted fs-12">Utilidad</span><h5 class="fs-14 mt-1 fw-normal utilidad">0.00</h5></td>
+            <td><span class="text-muted fs-12">Precio Cliente</span><h5 class="fs-14 mt-1 fw-normal precio-cliente">0.00</h5></td>
             <td>
                 <span class="text-muted fs-12">Status</span>
                 <h5 class="fs-14 mt-1 fw-normal">
