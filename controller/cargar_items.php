@@ -19,6 +19,47 @@ try {
     $sheet = $spreadsheet->getSheet(0);
     $highestRow = $sheet->getHighestRow();
 
+    // ==================================================
+    // 🔒 VALIDAR CABECERAS DEL EXCEL (AQUÍ VA)
+    // ==================================================
+    $highestColumn = $sheet->getHighestColumn();
+    $headerRow = $sheet->rangeToArray("A1:{$highestColumn}1", null, true, false)[0];
+
+    $headerRow = array_map(fn($h) => trim(mb_strtoupper($h)), $headerRow);
+
+    $columnasEsperadas = array_map(fn($h) => trim(mb_strtoupper($h)), [
+        "MODELO",
+        "PRECIO UNITARIO",
+        "MONEDA",
+        "GRUPO DE DESCUENTO",
+        "DESCRIPCION",
+        "CATEGORIA DE PRODUCTO",
+        "CLASE DE PRODUCTO",
+        "PAIS DE ORIGEN",
+        "PESO EN KG",
+        "STATUS",
+        "PROVEEODR",
+        "ORIGEN"
+    ]);
+
+    if (count($headerRow) !== count($columnasEsperadas)) {
+        throw new Exception(
+            "El archivo Excel no tiene la cantidad correcta de columnas. " .
+            "Se esperaban " . count($columnasEsperadas)
+        );
+    }
+
+    $diff = array_diff_assoc($columnasEsperadas, $headerRow);
+
+    if (!empty($diff)) {
+        throw new Exception(
+            "Las columnas del Excel no coinciden con el formato requerido. " .
+            "Verifique nombres y orden de las columnas."
+        );
+    }
+    //fin validación cabeceras
+    // ==================================================
+
     $item = new Item();
     $batch = [];
     $insertados = 0;
