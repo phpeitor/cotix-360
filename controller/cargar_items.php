@@ -19,9 +19,9 @@ try {
     $sheet = $spreadsheet->getSheet(0);
     $highestRow = $sheet->getHighestRow();
 
-    // ==================================================
-    // 🔒 VALIDAR CABECERAS DEL EXCEL (AQUÍ VA)
-    // ==================================================
+    // ===============================
+    // 🔒 VALIDAR CABECERAS DEL EXCEL
+    // ===============================
     $highestColumn = $sheet->getHighestColumn();
     $headerRow = $sheet->rangeToArray("A1:{$highestColumn}1", null, true, false)[0];
 
@@ -58,24 +58,24 @@ try {
         );
     }
     //fin validación cabeceras
-    // ==================================================
+    // ==========================
 
     $item = new Item();
     $batch = [];
     $insertados = 0;
     $chunkSize = 300;
 
-    // -------------------------------------------
+    // ------------------------------------
     // 1. Crear registro en tabla "carga"
-    // -------------------------------------------
+    // ------------------------------------
     $idCarga = $item->crearCarga($fileName);
     if (!$idCarga) {
         throw new Exception("No se pudo crear el registro de carga");
     }
 
-    // -------------------------------------------
+    // ---------------------------------
     // 2. Procesar Excel por chunks
-    // -------------------------------------------
+    // ---------------------------------
     for ($row = 2; $row <= $highestRow; $row++) {
 
         $data = [

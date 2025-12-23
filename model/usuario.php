@@ -31,7 +31,8 @@ class Usuario {
                     DOC = :DOC,
                     TLF = :TLF,
                     SEXO = :SEXO,
-                    IDESTADO = :IDESTADO
+                    IDESTADO = :IDESTADO,
+                    CARGO = :CARGO
                 WHERE MD5(IDPERSONAL) = :hash";
         $stmt = $this->conn->prepare($sql);
 
@@ -42,6 +43,7 @@ class Usuario {
         $stmt->bindValue(':TLF', $data['telefono']);
         $stmt->bindValue(':SEXO', (int)$data['sexo'], PDO::PARAM_INT);
         $stmt->bindValue(':IDESTADO', (int)$data['estado'], PDO::PARAM_INT);
+        $stmt->bindValue(':CARGO', $data['cargo']);
         $stmt->bindValue(':hash', $hash);
         $stmt->execute();
         return $stmt->rowCount() > 0;
@@ -55,9 +57,9 @@ class Usuario {
         $usuario = strtolower($primerNombre . '.' . $primerApellido);
 
         $sql = "INSERT INTO personal 
-                (APELLIDOS, NOMBRES, EMAIL, DOC, TLF, SEXO, USUARIO, PASSWORD, fecha_registro, IDESTADO)
+                (APELLIDOS, NOMBRES, EMAIL, DOC, TLF, SEXO, USUARIO, PASSWORD, fecha_registro, IDESTADO, CARGO)
                 VALUES 
-                (:apellidos, :nombres, :email, :documento, :telefono, :sexo, :usuario, MD5(:documento), :fecha_registro, 1)";
+                (:apellidos, :nombres, :email, :documento, :telefono, :sexo, :usuario, MD5(:documento), :fecha_registro, 1, :cargo)";
         $stmt = $this->conn->prepare($sql);
 
         $stmt->bindValue(':nombres',   $data['nombres'] ?? '');
@@ -68,6 +70,7 @@ class Usuario {
         $stmt->bindValue(':sexo', (int)($data['sexo'] ?? 0), PDO::PARAM_INT);
         $stmt->bindValue(':usuario', $usuario);
         $stmt->bindValue(':fecha_registro', $this->nowLima);
+        $stmt->bindValue(':cargo',  $data['cargo'] ?? '0');
         $stmt->execute();
         return (int)$this->conn->lastInsertId();
     }
@@ -106,7 +109,8 @@ class Usuario {
                     EMAIL,
                     TLF,
                     SEXO,
-                    IDESTADO
+                    IDESTADO,
+                    CARGO
                 FROM personal
                 WHERE MD5(IDPERSONAL) = :hash
                 LIMIT 1";
@@ -124,7 +128,8 @@ class Usuario {
                     NOMBRES,
                     USUARIO,
                     PASSWORD,
-                    IDESTADO
+                    IDESTADO,
+                    CARGO
                 FROM personal
                 WHERE USUARIO = :USUARIO
                 AND PASSWORD= :PASSWORD

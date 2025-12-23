@@ -22,6 +22,7 @@ try {
         'email'     => $_POST['email'] ?? '',
         'telefono'  => $_POST['telefono'] ?? '',
         'sexo'      => $_POST['sexo'] ?? 0,
+        'cargo'     => $_POST['cargo'] ?? '',
         'estado'    => isset($_POST['estado']) ? 1 : 0,
     ];
 

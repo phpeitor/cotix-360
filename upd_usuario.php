@@ -68,22 +68,34 @@
                             <div class="card-body">
                                 <form class="needs-validation form-upd-user" novalidate="">
                                     <div class="row">
-                                        <div class="col-md-4 mb-3">
+                                        <div class="col-md-3 mb-3">
                                             <label class="form-label" for="documento">Documento</label>
                                             <input type="number" class="form-control" id="documento" name="documento" placeholder="12345678" required="" min="9999999" max="9999999999">
                                             <div class="invalid-feedback">Please provide a document.</div>
                                         </div>
 
-                                        <div class="col-md-4 mb-3">
+                                        <div class="col-md-3 mb-3">
                                             <label class="form-label" for="nombres">Nombres</label>
                                             <input type="text" class="form-control" id="nombres" name="nombres" placeholder="First name" required="" maxlength="70">
                                             <div class="valid-feedback">Looks good!</div>
                                         </div>
 
-                                        <div class="col-md-4 mb-3">
+                                        <div class="col-md-3 mb-3">
                                             <label class="form-label" for="apellidos">Apellidos</label>
                                             <input type="text" class="form-control" id="apellidos" name="apellidos" placeholder="Last name" required="" maxlength="70">
                                             <div class="valid-feedback">Looks good!</div>
+                                        </div>
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Cargo</label>
+                                            <select id="cargo" name="cargo" class="form-select" required="">
+                                                <option value="">-- Seleccione --</option>
+                                                <option value="1">Admin</option>
+                                                <option value="2">Gestor</option>
+                                            </select>
+                                            <div class="invalid-feedback">
+                                                Please select an option.
+                                            </div>
                                         </div>
                                     </div>
 
@@ -94,16 +106,16 @@
                                             <div class="invalid-feedback">Please provide a valid email.</div>
                                         </div>
 
-                                        <div class="col-md-4 mb-3">
+                                        <div class="col-md-3 mb-3">
                                             <label class="form-label" for="telefono">Teléfono</label>
                                             <input type="number" class="form-control" data-toggle="input-mask" data-mask-format="999999999" inputmode="number" min="99999999" id="telefono" name="telefono" placeholder="123456789" required="">
                                             <div class="invalid-feedback">Please provide a valid phone.</div>
                                         </div>
 
-                                        <div class="col-md-2 mb-3">
+                                        <div class="col-md-3 mb-3">
                                             <label class="form-label d-block">Sexo</label>
                                             <input type="radio" class="form-check-input" id="sexo1" name="sexo" required value="1">
-                                            <label for="sexo1" class="ms-1">Masculino</label><br>
+                                            <label for="sexo1" class="ms-1">Masculino</label>
                                             <input type="radio" class="form-check-input" id="sexo2" name="sexo" required value="2">
                                             <label for="sexo2" class="ms-1">Femenino</label>
                                             <div class="invalid-feedback">

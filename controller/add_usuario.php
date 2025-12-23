@@ -12,6 +12,7 @@ try {
         'documento' => $_POST['documento'] ?? '',
         'telefono'  => $_POST['telefono']  ?? '',
         'sexo'      => $_POST['sexo']      ?? '',
+        'cargo'     => $_POST['cargo']     ?? '',
     ];
 
     $existe = $cli->valida_documento($payload['documento']);

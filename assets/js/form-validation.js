@@ -7,6 +7,55 @@ document.addEventListener("DOMContentLoaded", () => {
   const hash = params.get("hash");
 
 
+  /* =====================================================
+     AUTOCOMPLETAR NOMBRES/APELLIDOS POR DNI (8 DÍGITOS)
+  ===================================================== */
+  const documentoInput = document.getElementById("documento");
+  const nombresInput   = document.getElementById("nombres");
+  const apellidosInput = document.getElementById("apellidos");
+
+  let lastDniConsulted = null;
+
+  if (documentoInput) {
+    documentoInput.addEventListener("keyup", async () => {
+      const dni = documentoInput.value.trim();
+
+      if (dni.length < 8) {
+        lastDniConsulted = null;
+        nombresInput.readOnly = false;
+        apellidosInput.readOnly = false;
+        return;
+      }
+
+      if (dni.length !== 8 || dni === lastDniConsulted) return;
+
+      lastDniConsulted = dni;
+
+      try {
+        nombresInput.value = '';
+        apellidosInput.value = '';
+
+        const res = await fetch(
+          `./config/api.php?dni=${dni}`
+        );
+
+        if (!res.ok) throw new Error("Error API DNI");
+
+        const data = await res.json();
+
+        if (data.found_patient) {
+          nombresInput.value   = data.found_patient.name ?? '';
+          apellidosInput.value = data.found_patient.last_name ?? '';
+        }
+
+      } catch (err) {
+        console.error("❌ Error DNI:", err);
+        lastDniConsulted = null;
+      }
+    });
+  }
+  /* ================= FIN BLOQUE DNI ================= */
+
   if (hash && form.classList.contains("form-upd-user")) {
      cargarUsuario(hash);
      prepararFormularioEdicion(form, hash);
@@ -102,6 +151,10 @@ async function cargarUsuario(hash) {
             r.checked = parseInt(r.value) === parseInt(u.SEXO);
         });
         document.querySelector('#switch3').checked = parseInt(u.IDESTADO) === 1;
+        const cargoSelect = document.querySelector('#cargo');
+        if (cargoSelect && u.CARGO) {
+            cargoSelect.value = u.CARGO;
+        }
 
     } catch (err) {
         console.error("❌ Error al cargar usuario:", err);

@@ -30,7 +30,9 @@ try {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_TIMEOUT => 10,  
-        CURLOPT_CONNECTTIMEOUT => 5
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
     ]);
 
     $response = curl_exec($ch);
