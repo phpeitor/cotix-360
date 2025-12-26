@@ -155,9 +155,15 @@
                                             </li>
                                         </ul>
                                     </div>
+
+                                    <div class="col-sm-auto mt-3 mt-sm-0">
+                                        <button type="submit" class="btn btn-success btn-icon">
+                                            <i class="ti ti-send"></i>
+                                        </button>
+                                    </div>
                                 </div> 
                             </div>
-                            -
+
                         </div>
 
                     </div>
