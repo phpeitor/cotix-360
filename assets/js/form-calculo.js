@@ -173,8 +173,9 @@ document.addEventListener("DOMContentLoaded", () => {
     /* ---------------------------------------------------
        EVITAR AGREGAR DUPLICADOS
     --------------------------------------------------- */
-    function itemAlreadyAdded(modelo) {
-        return [...tbody.querySelectorAll("tr")].some(tr => tr.dataset.modelo === modelo);
+    function itemAlreadyAdded(itemId) {
+        return [...tbody.querySelectorAll("tr")]
+            .some(tr => tr.dataset.itemId == itemId);
     }
 
     /* ---------------------------------------------------
@@ -200,6 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     value: i.modelo,
                     label: i.modelo,
                     customProperties: {
+                        id: i.id,
                         descripcion: i.descripcion,
                         categoria: i.categoria_producto,
                         grupo: i.grupo_descuento,
@@ -236,6 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const modelo = selected.value;
         const item = selected.customProperties;
+        const itemId  = item.id;
 
         if (!item) {
             alertify.error("El item no contiene información válida");
@@ -243,13 +246,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Validación de duplicado
-        if (itemAlreadyAdded(modelo)) {
+        if (itemAlreadyAdded(itemId)) {
             alertify.error("Este item ya fue agregado");
             return;
         }
 
         // Crear fila
         const tr = document.createElement("tr");
+        tr.dataset.itemId  = itemId ;
         tr.dataset.modelo = modelo;
         tr.dataset.peso = item.peso;
         tr.dataset.precio = item.precio;
@@ -340,5 +344,65 @@ document.addEventListener("DOMContentLoaded", () => {
             alertify.error("Item eliminado");
         }
     });
+
+
+    /* ---------------------------------------------------
+    SUBMIT COTIZACIÓN
+    --------------------------------------------------- */
+    const formCotizacion = document.getElementById("formCotizacion");
+
+    formCotizacion.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const rows = tbody.querySelectorAll("tr");
+        if (rows.length === 0) {
+            alertify.error("Debe agregar al menos un item para continuar");
+            return;
+        }
+
+        const items = [];
+
+        rows.forEach(tr => {
+            items.push({
+                item_id: tr.dataset.itemId, 
+                modelo: tr.dataset.modelo,
+                descripcion: tr.querySelector("h5").innerText,
+                categoria: tr.querySelector("td:nth-child(2) span").innerText,
+                grupo: tr.dataset.grupo,
+                cantidad: parseInt(tr.querySelector("input").value),
+                peso: parseFloat(tr.dataset.peso),
+                precio: parseFloat(tr.dataset.precio),
+                status: 'Active'
+            });
+        });
+
+        // 🧾 FormData
+        const formData = new FormData();
+        formData.append("estado", "Borrador");
+        formData.append("items", JSON.stringify(items));
+
+        // 🚀 Enviar
+        fetch("controller/add_cotizacion.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(resp => {
+            if (!resp.ok) {
+                alertify.error(resp.message || "Error al guardar cotización");
+                return;
+            }
+
+            alertify.success("Cotización guardada correctamente");
+
+            // Opcional: redirigir
+            // window.location.href = `cotizacion_ver.php?id=${resp.id}`;
+        })
+        .catch(err => {
+            console.error(err);
+            alertify.error("Error de conexión con el servidor");
+        });
+    });
+
 
 });

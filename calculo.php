@@ -46,7 +46,6 @@
 
         <div class="page-content">
             <div class="page-container">
-
                  <div class="page-title-head d-flex align-items-sm-center flex-sm-row flex-column gap-2">
                     <div class="flex-grow-1">
                         <h4 class="fs-18 text-uppercase fw-bold mb-0">Templates</h4>
@@ -68,9 +67,8 @@
                                 <h4 class="header-title mb-0">Plantilla de Cálculo</h4>
                                 <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='items.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                             </div>
-
-                            <div class="card-body">
-                                <form class="needs-validation form-calculo" novalidate="">
+                            <form id="formCotizacion" class="needs-validation form-calculo" novalidate="">
+                                <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label">Base</label>
@@ -94,80 +92,79 @@
                                             </div>
                                         </div>
                                     </div>
-                                </form>
-                            </div>
-
-                            <div class="card-body p-0">
-                                <div class="bg-success bg-opacity-10 py-1 text-center">
-                                    <p class="m-0"><b id="total_item">0</b> item(s) agregados</p>
                                 </div>
-                                <div class="border border-dashed p-2 rounded text-center">
-                                    <div class="row">
-                                        <div class="col-lg-2 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:box-bold-duotone" class="text-danger"></iconify-icon> <span class="text-dark">Total Peso : </span> <span id="total_peso">0.00</span></p>
-                                        </div>
-                                        <div class="col-lg-2 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-outline" class="text-success"></iconify-icon> <span class="text-dark">Total FOB : </span> <span id="total_fob">0.00</span></p>
-                                        </div>
-                                        <div class="col-lg-2 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-broken" class="text-warning"></iconify-icon> <span class="text-dark">Flete : </span> <span id="total_flete">0.00</span></p>
-                                        </div>
-                                        <div class="col-lg-2 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-broken" class="text-info"></iconify-icon> <span class="text-dark">Gastos : </span> <span id="total_gasto">0.00</span></p>
-                                        </div>
-                                        <div class="col-lg-2 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total 🇵🇪: </span> <span id="total_peru">0.00</span></p>
-                                        </div>
-                                        <div class="col-lg-2 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:course-up-bold" class="text-danger"></iconify-icon> <span class="text-dark">Factor: </span> <span id="total_factor">0.00</span></p>
+
+                                <div class="card-body p-0">
+                                    <div class="bg-success bg-opacity-10 py-1 text-center">
+                                        <p class="m-0"><b id="total_item">0</b> item(s) agregados</p>
+                                    </div>
+                                    <div class="border border-dashed p-2 rounded text-center">
+                                        <div class="row">
+                                            <div class="col-lg-2 col-4 border-end">
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:box-bold-duotone" class="text-danger"></iconify-icon> <span class="text-dark">Total Peso : </span> <span id="total_peso">0.00</span></p>
+                                            </div>
+                                            <div class="col-lg-2 col-4 border-end">
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-outline" class="text-success"></iconify-icon> <span class="text-dark">Total FOB : </span> <span id="total_fob">0.00</span></p>
+                                            </div>
+                                            <div class="col-lg-2 col-4 border-end">
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-broken" class="text-warning"></iconify-icon> <span class="text-dark">Flete : </span> <span id="total_flete">0.00</span></p>
+                                            </div>
+                                            <div class="col-lg-2 col-4 border-end">
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-broken" class="text-info"></iconify-icon> <span class="text-dark">Gastos : </span> <span id="total_gasto">0.00</span></p>
+                                            </div>
+                                            <div class="col-lg-2 col-4 border-end">
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total 🇵🇪: </span> <span id="total_peru">0.00</span></p>
+                                            </div>
+                                            <div class="col-lg-2 col-4 border-end">
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:course-up-bold" class="text-danger"></iconify-icon> <span class="text-dark">Factor: </span> <span id="total_factor">0.00</span></p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">
-                                        <tbody>
-                                            
-                                        </tbody>
-                                    </table>
+                                    <div class="table-responsive">
+                                        <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">
+                                            <tbody>
+                                                
+                                            </tbody>
+                                        </table>
+                                    </div> 
                                 </div> 
-                            </div> 
                             
-                            <div class="card-footer border-0">
-                                <div class="align-items-center justify-content-between row text-center text-sm-start">
-                                    <div class="col-sm">
-                                        <div class="text-muted">
-                                            Showing <span class="fw-semibold">1</span> of <span class="fw-semibold">10</span> Results
+                                <div class="card-footer border-0">
+                                    <div class="align-items-center justify-content-between row text-center text-sm-start">
+                                        <div class="col-sm">
+                                            <div class="text-muted">
+                                                Showing <span class="fw-semibold">1</span> of <span class="fw-semibold">10</span> Results
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="col-sm-auto mt-3 mt-sm-0">
-                                        <ul class="pagination pagination-boxed pagination-sm mb-0 justify-content-center">
-                                            <li class="page-item disabled">
-                                                <a href="#" class="page-link"><i class="ti ti-chevron-left"></i></a>
-                                            </li>
-                                            <li class="page-item active">
-                                                <a href="#" class="page-link">1</a>
-                                            </li>
-                                            <!--<li class="page-item">
-                                                <a href="#" class="page-link">2</a>
-                                            </li>-->
-                                            <li class="page-item">
-                                                <a href="#" class="page-link"><i class="ti ti-chevron-right"></i></a>
-                                            </li>
-                                        </ul>
-                                    </div>
+                                        <div class="col-sm-auto mt-3 mt-sm-0">
+                                            <ul class="pagination pagination-boxed pagination-sm mb-0 justify-content-center">
+                                                <li class="page-item disabled">
+                                                    <a href="#" class="page-link"><i class="ti ti-chevron-left"></i></a>
+                                                </li>
+                                                <li class="page-item active">
+                                                    <a href="#" class="page-link">1</a>
+                                                </li>
+                                                <!--<li class="page-item">
+                                                    <a href="#" class="page-link">2</a>
+                                                </li>-->
+                                                <li class="page-item">
+                                                    <a href="#" class="page-link"><i class="ti ti-chevron-right"></i></a>
+                                                </li>
+                                            </ul>
+                                        </div>
 
-                                    <div class="col-sm-auto mt-3 mt-sm-0">
-                                        <button type="submit" class="btn btn-success btn-icon">
-                                            <i class="ti ti-send"></i>
-                                        </button>
-                                    </div>
-                                </div> 
-                            </div>
-
+                                        <div class="col-sm-auto mt-3 mt-sm-0">
+                                            <button type="submit" class="btn btn-success btn-icon">
+                                                <i class="ti ti-send"></i>
+                                            </button>
+                                        </div>
+                                    </div> 
+                                </div>
+                            </form>
                         </div>
-
                     </div>
                 </div>
+            <!-- End page-containerr-->                                  
             </div>
 
             <footer class="footer">

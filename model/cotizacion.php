@@ -12,10 +12,26 @@ class Cotizacion {
         $this->nowLima = (new DateTimeImmutable('now', $tz))->format('Y-m-d H:i:s');
     }
 
-    public function table_carga(): array{
+    public function begin(): void
+    {
+        $this->conn->beginTransaction();
+    }
+
+    public function commit(): void
+    {
+        $this->conn->commit();
+    }
+
+    public function rollback(): void
+    {
+        if ($this->conn->inTransaction()) {
+            $this->conn->rollBack();
+        }
+    }
+
+    public function table_cotizacion(): array{
          $sql = "SELECT *
-                FROM carga
-                where estado=1
+                FROM cotizaciones
                 ORDER BY id DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
