@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-require_once __DIR__ . '/../model/cotizacion.php';
+require_once __DIR__ . '/../model/item.php';
 
 try {
     $id     = $_POST['id']     ?? null;
@@ -10,16 +10,16 @@ try {
         throw new Exception("Parámetros incompletos");
     }
 
-    if (!in_array($accion, ['aprobar', 'anular'])) {
+    if (!in_array($accion, ['activar', 'anular'])) {
         throw new Exception("Acción no válida");
     }
 
-    $estado = $accion === 'aprobar'
-        ? 'Aprobada'
-        : 'Anulada';
+    $estado = $accion === 'activar'
+        ? '1'
+        : '0';
 
-    $cotizacion = new Cotizacion();
-    $ok = $cotizacion->actualizar_estado((int)$id, $estado);
+    $item = new Item();
+    $ok = $item->actualizar_estado((int)$id, $estado);
 
     if (!$ok) {
         throw new Exception("No se pudo actualizar el estado");

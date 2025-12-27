@@ -49,11 +49,8 @@ class Item {
         $values = [];
 
         foreach ($rows as $r) {
-            // normalizo y garantizo todas las columnas para evitar errores
             $placeholders[] = "(" . rtrim(str_repeat('?,', count($cols)), ',') . ")";
-            // push values en el mismo orden que $cols
             $values[] = $this->v($r['modelo'] ?? '');
-            // precio_unitario y peso deben ser números
             $values[] = isset($r['precio_unitario']) && $r['precio_unitario'] !== '' ? (float)$r['precio_unitario'] : 0.0;
             $values[] = $this->v($r['moneda'] ?? '');
             $values[] = $this->v($r['grupo_descuento'] ?? '');
@@ -70,7 +67,6 @@ class Item {
 
         $sql = "INSERT INTO item (" . implode(',', $cols) . ") VALUES " . implode(',', $placeholders);
 
-        // Ejecutar en transacción para mayor seguridad
         try {
             $this->conn->beginTransaction();
             $stmt = $this->conn->prepare($sql);
@@ -84,42 +80,57 @@ class Item {
             return $count;
         } catch (Throwable $t) {
             if ($this->conn->inTransaction()) $this->conn->rollBack();
-            // relanzar para que el caller lo maneje
             throw $t;
         }
     }
 
-    public function table_item($base = null, $grupo = null, $clase = null, $categoria = null, $md5_id = null): array
-    {
-        $sql = "SELECT * FROM item WHERE 1=1";
+    public function table_item(
+        $base = null,
+        $grupo = null,
+        $clase = null,
+        $categoria = null,
+        $md5_id = null
+    ): array {
+
+        $sql = "
+            SELECT a.*
+            FROM item a
+            LEFT JOIN carga b ON a.id_carga = b.id
+            WHERE 1 = 1
+        ";
+
         $params = [];
 
+        if (!$md5_id) {
+            $sql .= " AND b.estado = 1";
+        }
+
         if ($base) {
-            $sql .= " AND id_carga = ?";
+            $sql .= " AND a.id_carga = ?";
             $params[] = $base;
         }
 
         if ($grupo) {
-            $sql .= " AND grupo_descuento = ?";
+            $sql .= " AND a.grupo_descuento = ?";
             $params[] = $grupo;
         }
 
         if ($clase) {
-            $sql .= " AND clase_producto = ?";
+            $sql .= " AND a.clase_producto = ?";
             $params[] = $clase;
         }
 
         if ($categoria) {
-            $sql .= " AND categoria_producto = ?";
+            $sql .= " AND a.categoria_producto = ?";
             $params[] = $categoria;
         }
 
         if ($md5_id) {
-            $sql .= " AND MD5(id_carga) = ?";
+            $sql .= " AND MD5(a.id_carga) = ?";
             $params[] = $md5_id;
         }
 
-        $sql .= " ORDER BY id DESC";
+        $sql .= " ORDER BY a.id DESC";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute($params);
@@ -130,7 +141,6 @@ class Item {
     public function table_carga(): array{
          $sql = "SELECT *
                 FROM carga
-                where estado=1
                 ORDER BY id DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
@@ -152,7 +162,7 @@ class Item {
          $sql = "SELECT grupo_descuento, count(1) as ctd 
                 FROM item a
                 left join carga b on a.id_carga=b.id
-                where estado=1
+                where b.estado=1
                 group by grupo_descuento";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
@@ -163,7 +173,7 @@ class Item {
          $sql = "SELECT clase_producto, count(1) as ctd 
                 FROM item a
                 left join carga b on a.id_carga=b.id
-                where estado=1
+                where b.estado=1
                 group by clase_producto";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
@@ -174,7 +184,7 @@ class Item {
          $sql = "SELECT categoria_producto, count(1) as ctd 
                 FROM item a
                 left join carga b on a.id_carga=b.id
-                where estado=1
+                where b.estado=1
                 group by categoria_producto";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
@@ -253,5 +263,15 @@ class Item {
         return $stmt->execute();
     }
 
+    public function actualizar_estado(int $id, string $estado): bool {
+        $sql = "UPDATE carga 
+                SET estado = :estado
+                WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':estado', $estado);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
+    }
 }
 ?>

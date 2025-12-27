@@ -95,6 +95,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 width: "100px"
             },
             {
+                id: "estado",
+                name: "Estado",
+                width: "80px",
+                formatter: (cell) => {
+                    const v = String(cell ?? "").trim();
+                    if (v === "1") {
+                        return gridjs.html(`<span class="badge bg-success">ACTIVE</span>`);
+                    }
+                    if (v === "0") {
+                        return gridjs.html(`<span class="badge bg-danger">SUSPENDED</span>`);
+                    }
+                    return gridjs.html(`<span class="badge bg-dark text-light">NDF</span>`);
+                }
+            },
+            {
                 id: "acciones",
                 name: "Opciones",
                 width: "90px",
@@ -151,8 +166,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 alertify.confirm(
                     "Confirmar eliminación",
                     "¿Seguro que deseas eliminar el registro " + id + "?",
-                    function () { resolve(true); },    // OK
-                    function () { resolve(false); }    // Cancelar
+                    function () { resolve(true); },    
+                    function () { resolve(false); }   
                 );
             });
 
