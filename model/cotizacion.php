@@ -29,12 +29,35 @@ class Cotizacion {
         }
     }
 
-    public function table_cotizacion(): array{
-         $sql = "SELECT *
-                FROM cotizaciones
-                ORDER BY id DESC";
+   public function table_cotizacion(string $fec_ini, string $fec_fin): array
+    {
+        $sql = "
+            SELECT
+                c.id,
+                p.usuario,
+                c.estado,
+                c.created_at,
+                c.updated_at,
+                COUNT(cd.id) AS total_items,
+                GROUP_CONCAT(
+                    CONCAT(cd.modelo, ' - ', cd.categoria)
+                    ORDER BY cd.modelo
+                    SEPARATOR ' | '
+                ) AS items
+            FROM cotizaciones c
+            LEFT JOIN cotizacion_detalle cd ON cd.cotizacion_id = c.id
+            LEFT JOIN personal p on p.IDPERSONAL=c.usuario_id
+            WHERE c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)
+            GROUP BY
+                c.id, p.usuario, c.estado, c.created_at, c.updated_at
+            ORDER BY c.id DESC
+        ";
+
         $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':fec_ini', $fec_ini);
+        $stmt->bindValue(':fec_fin', $fec_fin);
         $stmt->execute();
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
