@@ -37,10 +37,28 @@ document.addEventListener("DOMContentLoaded", () => {
         columns: [
             { id: "id", name: "ID", width: "70px" },
             { id: "usuario", name: "Usuario", width: "80px" },
-            { id: "estado", name: "Estado", width: "100px" },
-            { id: "items", name: "Items", width: "250px" },
-            { id: "total_items", name: "Cant.", width: "80px" },
-            { id: "created_at", name: "Fecha", width: "140px" }
+            {
+                id: "estado",
+                name: "Estado",
+                width: "100px",
+                formatter: (cell) => renderEstado(cell)
+            },
+
+            {
+                id: "items",
+                name: "Items",
+                width: "280px",
+                formatter: (cell) => renderItems(cell)
+            },
+
+            { id: "created_at", name: "Fecha", width: "150px" },
+
+            {
+                name: "Opciones",
+                width: "140px",
+                sort: false,
+                formatter: renderAcciones
+            }
         ],
         server: {
             url: buildUrl(),
@@ -84,6 +102,55 @@ document.addEventListener("DOMContentLoaded", () => {
             fec_ini,
             fec_fin
         });
+    }
+
+    function renderEstado(estado) {
+        const map = {
+            "Borrador": "badge-outline-primary",
+            "Enviada": "badge-outline-info",
+            "Aprobada": "badge-outline-success",
+            "Anulada": "badge-outline-danger"
+        };
+
+        const cls = map[estado] || "badge-outline-secondary";
+
+        return gridjs.html(
+            `<span class="badge ${cls}">${estado}</span>`
+        );
+    }
+
+    function renderItems(items) {
+        if (!items) return "";
+
+        const arr = items.split("|").map(i => i.trim());
+        const total = arr.length;
+
+        if (total === 1) {
+            return gridjs.html(`<span>${arr[0]}</span>`);
+        }
+
+        const list = arr.map(i => `<li>${i}</li>`).join("");
+
+        return gridjs.html(`
+            <div>
+                <ul class="mb-1 ps-3">${list}</ul>
+                <small class="text-muted fw-semibold">
+                    Total items: ${total}
+                </small>
+            </div>
+        `);
+    }
+
+    function renderAcciones(_, row) {
+        const id = row.cells[0].data;
+
+        return gridjs.html(`
+            <div class="d-flex gap-1 justify-content-center">
+                <a href="javascript:void(0);" class="btn btn-soft-primary btn-icon btn-sm rounded-circle"> <i class="ti ti-eye"></i></a>
+                <a href="javascript:void(0);" class="btn btn-soft-success btn-icon btn-sm rounded-circle"> <i class="ti ti-check"></i></a>
+                <a href="javascript:void(0);" class="btn btn-soft-danger btn-icon btn-sm rounded-circle"> <i class="ti ti-x"></i></a>
+            </div>
+        `);
     }
 
 });

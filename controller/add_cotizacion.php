@@ -34,7 +34,7 @@ try {
     // 🧾 Guardar cabecera
     $cotizacionId = $cotizacion->g_cotizacion([
         'usuario_id' => (int) $_SESSION['session_id'],
-        'estado'     => $_POST['estado'] ?? 'Borrador',
+        'estado'     => 'Enviada',
     ]);
 
     // 📄 Guardar detalle

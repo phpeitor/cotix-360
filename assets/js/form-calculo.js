@@ -394,9 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             alertify.success("Cotización guardada correctamente");
-
-            // Opcional: redirigir
-            // window.location.href = `cotizacion_ver.php?id=${resp.id}`;
+            window.location.href = `cotizaciones.php?id=${md5(String(resp.id))}`;
         })
         .catch(err => {
             console.error(err);

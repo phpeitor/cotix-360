@@ -40,7 +40,7 @@ class Cotizacion {
                 c.updated_at,
                 COUNT(cd.id) AS total_items,
                 GROUP_CONCAT(
-                    CONCAT(cd.modelo, ' - ', cd.categoria)
+                    CONCAT(cd.modelo, ': ', cd.descripcion)
                     ORDER BY cd.modelo
                     SEPARATOR ' | '
                 ) AS items
