@@ -76,7 +76,7 @@
                             </a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="#" class="side-nav-link">
+                            <a href="cotizaciones.php" class="side-nav-link">
                                 <span class="menu-text">Cotizaciones</span>
                             </a>
                         </li>

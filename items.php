@@ -115,7 +115,6 @@
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
-
                                 </div>
 
                                 <div id="table-gridjs"></div>

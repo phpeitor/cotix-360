@@ -45,7 +45,7 @@
 
                  <div class="page-title-head d-flex align-items-sm-center flex-sm-row flex-column gap-2">
                     <div class="flex-grow-1">
-                        <h4 class="fs-18 text-uppercase fw-bold mb-0">Usuarios</h4>
+                        <h4 class="fs-18 text-uppercase fw-bold mb-0">Cotizaciones</h4>
                     </div>
 
                     <div class="text-end">
@@ -61,7 +61,34 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
-                                <h4 class="header-title mb-0">Base Cotizaciones</h4>
+                                
+                                <div class="mt-3 mt-sm-0">
+                                    <form action="javascript:void(0);">
+                                        <div class="row g-2 mb-0 align-items-center">
+                                            
+                                            <div class="col-sm-auto">
+                                                <div class="input-group">
+                                                    <input
+                                                        type="text"
+                                                        id="filterDate"
+                                                        class="form-control"
+                                                        data-provider="flatpickr"
+                                                        data-date-format="d M Y"
+                                                        data-range-date="true"
+                                                    />
+                                                    <span class="input-group-text bg-primary border-primary text-white">
+                                                        <i class="ti ti-calendar fs-15"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-auto">
+                                                <a href="#" id="btn_buscar" class="btn btn-sm rounded-pill btn-info"><i class="ti ti-search fs-22"></i> Buscar</a>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+
                             </div>
 
                             <div class="card-body">
