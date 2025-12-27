@@ -11,6 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalGastoEl   = document.getElementById("total_gasto");
     const totalPeruEl    = document.getElementById("total_peru");
     const totalFactorEl  = document.getElementById("total_factor");
+    const usuarioEl = document.getElementById("usuario");
+    const fechaEl   = document.getElementById("fecha");
+    const estadoEl  = document.getElementById("estado");
+    const cotizacionIdEl = document.getElementById("cotizacion_id");
+
 
     let fleteTable = [];
     let gastoTable = [];
@@ -37,10 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(res => res ? res.json() : null)
         .then(data => {
             if (!data || !data.cotizacion) return;
-
+            setHeader(data.cotizacion);
             data.detalle.forEach(renderItemRow);
             recalculateTotals();
-
             alertify.success("Cotización cargada");
         })
         .catch(err => {
@@ -54,6 +58,10 @@ document.addEventListener("DOMContentLoaded", () => {
     =================================================== */
     function getQueryParam(param) {
         return new URLSearchParams(window.location.search).get(param);
+    }
+
+    function formatNumber(value, decimals = 2) {
+        return Number(value || 0).toFixed(decimals);
     }
 
     function getRandomLogo() {
@@ -144,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <td>
                 <span class="text-muted fs-12">Precio Uni.</span>
-                <h5 class="fs-14 mt-1 fw-normal">${precio}</h5>
+                <h5 class="fs-14 mt-1 fw-normal">${formatNumber(precio)}</h5>
             </td>
 
             <td><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 factor-precio">0.00</h5></td>
@@ -224,5 +232,41 @@ document.addEventListener("DOMContentLoaded", () => {
             tr.querySelector(".precio-cliente").textContent = precioCliente.toFixed(2);
         });
     }
+
+    function setHeader(cotizacion) {
+        usuarioEl.textContent = cotizacion.usuario ?? "";
+        fechaEl.textContent = cotizacion.created_at ?? "";;
+        estadoEl.textContent = cotizacion.estado ?? "";;
+        cotizacionIdEl.textContent = md5(cotizacion.id) ?? "";
+        setEstadoIcon(cotizacion.estado);
+    }
+
+    function setEstadoIcon(estado) {
+        const avatar = estadoEl
+            .closest(".d-flex")
+            .querySelector(".avatar-lg");
+
+        let icon = "solar:refresh-square-bold";
+        let color = "text-primary";
+
+        if (!estado) return;
+
+        switch (estado) {
+            case "Aprobada":
+                icon  = "solar:verified-check-broken";
+                color = "text-success";
+                break;
+
+            case "Anulada":
+                icon  = "solar:folder-error-broken";
+                color = "text-danger";
+                break;
+        }
+
+        avatar.innerHTML = `
+            <iconify-icon icon="${icon}" class="fs-28 ${color}"></iconify-icon>
+        `;
+    }
+
 
 });

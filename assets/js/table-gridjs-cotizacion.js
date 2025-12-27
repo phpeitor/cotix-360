@@ -143,21 +143,109 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderAcciones(_, row) {
         const id = row.cells[0].data;
+        const estado = row.cells[2].data;
         const hashId = md5(String(id));
+
+        let botones = `
+            <a 
+                href="form_cotizacion.php?id=${hashId}" 
+                class="btn btn-soft-primary btn-icon btn-sm rounded-circle"
+                title="Ver cotización"
+            >
+                <i class="ti ti-eye"></i>
+            </a>
+        `;
+
+        if (estado === "Aprobada") {
+
+            botones += `
+                <button class="btn btn-soft-danger btn-icon btn-sm rounded-circle btn-estado"
+                        data-id="${id}"
+                        data-accion="anular"
+                        title="Anular">
+                    <i class="ti ti-x"></i>
+                </button>
+
+                <a href="pdf_cotizacion.php?id=${hashId}"
+                class="btn btn-soft-warning btn-icon btn-sm rounded-circle"
+                title="PDF">
+                    <i class="ti ti-file"></i>
+                </a>
+            `;
+
+        } else if (estado === "Anulada") {
+
+            botones += `
+                <button class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-estado"
+                        data-id="${id}"
+                        data-accion="aprobar"
+                        title="Aprobar">
+                    <i class="ti ti-check"></i>
+                </button>
+            `;
+
+        } else {
+
+            botones += `
+                <button class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-estado"
+                        data-id="${id}"
+                        data-accion="aprobar"
+                        title="Aprobar">
+                    <i class="ti ti-check"></i>
+                </button>
+
+                <button class="btn btn-soft-danger btn-icon btn-sm rounded-circle btn-estado"
+                        data-id="${id}"
+                        data-accion="anular"
+                        title="Anular">
+                    <i class="ti ti-x"></i>
+                </button>
+            `;
+        }
 
         return gridjs.html(`
             <div class="d-flex gap-1 justify-content-center">
-                <a 
-                    href="form_cotizacion.php?id=${hashId}" 
-                    class="btn btn-soft-primary btn-icon btn-sm rounded-circle"
-                    title="Ver cotización"
-                >
-                    <i class="ti ti-eye"></i>
-                </a>
-                <a href="javascript:void(0);" class="btn btn-soft-success btn-icon btn-sm rounded-circle"> <i class="ti ti-check"></i></a>
-                <a href="javascript:void(0);" class="btn btn-soft-danger btn-icon btn-sm rounded-circle"> <i class="ti ti-x"></i></a>
+                ${botones}
             </div>
         `);
+    }
+
+
+    document.addEventListener("click", e => {
+        const btn = e.target.closest(".btn-estado");
+        if (!btn) return;
+
+        const id     = btn.dataset.id;
+        const accion = btn.dataset.accion;
+
+        const texto = accion === "aprobar"
+            ? "¿Deseas aprobar esta cotización?"
+            : "¿Deseas anular esta cotización?";
+
+        alertify.confirm(texto,
+            () => actualizarEstado(id, accion),
+            () => {}
+        );
+    });
+
+    function actualizarEstado(id, accion) {
+
+        fetch("controller/upd_estado.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ id, accion })
+        })
+        .then(res => res.json())
+        .then(resp => {
+            if (!resp.success) {
+                alertify.error(resp.message || "Error");
+                return;
+            }
+
+            alertify.success(`Cotización ${resp.estado}`);
+            grid.forceRender();
+        })
+        .catch(() => alertify.error("Error de conexión"));
     }
 
 });

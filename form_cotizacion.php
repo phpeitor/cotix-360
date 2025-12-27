@@ -61,8 +61,45 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
-                                <h4 class="header-title mb-0">Cotización</h4>
-                                <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='items.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
+                                <h4 class="header-title mb-0">Cotización #<span id="cotizacion_id"></span></h4>
+
+                                <div class="row g-3">
+                                    <div class="col-lg-4">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-lg bg-light d-flex align-items-center justify-content-center rounded">
+                                                <iconify-icon icon="solar:shield-user-bold" class="fs-28 text-primary"></iconify-icon>
+                                            </div>
+
+                                            <div>
+                                                <p class="text-dark fw-medium fs-12 mb-0"><span id="usuario"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-lg bg-light d-flex align-items-center justify-content-center rounded">
+                                                <iconify-icon icon="solar:calendar-date-broken" class="fs-28 text-primary"></iconify-icon>
+                                            </div>
+
+                                            <div>
+                                                <p class="text-dark fw-medium fs-12 mb-0"><span id="fecha"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-lg bg-light d-flex align-items-center justify-content-center rounded">
+                                                <iconify-icon icon="solar:refresh-square-bold" class="fs-28 text-primary"></iconify-icon>
+                                            </div>
+
+                                            <div>
+                                                <p class="text-dark fw-medium fs-12 mb-0"><span id="estado"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='cotizaciones.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                             </div>
                             <form id="formCotizacion" class="needs-validation form-calculo" novalidate="">
                                 <div class="card-body p-0">
