@@ -167,8 +167,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 </button>
 
                 <a href="pdf_cotizacion.php?id=${hashId}"
-                class="btn btn-soft-warning btn-icon btn-sm rounded-circle"
-                title="PDF">
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Abrir cotización en PDF"
+                class="btn btn-soft-warning btn-icon btn-sm rounded-circle">
                     <i class="ti ti-file"></i>
                 </a>
             `;
