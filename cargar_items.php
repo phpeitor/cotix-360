@@ -76,6 +76,47 @@
                                         </div>
                                     </div>
                                 </form>
+
+                                <div class="border border-dashed p-2 rounded text-center">
+                                    <div class="row">
+                                        <div class="col-lg-1 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">MODELO</p>
+                                        </div>
+                                        <div class="col-lg-1 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">PRECIO UN.</p>
+                                        </div>
+                                        <div class="col-lg-1 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">MONEDA</p>
+                                        </div>
+                                        <div class="col-lg-1 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">GRUPO DSCTO</p>
+                                        </div>
+                                        <div class="col-lg-1 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">DESCRIPCION</p>
+                                        </div>
+                                        <div class="col-lg-1 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">CATEGORIA</p>
+                                        </div>
+                                        <div class="col-lg-1 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">CLASE</p>
+                                        </div>
+                                        <div class="col-lg-1 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">PAIS</p>
+                                        </div>
+                                        <div class="col-lg-1 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">PESO</p>
+                                        </div>
+                                        <div class="col-lg-1 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">STATUS</p>
+                                        </div>
+                                        <div class="col-lg-1 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">PROVEEDOR</p>
+                                        </div>
+                                        <div class="col-lg-1 col-4 border-end">
+                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">ORIGEN</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

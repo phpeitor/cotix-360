@@ -58,7 +58,6 @@ try {
         ]);
     }
 
-    // ✅ Confirmar transacción
     $cotizacion->commit();
 
     echo json_encode([

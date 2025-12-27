@@ -60,24 +60,24 @@
                 </div>
             </li>
 
-            <li class="side-nav-title mt-2">Cotizaciones</li>
+            <li class="side-nav-title mt-2">Cotiza Templates</li>
 
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarExtendedUI" aria-expanded="false" aria-controls="sidebarExtendedUI" class="side-nav-link">
-                    <span class="menu-icon"><i class="ti ti-alien-filled"></i></span>
-                    <span class="menu-text"> Plantillas UI </span>
+                    <span class="menu-icon"><i class="ti ti-box-multiple-3"></i></span>
+                    <span class="menu-text"> Templates X </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarExtendedUI">
                     <ul class="sub-menu">
                         <li class="side-nav-item">
                             <a href="calculo.php" class="side-nav-link">
-                                <span class="menu-text">Cálculo</span>
+                                <span class="menu-text">Plantilla de Cálculo</span>
                             </a>
                         </li>
                         <li class="side-nav-item">
                             <a href="#" class="side-nav-link">
-                                <span class="menu-text">Alertas</span>
+                                <span class="menu-text">Cotizaciones</span>
                             </a>
                         </li>
                     </ul>

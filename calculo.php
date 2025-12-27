@@ -164,7 +164,7 @@
                         </div>
                     </div>
                 </div>
-            <!-- End page-containerr-->                                  
+            <!-- End page-container-->                                  
             </div>
 
             <footer class="footer">
