@@ -143,10 +143,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderAcciones(_, row) {
         const id = row.cells[0].data;
+        const hashId = md5(String(id));
 
         return gridjs.html(`
             <div class="d-flex gap-1 justify-content-center">
-                <a href="javascript:void(0);" class="btn btn-soft-primary btn-icon btn-sm rounded-circle"> <i class="ti ti-eye"></i></a>
+                <a 
+                    href="form_cotizacion.php?id=${hashId}" 
+                    class="btn btn-soft-primary btn-icon btn-sm rounded-circle"
+                    title="Ver cotización"
+                >
+                    <i class="ti ti-eye"></i>
+                </a>
                 <a href="javascript:void(0);" class="btn btn-soft-success btn-icon btn-sm rounded-circle"> <i class="ti ti-check"></i></a>
                 <a href="javascript:void(0);" class="btn btn-soft-danger btn-icon btn-sm rounded-circle"> <i class="ti ti-x"></i></a>
             </div>

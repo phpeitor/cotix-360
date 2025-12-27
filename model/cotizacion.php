@@ -61,6 +61,29 @@ class Cotizacion {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function obtenerPorHash(string $hash): ?array {
+        $sql = "SELECT *
+                FROM cotizaciones
+                WHERE MD5(id) = :hash
+                LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    public function obtenerDetallePorHash(string $hash): array {
+        $sql = "SELECT *
+                FROM cotizacion_detalle
+                WHERE MD5(cotizacion_id) = :hash";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function g_cotizacion(array $data): int
     {
         $sql = "INSERT INTO cotizaciones

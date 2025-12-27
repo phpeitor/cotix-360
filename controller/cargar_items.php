@@ -9,7 +9,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 try {
     if (!isset($_FILES['fileItems'])) {
-        throw new Exception("No se recibió archivo");
+        throw new Exception("No se adjunta archivo");
     }
 
     $fileTmp = $_FILES['fileItems']['tmp_name'];
