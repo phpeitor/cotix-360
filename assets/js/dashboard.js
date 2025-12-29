@@ -2,6 +2,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const cotizacionesContainer = document.getElementById("dashboard-cotizaciones");
     const itemsContainer        = document.getElementById("dashboard-items");
+    const contUser = document.getElementById("total_user");
+    const contItem = document.getElementById("total_item");
+    const contCoti = document.getElementById("total_cotizacion");
+    const contCarga = document.getElementById("total_carga");
+
+    const dateInput = document.getElementById("filterDate");
+
+    const today = new Date();
+    const pastDate = new Date();
+    pastDate.setDate(today.getDate() - 7);
+
+    const formatFlatpickr = (d) =>
+        d.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+
+    const defaultRangeText =
+        `${formatFlatpickr(pastDate)} to ${formatFlatpickr(today)}`;
+
+    flatpickr(dateInput, {
+        mode: "range",
+        dateFormat: "d M",
+        defaultDate: [pastDate, today]
+    });
+
+    dateInput.value = defaultRangeText;
 
     try {
         const res  = await fetch("controller/dashboard.php");
@@ -12,6 +40,18 @@ document.addEventListener("DOMContentLoaded", async () => {
                 cotizacionesContainer.innerHTML = `<p class="text-danger">Error al cargar datos</p>`;
             }
             return;
+        }
+
+        /* ===============================
+           CONTADORES
+        =============================== */
+        const contadores = json.data?.contadores?.[0];
+
+        if (contadores) {
+            contUser.textContent  = contadores.usuarios     ?? 0;
+            contItem.textContent  = contadores.items        ?? 0;
+            contCoti.textContent  = contadores.cotizaciones ?? 0;
+            contCarga.textContent = contadores.carga        ?? 0;
         }
 
         /* =====================================================

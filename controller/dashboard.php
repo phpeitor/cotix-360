@@ -7,12 +7,14 @@ try {
 
     $cotizaciones = $dashboard->table_cotizacion();
     $items        = $dashboard->items();
+    $contadores        = $dashboard->contadores();
 
     echo json_encode([
         'error' => false,
         'data'  => [
             'cotizaciones' => $cotizaciones,
-            'items'        => $items
+            'items'        => $items,
+            'contadores'   => $contadores
         ]
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 

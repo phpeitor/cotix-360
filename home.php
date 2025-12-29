@@ -58,7 +58,14 @@
                                         </div>
                                         <div class="col-sm-auto">
                                             <div class="input-group">
-                                                <input type="text" class="form-control" data-provider="flatpickr" data-deafult-date="01 May to 31 May" data-date-format="d M" data-range-date="true">
+                                               <input
+                                                        type="text"
+                                                        id="filterDate"
+                                                        class="form-control"
+                                                        data-provider="flatpickr"
+                                                        data-date-format="d M"
+                                                        data-range-date="true"
+                                                    />
                                                 <span class="input-group-text bg-primary border-primary text-white">
                                                     <i class="ti ti-calendar fs-15"></i>
                                                 </span>
@@ -77,14 +84,14 @@
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Number of Orders">Total Orders</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Number of Orders">Total Usuarios</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
-                                                    <iconify-icon icon="solar:case-round-minimalistic-bold-duotone"></iconify-icon>
+                                                    <iconify-icon icon="solar:user-heart-linear"></iconify-icon>
                                                 </span>
                                             </div>
-                                            <h3 class="mb-0 fw-bold">687.3k</h3>
+                                            <h3 id="total_user" class="mb-0 fw-bold">0</h3>
                                         </div>
                                         <p class="mb-0 text-muted">
                                             <span class="text-danger me-2"><i class="ti ti-caret-down-filled"></i> 9.19%</span>
@@ -97,14 +104,14 @@
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Number of Orders">Total Returns</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Number of Orders">Total Cotizaciones</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
                                                     <iconify-icon icon="solar:bill-list-bold-duotone"></iconify-icon>
                                                 </span>
                                             </div>
-                                            <h3 class="mb-0 fw-bold">9.62k</h3>
+                                            <h3 id="total_cotizacion" class="mb-0 fw-bold">0</h3>
                                         </div>
                                         <p class="mb-0 text-muted">
                                             <span class="text-success me-2"><i class="ti ti-caret-up-filled"></i> 26.87%</span>
@@ -117,14 +124,14 @@
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Number of Orders">Avg. Sales Earnings</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Number of Orders">Total Items</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
-                                                    <iconify-icon icon="solar:wallet-money-bold-duotone"></iconify-icon>
+                                                    <iconify-icon icon="solar:box-minimalistic-broken"></iconify-icon>
                                                 </span>
                                             </div>
-                                            <h3 class="mb-0 fw-bold">$98.24 <small class="text-muted">USD</small></h3>
+                                            <h3 id="total_item" class="mb-0 fw-bold">0</h3>
                                         </div>
                                         <p class="mb-0 text-muted">
                                             <span class="text-success me-2"><i class="ti ti-caret-up-filled"></i> 3.51%</span>
@@ -137,14 +144,14 @@
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Number of Orders">Number of Visits</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Number of Orders">Total Excels</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
-                                                    <iconify-icon icon="solar:eye-bold-duotone"></iconify-icon>
+                                                    <iconify-icon icon="solar:file-send-outline"></iconify-icon>
                                                 </span>
                                             </div>
-                                            <h3 class="mb-0 fw-bold">87.94M</h3>
+                                            <h3 id="total_carga" class="mb-0 fw-bold">0</h3>
                                         </div>
                                         <p class="mb-0 text-muted">
                                             <span class="text-danger me-2"><i class="ti ti-caret-down-filled"></i> 1.05%</span>

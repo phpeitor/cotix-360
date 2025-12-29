@@ -56,5 +56,21 @@ class Dashboard {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function contadores(): array
+    {
+        $sql = "
+            SELECT
+            (SELECT COUNT(*) FROM personal WHERE idestado = 1) AS usuarios,
+            (SELECT COUNT(*) FROM item WHERE estado = 1) AS items,
+            (SELECT COUNT(*) FROM cotizaciones) AS cotizaciones,
+            (SELECT COUNT(*) FROM carga) AS carga;
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
 ?>
