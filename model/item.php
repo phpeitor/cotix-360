@@ -22,6 +22,30 @@ class Item {
         return $stmt->rowCount() > 0;
     }
 
+    public function actualizarPorHash(string $hash, array $data): bool {
+        $sql = "UPDATE item 
+                SET modelo = :modelo,
+                    descripcion = :descripcion,
+                    precio_unitario = :precio_unitario,
+                    grupo_descuento = :grupo_descuento,
+                    pais_origen = :pais_origen,
+                    peso = :peso,
+                    estado = :estado
+                WHERE MD5(id) = :hash";
+        $stmt = $this->conn->prepare($sql);
+
+        $stmt->bindValue(':modelo', $data['modelo']);
+        $stmt->bindValue(':descripcion', $data['descripcion']);
+        $stmt->bindValue(':precio_unitario', $data['precio_unitario']);
+        $stmt->bindValue(':grupo_descuento', $data['grupo_descuento']);
+        $stmt->bindValue(':pais_origen', $data['pais_origen']);
+        $stmt->bindValue(':peso', $data['peso']);
+        $stmt->bindValue(':estado', (int)$data['estado'], PDO::PARAM_INT);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
+    }
+
     public function v($value): string {
         return trim((string)($value ?? ''));
     }
@@ -205,7 +229,7 @@ class Item {
                 pais_origen,
                 status
                 FROM item
-                WHERE id_carga = :id";
+                WHERE id_carga = :id and estado=1";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':id', $id);
         $stmt->execute();
@@ -272,6 +296,21 @@ class Item {
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->rowCount() > 0;
+    }
+
+    public function valida_modelo_upd(string $modelo, string $hash): ?array
+    {
+        $sql = "SELECT id
+                FROM item
+                WHERE modelo = :modelo
+                AND MD5(id) <> :hash
+                LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':modelo', $modelo);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $data ?: null;
     }
 }
 ?>

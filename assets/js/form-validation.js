@@ -1,8 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
   const forms = document.querySelectorAll(
-    ".form-add-user, .form-upd-user"
+    ".form-add-user, .form-upd-user, .form-upd-item"
   );
-  const form = document.querySelector("form.form-upd-user");
+
+  const form =
+  document.querySelector("form.form-upd-user") ||
+  document.querySelector("form.form-upd-item");
+
   const params = new URLSearchParams(window.location.search);
   const hash = params.get("hash");
 
@@ -61,6 +65,11 @@ document.addEventListener("DOMContentLoaded", () => {
      prepararFormularioEdicion(form, hash);
   }
 
+  if (hash && form.classList.contains("form-upd-item")) {
+    cargarItem(hash);
+    prepararFormularioEdicion(form, hash);
+  }
+
   forms.forEach((form) => {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -95,8 +104,18 @@ document.addEventListener("DOMContentLoaded", () => {
         redirectUrl = "usuarios.php";
       }
 
+      if (form.classList.contains("form-upd-item")) {
+        actionUrl = "controller/upd_item.php";
+        redirectUrl = "items.php";
+      }
+
       try {
         const formData = new FormData(form);
+
+        if (!actionUrl) {
+          alertify.error("No se pudo determinar la acción del formulario");
+          return;
+        }
 
         const res = await fetch(actionUrl, {
           method: "POST",
@@ -112,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
           form.reset();
           window.location.href = redirectUrl;
         } else {
-          alertify.error("Error: " + (json.message || "No se pudo guardar."));
+          alertify.error("Alerta: " + (json.message || "No se pudo guardar."));
         }
 
       } catch (err) {
@@ -127,7 +146,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
-
   
 });
 
@@ -158,6 +176,33 @@ async function cargarUsuario(hash) {
 
     } catch (err) {
         console.error("❌ Error al cargar usuario:", err);
+    }
+}
+
+async function cargarItem(hash) {
+    try {
+        const res = await fetch(`controller/get_item.php?hash=${hash}`);
+        const json = await res.json();
+
+        if (!json.ok) {
+            alertify.error(json.message || "Item no encontrado");
+            return;
+        }
+
+        const i = json.data;
+
+        document.querySelector('#descripcion').value = i.descripcion ?? '';
+        document.querySelector('#modelo').value = i.modelo ?? '';
+        document.querySelector('#categoria').value = i.categoria_producto ?? '';
+        document.querySelector('#grupo').value = i.grupo_descuento ?? '';
+        document.querySelector('#clase').value = i.clase_producto ?? '';
+        document.querySelector('#origen').value = i.pais_origen ?? i.origen;
+        document.querySelector('#peso').value = i.peso ?? '';
+        document.querySelector('#precio').value = i.precio_unitario ?? '';
+        document.querySelector('#switch3').checked = parseInt(i.estado) === 1;
+
+    } catch (err) {
+        console.error("❌ Error al cargar item:", err);
     }
 }
 
