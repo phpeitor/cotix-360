@@ -336,53 +336,13 @@
                             </div>
                             <div class="col">
                                 <a class="dropdown-icon-item" href="#">
-                                    <img src="./assets/images/brands/dribbble.svg" alt="dribbble">
-                                    <span>Dribbble</span>
+                                    <img src="./assets/images/brands/google-cloud.svg" alt="Google">
+                                    <span>Google</span>
                                 </a>
                             </div>
                         </div>
 
-                        <div class="row g-0">
-                            <div class="col">
-                                <a class="dropdown-icon-item" href="#">
-                                    <img src="./assets/images/brands/bitbucket.svg" alt="bitbucket">
-                                    <span>Bitbucket</span>
-                                </a>
-                            </div>
-                            <div class="col">
-                                <a class="dropdown-icon-item" href="#">
-                                    <img src="./assets/images/brands/dropbox.svg" alt="dropbox">
-                                    <span>Dropbox</span>
-                                </a>
-                            </div>
-                            <div class="col">
-                                <a class="dropdown-icon-item" href="#">
-                                    <img src="./assets/images/brands/google-cloud.svg" alt="G Suite">
-                                    <span>G Cloud</span>
-                                </a>
-                            </div>
-                        </div> <!-- end row-->
-
-                        <div class="row g-0">
-                            <div class="col">
-                                <a class="dropdown-icon-item" href="#">
-                                    <img src="./assets/images/brands/aws.svg" alt="bitbucket">
-                                    <span>AWS</span>
-                                </a>
-                            </div>
-                            <div class="col">
-                                <a class="dropdown-icon-item" href="#">
-                                    <img src="./assets/images/brands/digital-ocean.svg" alt="dropbox">
-                                    <span>Server</span>
-                                </a>
-                            </div>
-                            <div class="col">
-                                <a class="dropdown-icon-item" href="#">
-                                    <img src="./assets/images/brands/bootstrap.svg" alt="G Suite">
-                                    <span>Bootstrap</span>
-                                </a>
-                            </div>
-                        </div> <!-- end row-->
+                       
                     </div>
                 </div>
             </div>

@@ -283,173 +283,24 @@
                         <div class="card">
                             <div class="card-body">
                                 <div class="d-flex mb-3 justify-content-between align-items-center">
-                                    <h4 class="header-title">Recent Orders:</h4>
+                                    <h4 class="header-title">Recent Cotizaciones:</h4>
                                     <div>
-                                        <a href="javascript:void(0);" class="btn btn-sm btn-primary rounded-circle btn-icon"><i class="ti ti-plus"></i></a>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center gap-2 position-relative mb-2">
-                                    <div class="avatar-md flex-shrink-0">
-                                        <img src="./assets/images/products/p-6.png" alt="product-pic" height="36">
-                                    </div>
-                                    <div>
-                                        <h5 class="fs-14 my-1"><a href="apps-ecommerce-order-details.html" class="stretched-link link-reset">Marco Shoes</a></h5>
-                                        <span class="text-muted fs-12">$29.99 x 1 = $29.99</span>
-                                    </div>
-                                    <div class="ms-auto">
-                                        <span class="badge badge-soft-success px-2 py-1">Sold</span>
+                                        <a href="calculo.php" class="btn btn-sm btn-primary rounded-circle btn-icon"><i class="ti ti-plus"></i></a>
                                     </div>
                                 </div>
 
-                                <div class="d-flex align-items-center gap-2 position-relative mb-2">
-                                    <div class="avatar-md flex-shrink-0">
-                                        <img src="./assets/images/products/p-1.png" alt="product-pic" height="36">
-                                    </div>
-                                    <div>
-                                        <h5 class="fs-14 my-1"><a href="apps-ecommerce-order-details.html" class="stretched-link link-reset">High Waist Tshirt</a></h5>
-                                        <span class="text-muted fs-12">$9.99 x 3 = $29.97</span>
-                                    </div>
-                                    <div class="ms-auto">
-                                        <span class="badge badge-soft-success px-2 py-1">Sold</span>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex align-items-center gap-2 position-relative mb-2">
-                                    <div class="avatar-md flex-shrink-0">
-                                        <img src="./assets/images/products/p-3.png" alt="product-pic" height="36">
-                                    </div>
-                                    <div>
-                                        <h5 class="fs-14 my-1"><a href="apps-ecommerce-order-details.html" class="stretched-link link-reset">Comfirt Chair</a></h5>
-                                        <span class="text-muted fs-12">$49.99 x 1 = $49.99</span>
-                                    </div>
-                                    <div class="ms-auto">
-                                        <span class="badge badge-soft-danger px-2 py-1">Return</span>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex align-items-center gap-2 position-relative mb-2">
-                                    <div class="avatar-md flex-shrink-0">
-                                        <img src="./assets/images/products/p-4.png" alt="product-pic" height="36">
-                                    </div>
-                                    <div>
-                                        <h5 class="fs-14 my-1"><a href="apps-ecommerce-order-details.html" class="stretched-link link-reset">Smart Headphone</a></h5>
-                                        <span class="text-muted fs-12">$39.99 x 1 = $39.99</span>
-                                    </div>
-                                    <div class="ms-auto">
-                                        <span class="badge badge-soft-success px-2 py-1">Sold</span>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex align-items-center gap-2 position-relative">
-                                    <div class="avatar-md flex-shrink-0">
-                                        <img src="./assets/images/products/p-2.png" alt="product-pic" height="36">
-                                    </div>
-                                    <div>
-                                        <h5 class="fs-14 my-1"><a href="apps-ecommerce-order-details.html" class="stretched-link link-reset">Laptop Bag</a></h5>
-                                        <span class="text-muted fs-12">$12.99 x 4 = $51.96</span>
-                                    </div>
-                                    <div class="ms-auto">
-                                        <span class="badge badge-soft-success px-2 py-1">Sold</span>
-                                    </div>
-                                </div>
+                                <div id="dashboard-cotizaciones"></div>
 
                                 <div class="mt-3 text-center">
-                                    <a href="#!" class="text-decoration-underline fw-semibold ms-auto link-offset-2 link-dark">View All</a>
+                                    <a href="cotizaciones.php" class="text-decoration-underline fw-semibold ms-auto link-offset-2 link-dark">View All</a>
                                 </div>
                             </div>
+
                             <div class="card-body p-0 border-top border-dashed">
-                                <h4 class="header-title px-3 mb-2 mt-3">Recent Activity:</h4>
+                                <h4 class="header-title px-3 mb-2 mt-3">Recent Items:</h4>
                                 <div class="my-3 px-3" data-simplebar style="max-height: 370px;">
-                                    <div class="timeline-alt py-0">
-                                        <div class="timeline-item">
-                                            <i class="ti ti-basket bg-info-subtle text-info timeline-icon"></i>
-                                            <div class="timeline-item-info">
-                                                <a href="javascript:void(0);" class="link-reset fw-semibold mb-1 d-block">You sold an item</a>
-                                                <span class="mb-1">Paul Burgess just purchased “My - Admin Dashboard”!</span>
-                                                <p class="mb-0 pb-3">
-                                                    <small class="text-muted">5 minutes ago</small>
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div class="timeline-item">
-                                            <i class="ti ti-rocket bg-primary-subtle text-primary timeline-icon"></i>
-                                            <div class="timeline-item-info">
-                                                <a href="javascript:void(0);" class="link-reset fw-semibold mb-1 d-block">Product on the Theme Market</a>
-                                                <span class="mb-1">Reviewer added
-                                                    <span class="fw-medium">Admin Dashboard</span>
-                                                </span>
-                                                <p class="mb-0 pb-3">
-                                                    <small class="text-muted">30 minutes ago</small>
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div class="timeline-item">
-                                            <i class="ti ti-message bg-info-subtle text-info timeline-icon"></i>
-                                            <div class="timeline-item-info">
-                                                <a href="javascript:void(0);" class="link-reset fw-semibold mb-1 d-block">Robert Delaney</a>
-                                                <span class="mb-1">Send you message
-                                                    <span class="fw-medium">"Are you there?"</span>
-                                                </span>
-                                                <p class="mb-0 pb-3">
-                                                    <small class="text-muted">2 hours ago</small>
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div class="timeline-item">
-                                            <i class="ti ti-photo bg-primary-subtle text-primary timeline-icon"></i>
-                                            <div class="timeline-item-info">
-                                                <a href="javascript:void(0);" class="link-reset fw-semibold mb-1 d-block">Audrey Tobey</a>
-                                                <span class="mb-1">Uploaded a photo
-                                                    <span class="fw-medium">"Error.jpg"</span>
-                                                </span>
-                                                <p class="mb-0 pb-3">
-                                                    <small class="text-muted">14 hours ago</small>
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div class="timeline-item">
-                                            <i class="ti ti-basket bg-info-subtle text-info timeline-icon"></i>
-                                            <div class="timeline-item-info">
-                                                <a href="javascript:void(0);" class="link-reset fw-semibold mb-1 d-block">You sold an item</a>
-                                                <span class="mb-1">Paul Burgess just purchased “My - Admin Dashboard”!</span>
-                                                <p class="mb-0 pb-3">
-                                                    <small class="text-muted">16 hours ago</small>
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div class="timeline-item">
-                                            <i class="ti ti-rocket bg-primary-subtle text-primary timeline-icon"></i>
-                                            <div class="timeline-item-info">
-                                                <a href="javascript:void(0);" class="link-reset fw-semibold mb-1 d-block">Product on the Bootstrap Market</a>
-                                                <span class="mb-1">Reviewer added
-                                                    <span class="fw-medium">Admin Dashboard</span>
-                                                </span>
-                                                <p class="mb-0 pb-3">
-                                                    <small class="text-muted">22 hours ago</small>
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div class="timeline-item">
-                                            <i class="ti ti-message bg-info-subtle text-info timeline-icon"></i>
-                                            <div class="timeline-item-info">
-                                                <a href="javascript:void(0);" class="link-reset fw-semibold mb-1 d-block">Robert Delaney</a>
-                                                <span class="mb-1">Send you message
-                                                    <span class="fw-medium">"Are you there?"</span>
-                                                </span>
-                                                <p class="mb-0 pb-2">
-                                                    <small class="text-muted">2 days ago</small>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- end timeline -->
-                                </div> <!-- end slimscroll -->
+                                    <div id="dashboard-items" class="timeline-alt py-0"></div>
+                                </div> 
                             </div>
 
                             <div class="card-body">
@@ -765,6 +616,8 @@
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/dashboard-sales.js"></script>
+    <script src="./assets/js/dashboard.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
 </html>
