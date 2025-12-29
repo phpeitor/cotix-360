@@ -71,18 +71,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 width: "160px",
                 sort: false,
                 formatter: (_, row) => {
-                    const data = row.cells;
-                    const id = data[0].data;
+                    const cells = row.cells;
+
+                    const id = cells[0].data;
+                    const estado = String(cells[4].data).trim(); // IDESTADO
                     const idHash = md5(String(id));
+
+                    const btnDelete = estado === "1"
+                    ? `
+                        <button class="btn-delete btn btn-soft-danger btn-icon" data-id="${id}">
+                            <i class="ti ti-trash-x"></i>
+                        </button>
+                    `
+                    : ``;
 
                     return gridjs.html(`
                         <div style="gap:.5rem;justify-content:center;">
                             <button class="btn-edit btn btn-outline-primary btn-icon" data-hash="${idHash}">
                                 <i class="ti ti-pencil-bolt"></i>
                             </button>
-                            <button class="btn-delete btn btn-soft-danger btn-icon" data-id="${id}">
-                                <i class="ti ti-trash-x"></i>
-                            </button>
+                             ${btnDelete}
                         </div>
                     `);
                 }
