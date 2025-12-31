@@ -89,10 +89,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const qty = parseInt(tr.querySelector("input").value);
             const peso = parseFloat(tr.dataset.peso);
             const precio = parseFloat(tr.dataset.precio);
+            const grupo  = tr.dataset.grupo;
+
+            const margen = getMargenByGrupo(grupo);
+            const precio_dscto = precio * (1 - margen);
 
             totalItems += qty;
-            totalPeso += peso * qty;
-            totalFob += precio * qty;
+            totalPeso  += peso * qty;
+            totalFob   += precio_dscto * qty;
         });
 
         totalItemsEl.textContent = totalItems;
@@ -122,26 +126,36 @@ document.addEventListener("DOMContentLoaded", () => {
             const precio = parseFloat(tr.dataset.precio);
             const grupo  = tr.dataset.grupo;
 
-            // Factor PU
-            const factorPU = decimalAdjust(
-                'round',
-                precio * decimalAdjust('round', rawFactor, '-4'),
-                '-2'
-            );
-            tr.querySelector(".factor-precio").textContent = factorPU.toFixed(2);
-
-            // Precio M
-            const precioM = decimalAdjust(
-                'round',
-                precio + factorPU,
-                '-2'
-            );
-            tr.querySelector(".precio-m").textContent = precioM.toFixed(2);
-
             // Margen
             const margen = getMargenByGrupo(grupo);
             tr.querySelector(".margen").textContent =
                 (margen * 100).toFixed(0) + "%";
+            
+            // Margen_dscto
+            const margen_dscto = precio * margen;
+            const precio_dscto = precio * (1 - margen);
+
+            // Precio Dscto
+            tr.querySelector(".margen_dscto").textContent =
+                decimalAdjust('round',margen_dscto,'-2').toFixed(2);
+            tr.querySelector(".precio_dscto").textContent =
+                decimalAdjust('round',precio_dscto,'-2').toFixed(2);
+
+            // Factor PU
+            const factorPU = decimalAdjust(
+                'round',
+                precio_dscto * decimalAdjust('round', rawFactor, '-4'),
+                '-2'
+            );
+            tr.querySelector(".factor-precio").textContent = factorPU.toFixed(2);
+            
+            // Precio M
+            const precioM = decimalAdjust(
+                'round',
+                precio_dscto + factorPU,
+                '-2'
+            );
+            tr.querySelector(".precio-m").textContent = precioM.toFixed(2);
 
             // Utilidad
             const utilidad = decimalAdjust(
@@ -280,6 +294,14 @@ document.addEventListener("DOMContentLoaded", () => {
             </td>
 
             <td>
+                <span class="text-muted fs-12">Status</span>
+                <h5 class="fs-14 mt-1 fw-normal">
+                    <i class="ti ti-circle-filled fs-12 ${item.status === "Active" ? "text-success" : "text-danger"}"></i>
+                    ${item.status}
+                </h5>
+            </td>
+
+            <td>
                 <span class="text-muted fs-12">Cantidad</span> <br>
                 <div data-touchspin class="input-step border bg-body-secondary p-1 mt-1 rounded-pill d-inline-flex overflow-visible">
                     <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
@@ -289,20 +311,15 @@ document.addEventListener("DOMContentLoaded", () => {
             </td>
 
             <td><span class="text-muted fs-12">Peso</span><h5 class="fs-14 mt-1 fw-normal">${item.peso}</h5></td>
-            <td><span class="text-muted fs-12">Precio Uni.</span><h5 class="fs-14 mt-1 fw-normal">${item.precio} ${item.moneda}</h5></td>
+            <td><span class="text-muted fs-12">Precio Uni.</span><h5 class="fs-14 mt-1 fw-normal">${item.precio.toFixed(2)} ${item.moneda}</h5></td>
+            
+            <td><span class="text-muted fs-12">Valor</span><h5 class="fs-14 mt-1 fw-normal margen">0.00</h5></td>
+            <td><span class="text-muted fs-12">Dscto</span><h5 class="fs-14 mt-1 fw-normal margen_dscto">0.00</h5></td>
+            <td><span class="text-muted fs-12">Precio Dscto</span><h5 class="fs-14 mt-1 fw-normal precio_dscto">0.00</h5></td>
             <td><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
             <td><span class="text-muted fs-12">Precio M</span><h5 class="fs-14 mt-1 fw-normal precio-m">0.00</h5></td>
-            <td><span class="text-muted fs-12">Margen</span><h5 class="fs-14 mt-1 fw-normal margen">0.00</h5></td>
             <td><span class="text-muted fs-12">Utilidad</span><h5 class="fs-14 mt-1 fw-normal utilidad">0.00</h5></td>
             <td><span class="text-muted fs-12">Precio Cliente</span><h5 class="fs-14 mt-1 fw-normal precio-cliente">0.00</h5></td>
-            <td>
-                <span class="text-muted fs-12">Status</span>
-                <h5 class="fs-14 mt-1 fw-normal">
-                    <i class="ti ti-circle-filled fs-12 ${item.status === "Active" ? "text-success" : "text-danger"}"></i>
-                    ${item.status}
-                </h5>
-            </td>
-
             <td>
                 <a href="javascript:void(0)" class="text-danger btnDeleteItem">
                     <i class="ti ti-trash fs-18"></i>

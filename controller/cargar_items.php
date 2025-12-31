@@ -38,7 +38,7 @@ try {
         "PAIS DE ORIGEN",
         "PESO EN KG",
         "STATUS",
-        "PROVEEODR",
+        "PROVEEDOR",
         "ORIGEN"
     ]);
 
