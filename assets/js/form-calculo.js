@@ -25,17 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => gastoTable  = data)
         .catch(err => console.error("Error cargando gastos:", err));
 
-    function calcularFlete(totalPeso) {
-        if (fleteTable.length === 0) return 0;
-
-        for (const row of fleteTable) {
-            if (parseFloat(row.peso) >= totalPeso) {
-                return parseFloat(row.flete);
-            }
-        }
-
-        return parseFloat(fleteTable[fleteTable.length - 1].flete);
-    }
 
     function calcularGasto(totalFob) {
         if (gastoTable.length === 0) return 0;
@@ -52,10 +41,51 @@ document.addEventListener("DOMContentLoaded", () => {
         return parseFloat(gastoTable[gastoTable.length - 1].costo);
     }
 
+    function normalizarPais(pais) {
+        return pais && pais.toString().trim().toUpperCase() === "USA"
+            ? "USA"
+            : "CHINA";
+    }
+
+    function getPesoPorPais() {
+        const pesos = {};
+
+        tbody.querySelectorAll("tr").forEach(tr => {
+            const qty  = parseInt(tr.querySelector("input").value);
+            const peso = parseFloat(tr.dataset.peso);
+            const pais = normalizarPais(tr.dataset.pais);
+
+            if (!pesos[pais]) pesos[pais] = 0;
+            pesos[pais] += peso * qty;
+        });
+
+        return pesos;
+    }
+
+    function calcularFletePorPais(pais, pesoTotal) {
+        const paisCalc = normalizarPais(pais);
+
+        let tarifas = fleteTable.filter(r => r.pais === paisCalc);
+
+        // fallback de seguridad (si algo viene mal del backend)
+        if (tarifas.length === 0) {
+            tarifas = fleteTable.filter(r => r.pais === "CHINA");
+        }
+
+        tarifas.sort((a, b) => parseFloat(a.peso) - parseFloat(b.peso));
+
+        for (const row of tarifas) {
+            if (pesoTotal <= parseFloat(row.peso)) {
+                return parseFloat(row.flete);
+            }
+        }
+
+        return parseFloat(tarifas[tarifas.length - 1].flete);
+    }
+
     /* ---------------------------------------------------
        FUNCIÓN: RE-CALCULAR TOTALES
     --------------------------------------------------- */
-
     function getMargenByGrupo(grupo) {
         if (!grupo) return 0.32;
         const g = grupo.toString().toLowerCase();
@@ -103,17 +133,23 @@ document.addEventListener("DOMContentLoaded", () => {
         totalPesoEl.textContent = totalPeso.toFixed(2);
         totalFobEl.textContent = totalFob.toFixed(2);
 
-        const flete = calcularFlete(totalPeso);
-        totalFleteEl.textContent = flete.toFixed(2);
+        const pesosPorPais = getPesoPorPais();
+        let totalFlete = 0;
+
+        for (const pais in pesosPorPais) {
+            totalFlete += calcularFletePorPais(pais, pesosPorPais[pais]);
+        }
+
+        totalFleteEl.textContent = totalFlete.toFixed(2);
 
         const gasto = calcularGasto(totalFob);
         totalGastoEl.textContent = gasto.toFixed(2);
 
-        const totalPeru = totalFob + flete + gasto;
+        const totalPeru = totalFob + totalFlete + gasto;
         totalPeruEl.textContent = totalPeru.toFixed(2);
 
         const rawFactor = totalFob > 0
-            ? (gasto + flete) / totalFob
+            ? (gasto + totalFlete) / totalFob
             : 0;
 
         totalFactorEl.textContent = rawFactor.toFixed(4);
@@ -272,6 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tr.dataset.peso = item.peso;
         tr.dataset.precio = item.precio;
         tr.dataset.grupo = item.grupo;
+        tr.dataset.pais   = item.pais;
 
         tr.innerHTML = `
             <td>
@@ -291,6 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>
                 <span class="text-muted fs-12">${item.categoria}</span>
                 <h5 class="fs-14 mt-1 fw-normal">${item.grupo}</h5>
+                <h5 class="fs-11 mt-1 fw-normal">${item.pais}</h5>
             </td>
 
             <td>

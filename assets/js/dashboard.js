@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         /* =====================================================
-           COTIZACIONES (YA LO TENÍAS)
+           COTIZACIONES 
         ===================================================== */
         if (cotizacionesContainer && Array.isArray(json.data.cotizaciones)) {
 
@@ -91,14 +91,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                             <h5 class="fs-13 my-1">
                                 <a href="form_cotizacion.php?id=${md5(String(coti.id))}"
                                    class="stretched-link link-reset">
-                                   Cotización #${coti.id}
+                                   Cotix #${coti.id}
                                 </a>
                             </h5>
                             ${renderItemsString(coti.items)}
                         </div>
 
                         <div class="ms-auto">
-                            <span class="badge ${badgeByEstado(coti.estado)} px-2 py-1">
+                            <span class="badge ${badgeByEstado(coti.estado)} px-1 py-1" >
                                 ${coti.estado}
                             </span>
                         </div>
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         /* =====================================================
-           TIMELINE ITEMS (NUEVO)
+           TIMELINE ITEMS 
         ===================================================== */
         if (itemsContainer && Array.isArray(json.data.items)) {
 
