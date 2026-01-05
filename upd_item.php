@@ -93,6 +93,7 @@
                                                 <option value="Default">Default</option>
                                                 <option value="Group 1">Group 1</option>
                                                 <option value="Group 2">Group 2</option>
+                                                <option value="LOCAL">LOCAL</option>
                                             </select>
                                             <div class="invalid-feedback">
                                                 Please select an option.

@@ -119,10 +119,10 @@ class Cotizacion {
     {
         $sql = "INSERT INTO cotizacion_detalle
             (cotizacion_id, item_id, modelo, descripcion, categoria, grupo,
-            cantidad, peso, precio_unitario, status)
+            cantidad, peso, precio_unitario, status, pais_origen)
             VALUES
             (:cotizacion_id, :item_id, :modelo, :descripcion, :categoria, :grupo,
-            :cantidad, :peso, :precio_unitario, :status)";
+            :cantidad, :peso, :precio_unitario, :status, :pais_origen)";
 
         $stmt = $this->conn->prepare($sql);
 
@@ -136,6 +136,7 @@ class Cotizacion {
         $stmt->bindValue(':peso', $data['peso'] ?? 0);
         $stmt->bindValue(':precio_unitario', $data['precio_unitario'] ?? 0);
         $stmt->bindValue(':status', $data['status'] ?? 'Active');
+        $stmt->bindValue(':pais_origen', $data['pais_origen'] ?? '');
 
         $stmt->execute();
         return (int)$this->conn->lastInsertId();

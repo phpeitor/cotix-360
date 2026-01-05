@@ -80,42 +80,72 @@ document.addEventListener("DOMContentLoaded", () => {
     /* ===================================================
        FLETE / GASTOS
     =================================================== */
-    function calcularFlete(totalPeso) {
-        if (!fleteTable.length) return 0;
-
-        for (const row of fleteTable) {
-            if (parseFloat(row.peso) >= totalPeso) {
-                return parseFloat(row.flete);
-            }
-        }
-        return parseFloat(fleteTable.at(-1).flete);
-    }
-
     function calcularGasto(totalFob) {
-        if (!gastoTable.length) return 0;
+        if (gastoTable.length === 0) return 0;
 
         for (const row of gastoTable) {
             const min = parseFloat(row.valor_inicial);
             const max = parseFloat(row.valor_final);
+
             if (totalFob >= min && totalFob <= max) {
                 return parseFloat(row.costo);
             }
         }
-        return parseFloat(gastoTable.at(-1).costo);
+
+        return parseFloat(gastoTable[gastoTable.length - 1].costo);
+    }
+
+    function normalizarPais(pais) {
+        return pais && pais.toString().trim().toUpperCase() === "USA"
+            ? "USA"
+            : "CHINA";
+    }
+
+    function getPesoPorPais() {
+        const pesos = {};
+
+        tbody.querySelectorAll("tr").forEach(tr => {
+            const qty  = parseInt(tr.dataset.cantidad);
+            const peso = parseFloat(tr.dataset.peso);
+            const pais = normalizarPais(tr.dataset.pais);
+
+            if (!pesos[pais]) pesos[pais] = 0;
+            pesos[pais] += peso * qty;
+        });
+
+        return pesos;
+    }
+
+    function calcularFletePorPais(pais, pesoTotal) {
+        const paisCalc = normalizarPais(pais);
+        let tarifas = fleteTable.filter(r => r.pais === paisCalc);
+        
+        if (tarifas.length === 0) {
+            tarifas = fleteTable.filter(r => r.pais === "CHINA");
+        }
+
+        tarifas.sort((a, b) => parseFloat(a.peso) - parseFloat(b.peso));
+
+        for (const row of tarifas) {
+            if (pesoTotal <= parseFloat(row.peso)) {
+                return parseFloat(row.flete);
+            }
+        }
+
+        return parseFloat(tarifas[tarifas.length - 1].flete);
     }
 
     /* ===================================================
        RENDER ITEM (SOLO LECTURA)
     =================================================== */
     function renderItemRow(item) {
-
         const tr = document.createElement("tr");
-
         tr.dataset.itemId = item.item_id;
         tr.dataset.peso   = parseFloat(item.peso);
         tr.dataset.precio = parseFloat(item.precio_unitario);
         tr.dataset.grupo  = item.grupo;
         tr.dataset.cantidad = parseInt(item.cantidad);
+        tr.dataset.pais   = item.pais_origen;
 
         const peso   = parseFloat(item.peso).toFixed(2);
         const precio = parseFloat(item.precio_unitario).toFixed(2);
@@ -138,6 +168,15 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>
                 <span class="text-muted fs-12">${item.categoria}</span>
                 <h5 class="fs-14 mt-1 fw-normal">${item.grupo}</h5>
+                <h5 class="fs-14 mt-1 fw-normal">${item.pais_origen}</h5>
+            </td>
+
+            <td>
+                <span class="text-muted fs-12">Status</span>
+                <h5 class="fs-14">
+                    <i class="ti ti-circle-filled fs-12 ${item.status === "Active" ? "text-success" : "text-danger"}"></i>
+                    ${item.status}
+                </h5>
             </td>
 
             <td>
@@ -155,19 +194,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 <h5 class="fs-14 mt-1 fw-normal">${formatNumber(precio)}</h5>
             </td>
 
-            <td><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 factor-precio">0.00</h5></td>
-            <td><span class="text-muted fs-12">Precio M</span><h5 class="fs-14 precio-m">0.00</h5></td>
-            <td><span class="text-muted fs-12">Margen</span><h5 class="fs-14 margen">0%</h5></td>
-            <td><span class="text-muted fs-12">Utilidad</span><h5 class="fs-14 utilidad">0.00</h5></td>
-            <td><span class="text-muted fs-12">Precio Cliente</span><h5 class="fs-14 precio-cliente">0.00</h5></td>
-
-            <td>
-                <span class="text-muted fs-12">Status</span>
-                <h5 class="fs-14">
-                    <i class="ti ti-circle-filled fs-12 ${item.status === "Active" ? "text-success" : "text-danger"}"></i>
-                    ${item.status}
-                </h5>
-            </td>
+            <td><span class="text-muted fs-12">Valor</span><h5 class="fs-14 mt-1 fw-normal margen">0.00</h5></td>
+            <td><span class="text-muted fs-12">Dscto</span><h5 class="fs-14 mt-1 fw-normal margen_dscto">0.00</h5></td>
+            <td><span class="text-muted fs-12">Precio Dscto</span><h5 class="fs-14 mt-1 fw-normal precio_dscto">0.00</h5></td>
+            <td><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
+            <td><span class="text-muted fs-12">Precio M</span><h5 class="fs-14 mt-1 fw-normal precio-m">0.00</h5></td>
+            <td><span class="text-muted fs-12">Utilidad</span><h5 class="fs-14 mt-1 fw-normal utilidad">0.00</h5></td>
+            <td><span class="text-muted fs-12">Precio Cliente</span><h5 class="fs-14 mt-1 fw-normal precio-cliente">0.00</h5></td>
         `;
 
         tbody.appendChild(tr);
@@ -177,59 +210,120 @@ document.addEventListener("DOMContentLoaded", () => {
        RECÁLCULO TOTAL
     =================================================== */
     function recalculateTotals() {
+        let totalItems = 0;
+        let totalPeso = 0;
+        let totalFob = 0;
 
-        let totalItems = 0, totalPeso = 0, totalFob = 0;
         const rows = tbody.querySelectorAll("tr");
 
-        if (!rows.length) {
-            totalItemsEl.textContent  = "0";
-            totalPesoEl.textContent   = "0.00";
-            totalFobEl.textContent    = "0.00";
-            totalFleteEl.textContent  = "0.00";
-            totalGastoEl.textContent  = "0.00";
-            totalPeruEl.textContent   = "0.00";
+        if (rows.length === 0) {
+            totalItemsEl.textContent = "0";
+            totalPesoEl.textContent = "0.00";
+            totalFobEl.textContent = "0.00";
+            totalFleteEl.textContent = "0.00";
+            totalGastoEl.textContent = "0.00";
+            totalPeruEl.textContent  = "0.00";
             totalFactorEl.textContent = "0.0000";
             return;
         }
 
+        /* ==========================
+        1️⃣ ACUMULAR TOTALES
+        ========================== */
         rows.forEach(tr => {
-            const qty    = parseInt(tr.dataset.cantidad);
-            const peso   = parseFloat(tr.dataset.peso);
+            const qty = parseInt(tr.dataset.cantidad);
+            const peso = parseFloat(tr.dataset.peso);
             const precio = parseFloat(tr.dataset.precio);
+            const grupo  = tr.dataset.grupo;
+
+            const margen = getMargenByGrupo(grupo);
+            const precio_dscto = precio * (1 - margen);
 
             totalItems += qty;
             totalPeso  += peso * qty;
-            totalFob   += precio * qty;
+            totalFob   += precio_dscto * qty;
         });
 
         totalItemsEl.textContent = totalItems;
-        totalPesoEl.textContent  = totalPeso.toFixed(2);
-        totalFobEl.textContent   = totalFob.toFixed(2);
+        totalPesoEl.textContent = totalPeso.toFixed(2);
+        totalFobEl.textContent = totalFob.toFixed(2);
 
-        const flete = calcularFlete(totalPeso);
+        const pesosPorPais = getPesoPorPais();
+        let totalFlete = 0;
+
+        for (const pais in pesosPorPais) {
+            totalFlete += calcularFletePorPais(pais, pesosPorPais[pais]);
+        }
+
+        totalFleteEl.textContent = totalFlete.toFixed(2);
+
         const gasto = calcularGasto(totalFob);
-        const totalPeru = totalFob + flete + gasto;
-        const rawFactor = totalFob ? (gasto + flete) / totalFob : 0;
+        totalGastoEl.textContent = gasto.toFixed(2);
 
-        totalFleteEl.textContent  = flete.toFixed(2);
-        totalGastoEl.textContent  = gasto.toFixed(2);
-        totalPeruEl.textContent   = totalPeru.toFixed(2);
+        const totalPeru = totalFob + totalFlete + gasto;
+        totalPeruEl.textContent = totalPeru.toFixed(2);
+
+        const rawFactor = totalFob > 0
+            ? (gasto + totalFlete) / totalFob
+            : 0;
+
         totalFactorEl.textContent = rawFactor.toFixed(4);
 
+        /* ==========================
+        2️⃣ CÁLCULOS POR FILA
+        ========================== */
         rows.forEach(tr => {
+
             const precio = parseFloat(tr.dataset.precio);
-            const margen = getMargenByGrupo(tr.dataset.grupo);
+            const grupo  = tr.dataset.grupo;
 
-            const factorPU = decimalAdjust('round', precio * decimalAdjust('round', rawFactor, '-4'), '-2');
-            const precioM  = decimalAdjust('round', precio + factorPU, '-2');
-            const utilidad = decimalAdjust('round', precioM * margen, '-2');
-            const precioCliente = decimalAdjust('round', precioM + utilidad, '-2');
+            // Margen
+            const margen = getMargenByGrupo(grupo);
+            tr.querySelector(".margen").textContent =
+                (margen * 100).toFixed(0) + "%";
+            
+            // Margen_dscto
+            const margen_dscto = precio * margen;
+            const precio_dscto = precio * (1 - margen);
 
-            tr.querySelector(".factor-precio").textContent  = factorPU.toFixed(2);
-            tr.querySelector(".precio-m").textContent       = precioM.toFixed(2);
-            tr.querySelector(".margen").textContent         = (margen * 100).toFixed(0) + "%";
-            tr.querySelector(".utilidad").textContent       = utilidad.toFixed(2);
-            tr.querySelector(".precio-cliente").textContent = precioCliente.toFixed(2);
+            // Precio Dscto
+            tr.querySelector(".margen_dscto").textContent =
+                decimalAdjust('round',margen_dscto,'-2').toFixed(2);
+            tr.querySelector(".precio_dscto").textContent =
+                decimalAdjust('round',precio_dscto,'-2').toFixed(2);
+
+            // Factor PU
+            const factorPU = decimalAdjust(
+                'round',
+                precio_dscto * decimalAdjust('round', rawFactor, '-4'),
+                '-2'
+            );
+            tr.querySelector(".factor-precio").textContent = factorPU.toFixed(2);
+            
+            // Precio M
+            const precioM = decimalAdjust(
+                'round',
+                precio_dscto + factorPU,
+                '-2'
+            );
+            tr.querySelector(".precio-m").textContent = precioM.toFixed(2);
+
+            // Utilidad
+            const utilidad = decimalAdjust(
+                'round',
+                precioM * margen,
+                '-2'
+            );
+            tr.querySelector(".utilidad").textContent = utilidad.toFixed(2);
+
+            // Precio Cliente
+            const precioCliente = decimalAdjust(
+                'round',
+                precioM + utilidad,
+                '-2'
+            );
+            tr.querySelector(".precio-cliente").textContent =
+                precioCliente.toFixed(2);
         });
     }
 

@@ -6,7 +6,6 @@ require_once __DIR__ . '/../model/cotizacion.php';
 
 try {
 
-    // 🔐 Validar sesión
     if (!isset($_SESSION['session_id']) || $_SESSION['session_id'] <= 0) {
         echo json_encode([
             'ok' => false,
@@ -15,7 +14,6 @@ try {
         exit;
     }
 
-    // 📦 Validar items
     if (!isset($_POST['items'])) {
         throw new Exception('No se enviaron items');
     }
@@ -27,17 +25,12 @@ try {
     }
 
     $cotizacion = new Cotizacion();
-
-    // 🔁 Iniciar transacción
     $cotizacion->begin();
-
-    // 🧾 Guardar cabecera
     $cotizacionId = $cotizacion->g_cotizacion([
         'usuario_id' => (int) $_SESSION['session_id'],
         'estado'     => 'Enviada',
     ]);
 
-    // 📄 Guardar detalle
     foreach ($items as $item) {
 
         if (($item['item_id'] ?? 0) <= 0) {
@@ -55,6 +48,7 @@ try {
             'peso'            => (float) ($item['peso'] ?? 0),
             'precio_unitario' => (float) ($item['precio'] ?? 0),
             'status'          => $item['status'] ?? 'Active',
+            'pais_origen'     => $item['pais'] ?? '',
         ]);
     }
 

@@ -64,10 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function calcularFletePorPais(pais, pesoTotal) {
         const paisCalc = normalizarPais(pais);
-
         let tarifas = fleteTable.filter(r => r.pais === paisCalc);
 
-        // fallback de seguridad (si algo viene mal del backend)
         if (tarifas.length === 0) {
             tarifas = fleteTable.filter(r => r.pais === "CHINA");
         }
@@ -427,7 +425,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 cantidad: parseInt(tr.querySelector("input").value),
                 peso: parseFloat(tr.dataset.peso),
                 precio: parseFloat(tr.dataset.precio),
-                status: 'Active'
+                status: 'Active',
+                pais: tr.dataset.pais
             });
         });
 
