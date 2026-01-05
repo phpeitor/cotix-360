@@ -13,14 +13,30 @@ class CotizacionCalc
         return 0.32;
     }
 
-    public static function calcularFlete(array $tabla, float $peso): float
+    public static function normalizarPais(?string $pais): string
     {
-        foreach ($tabla as $row) {
-            if ((float)$row['peso'] >= $peso) {
+        return strtoupper(trim($pais)) === 'USA' ? 'USA' : 'CHINA';
+    }
+
+    public static function calcularFletePorPais(array $tabla, string $pais, float $peso): float
+    {
+        $pais = self::normalizarPais($pais);
+
+        $tarifas = array_filter($tabla, fn($r) => $r['pais'] === $pais);
+
+        if (!$tarifas) {
+            $tarifas = array_filter($tabla, fn($r) => $r['pais'] === 'CHINA');
+        }
+
+        usort($tarifas, fn($a, $b) => $a['peso'] <=> $b['peso']);
+
+        foreach ($tarifas as $row) {
+            if ($peso <= (float)$row['peso']) {
                 return (float)$row['flete'];
             }
         }
-        return (float)end($tabla)['flete'];
+
+        return (float)end($tarifas)['flete'];
     }
 
     public static function calcularGasto(array $tabla, float $fob): float

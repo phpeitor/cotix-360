@@ -1,8 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-
-    /* ===================================================
-       ELEMENTOS DOM
-    =================================================== */
     const tbody          = document.querySelector("table.table tbody");
     const totalItemsEl   = document.getElementById("total_item");
     const totalPesoEl    = document.getElementById("total_peso");
@@ -15,14 +11,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const fechaEl   = document.getElementById("fecha");
     const estadoEl  = document.getElementById("estado");
     const cotizacionIdEl = document.getElementById("cotizacion_id");
-
-
     let fleteTable = [];
     let gastoTable = [];
 
-    /* ===================================================
-       INIT
-    =================================================== */
     init();
 
     function init() {
@@ -53,9 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ===================================================
-       UTILIDADES
-    =================================================== */
     function getQueryParam(param) {
         return new URLSearchParams(window.location.search).get(param);
     }
@@ -77,9 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return 0.32;
     }
 
-    /* ===================================================
-       FLETE / GASTOS
-    =================================================== */
     function calcularGasto(totalFob) {
         if (gastoTable.length === 0) return 0;
 
@@ -135,9 +120,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return parseFloat(tarifas[tarifas.length - 1].flete);
     }
 
-    /* ===================================================
-       RENDER ITEM (SOLO LECTURA)
-    =================================================== */
     function renderItemRow(item) {
         const tr = document.createElement("tr");
         tr.dataset.itemId = item.item_id;
@@ -206,9 +188,6 @@ document.addEventListener("DOMContentLoaded", () => {
         tbody.appendChild(tr);
     }
 
-    /* ===================================================
-       RECÁLCULO TOTAL
-    =================================================== */
     function recalculateTotals() {
         let totalItems = 0;
         let totalPeso = 0;
@@ -227,9 +206,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        /* ==========================
-        1️⃣ ACUMULAR TOTALES
-        ========================== */
         rows.forEach(tr => {
             const qty = parseInt(tr.dataset.cantidad);
             const peso = parseFloat(tr.dataset.peso);
@@ -269,11 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         totalFactorEl.textContent = rawFactor.toFixed(4);
 
-        /* ==========================
-        2️⃣ CÁLCULOS POR FILA
-        ========================== */
         rows.forEach(tr => {
-
             const precio = parseFloat(tr.dataset.precio);
             const grupo  = tr.dataset.grupo;
 
@@ -361,6 +333,4 @@ document.addEventListener("DOMContentLoaded", () => {
             <iconify-icon icon="${icon}" class="fs-28 ${color}"></iconify-icon>
         `;
     }
-
-
 });

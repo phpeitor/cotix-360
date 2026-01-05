@@ -1,26 +1,19 @@
 <?php
-
 use Dompdf\Dompdf;
 
 require_once __DIR__ . "/vendor/autoload.php";
 require_once __DIR__ . "/model/cotizacion.php";
 require_once __DIR__ . "/model/item.php";
-require_once __DIR__ . "/calc_cotizacion.php";
+require_once __DIR__ . "/model/calc_cotizacion.php";
 
 header("Content-Type: application/pdf");
 
-/* =====================================================
-   VALIDACIÓN
-===================================================== */
 $hash = $_GET['id'] ?? null;
 if (!$hash) {
     http_response_code(400);
     exit("ID inválido");
 }
 
-/* =====================================================
-   DATA
-===================================================== */
 $cotizacionModel = new Cotizacion();
 $items      = new Item();
 
@@ -34,54 +27,85 @@ if (!$cotizacion || !$detalle) {
     exit("Cotización no encontrada");
 }
 
-/* =====================================================
-   CÁLCULOS (IGUAL QUE JS)
-===================================================== */
 $totalItems = 0;
 $totalPeso  = 0;
 $totalFob   = 0;
+$pesosPorPais = [];
 
 foreach ($detalle as &$item) {
-
     $qty    = (int)$item['cantidad'];
     $peso   = (float)$item['peso'];
     $precio = (float)$item['precio_unitario'];
+    $grupo  = $item['grupo'];
+    $pais   = CotizacionCalc::normalizarPais($item['pais_origen']);
+
+    $margen = CotizacionCalc::margenPorGrupo($grupo);
+    $precioDscto = $precio * (1 - $margen);
 
     $totalItems += $qty;
     $totalPeso  += $peso * $qty;
-    $totalFob   += $precio * $qty;
+    $totalFob   += $precioDscto * $qty;
 
-    $item['_precio'] = $precio;
+    if (!isset($pesosPorPais[$pais])) {
+        $pesosPorPais[$pais] = 0;
+    }
+    $pesosPorPais[$pais] += $peso * $qty;
+
+    $item['_precio']       = $precio;
+    $item['_precio_dscto'] = $precioDscto;
+    $item['_margen']       = $margen;
 }
 
 /* === Flete / Gasto === */
-$flete = CotizacionCalc::calcularFlete($fleteTable, $totalPeso);
+$flete = 0;
+foreach ($pesosPorPais as $pais => $pesoPais) {
+    $flete += CotizacionCalc::calcularFletePorPais(
+        $fleteTable,
+        $pais,
+        $pesoPais
+    );
+}
 $gasto = CotizacionCalc::calcularGasto($gastoTable, $totalFob);
-
 $totalPeru = $totalFob + $flete + $gasto;
 $rawFactor = $totalFob ? ($flete + $gasto) / $totalFob : 0;
 
 /* === Cálculo por item === */
 foreach ($detalle as &$item) {
+    $precio      = $item['_precio'];
+    $precioDscto = $item['_precio_dscto'];
+    $margen      = $item['_margen'];
+    $qty         = (int)$item['cantidad'];
+    $margenDscto = round($precio * $margen, 2);
 
-    $precio = $item['_precio'];
-    $margen = CotizacionCalc::margenPorGrupo($item['grupo']);
+    $factorPU = round(
+        $precioDscto * round($rawFactor, 4),
+        2
+    );
 
-    $factorPU = round($precio * round($rawFactor, 4), 2);
-    $precioM  = round($precio + $factorPU, 2);
-    $utilidad = round($precioM * $margen, 2);
-    $precioCliente = round($precioM + $utilidad, 2);
+    $precioM = round(
+        $precioDscto + $factorPU,
+        2
+    );
 
-    $item['factor_pu']      = $factorPU;
-    $item['precio_m']       = $precioM;
-    $item['margen']         = $margen * 100;
-    $item['utilidad']       = $utilidad;
-    $item['precio_cliente'] = $precioCliente;
+    $utilidad = round(
+        $precioM * $margen,
+        2
+    );
+
+    $precioCliente = round(
+        $precioM + $utilidad,
+        2
+    );
+    
+    $item['margen_pct']      = $margen * 100;
+    $item['margen_dscto']    = $margenDscto;
+    $item['precio_dscto']    = $precioDscto;
+    $item['factor_pu']       = $factorPU;
+    $item['precio_m']        = $precioM;
+    $item['utilidad']        = $utilidad;
+    $item['precio_cliente']  = $precioCliente;
 }
 
-/* =====================================================
-   HTML PDF
-===================================================== */
 ob_start();
 ?>
 
@@ -112,11 +136,11 @@ ob_start();
         }
 
         .watermark.aprobada {
-            color: rgba(25, 135, 84, 0.15); /* verde */
+            color: rgba(25, 135, 84, 0.15); 
         }
 
         .watermark.anulada {
-            color: rgba(220, 53, 69, 0.15); /* rojo */
+            color: rgba(220, 53, 69, 0.15); 
         }
     </style>
 </head>
@@ -158,10 +182,12 @@ ob_start();
             <th>Item Descripción</th>
             <th class="center">Cant</th>
             <th class="center">Peso</th>
-            <th class="right">PU</th>
-            <th class="right">Factor</th>
+            <th class="right">Precio Uni.</th>
+            <th class="right">Valor</th>
+            <th class="center">Dscto</th>
+            <th class="right">Precio Dscto</th>
+            <th class="right">Factor PU</th>
             <th class="right">Precio M</th>
-            <th class="right">Margen</th>
             <th class="right">Utilidad</th>
             <th class="right">Precio Cliente</th>
         </tr>
@@ -169,17 +195,25 @@ ob_start();
     <tbody>
         <?php foreach ($detalle as $i): ?>
         <tr>
-            <td><b><?= $i['modelo']. '</b>: '.  $i['descripcion']. '</br>'.  $i['grupo'] ?></td>
-            <td class="center"><?= $i['cantidad'] ?></td>
-            <td class="center"><?= $i['peso'] ?></td>
-            <td class="right"><?= number_format($i['_precio'],2) ?></td>
-            <td class="right"><?= number_format($i['factor_pu'],2) ?></td>
-            <td class="right"><?= number_format($i['precio_m'],2) ?></td>
-            <td class="center">
-                <?= number_format($i['margen'], 0) ?> %
+            <td>
+                <b><?= $i['modelo'] ?></b><br>
+                <?= $i['descripcion'] ?><br>
+                <?= $i['grupo'] ?>
             </td>
-            <td class="right"><?= number_format($i['utilidad'],2) ?></td>
-            <td class="right"><?= number_format($i['precio_cliente'],2) ?></td>
+
+            <td class="center"><?= $i['cantidad'] ?></td>
+            <td class="center"><?= number_format($i['peso'], 2) ?></td>
+
+            <td class="right"><?= number_format($i['_precio'], 2) ?></td>
+            <td class="right"><?= number_format($i['margen_pct'], 0) ?>%</td>
+
+            <td class="center"><?= number_format($i['margen_dscto'], 2) ?></td>
+
+            <td class="right"><?= number_format($i['precio_dscto'], 2) ?></td>
+            <td class="right"><?= number_format($i['factor_pu'], 2) ?></td>
+            <td class="right"><?= number_format($i['precio_m'], 2) ?></td>
+            <td class="right"><?= number_format($i['utilidad'], 2) ?></td>
+            <td class="right"><?= number_format($i['precio_cliente'], 2) ?></td>
         </tr>
         <?php endforeach ?>
     </tbody>
@@ -202,10 +236,6 @@ ob_start();
 
 <?php
 $html = ob_get_clean();
-
-/* =====================================================
-   GENERAR PDF
-===================================================== */
 $pdf = new Dompdf();
 $pdf->loadHtml($html);
 $pdf->setPaper('A4', 'portrait');
