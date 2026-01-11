@@ -226,6 +226,16 @@ document.addEventListener("DOMContentLoaded", () => {
             .some(tr => tr.dataset.itemId == itemId);
     }
 
+    function getTotalPesoActual() {
+        let total = 0;
+        tbody.querySelectorAll("tr").forEach(tr => {
+            const qty  = parseInt(tr.querySelector("input").value);
+            const peso = parseFloat(tr.dataset.peso);
+            total += peso * qty;
+        });
+        return total;
+    }
+
     /* ---------------------------------------------------
        CARGAR ITEMS SEGÚN BASE
     --------------------------------------------------- */
@@ -354,6 +364,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <td><span class="text-muted fs-12">Precio Dscto</span><h5 class="fs-14 mt-1 fw-normal precio_dscto">0.00</h5></td>
             <td><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
             <td><span class="text-muted fs-12">Precio M</span><h5 class="fs-14 mt-1 fw-normal precio-m">0.00</h5></td>
+            <td><span class="text-muted fs-12">Margen</span>
+            <select id="margen_uti" class="form-select-sm"><option value="0.15">15%</option><option value="0.20">20%</option><option value="0.25">25%</option></select></td>
             <td><span class="text-muted fs-12">Utilidad</span><h5 class="fs-14 mt-1 fw-normal utilidad">0.00</h5></td>
             <td><span class="text-muted fs-12">Precio Cliente</span><h5 class="fs-14 mt-1 fw-normal precio-cliente">0.00</h5></td>
             <td>
@@ -374,14 +386,27 @@ document.addEventListener("DOMContentLoaded", () => {
     --------------------------------------------------- */
     tbody.addEventListener("click", (e) => {
 
-        // SUMAR
         if (e.target.classList.contains("plus")) {
             const input = e.target.parentNode.querySelector("input");
+            const tr = e.target.closest("tr");
+
+            const pesoItem = parseFloat(tr.dataset.peso);
+            const totalPesoActual = getTotalPesoActual();
+
+            // ⚠️ Validación peso > 10
+            if (totalPesoActual + pesoItem > 10) {
+                alertify.alert(
+                    "Límite de peso",
+                    "Items con un peso total mayor a 10 Kg. <br>Por favor, contacte al administrador"
+                );
+                return;
+            }
+
             input.value = parseInt(input.value) + 1;
             recalculateTotals();
         }
 
-        // RESTAR
+
         if (e.target.classList.contains("minus")) {
             const input = e.target.parentNode.querySelector("input");
             if (parseInt(input.value) > 1) {
@@ -390,7 +415,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // ELIMINAR ITEM
         if (e.target.closest(".btnDeleteItem")) {
             e.target.closest("tr").remove();
             recalculateTotals();
