@@ -128,6 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tr.dataset.grupo  = item.grupo;
         tr.dataset.cantidad = parseInt(item.cantidad);
         tr.dataset.pais   = item.pais_origen;
+        tr.dataset.margen   = parseFloat(item.margen);
 
         const peso   = parseFloat(item.peso).toFixed(2);
         const precio = parseFloat(item.precio_unitario).toFixed(2);
@@ -181,6 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td><span class="text-muted fs-12">Precio Dscto</span><h5 class="fs-14 mt-1 fw-normal precio_dscto">0.00</h5></td>
             <td><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
             <td><span class="text-muted fs-12">Precio M</span><h5 class="fs-14 mt-1 fw-normal precio-m">0.00</h5></td>
+            <td><span class="text-muted fs-12">Margen</span><h5 class="fs-14 mt-1 fw-normal margen_uti">${item.margen}</h5></td>
             <td><span class="text-muted fs-12">Utilidad</span><h5 class="fs-14 mt-1 fw-normal utilidad">0.00</h5></td>
             <td><span class="text-muted fs-12">Precio Cliente</span><h5 class="fs-14 mt-1 fw-normal precio-cliente">0.00</h5></td>
         `;
@@ -248,6 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
         rows.forEach(tr => {
             const precio = parseFloat(tr.dataset.precio);
             const grupo  = tr.dataset.grupo;
+            const margen_uti  = parseFloat(tr.dataset.margen || 0);
 
             // Margen
             const margen = getMargenByGrupo(grupo);
@@ -283,7 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Utilidad
             const utilidad = decimalAdjust(
                 'round',
-                precioM * margen,
+                precioM * margen_uti,
                 '-2'
             );
             tr.querySelector(".utilidad").textContent = utilidad.toFixed(2);

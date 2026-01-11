@@ -466,12 +466,10 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        // 🧾 FormData
         const formData = new FormData();
         formData.append("estado", "Borrador");
         formData.append("items", JSON.stringify(items));
 
-        // 🚀 Enviar
         fetch("controller/add_cotizacion.php", {
             method: "POST",
             body: formData
@@ -491,6 +489,4 @@ document.addEventListener("DOMContentLoaded", () => {
             alertify.error("Error de conexión con el servidor");
         });
     });
-
-
 });
