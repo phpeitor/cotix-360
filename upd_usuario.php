@@ -8,7 +8,7 @@
     <title>Cotix360 | Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description" />
-    <meta content="Coderthemes" name="author" />
+    <meta content="amvsoft.tech" name="author" />
     <link rel="shortcut icon" href="./assets/images/favicon.ico">
     <link rel="stylesheet" href="./assets/css/mermaid.min.css">
     <script src="./assets/js/config.js"></script>
@@ -142,7 +142,7 @@
                 <div class="page-container">
                     <div class="row">
                         <div class="col-md-6 text-center text-md-start">
-                            <script>document.write(new Date().getFullYear())</script> © Cotix360 - By <span class="fw-bold text-decoration-underline text-uppercase text-reset fs-12">Coderthemes</span>
+                            <script>document.write(new Date().getFullYear())</script> © Cotix360 - By <span class="fw-bold text-decoration-underline text-uppercase text-reset fs-12">amvsoft.tech</span>
                         </div>
                         <div class="col-md-6">
                             <div class="text-md-end footer-links d-none d-md-block">
