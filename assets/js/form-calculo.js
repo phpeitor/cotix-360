@@ -192,9 +192,12 @@ document.addEventListener("DOMContentLoaded", () => {
             tr.querySelector(".precio-m").textContent = precioM.toFixed(2);
 
             // Utilidad
+            const selectMargen = tr.querySelector(".margen-uti");
+            const margenUti = selectMargen ? parseFloat(selectMargen.value) : 0.15;
+
             const utilidad = decimalAdjust(
                 'round',
-                precioM * margen,
+                precioM * margenUti,
                 '-2'
             );
             tr.querySelector(".utilidad").textContent = utilidad.toFixed(2);
@@ -365,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
             <td><span class="text-muted fs-12">Precio M</span><h5 class="fs-14 mt-1 fw-normal precio-m">0.00</h5></td>
             <td><span class="text-muted fs-12">Margen</span>
-            <select id="margen_uti" class="form-select-sm"><option value="0.15">15%</option><option value="0.20">20%</option><option value="0.25">25%</option></select></td>
+            <select class="form-select-sm margen-uti" data-default="0.15"><option value="0.15">15%</option><option value="0.20">20%</option><option value="0.25">25%</option></select></td>
             <td><span class="text-muted fs-12">Utilidad</span><h5 class="fs-14 mt-1 fw-normal utilidad">0.00</h5></td>
             <td><span class="text-muted fs-12">Precio Cliente</span><h5 class="fs-14 mt-1 fw-normal precio-cliente">0.00</h5></td>
             <td>
@@ -422,6 +425,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    tbody.addEventListener("change", (e) => {
+        if (e.target.classList.contains("margen-uti")) {
+            recalculateTotals();
+        }
+    });
 
     /* ---------------------------------------------------
     SUBMIT COTIZACIÓN
@@ -440,6 +448,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const items = [];
 
         rows.forEach(tr => {
+             const selectMargen = tr.querySelector(".margen-uti");
+            const margenUti = selectMargen ? parseFloat(selectMargen.value) : 0.15;
+
             items.push({
                 item_id: tr.dataset.itemId, 
                 modelo: tr.dataset.modelo,
@@ -450,7 +461,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 peso: parseFloat(tr.dataset.peso),
                 precio: parseFloat(tr.dataset.precio),
                 status: 'Active',
-                pais: tr.dataset.pais
+                pais: tr.dataset.pais,
+                margen: margenUti
             });
         });
 

@@ -49,6 +49,7 @@ try {
             'precio_unitario' => (float) ($item['precio'] ?? 0),
             'status'          => $item['status'] ?? 'Active',
             'pais_origen'     => $item['pais'] ?? '',
+            'margen'          => (float) ($item['margen'] ?? 0),
         ]);
     }
 
