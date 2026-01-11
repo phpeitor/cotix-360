@@ -38,7 +38,6 @@ foreach ($detalle as &$item) {
     $precio = (float)$item['precio_unitario'];
     $grupo  = $item['grupo'];
     $pais   = CotizacionCalc::normalizarPais($item['pais_origen']);
-
     $margen = CotizacionCalc::margenPorGrupo($grupo);
     $precioDscto = $precio * (1 - $margen);
 
@@ -76,7 +75,8 @@ foreach ($detalle as &$item) {
     $margen      = $item['_margen'];
     $qty         = (int)$item['cantidad'];
     $margenDscto = round($precio * $margen, 2);
-
+    $margen_uti = (float)$item['margen'];
+    
     $factorPU = round(
         $precioDscto * round($rawFactor, 4),
         2
@@ -88,7 +88,7 @@ foreach ($detalle as &$item) {
     );
 
     $utilidad = round(
-        $precioM * $margen,
+        $precioM * $margen_uti,
         2
     );
 
@@ -188,6 +188,7 @@ ob_start();
             <th class="right">Precio Dscto</th>
             <th class="right">Factor PU</th>
             <th class="right">Precio M</th>
+            <th class="right">Margen</th>
             <th class="right">Utilidad</th>
             <th class="right">Precio Cliente</th>
         </tr>
@@ -203,15 +204,13 @@ ob_start();
 
             <td class="center"><?= $i['cantidad'] ?></td>
             <td class="center"><?= number_format($i['peso'], 2) ?></td>
-
             <td class="right"><?= number_format($i['_precio'], 2) ?></td>
             <td class="right"><?= number_format($i['margen_pct'], 0) ?>%</td>
-
             <td class="center"><?= number_format($i['margen_dscto'], 2) ?></td>
-
             <td class="right"><?= number_format($i['precio_dscto'], 2) ?></td>
             <td class="right"><?= number_format($i['factor_pu'], 2) ?></td>
             <td class="right"><?= number_format($i['precio_m'], 2) ?></td>
+            <td class="right"><?= number_format($i['margen'], 2) ?></td>
             <td class="right"><?= number_format($i['utilidad'], 2) ?></td>
             <td class="right"><?= number_format($i['precio_cliente'], 2) ?></td>
         </tr>

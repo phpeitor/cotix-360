@@ -12,6 +12,10 @@ class Usuario {
         $this->nowLima = (new DateTimeImmutable('now', $tz))->format('Y-m-d H:i:s');
     }
 
+    private function upper(string $value): string{
+        return mb_strtoupper(trim($value), 'UTF-8');
+    }
+
     public function baja(int $id): bool {
         $sql = "UPDATE personal 
                 SET IDESTADO = 0, fecha_baja = :fecha_baja 
@@ -36,8 +40,8 @@ class Usuario {
                 WHERE MD5(IDPERSONAL) = :hash";
         $stmt = $this->conn->prepare($sql);
 
-        $stmt->bindValue(':APELLIDOS', $data['apellidos']);
-        $stmt->bindValue(':NOMBRES', $data['nombres']);
+        $stmt->bindValue(':APELLIDOS', $this->upper($data['apellidos'] ?? ''));
+        $stmt->bindValue(':NOMBRES', $this->upper($data['nombres']));
         $stmt->bindValue(':EMAIL', $data['email']);
         $stmt->bindValue(':DOC', $data['documento']);
         $stmt->bindValue(':TLF', $data['telefono']);
@@ -62,8 +66,8 @@ class Usuario {
                 (:apellidos, :nombres, :email, :documento, :telefono, :sexo, :usuario, MD5(:documento), :fecha_registro, 1, :cargo)";
         $stmt = $this->conn->prepare($sql);
 
-        $stmt->bindValue(':nombres',   $data['nombres'] ?? '');
-        $stmt->bindValue(':apellidos', $data['apellidos'] ?? '');
+        $stmt->bindValue(':nombres',   $this->upper($data['nombres'] ?? ''));
+        $stmt->bindValue(':apellidos', $this->upper($data['apellidos'] ?? ''));
         $stmt->bindValue(':email',     $data['email'] ?? '');
         $stmt->bindValue(':documento', $data['documento'] ?? '');
         $stmt->bindValue(':telefono',  $data['telefono'] ?? '');
