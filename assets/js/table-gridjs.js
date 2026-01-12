@@ -9,9 +9,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 formatter: (cell) => gridjs.html(`<span class="fw-semibold">${cell}</span>`)
             },
             {
+                id: "CARGO",
+                name: "Cargo",
+                hidden: true
+            },
+            {
                 id: "nombre_completo",
                 name: "Nombre Completo",
-                width: "200px"
+                width: "220px",
+                formatter: (cell, row) => {
+
+                    const cargo = row.cells[1].data; 
+                    const badge = cargo == 1
+                        ? `<span class="badge badge-outline-dark rounded-pill">Admin</span>`
+                        : `<span class="badge badge-outline-secondary rounded-pill">Gestor</span>`;
+
+                    return gridjs.html(`
+                            <span>${cell}</span>
+                            ${badge}
+                    `);
+                }
             },
             {
                 id: "DOC",
@@ -74,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const cells = row.cells;
 
                     const id = cells[0].data;
-                    const estado = String(cells[4].data).trim(); // IDESTADO
+                    const estado = String(cells[5].data).trim();
                     const idHash = md5(String(id));
 
                     const btnDelete = estado === "1"

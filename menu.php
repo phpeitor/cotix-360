@@ -1,3 +1,14 @@
+<?php
+require_once __DIR__ . '/config/permisos.php';
+
+$archivoActual = basename($_SERVER['SCRIPT_NAME']);
+
+if (!tieneAcceso($archivoActual)) {
+    header('Location: home.php');
+    exit('Acceso denegado');
+}
+?>
+
 <div class="sidenav-menu">
     <a href="index.php" class="logo">
         <span class="logo-light">

@@ -1,0 +1,16 @@
+{
+  "1": {
+    "nombre": "Admin",
+    "acceso": "*"
+  },
+  "2": {
+    "nombre": "Gestor",
+    "acceso": [
+      "home.php",
+      "cotizaciones.php",
+      "form_cotizacion.php",
+      "pdf_cotizacion.php",
+      "calculo.php"
+    ]
+  }
+}

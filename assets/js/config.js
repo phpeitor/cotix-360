@@ -36,17 +36,62 @@
     document.addEventListener("DOMContentLoaded", function () {
         const logoutBtn = document.getElementById("logout-btn");
         if (logoutBtn) {
-        logoutBtn.addEventListener("click", function (e) {
-            e.preventDefault();
-            alertify.confirm("Cerrar sesión", "¿Seguro que deseas salir?",
-            function() {
-                window.location.href = "controller/logout.php";
-            },
-            function() {
-                alertify.message("Cancelado");
-            }
-            );
-        });
+			logoutBtn.addEventListener("click", function (e) {
+				e.preventDefault();
+				alertify.confirm("Cerrar sesión", "¿Seguro que deseas salir?",
+				function() {
+					window.location.href = "controller/logout.php";
+				},
+				function() {
+					alertify.message("Cancelado");
+				}
+				);
+			});
         }
+
+		fetch('config/permisos-js.php')
+		.then(r => r.json())
+		.then(permisos => {
+
+			const esAdmin = permisos[0] === '*';
+
+			/* ===============================
+			* 1. ITEMS SIMPLES + SUBITEMS
+			* =============================== */
+			document
+			.querySelectorAll('.side-nav a[href]:not([data-bs-toggle])')
+			.forEach(a => {
+
+				const url = a.getAttribute('href').split('/').pop();
+
+				if (!esAdmin && !permisos.includes(url)) {
+				const li = a.closest('.side-nav-item');
+				li?.classList.add('disabled');
+				}
+			});
+
+			/* ===============================
+			* 2. PADRES (COLAPSABLES)
+			* =============================== */
+			document
+			.querySelectorAll('.side-nav-item > a[data-bs-toggle]')
+			.forEach(parentLink => {
+
+				const parentLi = parentLink.closest('.side-nav-item');
+				const subLinks = parentLi.querySelectorAll('.sub-menu a[href]');
+
+				const tieneAlgunPermiso = [...subLinks].some(a => {
+				const url = a.getAttribute('href').split('/').pop();
+				return esAdmin || permisos.includes(url);
+				});
+
+				if (!tieneAlgunPermiso) {
+				parentLi.classList.add('disabled');
+				}
+			});
+
+		})
+		.catch(err => console.error('Permisos:', err));
+
     });
 }();

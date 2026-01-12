@@ -396,11 +396,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const pesoItem = parseFloat(tr.dataset.peso);
             const totalPesoActual = getTotalPesoActual();
 
-            // ⚠️ Validación peso > 10
-            if (totalPesoActual + pesoItem > 10) {
+            if (totalPesoActual + pesoItem > 100) {
                 alertify.alert(
                     "Límite de peso",
-                    "Items con un peso total mayor a 10 Kg. <br>Por favor, contacte al administrador"
+                    "Items con un peso total mayor a 100 Kg. <br>Por favor, contacte al administrador"
                 );
                 return;
             }
