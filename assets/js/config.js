@@ -90,6 +90,15 @@
 				}
 			});
 
+			/* ===============================
+			* 3. COLUMNAS ADMIN (TABLA)
+			* =============================== */
+			if (!esAdmin) {
+				document.querySelectorAll('td.isadmin').forEach(td => {
+					td.style.display = 'none';
+				});
+			}
+
 		})
 		.catch(err => console.error('Permisos:', err));
 

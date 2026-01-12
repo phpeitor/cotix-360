@@ -349,4 +349,21 @@ function decimalAdjust(type, value, exp) {
 	return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
 }
 
+let ES_ADMIN = false;
+
+fetch('config/permisos-js.php')
+    .then(r => r.json())
+    .then(permisos => {
+        ES_ADMIN = permisos[0] === '*';
+    })
+    .catch(err => console.error('Permisos:', err));
+
+function validarTdAdmin(tr) {
+    if (!tr) return;
+
+    tr.querySelectorAll('td.isadmin').forEach(td => {
+        td.style.display = ES_ADMIN ? '' : 'none';
+    });
+}
+
 customJS();

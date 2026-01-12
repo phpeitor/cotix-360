@@ -34,7 +34,10 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => {
             if (!data || !data.cotizacion) return;
             setHeader(data.cotizacion);
-            data.detalle.forEach(renderItemRow);
+            data.detalle.forEach(item => {
+                const tr = renderItemRow(item); // ⬅️ IMPORTANTE
+                validarTdAdmin(tr);             // ⬅️ ahora SÍ funciona
+            });
             recalculateTotals();
             alertify.success("Cotización cargada");
         })
@@ -178,16 +181,17 @@ document.addEventListener("DOMContentLoaded", () => {
             </td>
 
             <td><span class="text-muted fs-12">Valor</span><h5 class="fs-14 mt-1 fw-normal margen">0.00</h5></td>
-            <td><span class="text-muted fs-12">Dscto</span><h5 class="fs-14 mt-1 fw-normal margen_dscto">0.00</h5></td>
-            <td><span class="text-muted fs-12">Precio Dscto</span><h5 class="fs-14 mt-1 fw-normal precio_dscto">0.00</h5></td>
-            <td><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
-            <td><span class="text-muted fs-12">Precio M</span><h5 class="fs-14 mt-1 fw-normal precio-m">0.00</h5></td>
+            <td class="isadmin"><span class="text-muted fs-12">Dscto</span><h5 class="fs-14 mt-1 fw-normal margen_dscto">0.00</h5></td>
+            <td class="isadmin"><span class="text-muted fs-12">Precio Dscto</span><h5 class="fs-14 mt-1 fw-normal precio_dscto">0.00</h5></td>
+            <td class="isadmin"><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
+            <td class="isadmin"><span class="text-muted fs-12">Precio M</span><h5 class="fs-14 mt-1 fw-normal precio-m">0.00</h5></td>
             <td><span class="text-muted fs-12">Margen</span><h5 class="fs-14 mt-1 fw-normal margen_uti">${item.margen}</h5></td>
-            <td><span class="text-muted fs-12">Utilidad</span><h5 class="fs-14 mt-1 fw-normal utilidad">0.00</h5></td>
+            <td class="isadmin"><span class="text-muted fs-12">Utilidad</span><h5 class="fs-14 mt-1 fw-normal utilidad">0.00</h5></td>
             <td><span class="text-muted fs-12">Precio Cliente</span><h5 class="fs-14 mt-1 fw-normal precio-cliente">0.00</h5></td>
         `;
 
         tbody.appendChild(tr);
+        return tr; 
     }
 
     function recalculateTotals() {
