@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once __DIR__ . '/../database/conexion.php';
 
 class Cotizacion {
@@ -29,8 +30,14 @@ class Cotizacion {
         }
     }
 
-   public function table_cotizacion(string $fec_ini, string $fec_fin): array
+    public function table_cotizacion(string $fec_ini, string $fec_fin): array
     {
+        $where = "c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)";
+
+        if ($_SESSION['session_cargo'] != 1) {
+            $where .= " AND c.usuario_id = :usuario_id";
+        }
+
         $sql = "
             SELECT
                 c.id,
@@ -46,8 +53,8 @@ class Cotizacion {
                 ) AS items
             FROM cotizaciones c
             LEFT JOIN cotizacion_detalle cd ON cd.cotizacion_id = c.id
-            LEFT JOIN personal p on p.IDPERSONAL=c.usuario_id
-            WHERE c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)
+            LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
+            WHERE $where
             GROUP BY
                 c.id, p.usuario, c.estado, c.created_at, c.updated_at
             ORDER BY c.id DESC
@@ -56,8 +63,12 @@ class Cotizacion {
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':fec_ini', $fec_ini);
         $stmt->bindValue(':fec_fin', $fec_fin);
-        $stmt->execute();
 
+        if ($_SESSION['session_cargo'] != 1) {
+            $stmt->bindValue(':usuario_id', $_SESSION['session_id'], PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

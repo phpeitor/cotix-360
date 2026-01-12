@@ -1,12 +1,14 @@
 <?php
 use Dompdf\Dompdf;
-
 require_once __DIR__ . "/vendor/autoload.php";
 require_once __DIR__ . "/model/cotizacion.php";
 require_once __DIR__ . "/model/item.php";
 require_once __DIR__ . "/model/calc_cotizacion.php";
 
-header("Content-Type: application/pdf");
+//header("Content-Type: application/pdf");
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 $hash = $_GET['id'] ?? null;
 if (!$hash) {
@@ -21,6 +23,7 @@ $cotizacion = $cotizacionModel->obtenerPorHash($hash);
 $detalle    = $cotizacionModel->obtenerDetallePorHash($hash);
 $fleteTable = $items->obtenerFlete();
 $gastoTable = $items->obtenerGastos();
+$isAdmin = isset($_SESSION['session_cargo']) && $_SESSION['session_cargo'] == 1;
 
 if (!$cotizacion || !$detalle) {
     http_response_code(404);
@@ -184,19 +187,19 @@ ob_start();
             <th class="center">Peso</th>
             <th class="right">Precio Uni.</th>
             <th class="right">Valor</th>
-            <th class="center">Dscto</th>
-            <th class="right">Precio Dscto</th>
-            <th class="right">Factor PU</th>
-            <th class="right">Precio M</th>
+            <?php if ($isAdmin): ?><th class="center">Dscto</th><?php endif; ?>
+            <?php if ($isAdmin): ?><th class="right">Precio Dscto</th><?php endif; ?>
+            <?php if ($isAdmin): ?><th class="right">Factor PU</th><?php endif; ?>
+            <?php if ($isAdmin): ?><th class="right">Precio M</th><?php endif; ?>
             <th class="right">Margen</th>
-            <th class="right">Utilidad</th>
+            <?php if ($isAdmin): ?><th class="right">Utilidad</th><?php endif; ?>
             <th class="right">Precio Cliente</th>
         </tr>
     </thead>
     <tbody>
         <?php foreach ($detalle as $i): ?>
         <tr>
-            <td>
+            <td class="left">
                 <b><?= $i['modelo'] ?></b><br>
                 <?= $i['descripcion'] ?><br>
                 <?= $i['grupo'] ?>
@@ -206,20 +209,18 @@ ob_start();
             <td class="center"><?= number_format($i['peso'], 2) ?></td>
             <td class="right"><?= number_format($i['_precio'], 2) ?></td>
             <td class="right"><?= number_format($i['margen_pct'], 0) ?>%</td>
-            <td class="center"><?= number_format($i['margen_dscto'], 2) ?></td>
-            <td class="right"><?= number_format($i['precio_dscto'], 2) ?></td>
-            <td class="right"><?= number_format($i['factor_pu'], 2) ?></td>
-            <td class="right"><?= number_format($i['precio_m'], 2) ?></td>
+            <?php if ($isAdmin): ?><td class="center"><?= number_format($i['margen_dscto'], 2) ?></td><?php endif; ?>
+            <?php if ($isAdmin): ?><td class="right"><?= number_format($i['precio_dscto'], 2) ?></td><?php endif; ?>
+            <?php if ($isAdmin): ?><td class="right"><?= number_format($i['factor_pu'], 2) ?></td><?php endif; ?>
+            <?php if ($isAdmin): ?><td class="right"><?= number_format($i['precio_m'], 2) ?></td><?php endif; ?>
             <td class="right"><?= number_format($i['margen'], 2) ?></td>
-            <td class="right"><?= number_format($i['utilidad'], 2) ?></td>
+            <?php if ($isAdmin): ?><td class="right"><?= number_format($i['utilidad'], 2) ?></td><?php endif; ?>
             <td class="right"><?= number_format($i['precio_cliente'], 2) ?></td>
         </tr>
         <?php endforeach ?>
     </tbody>
 </table>
-
 <br>
-
 <p>
     <strong>Total Items:</strong> <?= $totalItems ?><br>
     <strong>Total Peso:</strong> <?= number_format($totalPeso,2) ?><br>
@@ -229,12 +230,13 @@ ob_start();
     <strong>Total Perú:</strong> <?= number_format($totalPeru,2) ?><br>
     <strong>Factor:</strong> <?= number_format($rawFactor,4) ?>
 </p>
-
 </body>
 </html>
 
 <?php
 $html = ob_get_clean();
+//echo $html;
+//exit;
 $pdf = new Dompdf();
 $pdf->loadHtml($html);
 $pdf->setPaper('A4', 'portrait');
