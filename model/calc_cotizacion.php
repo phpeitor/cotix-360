@@ -5,11 +5,21 @@ class CotizacionCalc
     public static function margenPorGrupo(?string $grupo): float
     {
         if (!$grupo) return 0.32;
-
+        
         $g = strtolower($grupo);
-        if (str_contains($g, '1')) return 0.25;
-        if (str_contains($g, '2')) return 0.15;
-
+        if (str_contains($g, '0')) return 0;
+        if (str_contains($g, '1')) return 0.15;
+        if (str_contains($g, '2')) return 0.25;
+        if (str_contains($g, '3')) return 0.28;
+        if (str_contains($g, '4')) return 0.30;
+        if (str_contains($g, '5')) return 0.31;
+        if (str_contains($g, '6')) return 0.33;
+        if (str_contains($g, '7')) return 0.35;
+        if (str_contains($g, '8')) return 0.36;
+        if (str_contains($g, '9')) return 0.40;
+        if (str_contains($g, '10')) return 0.45;
+        if (str_contains($g, '11')) return 0.50;
+        if (str_contains($g, '12')) return 0.55;
         return 0.32;
     }
 

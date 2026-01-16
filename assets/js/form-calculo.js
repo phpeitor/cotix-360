@@ -87,8 +87,19 @@ document.addEventListener("DOMContentLoaded", () => {
     function getMargenByGrupo(grupo) {
         if (!grupo) return 0.32;
         const g = grupo.toString().toLowerCase();
-        if (g.includes("1")) return 0.25;
-        if (g.includes("2")) return 0.15;
+        if (g.includes("0")) return 0;
+        if (g.includes("1")) return 0.15;
+        if (g.includes("2")) return 0.25;
+        if (g.includes("3")) return 0.28;
+        if (g.includes("4")) return 0.30;
+        if (g.includes("5")) return 0.31;
+        if (g.includes("6")) return 0.33;
+        if (g.includes("7")) return 0.35;
+        if (g.includes("8")) return 0.36;
+        if (g.includes("9")) return 0.40;
+        if (g.includes("10")) return 0.45;
+        if (g.includes("11")) return 0.50;
+        if (g.includes("12")) return 0.55;
         return 0.32;
     }
 
@@ -367,7 +378,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td class="isadmin"><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Precio M</span><h5 class="fs-14 mt-1 fw-normal precio-m">0.00</h5></td>
             <td><span class="text-muted fs-12">Margen</span>
-            <select class="form-select-sm margen-uti" data-default="0.15"><option value="0.15">15%</option><option value="0.20">20%</option><option value="0.25">25%</option></select></td>
+            <select class="form-select-sm margen-uti" data-default="0.15"><option value="0.25">Lista 1</option><option value="0.30">Lista 2</option><option value="0.35">Lista 3</option><option value="0.40">Lista 4</option><option value="0.45">Lista 5</option><option value="0.50">Lista 6</option></select></td>
             <td class="isadmin"><span class="text-muted fs-12">Utilidad</span><h5 class="fs-14 mt-1 fw-normal utilidad">0.00</h5></td>
             <td><span class="text-muted fs-12">Precio Cliente</span><h5 class="fs-14 mt-1 fw-normal precio-cliente">0.00</h5></td>
             <td>

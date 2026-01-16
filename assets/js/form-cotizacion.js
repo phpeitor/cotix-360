@@ -35,8 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!data || !data.cotizacion) return;
             setHeader(data.cotizacion);
             data.detalle.forEach(item => {
-                const tr = renderItemRow(item); // ⬅️ IMPORTANTE
-                validarTdAdmin(tr);             // ⬅️ ahora SÍ funciona
+                const tr = renderItemRow(item); 
+                validarTdAdmin(tr);             
             });
             recalculateTotals();
             alertify.success("Cotización cargada");
@@ -63,8 +63,19 @@ document.addEventListener("DOMContentLoaded", () => {
     function getMargenByGrupo(grupo) {
         if (!grupo) return 0.32;
         const g = grupo.toString().toLowerCase();
-        if (g.includes("1")) return 0.25;
-        if (g.includes("2")) return 0.15;
+        if (g.includes("0")) return 0;
+        if (g.includes("1")) return 0.15;
+        if (g.includes("2")) return 0.25;
+        if (g.includes("3")) return 0.28;
+        if (g.includes("4")) return 0.30;
+        if (g.includes("5")) return 0.31;
+        if (g.includes("6")) return 0.33;
+        if (g.includes("7")) return 0.35;
+        if (g.includes("8")) return 0.36;
+        if (g.includes("9")) return 0.40;
+        if (g.includes("10")) return 0.45;
+        if (g.includes("11")) return 0.50;
+        if (g.includes("12")) return 0.55;
         return 0.32;
     }
 
