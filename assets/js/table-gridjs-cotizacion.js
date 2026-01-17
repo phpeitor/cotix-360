@@ -1,16 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    /* ---------------------------------------------------
-       📅 FECHAS POR DEFECTO (HOY y -7 DÍAS)
-    --------------------------------------------------- */
-    const dateInput = document.getElementById("filterDate");
+    const observer = new MutationObserver(() => {
+        aplicarPermisosAdmin();
+    });
 
+    observer.observe(document.getElementById("table-gridjs"), {
+        childList: true,
+        subtree: true
+    });
+
+    const dateInput = document.getElementById("filterDate");
     const today = new Date();
     const pastDate = new Date();
     pastDate.setDate(today.getDate() - 7);
-
-    // Helpers
-    const formatISO = (d) => d.toISOString().split("T")[0]; // YYYY-MM-DD
+    const formatISO = (d) => d.toISOString().split("T")[0]; 
     const formatFlatpickr = (d) =>
         d.toLocaleDateString("en-GB", {
             day: "2-digit",
@@ -72,6 +75,8 @@ document.addEventListener("DOMContentLoaded", () => {
         sort: true,
         search: true
     }).render(document.getElementById("table-gridjs"));
+
+    grid.on("ready", aplicarPermisosAdmin);
 
     /* ---------------------------------------------------
        🔎 BOTÓN BUSCAR
@@ -147,8 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const hashId = md5(String(id));
 
         let botones = `
-            <a 
-                href="form_cotizacion.php?id=${hashId}" 
+            <a href="form_cotizacion.php?id=${hashId}" 
                 class="btn btn-soft-primary btn-icon btn-sm rounded-circle"
                 title="Ver cotización"
             >
@@ -157,9 +161,8 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         if (estado === "Aprobada") {
-
             botones += `
-                <button class="btn btn-soft-danger btn-icon btn-sm rounded-circle btn-estado"
+                <button class="btn btn-soft-danger btn-icon btn-sm rounded-circle btn-estado isadmin"
                         data-id="${id}"
                         data-accion="anular"
                         title="Anular">
@@ -176,20 +179,17 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
 
         } else if (estado === "Anulada") {
-
             botones += `
-                <button class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-estado"
+                <button class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-estado isadmin"
                         data-id="${id}"
                         data-accion="aprobar"
                         title="Aprobar">
                     <i class="ti ti-check"></i>
                 </button>
             `;
-
         } else {
-
             botones += `
-                <button class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-estado"
+                <button class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-estado isadmin"
                         data-id="${id}"
                         data-accion="aprobar"
                         title="Aprobar">
@@ -212,7 +212,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `);
     }
 
-
     document.addEventListener("click", e => {
         const btn = e.target.closest(".btn-estado");
         if (!btn) return;
@@ -231,7 +230,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function actualizarEstado(id, accion) {
-
         fetch("controller/upd_estado.php", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -243,7 +241,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 alertify.error(resp.message || "Error");
                 return;
             }
-
             alertify.success(`Cotización ${resp.estado}`);
             grid.forceRender();
         })

@@ -355,13 +355,21 @@ fetch('config/permisos-js.php')
     .then(r => r.json())
     .then(permisos => {
         ES_ADMIN = permisos[0] === '*';
+		//console.log('Permisos:', permisos);
     })
     .catch(err => console.error('Permisos:', err));
 
 function validarTdAdmin(tr) {
     if (!tr) return;
-    tr.querySelectorAll('td.isadmin,  div.isadmin, h5.isadmin').forEach(td => {
+    tr.querySelectorAll('td.isadmin,  div.isadmin, h5.isadmin, button.isadmin').forEach(td => {
         td.style.display = ES_ADMIN ? '' : 'none';
+    });
+}
+
+function aplicarPermisosAdmin() {
+    document.querySelectorAll(".isadmin").forEach(el => {
+		console.log('ES_ADMIN:', ES_ADMIN);
+        el.style.display = ES_ADMIN ? "" : "none";
     });
 }
 
