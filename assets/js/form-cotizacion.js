@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <td>
                 <span class="text-muted fs-12">${item.categoria}</span>
-                <h5 class="fs-14 mt-1 fw-normal">${item.grupo}</h5>
+                <h5 class="fs-14 mt-1 fw-normal isadmin">${item.grupo}</h5>
                 <h5 class="fs-14 mt-1 fw-normal">${item.pais_origen}</h5>
             </td>
 
@@ -187,11 +187,11 @@ document.addEventListener("DOMContentLoaded", () => {
             </td>
 
             <td>
-                <span class="text-muted fs-12">Precio Uni.</span>
+                <span class="text-muted fs-12">MSRP</span>
                 <h5 class="fs-14 mt-1 fw-normal">${formatNumber(precio)}</h5>
             </td>
 
-            <td><span class="text-muted fs-12">Valor</span><h5 class="fs-14 mt-1 fw-normal margen">0.00</h5></td>
+            <td class="isadmin"><span class="text-muted fs-12">Valor</span><h5 class="fs-14 mt-1 fw-normal margen">0.00</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Dscto</span><h5 class="fs-14 mt-1 fw-normal margen_dscto">0.00</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Precio Dscto</span><h5 class="fs-14 mt-1 fw-normal precio_dscto">0.00</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>

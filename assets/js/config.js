@@ -91,12 +91,14 @@
 			});
 
 			/* ===============================
-			* 3. COLUMNAS ADMIN (TABLA)
+			* 3. ISADMIN 
 			* =============================== */
 			if (!esAdmin) {
-				document.querySelectorAll('td.isadmin').forEach(td => {
-					td.style.display = 'none';
-				});
+				document
+					.querySelectorAll('td.isadmin, div.isadmin, h5.isadmin')
+					.forEach(el => {
+						el.style.display = 'none';
+					});
 			}
 
 		})

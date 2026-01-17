@@ -360,8 +360,7 @@ fetch('config/permisos-js.php')
 
 function validarTdAdmin(tr) {
     if (!tr) return;
-
-    tr.querySelectorAll('td.isadmin').forEach(td => {
+    tr.querySelectorAll('td.isadmin,  div.isadmin, h5.isadmin').forEach(td => {
         td.style.display = ES_ADMIN ? '' : 'none';
     });
 }

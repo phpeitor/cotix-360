@@ -98,7 +98,7 @@
                                     <div class="bg-success bg-opacity-10 py-1 text-center">
                                         <p class="m-0"><b id="total_item">0</b> item(s) agregados</p>
                                     </div>
-                                    <div class="border border-dashed p-2 rounded text-center">
+                                    <div class="border border-dashed p-2 rounded text-center isadmin">
                                         <div class="row">
                                             <div class="col-lg-2 col-4 border-end">
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:box-bold-duotone" class="text-danger"></iconify-icon> <span class="text-dark">Total Peso : </span> <span id="total_peso">0.00</span></p>

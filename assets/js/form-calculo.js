@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalGastoEl = document.getElementById("total_gasto");
     const totalPeruEl = document.getElementById("total_peru");
     const totalFactorEl = document.getElementById("total_factor");
-
+    const LIMITE_PESO = 100;
     let fleteTable = [];
 
     fetch("controller/get_flete.php")
@@ -317,13 +317,20 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Validación de duplicado
         if (itemAlreadyAdded(itemId)) {
             alertify.error("Este item ya fue agregado");
             return;
         }
 
-        // Crear fila
+        const pesoActual = getTotalPesoActual();
+        if (pesoActual + item.peso > LIMITE_PESO) {
+            alertify.alert(
+                "Límite de peso",
+                "No se puede agregar este item porque el peso total superará los 100 Kg.<br>Por favor, contacte al administrador."
+            );
+            return;
+        }
+
         const tr = document.createElement("tr");
         tr.dataset.itemId  = itemId ;
         tr.dataset.modelo = modelo;
@@ -349,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <td>
                 <span class="text-muted fs-12">${item.categoria}</span>
-                <h5 class="fs-14 mt-1 fw-normal">${item.grupo}</h5>
+                <h5 class="fs-14 mt-1 fw-normal isadmin">${item.grupo}</h5>
                 <h5 class="fs-11 mt-1 fw-normal">${item.pais}</h5>
             </td>
 
@@ -365,19 +372,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="text-muted fs-12">Cantidad</span> <br>
                 <div data-touchspin class="input-step border bg-body-secondary p-1 mt-1 rounded-pill d-inline-flex overflow-visible">
                     <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
-                    <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="1" min="0" max="100" readonly="">
+                    <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="1" min="0" max="100" readonly />
                     <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
                 </div>
             </td>
 
             <td><span class="text-muted fs-12">Peso</span><h5 class="fs-14 mt-1 fw-normal">${item.peso}</h5></td>
-            <td><span class="text-muted fs-12">Precio Uni.</span><h5 class="fs-14 mt-1 fw-normal">${item.precio.toFixed(2)} ${item.moneda}</h5></td>
-            <td><span class="text-muted fs-12">Valor</span><h5 class="fs-14 mt-1 fw-normal margen">0.00</h5></td>
+            <td><span class="text-muted fs-12">MSRP</span><h5 class="fs-14 mt-1 fw-normal">${item.precio.toFixed(2)} ${item.moneda}</h5></td>
+            <td class="isadmin"><span class="text-muted fs-12">Valor</span><h5 class="fs-14 mt-1 fw-normal margen">0.00</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Dscto</span><h5 class="fs-14 mt-1 fw-normal margen_dscto">0.00</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Precio Dscto</span><h5 class="fs-14 mt-1 fw-normal precio_dscto">0.00</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Precio M</span><h5 class="fs-14 mt-1 fw-normal precio-m">0.00</h5></td>
-            <td><span class="text-muted fs-12">Margen</span>
+            <td><span class="text-muted fs-12">Margen</span><br>
             <select class="form-select-sm margen-uti" data-default="0.15"><option value="0.25">Lista 1</option><option value="0.30">Lista 2</option><option value="0.35">Lista 3</option><option value="0.40">Lista 4</option><option value="0.45">Lista 5</option><option value="0.50">Lista 6</option></select></td>
             <td class="isadmin"><span class="text-muted fs-12">Utilidad</span><h5 class="fs-14 mt-1 fw-normal utilidad">0.00</h5></td>
             <td><span class="text-muted fs-12">Precio Cliente</span><h5 class="fs-14 mt-1 fw-normal precio-cliente">0.00</h5></td>
@@ -402,11 +409,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target.classList.contains("plus")) {
             const input = e.target.parentNode.querySelector("input");
             const tr = e.target.closest("tr");
-
             const pesoItem = parseFloat(tr.dataset.peso);
             const totalPesoActual = getTotalPesoActual();
 
-            if (totalPesoActual + pesoItem > 100) {
+            if (totalPesoActual + pesoItem > LIMITE_PESO) {
                 alertify.alert(
                     "Límite de peso",
                     "Items con un peso total mayor a 100 Kg. <br>Por favor, contacte al administrador"
@@ -451,6 +457,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const rows = tbody.querySelectorAll("tr");
         if (rows.length === 0) {
             alertify.error("Debe agregar al menos un item para continuar");
+            return;
+        }
+
+        const pesoTotal = getTotalPesoActual();
+        if (pesoTotal > LIMITE_PESO) {
+            alertify.alert(
+                "Límite de peso",
+                "El peso total de la cotización supera los 100 Kg.<br>No se puede continuar."
+            );
             return;
         }
 
