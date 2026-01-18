@@ -76,11 +76,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             };
 
             cotizacionesContainer.innerHTML = "";
-
             cotizaciones.forEach((coti) => {
                 const logo = logos[logoIndex % logos.length];
                 logoIndex++;
 
+                const link = ES_ADMIN
+                ? `form_cotizacion.php?id=${md5(String(coti.id))}`
+                : "#";
+                
                 cotizacionesContainer.insertAdjacentHTML("beforeend", `
                     <div class="d-flex align-items-start gap-2 position-relative mb-2">
                         <div class="avatar-md flex-shrink-0">
@@ -89,9 +92,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                         <div class="flex-grow-1">
                             <h5 class="fs-13 my-1">
-                                <a href="form_cotizacion.php?id=${md5(String(coti.id))}"
-                                   class="stretched-link link-reset">
-                                   Cotix #${coti.id}
+                                <a href="${link}" class="stretched-link link-reset ${!ES_ADMIN ? 'disabled-link' : ''}"
+                                    ${!ES_ADMIN ? 'onclick="return false;"' : ''}>
+                                   Cotix #${coti.id} [${String(coti.usuario).toLowerCase()}]
                                 </a>
                             </h5>
                             ${renderItemsString(coti.items)}
@@ -130,7 +133,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         <div class="timeline-item-info">
                             <a href="javascript:void(0);"
                                class="link-reset fw-semibold mb-1 d-block fs-12">
-                               ${item.modelo}
+                               ${item.modelo} - ${item.categoria_producto}
                             </a>
                             <span class="mb-1 fs-11">
                                 ${item.descripcion?.replace(/\n/g, " ") || ""}
@@ -141,6 +144,62 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 </small>
                             </p>
                         </div>
+                    </div>
+                `);
+            });
+        }
+
+        /* =====================================================
+        HEADER NOTIFICATIONS
+        ===================================================== */
+        const headerContainer = document.getElementById("dashboard-header-notifications");
+
+        if (headerContainer && Array.isArray(json.data.header)) {
+
+            headerContainer.innerHTML = "";
+
+            json.data.header.forEach((h, index) => {
+
+                const avatar = Math.floor(Math.random() * 10) + 1;
+                const notifId = `notification-${index + 1}`;
+                const usuario = String(h.usuario).toLowerCase();
+                const doc = h.doc;
+                const fecha = h.ultima_fecha;
+
+                // 👉 doc hash (32 chars) = inicio de sesión
+                const isLogin = doc.length === 32;
+
+                headerContainer.insertAdjacentHTML("beforeend", `
+                    <div class="dropdown-item notification-item py-2 text-wrap ${isLogin ? 'active' : ''}" id="${notifId}">
+                        <span class="d-flex align-items-center">
+                            <span class="me-3 position-relative flex-shrink-0">
+                                <img src="./assets/images/users/avatar-${avatar}.jpg"
+                                    class="avatar-md rounded-circle" alt="" />
+                                <span class="position-absolute rounded-pill bg-${isLogin ? 'danger' : 'secondary'} notification-badge">
+                                    <i class="ti ${isLogin ? 'ti-message-circle' : 'ti-plus'}"></i>
+                                </span>
+                            </span>
+
+                            <span class="flex-grow-1 text-muted">
+                                ${
+                                    isLogin
+                                    ? `<span class="fw-medium text-body">${usuario}</span> inició sesión con
+                                    <span class="fw-medium text-body">${doc}</span>`
+                                    : `<span class="fw-medium text-body">${usuario}</span> you in
+                                    <span class="fw-medium text-body">${doc}</span>`
+                                }
+                                <br />
+                                <span class="fs-12">${fecha}</span>
+                            </span>
+
+                            <span class="notification-item-close">
+                                <button type="button"
+                                        class="btn btn-ghost-danger rounded-circle btn-sm btn-icon"
+                                        data-dismissible="#${notifId}">
+                                    <i class="ti ti-x fs-16"></i>
+                                </button>
+                            </span>
+                        </span>
                     </div>
                 `);
             });

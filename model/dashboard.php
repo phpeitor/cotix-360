@@ -69,6 +69,46 @@ class Dashboard {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function header(): array
+    {
+        $sql = "
+                SELECT
+                b.usuario,
+                MD5(b.doc) AS doc,
+                MAX(a.fecha) AS ultima_fecha
+                FROM login a
+                LEFT JOIN personal b ON a.id_user = b.idpersonal
+                WHERE a.tipo = 'IN'
+                AND a.fecha >= CURDATE()
+                AND a.fecha < CURDATE() + INTERVAL 1 DAY
+                GROUP BY b.usuario, b.doc
+
+                UNION ALL
+
+                SELECT
+                t.usuario,
+                t.estado AS doc,
+                t.created_at AS ultima_fecha
+                FROM (
+                    SELECT
+                        b.usuario,
+                        a.estado,
+                        a.created_at
+                    FROM cotizaciones a
+                    LEFT JOIN personal b ON a.usuario_id = b.IDPERSONAL
+                    WHERE a.estado = 'Aprobada'
+                    AND a.created_at >= CURDATE()
+                    AND a.created_at < CURDATE() + INTERVAL 1 DAY
+                    ORDER BY a.created_at DESC
+                    LIMIT 5
+                ) t;
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function graf_donut(): array
     {
         $sql = "

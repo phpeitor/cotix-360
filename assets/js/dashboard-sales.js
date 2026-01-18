@@ -79,20 +79,30 @@ document.addEventListener("DOMContentLoaded", function () {
 		====================== */
 
 		const lineData = resp.data.line;
-
-		// meses únicos ordenados
 		const months = [...new Set(lineData.map(i => i.periodo))]
 		.sort();
 
-		// labels visibles (January, February…)
-		const monthLabels = months.map(m =>
-		lineData.find(i => i.periodo === m).mes
-		);
+		const MONTHS_ES = {
+			"01": "Ene",
+			"02": "Feb",
+			"03": "Mar",
+			"04": "Abr",
+			"05": "May",
+			"06": "Jun",
+			"07": "Jul",
+			"08": "Ago",
+			"09": "Sep",
+			"10": "Oct",
+			"11": "Nov",
+			"12": "Dic"
+		};
 
-		// estados únicos
+		const monthLabels = months.map(periodo => {
+			const [year, month] = periodo.split("-");
+			return `${MONTHS_ES[month]}-${year}`;
+		});
+
 		const states = [...new Set(lineData.map(i => i.estado))];
-
-		// construir series por estado
 		const revenueSeries = states.map(state => ({
 			name: state,
 			type: "bar",

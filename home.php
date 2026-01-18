@@ -203,33 +203,7 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="bg-danger bg-opacity-10">
-                                        <div class="row text-center">
-                                            <div class="col-md-3 col-6">
-                                                <p class="text-muted mt-3 mb-1">Revenue</p>
-                                                <h4 class="mb-3">
-                                                    <span class="ti ti-square-rounded-arrow-down text-success me-1"></span>
-                                                    <span>$29.5k</span>
-                                                </h4>
-                                            </div>
-                                            <div class="col-md-3 col-6">
-                                                <p class="text-muted mt-3 mb-1">Expenses</p>
-                                                <h4 class="mb-3">
-                                                    <span class="ti ti-square-rounded-arrow-up text-danger me-1"></span>
-                                                    <span>$15.07k</span>
-                                                </h4>
-                                            </div>
-                                            <div class="col-md-3 col-6">
-                                                <p class="text-muted mt-3 mb-1">Investment</p>
-                                                <h4 class="mb-3">
-                                                    <span class="ti ti-chart-infographic me-1"></span>
-                                                    <span>$3.6k</span>
-                                                </h4>
-                                            </div>
-                                        </div>
-                                    </div>
-
+                                    
                                     <div class="card-body pt-0">
                                         <div dir="ltr">
                                             <div id="revenue-chart" class="apex-charts"></div>
