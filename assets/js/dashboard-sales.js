@@ -1,183 +1,159 @@
-var colors = ["#ce7e7e", "#6ac75a", "#fa5c7c", "#ffbc00"],
-	dataColors = $("#revenue-chart").data("colors"),
-	options = {
-		series: [{
-			name: "Total Income",
-			type: "bar",
-			data: [89.25, 98.58, 68.74, 108.87, 77.54, 84.03, 51.24, 28.57, 92.57, 42.36, 88.51, 36.57]
-		}, {
-			name: "Total Expenses",
-			type: "bar",
-			data: [22.25, 24.58, 36.74, 22.87, 19.54, 25.03, 29.24, 10.57, 24.57, 35.36, 20.51, 17.57]
-		}, {
-			name: "Investments",
-			type: "area",
-			data: [34, 65, 46, 68, 49, 61, 42, 44, 78, 52, 63, 67]
-		}, {
-			name: "Savings",
-			type: "line",
-			data: [8, 12, 7, 17, 21, 11, 5, 9, 7, 29, 12, 35]
-		}],
-		chart: {
-			height: 300,
-			type: "line",
-			toolbar: {
-				show: !1
-			}
-		},
-		stroke: {
-			dashArray: [0, 0, 0, 8],
-			width: [0, 0, 2, 2],
-			curve: "smooth"
-		},
-		fill: {
-			opacity: [1, 1, .1, 1],
-			type: ["gradient", "solid", "solid", "solid"],
-			gradient: {
-				type: "vertical",
-				inverseColors: !1,
-				opacityFrom: .5,
-				opacityTo: 0,
-				stops: [0, 70]
-			}
-		},
-		markers: {
-			size: [0, 0, 0, 0],
-			strokeWidth: 2,
-			hover: {
-				size: 4
-			}
-		},
-		xaxis: {
-			categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-			axisTicks: {
-				show: !1
-			},
-			axisBorder: {
-				show: !1
-			}
-		},
-		yaxis: {
-			stepSize: 25,
-			min: 0,
-			labels: {
-				formatter: function(e) {
-					return e + "k"
-				},
-				offsetX: -15
-			},
-			axisBorder: {
-				show: !1
-			}
-		},
-		grid: {
-			show: !0,
-			xaxis: {
-				lines: {
-					show: !1
-				}
-			},
-			yaxis: {
-				lines: {
-					show: !0
-				}
-			},
-			padding: {
-				top: 0,
-				right: -15,
-				bottom: 15,
-				left: -15
-			}
-		},
-		legend: {
-			show: !0,
-			horizontalAlign: "center",
-			offsetX: 0,
-			offsetY: -5,
-			markers: {
-				width: 9,
-				height: 9,
-				radius: 6
-			},
-			itemMargin: {
-				horizontal: 10,
-				vertical: 0
-			}
-		},
-		plotOptions: {
-			bar: {
-				columnWidth: "50%",
-				barHeight: "70%",
-				borderRadius: 3
-			}
-		},
-		colors: colors = dataColors ? dataColors.split(",") : colors,
-		tooltip: {
-			shared: !0,
-			y: [{
-				formatter: function(e) {
-					return void 0 !== e ? "$" + e.toFixed(2) + "k" : e
-				}
-			}, {
-				formatter: function(e) {
-					return void 0 !== e ? "$" + e.toFixed(2) + "k" : e
-				}
-			}, {
-				formatter: function(e) {
-					return void 0 !== e ? "$" + e.toFixed(2) + "k" : e
-				}
-			}, {
-				formatter: function(e) {
-					return void 0 !== e ? "$" + e.toFixed(2) + "k" : e
-				}
-			}]
-		}
-	},
-	chart = new ApexCharts(document.querySelector("#revenue-chart"), options),
-	colors = (chart.render(), ["#6C757D", "#FFBC00", "#ce7e7e", "#6ac75a"]),
-	dataColors = $("#multiple-radialbar").data("colors"),
-	options = {
-		chart: {
-			height: 330,
-			type: "radialBar"
-		},
-		plotOptions: {
-			circle: {
+document.addEventListener("DOMContentLoaded", function () {
+  fetch("controller/dashboard_graf.php")
+    .then(res => res.json())
+    .then(resp => {
+      if (resp.error) return;
+
+      const donut = resp.data.donut;
+	  const STATUS_COLORS = {
+		Enviada:  "#6C757D",
+		Aprobada: "#53cd48ff",
+		Anulada:  "#ce7e7e"
+	  };
+
+	  const total = donut.reduce((sum, i) => sum + Number(i.ctd), 0);
+	  const series = donut.map(i =>
+		total > 0 ? Math.round((i.ctd / total) * 100) : 0
+		);
+
+	  const labels = donut.map(i => i.estado);
+
+      const chartColors = donut.map(i =>
+		STATUS_COLORS[i.estado] || "#999999"
+		);
+
+      const chart = new ApexCharts(
+        document.querySelector("#multiple-radialbar"),
+        {
+          chart: { height: 330, type: "radialBar" },
+          plotOptions: {
+           radialBar: {
+				track: { margin: "17%" },
+				hollow: { size: "1%" },
 				dataLabels: {
-					showOn: "hover"
-				}
-			},
-			radialBar: {
-				track: {
-					margin: "17%",
-					background: "rgba(170,184,197, 0.2)"
+				name: {
+					show: true
 				},
-				hollow: {
-					size: "1%"
+				value: {
+					show: true,
+					formatter: val => `${val}%`
+				}
+				}
+			}
+          },
+          stroke: { lineCap: "round" },
+          colors: chartColors,
+          series: series,
+          labels: labels
+        }
+      );
+
+      chart.render();
+
+      /* ======================
+         LEGEND / LISTADO
+      ====================== */
+
+      const legend = document.getElementById("donut-legend");
+      legend.innerHTML = "";
+
+      donut.forEach((item, index) => {
+        const color = STATUS_COLORS[item.estado] || "#999";
+
+        legend.innerHTML += `
+          <div class="d-flex justify-content-between align-items-center p-1">
+            <div>
+              <i class="ti ti-circle-filled fs-12 align-middle me-1"
+           		style="color:${color}"></i>
+              <span class="align-middle fw-semibold">${item.estado}</span>
+            </div>
+            <span class="fw-semibold text-muted float-end">
+              ${item.ctd}
+            </span>
+          </div>
+        `;
+      });
+
+		/* ======================
+		REVENUE CHART (LINE / BAR)
+		====================== */
+
+		const lineData = resp.data.line;
+
+		// meses únicos ordenados
+		const months = [...new Set(lineData.map(i => i.periodo))]
+		.sort();
+
+		// labels visibles (January, February…)
+		const monthLabels = months.map(m =>
+		lineData.find(i => i.periodo === m).mes
+		);
+
+		// estados únicos
+		const states = [...new Set(lineData.map(i => i.estado))];
+
+		// construir series por estado
+		const revenueSeries = states.map(state => ({
+			name: state,
+			type: "bar",
+			data: months.map(month => {
+				const found = lineData.find(
+				i => i.estado === state && i.periodo === month
+				);
+				return found ? Number(found.ctd) : 0;
+			})
+		}));
+
+		const revenueColors = states.map(
+			s => STATUS_COLORS[s] || "#999999"
+		);
+
+		const revenueChart = new ApexCharts(
+		document.querySelector("#revenue-chart"),
+			{
+				chart: {
+					height: 300,
+					type: "line",
+					toolbar: { show: false }
+				},
+				stroke: {
+					curve: "smooth",
+					width: 2
+				},
+				plotOptions: {
+					bar: {
+						columnWidth: "50%",
+						borderRadius: 4
+					}
 				},
 				dataLabels: {
-					name: {
-						show: !1
-					},
-					value: {
-						show: !1
+					enabled: false
+				},
+				xaxis: {
+					categories: monthLabels,
+					axisTicks: { show: false },
+					axisBorder: { show: false }
+				},
+				yaxis: {
+					min: 0,
+					forceNiceScale: true
+				},
+					colors: revenueColors,
+					series: revenueSeries,
+					legend: {
+					show: true,
+					position: "top"
+				},
+				tooltip: {
+					y: {
+						formatter: val => val
 					}
 				}
 			}
-		},
-		stroke: {
-			lineCap: "round"
-		},
-		colors: colors = dataColors ? dataColors.split(",") : colors,
-		series: [44, 55, 67, 22],
-		labels: ["Completed", "In Progress", "Yet to Start", "Cancelled"],
-		responsive: [{
-			breakpoint: 380,
-			options: {
-				chart: {
-					height: 260
-				}
-			}
-		}]
-	};
-(chart = new ApexCharts(document.querySelector("#multiple-radialbar"), options)).render();
+		);
+
+		revenueChart.render();
+
+	});
+
+});

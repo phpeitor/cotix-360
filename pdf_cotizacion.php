@@ -185,8 +185,8 @@ ob_start();
             <th>Item Descripción</th>
             <th class="center">Cant</th>
             <th class="center">Peso</th>
-            <th class="right">Precio Uni.</th>
-            <th class="right">Valor</th>
+            <th class="right">MSRP</th>
+            <?php if ($isAdmin): ?><th class="right">Valor</th><?php endif; ?>
             <?php if ($isAdmin): ?><th class="center">Dscto</th><?php endif; ?>
             <?php if ($isAdmin): ?><th class="right">Precio Dscto</th><?php endif; ?>
             <?php if ($isAdmin): ?><th class="right">Factor PU</th><?php endif; ?>
@@ -204,11 +204,10 @@ ob_start();
                 <?= $i['descripcion'] ?><br>
                 <?= $i['grupo'] ?>
             </td>
-
             <td class="center"><?= $i['cantidad'] ?></td>
             <td class="center"><?= number_format($i['peso'], 2) ?></td>
             <td class="right"><?= number_format($i['_precio'], 2) ?></td>
-            <td class="right"><?= number_format($i['margen_pct'], 0) ?>%</td>
+            <?php if ($isAdmin): ?><td class="right"><?= number_format($i['margen_pct'], 0) ?>%</td><?php endif; ?>
             <?php if ($isAdmin): ?><td class="center"><?= number_format($i['margen_dscto'], 2) ?></td><?php endif; ?>
             <?php if ($isAdmin): ?><td class="right"><?= number_format($i['precio_dscto'], 2) ?></td><?php endif; ?>
             <?php if ($isAdmin): ?><td class="right"><?= number_format($i['factor_pu'], 2) ?></td><?php endif; ?>
@@ -224,11 +223,11 @@ ob_start();
 <p>
     <strong>Total Items:</strong> <?= $totalItems ?><br>
     <strong>Total Peso:</strong> <?= number_format($totalPeso,2) ?><br>
-    <strong>Total FOB:</strong> <?= number_format($totalFob,2) ?><br>
-    <strong>Flete:</strong> <?= number_format($flete,2) ?><br>
-    <strong>Gasto:</strong> <?= number_format($gasto,2) ?><br>
-    <strong>Total Perú:</strong> <?= number_format($totalPeru,2) ?><br>
-    <strong>Factor:</strong> <?= number_format($rawFactor,4) ?>
+    <?php if ($isAdmin): ?><strong>Total FOB:</strong> <?= number_format($totalFob,2) ?><br><?php endif; ?>
+    <?php if ($isAdmin): ?><strong>Flete:</strong> <?= number_format($flete,2) ?><br><?php endif; ?>
+    <?php if ($isAdmin): ?><strong>Gasto:</strong> <?= number_format($gasto,2) ?><br><?php endif; ?>
+    <?php if ($isAdmin): ?><strong>Total Perú:</strong> <?= number_format($totalPeru,2) ?><br><?php endif; ?>
+    <?php if ($isAdmin): ?><strong>Factor:</strong> <?= number_format($rawFactor,4) ?><?php endif; ?>
 </p>
 </body>
 </html>

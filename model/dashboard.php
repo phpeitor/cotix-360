@@ -38,7 +38,6 @@ class Dashboard {
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
-
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -52,7 +51,6 @@ class Dashboard {
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
-
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -68,9 +66,42 @@ class Dashboard {
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
-
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function graf_donut(): array
+    {
+        $sql = "
+            SELECT estado, COUNT(*) AS ctd
+            FROM cotizaciones
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            GROUP BY estado;
+        ";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function graf_line(): array
+    {
+        $sql = "
+            SELECT
+            estado,
+            DATE_FORMAT(created_at, '%M') AS mes,
+            DATE_FORMAT(created_at, '%Y-%m') AS periodo,
+            COUNT(*) AS ctd
+            FROM cotizaciones
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+            GROUP BY
+            estado,
+            DATE_FORMAT(created_at, '%Y-%m'),
+            DATE_FORMAT(created_at, '%M')
+            ORDER BY
+            DATE_FORMAT(created_at, '%Y-%m') ASC;
+        ";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

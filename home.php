@@ -166,7 +166,7 @@
                             <div class="col-xxl-4">
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between align-items-center border-bottom border-dashed">
-                                        <h4 class="header-title">Top Traffic by Source</h4>
+                                        <h4 class="header-title"> Status Cotizaciones</h4>
                                         <div class="dropdown">
                                             <a href="#" class="dropdown-toggle drop-arrow-none card-drop p-0" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="ti ti-dots-vertical"></i>
@@ -179,43 +179,10 @@
                                     </div>
 
                                     <div class="card-body">
-                                        <div id="multiple-radialbar" class="apex-charts" data-colors="#6ac75a,#313a46,#ce7e7e,#669776"></div>
+                                        <div id="multiple-radialbar" class="apex-charts"></div>
 
                                         <div class="row mt-2">
-                                            <div class="col">
-                                                <div class="d-flex justify-content-between align-items-center p-1">
-                                                    <div>
-                                                        <i class="ti ti-circle-filled fs-12 align-middle me-1 text-primary"></i>
-                                                        <span class="align-middle fw-semibold">Direct</span>
-                                                    </div>
-                                                    <span class="fw-semibold text-muted float-end"><i class="ti ti-arrow-badge-down text-danger"></i> 965</span>
-                                                </div>
-
-                                                <div class="d-flex justify-content-between align-items-center p-1">
-                                                    <div>
-                                                        <i class="ti ti-circle-filled fs-12 text-success align-middle me-1"></i>
-                                                        <span class="align-middle fw-semibold">Social</span>
-                                                    </div>
-                                                    <span class="fw-semibold text-muted float-end"><i class="ti ti-arrow-badge-up text-success"></i> 75</span>
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <div class="d-flex justify-content-between align-items-center p-1">
-                                                    <div>
-                                                        <i class="ti ti-circle-filled fs-12 text-secondary align-middle me-1"></i>
-                                                        <span class="align-middle fw-semibold"> Marketing</span>
-                                                    </div>
-                                                    <span class="fw-semibold text-muted float-end"><i class="ti ti-arrow-badge-up text-success"></i> 102</span>
-                                                </div>
-
-                                                <div class="d-flex justify-content-between align-items-center p-1">
-                                                    <div>
-                                                        <i class="ti ti-circle-filled fs-12 text-danger align-middle me-1"></i>
-                                                        <span class="align-middle fw-semibold">Affiliates</span>
-                                                    </div>
-                                                    <span class="fw-semibold text-muted float-end"><i class="ti ti-arrow-badge-down text-danger"></i> 96</span>
-                                                </div>
-                                            </div>
+                                           <div class="col" id="donut-legend"></div>
                                         </div>
                                     </div>
                                 </div> <!-- end card-->
@@ -230,13 +197,8 @@
                                                 <i class="ti ti-dots-vertical"></i>
                                             </a>
                                             <div class="dropdown-menu dropdown-menu-end">
-                                                <!-- item-->
-                                                <a href="javascript:void(0);" class="dropdown-item">Sales Report</a>
-                                                <!-- item-->
                                                 <a href="javascript:void(0);" class="dropdown-item">Export Report</a>
-                                                <!-- item-->
                                                 <a href="javascript:void(0);" class="dropdown-item">Profit</a>
-                                                <!-- item-->
                                                 <a href="javascript:void(0);" class="dropdown-item">Action</a>
                                             </div>
                                         </div>
@@ -265,19 +227,12 @@
                                                     <span>$3.6k</span>
                                                 </h4>
                                             </div>
-                                            <div class="col-md-3 col-6">
-                                                <p class="text-muted mt-3 mb-1">Savings</p>
-                                                <h4 class="mb-3">
-                                                    <span class="ti ti-pig me-1"></span>
-                                                    <span>$6.9k</span>
-                                                </h4>
-                                            </div>
                                         </div>
                                     </div>
 
                                     <div class="card-body pt-0">
                                         <div dir="ltr">
-                                            <div id="revenue-chart" class="apex-charts" data-colors="#6ac75a,#313a46,#ce7e7e,#669776"></div>
+                                            <div id="revenue-chart" class="apex-charts"></div>
                                         </div>
                                     </div>
                                 </div> <!-- end card-->
@@ -314,9 +269,9 @@
                                 <div class="card mb-0 bg-warning bg-opacity-25">
                                     <div class="card-body" style="background-image: url(assets/images/png/arrows.svg); background-size: contain; background-repeat: no-repeat; background-position: right bottom;">
                                         <h1><i class="ti ti-receipt-tax text-warning"></i></h1>
-                                        <h4 class="text-warning">Estimated tax for this year</h4>
-                                        <p class="text-warning text-opacity-75">We kindly encourage you to review your recent transactions</p>
-                                        <a href="#!" class="btn btn-sm rounded-pill btn-info">Activate Now</a>
+                                        <h4 class="text-warning">Actualizar a Profesional</h4>
+                                        <p class="text-warning text-opacity-75">Le recomendamos que revise sus transacciones recientes.</p>
+                                        <a href="#!" class="btn btn-sm rounded-pill btn-info">Activar</a>
                                     </div> <!-- end card-body-->
                                 </div> <!-- end card-->
                             </div>

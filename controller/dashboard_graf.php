@@ -4,17 +4,14 @@ require_once __DIR__ . '/../model/dashboard.php';
 
 try {
     $dashboard = new Dashboard();
-    $cotizaciones = $dashboard->table_cotizacion();
-    $items        = $dashboard->items();
-    $contadores   = $dashboard->contadores();
     $graf_donut   = $dashboard->graf_donut();
+    $graf_line   = $dashboard->graf_line();
 
     echo json_encode([
         'error' => false,
         'data'  => [
-            'cotizaciones' => $cotizaciones,
-            'items'        => $items,
-            'contadores'   => $contadores
+            'donut'   => $graf_donut,
+            'line'    => $graf_line
         ]
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
