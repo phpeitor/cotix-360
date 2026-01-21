@@ -165,9 +165,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const usuario = String(h.usuario).toLowerCase();
                 const doc = h.doc;
                 const fecha = h.ultima_fecha;
-
-                // 👉 doc hash (32 chars) = inicio de sesión
-                const isLogin = doc.length === 32;
+                const isLogin = doc.length >= 32;
 
                 headerContainer.insertAdjacentHTML("beforeend", `
                     <div class="dropdown-item notification-item py-2 text-wrap ${isLogin ? 'active' : ''}" id="${notifId}">
@@ -184,7 +182,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 ${
                                     isLogin
                                     ? `<span class="fw-medium text-body">${usuario}</span> inició sesión con
-                                    <span class="fw-medium text-body">${doc}</span>`
+                                    <span class="fw-medium text-body"> ${String(doc).substring(0, 12)+'*******'}</span>`
                                     : `<span class="fw-medium text-body">${usuario}</span> you in
                                     <span class="fw-medium text-body">${doc}</span>`
                                 }

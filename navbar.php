@@ -192,53 +192,8 @@
 
                     <div class="position-relative z-2 rounded-0" style="max-height: 300px;" data-simplebar>
                         <div id="dashboard-header-notifications"></div>
-                        <!-- 
-                        <div class="dropdown-item notification-item py-2 text-wrap active" id="notification-1">
-                            <span class="d-flex align-items-center">
-                                <span class="me-3 position-relative flex-shrink-0">
-                                    <img src="./assets/images/users/avatar-{1 al 10}.jpg" class="avatar-md rounded-circle" alt="" />
-                                    <span class="position-absolute rounded-pill bg-danger notification-badge">
-                                        <i class="ti ti-message-circle"></i>
-                                        <span class="visually-hidden">unread messages</span>
-                                    </span>
-                                </span>
-                                <span class="flex-grow-1 text-muted">
-                                    <span class="fw-medium text-body">{usuario}</span> inicio sesion con <span class="fw-medium text-body">{doc}</span>
-                                    <br />
-                                    <span class="fs-12">{ultima_fecha}</span>
-                                </span>
-                                <span class="notification-item-close">
-                                    <button type="button" class="btn btn-ghost-danger rounded-circle btn-sm btn-icon" data-dismissible="#notification-1">
-                                        <i class="ti ti-x fs-16"></i>
-                                    </button>
-                                </span>
-                            </span>
-                        </div>
-
-                        <div class="dropdown-item notification-item py-2 text-wrap" id="notification-4">
-                            <span class="d-flex align-items-center">
-                                <span class="me-3 position-relative flex-shrink-0">
-                                    <img src="./assets/images/users/avatar-{1 a 10}.jpg" class="avatar-md rounded-circle" alt="" />
-                                    <span class="position-absolute rounded-pill bg-secondary notification-badge">
-                                        <i class="ti ti-plus"></i>
-                                        <span class="visually-hidden">unread messages</span>
-                                    </span>
-                                </span>
-                                <span class="flex-grow-1 text-muted">
-                                    <span class="fw-medium text-body">{usuario}</span> followed you in <span class="fw-medium text-body">{doc}</span>
-                                    <br />
-                                    <span class="fs-12">{ultima_fecha}</span>
-                                </span>
-                                <span class="notification-item-close">
-                                    <button type="button" class="btn btn-ghost-danger rounded-circle btn-sm btn-icon" data-dismissible="#notification-4">
-                                        <i class="ti ti-x fs-16"></i>
-                                    </button>
-                                </span>
-                            </span>
-                        </div>-->
                     </div>
 
-                    <!-- All-->
                     <a href="javascript:void(0);" class="dropdown-item notification-item text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light py-2">
                         View All
                     </a>
