@@ -196,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td class="isadmin"><span class="text-muted fs-12">Precio Dscto</span><h5 class="fs-14 mt-1 fw-normal precio_dscto">0.00</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Precio M</span><h5 class="fs-14 mt-1 fw-normal precio-m">0.00</h5></td>
-            <td><span class="text-muted fs-12">Margen</span><h5 class="fs-14 mt-1 fw-normal margen_uti">${item.margen}</h5></td>
+            <td class="isadmin"><span class="text-muted fs-12">Margen</span><h5 class="fs-14 mt-1 fw-normal margen_uti">${item.margen}</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Utilidad</span><h5 class="fs-14 mt-1 fw-normal utilidad">0.00</h5></td>
             <td><span class="text-muted fs-12">Precio Cliente</span><h5 class="fs-14 mt-1 fw-normal precio-cliente">0.00</h5></td>
         `;
@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
         usuarioEl.textContent = cotizacion.usuario ?? "";
         fechaEl.textContent = cotizacion.created_at ?? "";;
         estadoEl.textContent = cotizacion.estado ?? "";;
-        cotizacionIdEl.textContent = md5(cotizacion.id) ?? "";
+        cotizacionIdEl.textContent = cotizacion.id ?? "";
         setEstadoIcon(cotizacion.estado);
     }
 

@@ -173,7 +173,7 @@ ob_start();
 </p>
 <hr>
 <p>
-    <strong>ID:</strong> <?= md5($cotizacion['id']) ?><br>
+    <strong>ID:</strong> <?= $cotizacion['id'] ?><br>
     <strong>Usuario:</strong> <?= $cotizacion['usuario'] ?><br>
     <strong>Fecha:</strong> <?= $cotizacion['created_at'] ?><br>
     <strong>Estado:</strong> <?= $cotizacion['estado'] ?>
@@ -191,7 +191,7 @@ ob_start();
             <?php if ($isAdmin): ?><th class="right">Precio Dscto</th><?php endif; ?>
             <?php if ($isAdmin): ?><th class="right">Factor PU</th><?php endif; ?>
             <?php if ($isAdmin): ?><th class="right">Precio M</th><?php endif; ?>
-            <th class="right">Margen</th>
+            <?php if ($isAdmin): ?>th class="right">Margen</th><?php endif; ?>
             <?php if ($isAdmin): ?><th class="right">Utilidad</th><?php endif; ?>
             <th class="right">Precio Cliente</th>
         </tr>
