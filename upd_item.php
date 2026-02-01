@@ -91,9 +91,9 @@
                                             <select id="grupo" name="grupo" class="form-select" required="">
                                                 <option value="">-- Seleccione --</option>
                                                 <option value="Default">Default</option>
-                                                <option value="Group 1">Group 1</option>
-                                                <option value="Group 2">Group 2</option>
-                                                <option value="LOCAL">LOCAL</option>
+                                                <?php for ($i = 0; $i <= 9; $i++): ?>
+                                                    <option value="Group <?= $i ?>">Group <?= $i ?></option>
+                                                <?php endfor; ?>
                                             </select>
                                             <div class="invalid-feedback">
                                                 Please select an option.
