@@ -3,6 +3,15 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../model/cotizacion.php';
 
 try {
+
+    if (!isset($_SESSION['session_id']) || $_SESSION['session_id'] <= 0) {
+        echo json_encode([
+            'ok' => false,
+            'message' => 'Sesión expirada o usuario no autenticado'
+        ]);
+        exit;
+    }
+
     $id     = $_POST['id']     ?? null;
     $accion = $_POST['accion'] ?? null;
 
@@ -19,7 +28,7 @@ try {
         : 'Anulada';
 
     $cotizacion = new Cotizacion();
-    $ok = $cotizacion->actualizar_estado((int)$id, $estado);
+    $ok = $cotizacion->actualizar_estado((int)$id, $estado,(int)$_SESSION['session_id']);
 
     if (!$ok) {
         throw new Exception("No se pudo actualizar el estado");

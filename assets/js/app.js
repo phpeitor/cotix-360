@@ -355,7 +355,7 @@ fetch('config/permisos-js.php')
     .then(r => r.json())
     .then(permisos => {
         ES_ADMIN = permisos[0] === '*';
-		//console.log('Permisos:', permisos);
+		console.log('Permisos:', permisos);
     })
     .catch(err => console.error('Permisos:', err));
 

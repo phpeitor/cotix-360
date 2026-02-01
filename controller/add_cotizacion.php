@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../model/cotizacion.php';
+
 try {
 
     if (!isset($_SESSION['session_id']) || $_SESSION['session_id'] <= 0) {

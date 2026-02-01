@@ -174,8 +174,10 @@ ob_start();
 <hr>
 <p>
     <strong>ID:</strong> <?= $cotizacion['id'] ?><br>
-    <strong>Usuario:</strong> <?= $cotizacion['usuario'] ?><br>
-    <strong>Fecha:</strong> <?= $cotizacion['created_at'] ?><br>
+    <strong>Usuario Registro:</strong> <?= $cotizacion['usuario'] ?><br>
+    <strong>Fec. Registro:</strong> <?= $cotizacion['created_at'] ?><br>
+    <strong>Usuario Modifica:</strong> <?= $cotizacion['usu_upd'] ?><br>
+    <strong>Fec. Modifica:</strong> <?= $cotizacion['updated_at'] ?><br>
     <strong>Estado:</strong> <?= $cotizacion['estado'] ?>
 </p>
 
@@ -191,7 +193,7 @@ ob_start();
             <?php if ($isAdmin): ?><th class="right">Precio Dscto</th><?php endif; ?>
             <?php if ($isAdmin): ?><th class="right">Factor PU</th><?php endif; ?>
             <?php if ($isAdmin): ?><th class="right">Precio M</th><?php endif; ?>
-            <?php if ($isAdmin): ?>th class="right">Margen</th><?php endif; ?>
+            <?php if ($isAdmin): ?><th class="right">Margen</th><?php endif; ?>
             <?php if ($isAdmin): ?><th class="right">Utilidad</th><?php endif; ?>
             <th class="right">Precio Cliente</th>
         </tr>
@@ -212,7 +214,7 @@ ob_start();
             <?php if ($isAdmin): ?><td class="right"><?= number_format($i['precio_dscto'], 2) ?></td><?php endif; ?>
             <?php if ($isAdmin): ?><td class="right"><?= number_format($i['factor_pu'], 2) ?></td><?php endif; ?>
             <?php if ($isAdmin): ?><td class="right"><?= number_format($i['precio_m'], 2) ?></td><?php endif; ?>
-            <td class="right"><?= number_format($i['margen'], 2) ?></td>
+            <?php if ($isAdmin): ?><td class="right"><?= number_format($i['margen'], 2) ?></td><?php endif; ?>
             <?php if ($isAdmin): ?><td class="right"><?= number_format($i['utilidad'], 2) ?></td><?php endif; ?>
             <td class="right"><?= number_format($i['precio_cliente'], 2) ?></td>
         </tr>

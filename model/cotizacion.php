@@ -73,9 +73,10 @@ class Cotizacion {
     }
 
     public function obtenerPorHash(string $hash): ?array {
-        $sql = "SELECT c.*,p.usuario
+        $sql = "SELECT c.*,p.usuario, p2.usuario as usu_upd
                 FROM cotizaciones c
                 LEFT JOIN personal p on p.IDPERSONAL=c.usuario_id
+                LEFT JOIN personal p2 on p2.IDPERSONAL=c.usuario_upd
                 WHERE MD5(id) = :hash
                 LIMIT 1";
         $stmt = $this->conn->prepare($sql);
@@ -96,12 +97,13 @@ class Cotizacion {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function actualizar_estado(int $id, string $estado): bool {
+    public function actualizar_estado(int $id, string $estado, int $usuario_upd): bool {
         $sql = "UPDATE cotizaciones 
-                SET estado = :estado, updated_at = :updated_at
+                SET estado = :estado, updated_at = :updated_at, usuario_upd = :usuario_upd
                 WHERE id = :id";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':estado', $estado);
+        $stmt->bindValue(':usuario_upd', $usuario_upd);
         $stmt->bindValue(':updated_at', $this->nowLima);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
