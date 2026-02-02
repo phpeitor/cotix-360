@@ -32,6 +32,14 @@ DB_PASS=password
 4. **Ejecutar el proyecto**
 ```bash
 htdocs/cotix-360
+php -S localhost:8000
 ```
+
+## 📦 Dependencias principales
+
+dompdf/dompdf → Generación de PDFs
+phpoffice/phpspreadsheet → Exportación a Excel
+
+vlucas/phpdotenv → Manejo de variables de entorno
 [![Video](https://img.youtube.com/vi/G7heyYn1CBk/0.jpg)](https://www.youtube.com/watch?v=G7heyYn1CBk)  
 [Ver demo](https://www.youtube.com/watch?v=G7heyYn1CBk)
