@@ -39,7 +39,6 @@ php -S localhost:8000
 
 + dompdf/dompdf → Generación PDF
 + phpoffice/phpspreadsheet → Importar Excel
-
-vlucas/phpdotenv → Manejo de variables de entorno
++ vlucas/phpdotenv → Manejo de variables de entorno
 [![Video](https://img.youtube.com/vi/G7heyYn1CBk/0.jpg)](https://www.youtube.com/watch?v=G7heyYn1CBk)  
 [Ver demo](https://www.youtube.com/watch?v=G7heyYn1CBk)
