@@ -350,12 +350,17 @@ function decimalAdjust(type, value, exp) {
 }
 
 let ES_ADMIN = false;
+let CARGO = 0;
+let LISTA_PERMISOS = [];
 
 fetch('config/permisos-js.php')
     .then(r => r.json())
-    .then(permisos => {
-        ES_ADMIN = permisos[0] === '*';
-		console.log('Permisos:', permisos);
+    .then(data => {
+
+        ES_ADMIN = data.permisos[0] === '*';
+        LISTA_PERMISOS = data.permisos;
+		CARGO = data.rol[0];
+		
     })
     .catch(err => console.error('Permisos:', err));
 
@@ -368,8 +373,7 @@ function validarTdAdmin(tr) {
 
 function aplicarPermisosAdmin() {
     document.querySelectorAll(".isadmin").forEach(el => {
-		console.log('ES_ADMIN:', ES_ADMIN);
-        el.style.display = ES_ADMIN ? "" : "none";
+        el.style.display = ES_ADMIN || CARGO==3 ? "" : "none";
     });
 }
 

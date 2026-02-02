@@ -16,13 +16,22 @@ $permisosJson = json_decode(
 );
 
 if (!isset($permisosJson[$rol])) {
-    echo json_encode([]);
+    echo json_encode([
+        'rol' => $rol,
+        'permisos' => []
+    ]);
     exit;
 }
 
 if ($permisosJson[$rol]['acceso'] === '*') {
-    echo json_encode(['*']);
+    echo json_encode([
+        'rol' => $rol,
+        'permisos' => ['*']
+    ]);
     exit;
 }
 
-echo json_encode($permisosJson[$rol]['acceso']);
+echo json_encode([
+    'rol' => $rol,
+    'permisos' => $permisosJson[$rol]['acceso']
+]);

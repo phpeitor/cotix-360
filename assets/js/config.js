@@ -51,8 +51,9 @@
 
 		fetch('config/permisos-js.php')
 		.then(r => r.json())
-		.then(permisos => {
+		.then(data => {
 
+			const permisos = data.permisos;
 			const esAdmin = permisos[0] === '*';
 
 			/* ===============================

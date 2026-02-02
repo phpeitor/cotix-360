@@ -21,8 +21,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const cargo = row.cells[1].data; 
                     const badge = cargo == 1
-                        ? `<span class="badge badge-outline-dark rounded-pill">Admin</span>`
+                    ? `<span class="badge badge-outline-dark rounded-pill">Admin</span>`
+                    : cargo == 3
+                        ? `<span class="badge badge-outline-danger rounded-pill">Supervisor</span>`
                         : `<span class="badge badge-outline-secondary rounded-pill">Gestor</span>`;
+
 
                     return gridjs.html(`
                             <span>${cell}</span>

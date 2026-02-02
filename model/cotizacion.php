@@ -34,7 +34,7 @@ class Cotizacion {
     {
         $where = "c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)";
 
-        if ($_SESSION['session_cargo'] != 1) {
+        if (!in_array($_SESSION['session_cargo'], [1, 3])) {
             $where .= " AND c.usuario_id = :usuario_id";
         }
 
@@ -64,7 +64,7 @@ class Cotizacion {
         $stmt->bindValue(':fec_ini', $fec_ini);
         $stmt->bindValue(':fec_fin', $fec_fin);
 
-        if ($_SESSION['session_cargo'] != 1) {
+        if (!in_array($_SESSION['session_cargo'], [1, 3])) {
             $stmt->bindValue(':usuario_id', $_SESSION['session_id'], PDO::PARAM_INT);
         }
 

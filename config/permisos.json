@@ -12,5 +12,13 @@
       "pdf_cotizacion.php",
       "calculo.php"
     ]
+  },
+  "3": {
+    "nombre": "Supervisor",
+    "acceso": [
+      "home.php",
+      "cotizaciones.php",
+      "form_cotizacion.php"
+    ]
   }
 }

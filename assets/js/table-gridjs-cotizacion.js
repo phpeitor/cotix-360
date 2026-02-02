@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ? "¿Deseas aprobar esta cotización?"
             : "¿Deseas anular esta cotización?";
 
-        alertify.confirm(texto,
+        alertify.confirm("Confirmar",texto,
             () => actualizarEstado(id, accion),
             () => {}
         );
