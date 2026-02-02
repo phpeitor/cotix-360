@@ -4,10 +4,10 @@
 
 ## 📋 Requisitos
 
-PHP >= 8.0
-MySQL >= 5.7
-Composer >= 2.x
-Servidor web (Apache / Nginx / Laragon)
++PHP >= 8.0
++MySQL >= 5.7
++Composer >= 2.x
++Servidor web (Apache / Nginx / Laragon)
 
 Para utilizar este proyecto sigue estos pasos:
 
@@ -37,8 +37,8 @@ php -S localhost:8000
 
 ## 📦 Dependencias principales
 
-dompdf/dompdf → Generación de PDFs
-phpoffice/phpspreadsheet → Exportación a Excel
++dompdf/dompdf → Generación PDF
++phpoffice/phpspreadsheet → Importar Excel
 
 vlucas/phpdotenv → Manejo de variables de entorno
 [![Video](https://img.youtube.com/vi/G7heyYn1CBk/0.jpg)](https://www.youtube.com/watch?v=G7heyYn1CBk)  
