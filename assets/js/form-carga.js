@@ -50,6 +50,16 @@ document.addEventListener("DOMContentLoaded", () => {
       renderPagination(data.length);
   }
 
+ function initTooltips() {
+    const tooltipTriggerList = [].slice.call(
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+
+    tooltipTriggerList.forEach(el => {
+        new bootstrap.Tooltip(el);
+    });
+ }
+
   function renderCards(data) {
       container.innerHTML = "";
       const start = (page - 1) * perPage;
@@ -67,6 +77,8 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <a href="javascript:void(0);"
                                     class="btn btn-sm rounded-circle btn-icon btn-estado
                                             ${carga.estado == 1 ? 'btn-danger' : 'btn-success'}"
+                                    data-bs-toggle="tooltip" data-bs-title="${carga.estado == 1 ? 'Anular' : 'Activar'}"
+                                    title="${carga.estado == 1 ? 'Anular' : 'Activar'}"
                                     data-id="${carga.id}"
                                     data-estado="${carga.estado}">
                                     <i class="ti ${carga.estado == 1 ? 'ti-x' : 'ti-check'}"></i>
@@ -98,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
           `;
           container.innerHTML += card;
       });
+      initTooltips();
   }
 
   function renderPagination(totalItems) {
