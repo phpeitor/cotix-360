@@ -2,15 +2,6 @@
 [![forthebadge](http://forthebadge.com/images/badges/made-with-javascript.svg)](https://www.linkedin.com/in/drphp/)
 [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](https://www.linkedin.com/in/drphp/)
 
-## 📋 Requisitos
-
-+ PHP >= 8.0
-+ MySQL >= 5.7
-+ Composer >= 2.x
-+ Servidor web (Apache / Nginx / Laragon)
-
-Para utilizar este proyecto sigue estos pasos:
-
 ## 🚀 Quick Start
 
 1. **Clonar este repositorio**
@@ -35,7 +26,7 @@ htdocs/cotix-360
 php -S localhost:8000
 ```
 
-## 📦 Dependencias principales
+## 📦 Dependencias
 
 + dompdf → Generación PDF
 + phpspreadsheet → Importar Excel

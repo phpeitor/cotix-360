@@ -52,7 +52,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderCards(data) {
       container.innerHTML = "";
-
       const start = (page - 1) * perPage;
       const end = start + perPage;
       const items = data.slice(start, end);
@@ -60,9 +59,8 @@ document.addEventListener("DOMContentLoaded", () => {
       items.forEach(carga => {
           const card = `
             <div class="col-sm-6 col-lg-3">
-                <div class="card d-block">
+                <div class="card d-block  ${carga.estado == 1 ? 'bg-success bg-opacity-25' : 'bg-danger bg-opacity-25'}">
                     <div class="card-body">
-                    
                         <div class="d-flex mb-3 justify-content-between align-items-center">
                             <h5 class="header-title">${carga.nombre_file}</h5>
                             <div>
