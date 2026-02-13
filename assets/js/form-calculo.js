@@ -317,6 +317,14 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        if (!item.peso || parseFloat(item.peso) === 0) {
+            alertify.alert(
+                "Peso inválido",
+                "No se puede cotizar items con peso 0.<br>Por favor, comuníquese con el administrador"
+            );
+            return;
+        }
+
         if (itemAlreadyAdded(itemId)) {
             alertify.error("Este item ya fue agregado");
             return;
@@ -458,6 +466,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (rows.length === 0) {
             alertify.error("Debe agregar al menos un item para continuar");
             return;
+        }
+
+        for (const tr of rows) {
+            const peso = parseFloat(tr.dataset.peso);
+
+            if (!peso || peso === 0) {
+                alertify.alert(
+                    "Peso inválido",
+                    "No se puede cotizar items con peso 0.<br>Por favor, comuníquese con el administrador"
+                );
+                return;
+            }
         }
 
         const pesoTotal = getTotalPesoActual();

@@ -35,6 +35,14 @@ try {
             throw new Exception('Item inválido');
         }
 
+        $peso = (float) ($item['peso'] ?? 0);
+
+        if ($peso <= 0) {
+            throw new Exception(
+                'No se puede cotizar items con peso 0. Por favor, comuníquese con el administrador'
+            );
+        }
+
         $cotizacion->g_cotizacion_detalle([
             'cotizacion_id'   => $cotizacionId,
             'item_id'         => (int) $item['item_id'],
