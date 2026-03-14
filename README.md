@@ -1,6 +1,13 @@
 # Cotix360
 
+[![forthebadge](http://forthebadge.com/images/badges/made-with-javascript.svg)](https://www.linkedin.com/in/drphp/)
+[![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](https://www.linkedin.com/in/drphp/)
+
 Aplicacion web para gestion de usuarios, items y cotizaciones con calculo automatico de costos, flete, gastos y precio final.
+
+[![Video](https://img.youtube.com/vi/QzPLElgIzGA/0.jpg)](https://www.youtube.com/watch?v=QzPLElgIzGA)
+
+[▶ Ver demo en YouTube](https://www.youtube.com/watch?v=QzPLElgIzGA)
 
 ## Resumen
 
@@ -100,10 +107,6 @@ cotix/
 - Formato con separador de miles en precios y totales en:
 	- `assets/js/form-calculo.js`
 	- `assets/js/form-cotizacion.js`
-
-## Demo
-
-[Ver video demo](https://www.youtube.com/watch?v=QzPLElgIzGA)
 
 ## Licencia
 
