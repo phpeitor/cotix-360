@@ -16006,10 +16006,24 @@ const au = "Login Machine",
 				alignment: ei.Alignment.Center
 			}),
 			...rt
-		}), [B, Mt] = hl.useState(""), [Ht, Nt] = hl.useState(""), [Ct, at] = hl.useState(0), [Y, vt] = hl.useState(Hd), it = hl.useRef(null), ot = ei.useStateMachineInput(I, au, "isChecking"), yt = ei.useStateMachineInput(I, au, "numLook"), S = ei.useStateMachineInput(I, au, "trigSuccess"), Pt = ei.useStateMachineInput(I, au, "trigFail"), re = ei.useStateMachineInput(I, au, "isHandsUp");
+		}), [B, Mt] = hl.useState(""), [Ht, Nt] = hl.useState(""), [Ct, at] = hl.useState(0), [Y, vt] = hl.useState(Hd), it = hl.useRef(null), ne = hl.useRef(!1), ce = hl.useRef(!1), ot = ei.useStateMachineInput(I, au, "isChecking"), yt = ei.useStateMachineInput(I, au, "numLook"), S = ei.useStateMachineInput(I, au, "trigSuccess"), Pt = ei.useStateMachineInput(I, au, "trigFail"), re = ei.useStateMachineInput(I, au, "isHandsUp");
 		hl.useEffect(() => {
 			it?.current && !Ct && at(it.current.offsetWidth / 100)
 		}, [it]);
+		hl.useEffect(() => {
+			if (ne.current && Pt && typeof Pt.fire == "function") {
+				requestAnimationFrame(() => {
+					Pt.fire(), ne.current = !1
+				})
+			}
+		}, [Pt]);
+		hl.useEffect(() => {
+			if (ce.current && S && typeof S.fire == "function") {
+				requestAnimationFrame(() => {
+					S.fire(), ce.current = !1
+				})
+			}
+		}, [S]);
 		const xt = Dt => {
 				const It = Dt.target.value;
 				Mt(It), ot.value || (ot.value = !0);
@@ -16019,11 +16033,26 @@ const au = "Login Machine",
 			Yt = () => {
 				ot.value = !0, yt.value !== B.length * Ct && (yt.value = B.length * Ct)
 			};
+			const xm = (Dt, It = !1) => {
+				if (Dt && typeof Dt.fire == "function") {
+					requestAnimationFrame(() => Dt.fire());
+					return
+				}
+				It && (ne.current = !0)
+			};
+			const Sm = Dt => {
+				if (Dt && typeof Dt.fire == "function") {
+					requestAnimationFrame(() => Dt.fire());
+					return
+				}
+				ce.current = !0
+			};
 			const Gt = async (e) => {
 				e.preventDefault();
 				
 				vt("Checking...");
 				ot.value = true;
+				re.value = false;
 
 				const usuario = B.trim();
 				const password = Ht.trim();
@@ -16048,28 +16077,35 @@ const au = "Login Machine",
 					const data = await res.json();
 
 					if (data.ok) {
-						S.fire();
+						ot.value = false;
+						setTimeout(() => {
+							Sm(S)
+						}, 260);
 						alertify.success("✅ Acceso correcto, redirigiendo...");
 
 						vt("Ingresando...");
 
 						setTimeout(() => {
 							window.location.href = "home.php";
-						}, 1000);
+						}, 3200);
 
 					} else {
-						Pt.fire();
+						xm(Pt, !0);
 						alertify.error(data.message || "❌ Usuario o contraseña incorrectos");
+						setTimeout(() => {
+							ot.value = false;
+						}, 350);
 						vt(Hd);
 					}
 
 				} catch (err) {
-					Pt.fire();
+					xm(Pt, !0);
 					alertify.error("❌ Error al conectar con el servidor");
 					console.error(err);
+					setTimeout(() => {
+						ot.value = false;
+					}, 350);
 					vt(Hd);
-				} finally {
-					ot.value = false;
 				}
 			};
 
@@ -16104,6 +16140,7 @@ const au = "Login Machine",
 								className: "form-pass",
 								name: "password",
 								placeholder: "Password",
+								maxLength: 12,
 								value: Ht,
 								onFocus: () => re.value = !0,
 								onBlur: () => re.value = !1,
