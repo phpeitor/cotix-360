@@ -11,6 +11,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalPeruEl = document.getElementById("total_peru");
     const totalFactorEl = document.getElementById("total_factor");
     const LIMITE_PESO = 100;
+    const integerFormatter = new Intl.NumberFormat("en-US", {
+        maximumFractionDigits: 0
+    });
+    const decimal2Formatter = new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+    const decimal4Formatter = new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 4,
+        maximumFractionDigits: 4
+    });
+
+    function formatInt(value) {
+        return integerFormatter.format(Number(value) || 0);
+    }
+
+    function format2(value) {
+        return decimal2Formatter.format(Number(value) || 0);
+    }
+
+    function format4(value) {
+        return decimal4Formatter.format(Number(value) || 0);
+    }
+
     let fleteTable = [];
 
     fetch("controller/get_flete.php")
@@ -112,12 +136,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (rows.length === 0) {
             totalItemsEl.textContent = "0";
-            totalPesoEl.textContent = "0.00";
-            totalFobEl.textContent = "0.00";
-            totalFleteEl.textContent = "0.00";
-            totalGastoEl.textContent = "0.00";
-            totalPeruEl.textContent  = "0.00";
-            totalFactorEl.textContent = "0.0000";
+            totalPesoEl.textContent = format2(0);
+            totalFobEl.textContent = format2(0);
+            totalFleteEl.textContent = format2(0);
+            totalGastoEl.textContent = format2(0);
+            totalPeruEl.textContent  = format2(0);
+            totalFactorEl.textContent = format4(0);
             return;
         }
 
@@ -138,9 +162,9 @@ document.addEventListener("DOMContentLoaded", () => {
             totalFob   += precio_dscto * qty;
         });
 
-        totalItemsEl.textContent = totalItems;
-        totalPesoEl.textContent = totalPeso.toFixed(2);
-        totalFobEl.textContent = totalFob.toFixed(2);
+        totalItemsEl.textContent = formatInt(totalItems);
+        totalPesoEl.textContent = format2(totalPeso);
+        totalFobEl.textContent = format2(totalFob);
 
         const pesosPorPais = getPesoPorPais();
         let totalFlete = 0;
@@ -149,19 +173,19 @@ document.addEventListener("DOMContentLoaded", () => {
             totalFlete += calcularFletePorPais(pais, pesosPorPais[pais]);
         }
 
-        totalFleteEl.textContent = totalFlete.toFixed(2);
+        totalFleteEl.textContent = format2(totalFlete);
 
         const gasto = calcularGasto(totalFob);
-        totalGastoEl.textContent = gasto.toFixed(2);
+        totalGastoEl.textContent = format2(gasto);
 
         const totalPeru = totalFob + totalFlete + gasto;
-        totalPeruEl.textContent = totalPeru.toFixed(2);
+        totalPeruEl.textContent = format2(totalPeru);
 
         const rawFactor = totalFob > 0
             ? (gasto + totalFlete) / totalFob
             : 0;
 
-        totalFactorEl.textContent = rawFactor.toFixed(4);
+        totalFactorEl.textContent = format4(rawFactor);
 
         /* ==========================
         2️⃣ CÁLCULOS POR FILA
@@ -182,9 +206,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Precio Dscto
             tr.querySelector(".margen_dscto").textContent =
-                decimalAdjust('round',margen_dscto,'-2').toFixed(2);
+                format2(decimalAdjust('round',margen_dscto,'-2'));
             tr.querySelector(".precio_dscto").textContent =
-                decimalAdjust('round',precio_dscto,'-2').toFixed(2);
+                format2(decimalAdjust('round',precio_dscto,'-2'));
 
             // Factor PU
             const factorPU = decimalAdjust(
@@ -192,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 precio_dscto * decimalAdjust('round', rawFactor, '-4'),
                 '-2'
             );
-            tr.querySelector(".factor-precio").textContent = factorPU.toFixed(2);
+            tr.querySelector(".factor-precio").textContent = format2(factorPU);
             
             // Precio M
             const precioM = decimalAdjust(
@@ -200,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 precio_dscto + factorPU,
                 '-2'
             );
-            tr.querySelector(".precio-m").textContent = precioM.toFixed(2);
+            tr.querySelector(".precio-m").textContent = format2(precioM);
 
             // Utilidad
             const selectMargen = tr.querySelector(".margen-uti");
@@ -211,7 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 precioM * margenUti,
                 '-2'
             );
-            tr.querySelector(".utilidad").textContent = utilidad.toFixed(2);
+            tr.querySelector(".utilidad").textContent = format2(utilidad);
 
             // Precio Cliente
             const precioCliente = decimalAdjust(
@@ -220,7 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 '-2'
             );
             tr.querySelector(".precio-cliente").textContent =
-                precioCliente.toFixed(2);
+                format2(precioCliente);
         });
     }
 
@@ -386,7 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </td>
 
             <td><span class="text-muted fs-12">Peso</span><h5 class="fs-14 mt-1 fw-normal">${item.peso}</h5></td>
-            <td><span class="text-muted fs-12">MSRP</span><h5 class="fs-14 mt-1 fw-normal">${item.precio.toFixed(2)} ${item.moneda}</h5></td>
+            <td><span class="text-muted fs-12">MSRP</span><h5 class="fs-14 mt-1 fw-normal">${format2(item.precio)} ${item.moneda}</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Valor</span><h5 class="fs-14 mt-1 fw-normal margen">0.00</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Dscto</span><h5 class="fs-14 mt-1 fw-normal margen_dscto">0.00</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Precio Dscto</span><h5 class="fs-14 mt-1 fw-normal precio_dscto">0.00</h5></td>
