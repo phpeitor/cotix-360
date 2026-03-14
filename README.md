@@ -3,7 +3,7 @@
 [![forthebadge](http://forthebadge.com/images/badges/made-with-javascript.svg)](https://www.linkedin.com/in/drphp/)
 [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](https://www.linkedin.com/in/drphp/)
 
-Aplicacion web para gestion de usuarios, items y cotizaciones con calculo automatico de costos, flete, gastos y precio final.
+APP web para gestion de usuarios, items y cotizaciones con calculo automatico de costos, flete, gastos y precios.
 
 [![Video](https://img.youtube.com/vi/QzPLElgIzGA/0.jpg)](https://www.youtube.com/watch?v=QzPLElgIzGA)
 
@@ -100,7 +100,7 @@ cotix/
 5. Guardado de cotizacion y consulta historica.
 6. Generacion de PDF.
 
-## Novedades de Esta Version
+## Novedades de esta Version
 
 - Mejoras en animaciones de login (fallo y exito).
 - Delay de redireccion en login exitoso para visualizar animacion.
