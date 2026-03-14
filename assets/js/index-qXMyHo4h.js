@@ -16080,14 +16080,14 @@ const au = "Login Machine",
 						ot.value = false;
 						setTimeout(() => {
 							Sm(S)
-						}, 260);
+						}, 320);
 						alertify.success("✅ Acceso correcto, redirigiendo...");
 
 						vt("Ingresando...");
 
 						setTimeout(() => {
 							window.location.href = "home.php";
-						}, 3200);
+						}, 3600);
 
 					} else {
 						xm(Pt, !0);
