@@ -45,9 +45,9 @@ class Cotizacion {
                 c.estado,
                 c.created_at,
                 c.updated_at,
-                COUNT(cd.id) AS total_items,
+                COALESCE(SUM(cd.cantidad), 0) AS total_items,
                 GROUP_CONCAT(
-                    CONCAT(cd.modelo, ': ', cd.descripcion)
+                    CONCAT(cd.modelo, ' x ', COALESCE(cd.cantidad, 0))
                     ORDER BY cd.modelo
                     SEPARATOR ' | '
                 ) AS items
@@ -69,7 +69,167 @@ class Cotizacion {
         }
 
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!$rows) {
+            return [];
+        }
+
+        $ids = array_map(static fn(array $r): int => (int)$r['id'], $rows);
+        $detailsByCotizacion = $this->getDetallesForCotizaciones($ids);
+        $fleteTable = $this->getFleteTable();
+        $gastoTable = $this->getGastoTable();
+
+        foreach ($rows as &$row) {
+            $cotizacionId = (int)$row['id'];
+            $detalles = $detailsByCotizacion[$cotizacionId] ?? [];
+
+            $totalFob = 0.0;
+            $pesosPorPais = [];
+
+            foreach ($detalles as $detalle) {
+                $qty = (int)$detalle['cantidad'];
+                $peso = (float)$detalle['peso'];
+                $precio = (float)$detalle['precio_unitario'];
+                $margen = $this->getMargenByGrupo($detalle['grupo'] ?? '');
+                $precioDscto = $precio * (1 - $margen);
+
+                $totalFob += $precioDscto * $qty;
+
+                $pais = $this->normalizarPais($detalle['pais_origen'] ?? '');
+                if (!isset($pesosPorPais[$pais])) {
+                    $pesosPorPais[$pais] = 0.0;
+                }
+                $pesosPorPais[$pais] += $peso * $qty;
+            }
+
+            $totalFlete = 0.0;
+            foreach ($pesosPorPais as $pais => $pesoTotal) {
+                $totalFlete += $this->calcularFletePorPais($pais, (float)$pesoTotal, $fleteTable);
+            }
+
+            $gasto = $this->calcularGasto($totalFob, $gastoTable);
+            $row['total_peru'] = round($totalFob + $totalFlete + $gasto, 2);
+        }
+        unset($row);
+
+        return $rows;
+    }
+
+    private function getDetallesForCotizaciones(array $ids): array
+    {
+        if (!$ids) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $sql = "SELECT cotizacion_id, cantidad, peso, precio_unitario, grupo, pais_origen
+                FROM cotizacion_detalle
+                WHERE cotizacion_id IN ($placeholders)";
+
+        $stmt = $this->conn->prepare($sql);
+        foreach (array_values($ids) as $idx => $id) {
+            $stmt->bindValue($idx + 1, (int)$id, PDO::PARAM_INT);
+        }
+        $stmt->execute();
+
+        $out = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $cid = (int)$row['cotizacion_id'];
+            if (!isset($out[$cid])) {
+                $out[$cid] = [];
+            }
+            $out[$cid][] = $row;
+        }
+
+        return $out;
+    }
+
+    private function getFleteTable(): array
+    {
+        $sql = "SELECT pais, peso, flete FROM flete";
+        return $this->conn->query($sql)->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    private function getGastoTable(): array
+    {
+        $sql = "SELECT valor_inicial, valor_final, costo FROM gastos ORDER BY valor_inicial ASC";
+        return $this->conn->query($sql)->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    private function getMargenByGrupo(?string $grupo): float
+    {
+        if (!$grupo) {
+            return 0.32;
+        }
+
+        if (preg_match('/\d+/', (string)$grupo, $m) !== 1) {
+            return 0.32;
+        }
+
+        $n = (int)$m[0];
+        $map = [
+            0 => 0.00,
+            1 => 0.15,
+            2 => 0.25,
+            3 => 0.28,
+            4 => 0.30,
+            5 => 0.31,
+            6 => 0.33,
+            7 => 0.35,
+            8 => 0.36,
+            9 => 0.40,
+            10 => 0.45,
+            11 => 0.50,
+            12 => 0.55,
+        ];
+
+        return $map[$n] ?? 0.32;
+    }
+
+    private function normalizarPais(?string $pais): string
+    {
+        return strtoupper(trim((string)$pais)) === 'USA' ? 'USA' : 'CHINA';
+    }
+
+    private function calcularFletePorPais(string $pais, float $pesoTotal, array $fleteTable): float
+    {
+        $paisCalc = $this->normalizarPais($pais);
+        $tarifas = array_values(array_filter($fleteTable, static fn(array $r): bool => ($r['pais'] ?? '') === $paisCalc));
+
+        if (!$tarifas) {
+            $tarifas = array_values(array_filter($fleteTable, static fn(array $r): bool => ($r['pais'] ?? '') === 'CHINA'));
+        }
+
+        if (!$tarifas) {
+            return 0.0;
+        }
+
+        usort($tarifas, static fn(array $a, array $b): int => ((float)$a['peso']) <=> ((float)$b['peso']));
+
+        foreach ($tarifas as $row) {
+            if ($pesoTotal <= (float)$row['peso']) {
+                return (float)$row['flete'];
+            }
+        }
+
+        return (float)$tarifas[count($tarifas) - 1]['flete'];
+    }
+
+    private function calcularGasto(float $totalFob, array $gastoTable): float
+    {
+        if (!$gastoTable) {
+            return 0.0;
+        }
+
+        foreach ($gastoTable as $row) {
+            $min = (float)$row['valor_inicial'];
+            $max = (float)$row['valor_final'];
+            if ($totalFob >= $min && $totalFob <= $max) {
+                return (float)$row['costo'];
+            }
+        }
+
+        return (float)$gastoTable[count($gastoTable) - 1]['costo'];
     }
 
     public function obtenerPorHash(string $hash): ?array {

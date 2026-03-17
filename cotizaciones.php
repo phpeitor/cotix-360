@@ -63,6 +63,7 @@
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
                                 
                                 <div class="mt-3 mt-sm-0">
+
                                     <form action="javascript:void(0);">
                                         <div class="row g-2 mb-0 align-items-center">
                                             
@@ -117,6 +118,176 @@
             </footer>
         </div>
     </div>
+    
+     <!-- Info Header Modal -->
+    <div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="max-width: 760px;">
+            <div class="modal-content">
+                <div class="modal-header text-bg-info border-0">
+                    <h4 class="modal-title" id="info-header-modalLabel">
+                        Total 🇵🇪: <span id="modal-total-peru"></span>
+                    </h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 align-items-center">
+
+                        <!-- Tasa Anual -->
+                        <div class="col-md-4">
+                            <h6 class="text-muted fw-semibold mb-2 text-center">Tasa Anual</h6>
+                            <div class="input-step border bg-body-secondary p-1 rounded-pill d-flex justify-content-center overflow-visible">
+                                <button type="button" id="btn-anual-minus" class="minus bg-light text-dark border-0 rounded-circle fs-20 lh-1">-</button>
+                                <input type="number" id="input-tasa-anual" class="text-dark text-center border-0 bg-body-secondary rounded" value="25" min="1" max="50" readonly style="width:60px" />
+                                <button type="button" id="btn-anual-plus" class="plus bg-light text-dark border-0 rounded-circle fs-20 lh-1">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Tasa Mensual -->
+                        <div class="col-md-4">
+                            <h6 class="text-muted fw-semibold mb-2 text-center">Tasa Mensual</h6>
+                            <div class="d-flex gap-2 align-items-center justify-content-center">
+                                <div class="avatar-sm flex-shrink-0">
+                                    <span class="avatar-title bg-success-subtle text-success rounded-circle fs-22">
+                                        <iconify-icon icon="solar:banknote-2-bold-duotone"></iconify-icon>
+                                    </span>
+                                </div>
+                                <h4 class="mb-0 fw-bold" id="display-tasa-mensual">-</h4>
+                            </div>
+                        </div>
+
+                        <!-- Cuota -->
+                        <div class="col-md-4">
+                            <h6 class="text-muted fw-semibold mb-2 text-center">Cuota</h6>
+                            <div class="d-flex gap-2 align-items-center justify-content-center">
+                                <div class="avatar-sm flex-shrink-0">
+                                    <span class="avatar-title bg-warning-subtle text-warning rounded-circle fs-22">
+                                        <iconify-icon icon="solar:wallet-money-bold-duotone"></iconify-icon>
+                                    </span>
+                                </div>
+                                <h4 class="mb-0 fw-bold" id="display-cuota">-</h4>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <hr class="my-3" />
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered align-middle mb-0" id="tabla-financiamiento">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-center">Tiempo</th>
+                                    <th class="text-end">Saldo</th>
+                                    <th class="text-end">Amortización</th>
+                                    <th class="text-end">Interés</th>
+                                    <th class="text-end">Cuota</th>
+                                </tr>
+                            </thead>
+                            <tbody id="financiamiento-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-info">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div><!-- /.modal -->
+
+    <script>
+    (function () {
+        const modalEl = document.getElementById('info-header-modal');
+
+        modalEl.addEventListener('show.bs.modal', function (e) {
+            const btn = e.relatedTarget;
+            const total = btn ? parseFloat(btn.dataset.totalPeru || 0) : 0;
+
+            document.getElementById('modal-total-peru').textContent =
+                total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            modalEl._totalPeru = total;
+            calcular();
+        });
+
+        const inputAnual  = document.getElementById('input-tasa-anual');
+        const dispMensual = document.getElementById('display-tasa-mensual');
+        const dispCuota   = document.getElementById('display-cuota');
+        const tablaBody   = document.getElementById('financiamiento-body');
+
+        document.getElementById('btn-anual-minus').addEventListener('click', function () {
+            const v = parseInt(inputAnual.value);
+            if (v > parseInt(inputAnual.min)) {
+                inputAnual.value = v - 1;
+                calcular();
+            }
+        });
+
+        document.getElementById('btn-anual-plus').addEventListener('click', function () {
+            const v = parseInt(inputAnual.value);
+            if (v < parseInt(inputAnual.max)) {
+                inputAnual.value = v + 1;
+                calcular();
+            }
+        });
+
+        function calcular() {
+            const iAnual   = parseInt(inputAnual.value) / 100;         // e.g. 0.25
+            const iMensual = Math.pow(1 + iAnual, 1 / 12) - 1;        // =((1+B2)^(1/12))-1
+            const total    = modalEl._totalPeru || 0;
+            const n        = 5;                                        // cuotas fijas
+            // =PAGO(i_mensual, n, -total)  →  PMT
+            const cuota    = (iMensual * total) / (1 - Math.pow(1 + iMensual, -n));
+
+            dispMensual.textContent = (iMensual * 100).toFixed(3) + '%';
+            dispCuota.textContent   = 'S/ ' + cuota.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            renderTabla(total, iMensual, cuota, n);
+        }
+
+        function renderTabla(total, iMensual, cuota, n) {
+            tablaBody.innerHTML = '';
+
+            const formatMoney = (v) => 'S/ ' + v.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            tablaBody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td class="text-center">0</td>
+                    <td class="text-end">${formatMoney(total)}</td>
+                    <td class="text-end">-</td>
+                    <td class="text-end">-</td>
+                    <td class="text-end">-</td>
+                </tr>
+            `);
+
+            let saldo = total;
+
+            for (let t = 1; t <= n; t++) {
+                const interes = saldo * iMensual;
+                const amortizacion = cuota - interes;
+                saldo = saldo - amortizacion;
+
+                const saldoMostrar = t === n ? 0 : saldo;
+
+                tablaBody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td class="text-center">${t}</td>
+                        <td class="text-end">${formatMoney(saldoMostrar)}</td>
+                        <td class="text-end">${formatMoney(amortizacion)}</td>
+                        <td class="text-end">${formatMoney(interes)}</td>
+                        <td class="text-end">${formatMoney(cuota)}</td>
+                    </tr>
+                `);
+            }
+        }
+    })();
+    </script>
 
     <div class="offcanvas offcanvas-end" tabindex="-1" id="theme-settings-offcanvas">
         <div class="d-flex align-items-center gap-2 px-3 py-3 offcanvas-header border-bottom border-dashed">

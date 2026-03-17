@@ -76,7 +76,7 @@ if (!tieneAcceso($archivoActual)) {
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarExtendedUI" aria-expanded="false" aria-controls="sidebarExtendedUI" class="side-nav-link">
                     <span class="menu-icon"><i class="ti ti-box-multiple-3"></i></span>
-                    <span class="menu-text"> Templates X </span>
+                    <span class="menu-text"> Templatex </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarExtendedUI">

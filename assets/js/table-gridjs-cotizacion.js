@@ -1,7 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    function initTooltips() {
+        document.querySelectorAll('[data-bs-toggle="tooltip"], .btn-tooltip').forEach(el => {
+            if (!bootstrap.Tooltip.getInstance(el)) {
+                new bootstrap.Tooltip(el);
+            }
+        });
+    }
+
     const observer = new MutationObserver(() => {
         aplicarPermisosAdmin();
+        initTooltips();
     });
 
     observer.observe(document.getElementById("table-gridjs"), {
@@ -51,8 +60,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 id: "items",
                 name: "Items",
                 width: "280px",
-                formatter: (cell) => renderItems(cell)
+                formatter: (cell, row) => renderItems(cell, row)
             },
+
+            { id: "total_items", name: "", hidden: true },
+            { id: "total_peru", name: "", hidden: true },
 
             { id: "created_at", name: "Fecha", width: "150px" },
 
@@ -124,11 +136,16 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     }
 
-    function renderItems(items) {
+    function renderItems(items, row) {
         if (!items) return "";
 
         const arr = items.split("|").map(i => i.trim());
-        const total = arr.length;
+        const total = Number(row?.cells?.[4]?.data ?? arr.length);
+        const totalPeru = Number(row?.cells?.[5]?.data ?? 0);
+        const totalPeruFmt = totalPeru.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
 
         if (total === 1) {
             return gridjs.html(`<span>${arr[0]}</span>`);
@@ -142,6 +159,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 <small class="text-muted fw-semibold">
                     Total items: ${total}
                 </small>
+                <br>
+                <small class="text-muted fw-semibold">
+                    Total 🇵🇪: ${totalPeruFmt}
+                </small>
             </div>
         `);
     }
@@ -149,12 +170,14 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderAcciones(_, row) {
         const id = row.cells[0].data;
         const estado = row.cells[2].data;
+        const totalPeru = Number(row?.cells?.[5]?.data ?? 0);
         const hashId = md5(String(id));
 
         let botones = `
             <a href="form_cotizacion.php?id=${hashId}" 
                 class="btn btn-soft-primary btn-icon btn-sm rounded-circle"
-                title="Ver cotización"
+                data-bs-toggle="tooltip"
+                data-bs-title="Ver"
             >
                 <i class="ti ti-eye"></i>
             </a>
@@ -165,6 +188,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button class="btn btn-soft-danger btn-icon btn-sm rounded-circle btn-estado isadmin"
                         data-id="${id}"
                         data-accion="anular"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="Anular"
                         title="Anular">
                     <i class="ti ti-x"></i>
                 </button>
@@ -183,6 +208,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-estado isadmin"
                         data-id="${id}"
                         data-accion="aprobar"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="Aprobar"
                         title="Aprobar">
                     <i class="ti ti-check"></i>
                 </button>
@@ -192,6 +219,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-estado isadmin"
                         data-id="${id}"
                         data-accion="aprobar"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="Aprobar"
                         title="Aprobar">
                     <i class="ti ti-check"></i>
                 </button>
@@ -199,8 +228,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button class="btn btn-soft-danger btn-icon btn-sm rounded-circle btn-estado"
                         data-id="${id}"
                         data-accion="anular"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="Anular"
                         title="Anular">
                     <i class="ti ti-x"></i>
+                </button>
+            `;
+        }
+
+        if (totalPeru > 15000) {
+            botones += `
+                <button class="btn btn-soft-warning btn-icon btn-sm rounded-circle btn-tooltip"
+                        data-bs-toggle="modal"
+                        data-bs-target="#info-header-modal"
+                        data-bs-title="Financiar"
+                        data-total-peru="${totalPeru}"
+                        title="Financiar">
+                    <i class="ti ti-currency-dollar"></i>
                 </button>
             `;
         }
