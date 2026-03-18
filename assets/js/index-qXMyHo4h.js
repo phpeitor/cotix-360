@@ -16006,7 +16006,7 @@ const au = "Login Machine",
 				alignment: ei.Alignment.Center
 			}),
 			...rt
-		}), [B, Mt] = hl.useState(""), [Ht, Nt] = hl.useState(""), [Ct, at] = hl.useState(0), [Y, vt] = hl.useState(Hd), it = hl.useRef(null), ne = hl.useRef(!1), ce = hl.useRef(!1), ot = ei.useStateMachineInput(I, au, "isChecking"), yt = ei.useStateMachineInput(I, au, "numLook"), S = ei.useStateMachineInput(I, au, "trigSuccess"), Pt = ei.useStateMachineInput(I, au, "trigFail"), re = ei.useStateMachineInput(I, au, "isHandsUp");
+		}), [B, Mt] = hl.useState(""), [Ht, Nt] = hl.useState(""), [Ct, at] = hl.useState(0), [Y, vt] = hl.useState(Hd), [_showReq, _setShowReq] = hl.useState(!1), it = hl.useRef(null), ne = hl.useRef(!1), ce = hl.useRef(!1), ot = ei.useStateMachineInput(I, au, "isChecking"), yt = ei.useStateMachineInput(I, au, "numLook"), S = ei.useStateMachineInput(I, au, "trigSuccess"), Pt = ei.useStateMachineInput(I, au, "trigFail"), re = ei.useStateMachineInput(I, au, "isHandsUp");
 		hl.useEffect(() => {
 			it?.current && !Ct && at(it.current.offsetWidth / 100)
 		}, [it]);
@@ -16026,12 +16026,12 @@ const au = "Login Machine",
 		}, [S]);
 		const xt = Dt => {
 				const It = Dt.target.value;
-				Mt(It), ot.value || (ot.value = !0);
+				Mt(It), ot && (ot.value || (ot.value = !0));
 				const ae = It.length;
-				yt.value = ae * Ct
+				yt && (yt.value = ae * Ct)
 			},
 			Yt = () => {
-				ot.value = !0, yt.value !== B.length * Ct && (yt.value = B.length * Ct)
+				ot && (ot.value = !0), yt && yt.value !== B.length * Ct && (yt.value = B.length * Ct)
 			};
 			const xm = (Dt, It = !1) => {
 				if (Dt && typeof Dt.fire == "function") {
@@ -16054,15 +16054,17 @@ const au = "Login Machine",
 				const password = Ht.trim();
 
 				if (!usuario || !password) {
+					_setShowReq(!0);
 					alertify.warning("⚠️ Ingrese usuario y contraseña");
 					return;
 				}
+				_setShowReq(!1);
 
-				if (ot.value) return;
+				if (ot && ot.value) return;
 				
 				vt("Checking...");
-				ot.value = true;
-				re.value = false;
+				ot && (ot.value = !0);
+				re && (re.value = !1);
 
 				const formData = new FormData();
 				formData.append("usuario", usuario);
@@ -16091,7 +16093,7 @@ const au = "Login Machine",
 					} else {
 						xm(Pt, !0);
 						alertify.error(data.message || "❌ Usuario o contraseña incorrectos");
-						ot.value = false;
+						ot && (ot.value = !1);
 						vt(Hd);
 					}
 
@@ -16100,7 +16102,7 @@ const au = "Login Machine",
 					alertify.error("❌ Error al conectar con el servidor");
 					console.error(err);
 					setTimeout(() => {
-						ot.value = false;
+						ot && (ot.value = !1);
 					}, 350);
 					vt(Hd);
 				}
@@ -16122,30 +16124,30 @@ const au = "Login Machine",
 						children: [Rn.jsx("label", {
 							children: Rn.jsx("input", {
 								type: "text",
-								className: "form-username" + (!B.trim() && ot.value ? " input-error" : ""),
+								className: "form-username" + (_showReq && !B.trim() ? " input-error" : ""),
 								name: "username",
 								placeholder: "Username",
 								onFocus: Yt,
 								value: B,
 								onChange: xt,
-								onBlur: () => ot.value = !1,
+								onBlur: () => ot && (ot.value = !1),
 								ref: it
 							})
 						}), Rn.jsx("label", {
 							children: Rn.jsx("input", {
 								type: "password",
-								className: "form-pass" + (!Ht.trim() && ot.value ? " input-error" : ""),
+								className: "form-pass" + (_showReq && !Ht.trim() ? " input-error" : ""),
 								name: "password",
 								placeholder: "Password",
 								maxLength: 12,
 								value: Ht,
-								onFocus: () => re.value = !0,
-								onBlur: () => re.value = !1,
+								onFocus: () => re && (re.value = !0),
+								onBlur: () => re && (re.value = !1),
 								onChange: Dt => Nt(Dt.target.value)
 							})
 						}), Rn.jsx("button", {
 							className: "login-btn",
-							disabled: ot.value,
+							disabled: !!(ot && ot.value),
 							children: Y
 						})]
 					})
