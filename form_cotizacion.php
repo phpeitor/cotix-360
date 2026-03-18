@@ -93,7 +93,9 @@
                                             </div>
 
                                             <div>
-                                                <p class="text-dark fw-medium fs-12 mb-0"><span id="estado"></span></p>
+                                                <p class="text-dark fw-medium fs-12 mb-0">
+                                                    <span id="estado"></span>
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -121,7 +123,7 @@
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-broken" class="text-info"></iconify-icon> <span class="text-dark">Gastos : </span> <span id="total_gasto">0.00</span></p>
                                             </div>
                                             <div class="col-lg-2 col-4 border-end">
-                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total 🇵🇪: </span> <span id="total_peru">0.00</span></p>
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total 🇵🇪: </span> <span id="total_peru">0.00</span> <span id="cuota_estado" class="ms-1 text-success" data-bs-toggle="tooltip" data-bs-title="Cuota" title="Cuota"></span></p>
                                             </div>
                                             <div class="col-lg-2 col-4 border-end">
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:course-up-bold" class="text-danger"></iconify-icon> <span class="text-dark">Factor: </span> <span id="total_factor">0.00</span></p>

@@ -70,6 +70,11 @@ foreach ($pesosPorPais as $pais => $pesoPais) {
 }
 $gasto = CotizacionCalc::calcularGasto($gastoTable, $totalFob);
 $totalPeru = $totalFob + $flete + $gasto;
+$cuota = isset($cotizacion['cuota']) && $cotizacion['cuota'] !== null
+    ? (float)$cotizacion['cuota']
+    : 0.0;
+$mostrarFinanciamiento = $cuota > 0;
+$totalFinal = $totalPeru + $cuota;
 $rawFactor = $totalFob ? ($flete + $gasto) / $totalFob : 0;
 
 /* === Cálculo por item === */
@@ -230,6 +235,8 @@ ob_start();
     <?php if ($isAdmin): ?><strong>Flete:</strong> <?= number_format($flete,2) ?><br><?php endif; ?>
     <?php if ($isAdmin): ?><strong>Gasto:</strong> <?= number_format($gasto,2) ?><br><?php endif; ?>
     <?php if ($isAdmin): ?><strong>Total Perú:</strong> <?= number_format($totalPeru,2) ?><br><?php endif; ?>
+    <?php if ($isAdmin && $mostrarFinanciamiento): ?><strong>Cuota:</strong> <?= number_format($cuota,2) ?><br><?php endif; ?>
+    <?php if ($isAdmin && $mostrarFinanciamiento): ?><strong>Total Final:</strong> <?= number_format($totalFinal,2) ?><br><?php endif; ?>
     <?php if ($isAdmin): ?><strong>Factor:</strong> <?= number_format($rawFactor,4) ?><?php endif; ?>
 </p>
 </body>

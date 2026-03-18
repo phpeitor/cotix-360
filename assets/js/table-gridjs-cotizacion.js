@@ -65,6 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             { id: "total_items", name: "", hidden: true },
             { id: "total_peru", name: "", hidden: true },
+            { id: "cuota", name: "", hidden: true },
 
             { id: "created_at", name: "Fecha", width: "150px" },
 
@@ -142,7 +143,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const arr = items.split("|").map(i => i.trim());
         const total = Number(row?.cells?.[4]?.data ?? arr.length);
         const totalPeru = Number(row?.cells?.[5]?.data ?? 0);
+        const cuotaRaw = row?.cells?.[6]?.data;
+        const tieneCuota = cuotaRaw !== null && cuotaRaw !== "" && !Number.isNaN(Number(cuotaRaw));
+        const cuota = tieneCuota ? Number(cuotaRaw) : 0;
+        const totalFinal = totalPeru + cuota;
+
         const totalPeruFmt = totalPeru.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        const cuotaFmt = cuota.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        const totalFinalFmt = totalFinal.toLocaleString("en-US", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
@@ -161,8 +177,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 </small>
                 <br>
                 <small class="text-muted fw-semibold">
-                    Total 🇵🇪: ${totalPeruFmt}
+                    Total 🇵🇪: $ ${totalPeruFmt}
                 </small>
+                ${tieneCuota ? `
+                    <br>
+                    <small class="text-muted fw-semibold">
+                        Cuota: $ ${cuotaFmt}
+                    </small>
+                    <br>
+                    <small class="text-muted fw-semibold">
+                        Total Final: $ ${totalFinalFmt}
+                    </small>
+                ` : ""}
             </div>
         `);
     }

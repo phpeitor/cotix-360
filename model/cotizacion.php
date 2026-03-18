@@ -45,6 +45,7 @@ class Cotizacion {
                 c.estado,
                 c.created_at,
                 c.updated_at,
+                c.cuota,
                 COALESCE(SUM(cd.cantidad), 0) AS total_items,
                 GROUP_CONCAT(
                     CONCAT(cd.modelo, ' x ', COALESCE(cd.cantidad, 0))
@@ -56,7 +57,7 @@ class Cotizacion {
             LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
             WHERE $where
             GROUP BY
-                c.id, p.usuario, c.estado, c.created_at, c.updated_at
+                c.id, p.usuario, c.estado, c.created_at, c.updated_at, c.cuota
             ORDER BY c.id DESC
         ";
 

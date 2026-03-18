@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const usuarioEl = document.getElementById("usuario");
     const fechaEl   = document.getElementById("fecha");
     const estadoEl  = document.getElementById("estado");
+    const cuotaEstadoEl = document.getElementById("cuota_estado");
     const cotizacionIdEl = document.getElementById("cotizacion_id");
     const integerFormatter = new Intl.NumberFormat("en-US", {
         maximumFractionDigits: 0
@@ -342,6 +343,16 @@ document.addEventListener("DOMContentLoaded", () => {
         fechaEl.textContent = cotizacion.created_at ?? "";;
         estadoEl.textContent = cotizacion.estado ?? "";;
         cotizacionIdEl.textContent = cotizacion.id ?? "";
+
+        const cuotaValida =
+            cotizacion.cuota !== null &&
+            cotizacion.cuota !== "" &&
+            !Number.isNaN(Number(cotizacion.cuota));
+
+        cuotaEstadoEl.textContent = cuotaValida
+            ? `+ $ ${format2(cotizacion.cuota)}`
+            : "";
+
         setEstadoIcon(cotizacion.estado);
     }
 
