@@ -225,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <i class="ti ti-check"></i>
                 </button>
 
-                <button class="btn btn-soft-danger btn-icon btn-sm rounded-circle btn-estado"
+                <button class="btn btn-soft-danger btn-icon btn-sm rounded-circle btn-estado isadmin"
                         data-id="${id}"
                         data-accion="anular"
                         data-bs-toggle="tooltip"
@@ -238,10 +238,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (totalPeru > 15000) {
             botones += `
-                <button class="btn btn-soft-warning btn-icon btn-sm rounded-circle btn-tooltip"
+                <button class="btn btn-soft-warning btn-icon btn-sm rounded-circle btn-tooltip isadmin"
                         data-bs-toggle="modal"
                         data-bs-target="#info-header-modal"
                         data-bs-title="Financiar"
+                        data-cotizacion-id="${id}"
                         data-total-peru="${totalPeru}"
                         title="Financiar">
                     <i class="ti ti-currency-dollar"></i>
@@ -289,6 +290,187 @@ document.addEventListener("DOMContentLoaded", () => {
             grid.forceRender();
         })
         .catch(() => alertify.error("Error de conexión"));
+    }
+
+    // Financiamiento modal
+    const modalEl = document.getElementById("info-header-modal");
+    if (modalEl) {
+        const inputAnual = document.getElementById("input-tasa-anual");
+        const dispMensual = document.getElementById("display-tasa-mensual");
+        const dispCuota = document.getElementById("display-cuota");
+        const tablaBody = document.getElementById("financiamiento-body");
+        const btnMinus = document.getElementById("btn-anual-minus");
+        const btnPlus = document.getElementById("btn-anual-plus");
+        const btnGuardar = document.getElementById("btn-guardar-financiamiento");
+
+        modalEl.addEventListener("show.bs.modal", async (e) => {
+            const btn = e.relatedTarget;
+            const cotizacionId = btn ? parseInt(btn.dataset.cotizacionId || 0, 10) : 0;
+            const total = btn ? parseFloat(btn.dataset.totalPeru || 0) : 0;
+
+            document.getElementById("modal-total-peru").textContent =
+                total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            modalEl._totalPeru = total;
+            modalEl._cotizacionId = cotizacionId;
+
+            setEditable(true);
+            inputAnual.value = "25";
+            calcular();
+
+            if (cotizacionId > 0) {
+                await cargarFinanciamientoExistente(cotizacionId);
+            }
+        });
+
+        btnMinus.addEventListener("click", () => {
+            const v = parseInt(inputAnual.value, 10);
+            if (v > parseInt(inputAnual.min, 10)) {
+                inputAnual.value = String(v - 1);
+                calcular();
+            }
+        });
+
+        btnPlus.addEventListener("click", () => {
+            const v = parseInt(inputAnual.value, 10);
+            if (v < parseInt(inputAnual.max, 10)) {
+                inputAnual.value = String(v + 1);
+                calcular();
+            }
+        });
+
+        btnGuardar.addEventListener("click", async () => {
+            const id = modalEl._cotizacionId || 0;
+            if (id <= 0) {
+                alertify.error("Cotizacion invalida");
+                return;
+            }
+
+            if (btnGuardar.disabled) {
+                return;
+            }
+
+            const { cuota } = calcular();
+            const tasaAnual = parseFloat(inputAnual.value);
+
+            btnGuardar.disabled = true;
+
+            try {
+                const res = await fetch("controller/financiamiento_cotizacion.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams({
+                        id: String(id),
+                        tasa: String(tasaAnual),
+                        cuota: String(cuota)
+                    })
+                });
+
+                const json = await res.json();
+
+                if (!res.ok || !json.success) {
+                    alertify.error(json.message || "No se pudo guardar");
+
+                    if (res.status === 409) {
+                        setEditable(false);
+                    } else {
+                        btnGuardar.disabled = false;
+                    }
+                    return;
+                }
+
+                alertify.success("Financiamiento guardado");
+                setEditable(false);
+            } catch (_err) {
+                btnGuardar.disabled = false;
+                alertify.error("Error de conexion");
+            }
+        });
+
+        function calcular() {
+            const iAnual = parseInt(inputAnual.value, 10) / 100;
+            const iMensual = Math.pow(1 + iAnual, 1 / 12) - 1;
+            const total = modalEl._totalPeru || 0;
+            const n = 5;
+            const cuota = (iMensual * total) / (1 - Math.pow(1 + iMensual, -n));
+
+            dispMensual.textContent = (iMensual * 100).toFixed(3) + "%";
+            dispCuota.textContent = "$ " + cuota.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            renderTabla(total, iMensual, cuota, n);
+            return { iMensual, cuota };
+        }
+
+        async function cargarFinanciamientoExistente(id) {
+            try {
+                const res = await fetch("controller/financiamiento_cotizacion.php?" + new URLSearchParams({ id: String(id) }));
+                const json = await res.json();
+
+                if (!res.ok || !json.success) {
+                    return;
+                }
+
+                if (json.ya_guardado) {
+                    if (json.tasa !== null && !Number.isNaN(Number(json.tasa))) {
+                        inputAnual.value = String(Math.round(Number(json.tasa)));
+                    }
+
+                    calcular();
+                    setEditable(false);
+                }
+            } catch (_err) {
+                // Si falla la consulta, se deja editable para no bloquear el flujo.
+            }
+        }
+
+        function setEditable(canEdit) {
+            inputAnual.disabled = !canEdit;
+            btnMinus.disabled = !canEdit;
+            btnPlus.disabled = !canEdit;
+            btnGuardar.disabled = !canEdit;
+        }
+
+        function renderTabla(total, iMensual, cuota, n) {
+            tablaBody.innerHTML = "";
+
+            const formatMoney = (v) => "$ " + v.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            tablaBody.insertAdjacentHTML("beforeend", `
+                <tr>
+                    <td class="text-center">0</td>
+                    <td class="text-end">${formatMoney(total)}</td>
+                    <td class="text-end">-</td>
+                    <td class="text-end">-</td>
+                    <td class="text-end">-</td>
+                </tr>
+            `);
+
+            let saldo = total;
+
+            for (let t = 1; t <= n; t++) {
+                const interes = saldo * iMensual;
+                const amortizacion = cuota - interes;
+                saldo = saldo - amortizacion;
+
+                const saldoMostrar = t === n ? 0 : saldo;
+
+                tablaBody.insertAdjacentHTML("beforeend", `
+                    <tr>
+                        <td class="text-center">${t}</td>
+                        <td class="text-end">${formatMoney(saldoMostrar)}</td>
+                        <td class="text-end">${formatMoney(amortizacion)}</td>
+                        <td class="text-end">${formatMoney(interes)}</td>
+                        <td class="text-end">${formatMoney(cuota)}</td>
+                    </tr>
+                `);
+            }
+        }
     }
 
 });

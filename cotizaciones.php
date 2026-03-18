@@ -189,105 +189,11 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-info">Guardar</button>
+                    <button type="button" class="btn btn-info" id="btn-guardar-financiamiento">Guardar</button>
                 </div>
             </div>
         </div>
     </div><!-- /.modal -->
-
-    <script>
-    (function () {
-        const modalEl = document.getElementById('info-header-modal');
-
-        modalEl.addEventListener('show.bs.modal', function (e) {
-            const btn = e.relatedTarget;
-            const total = btn ? parseFloat(btn.dataset.totalPeru || 0) : 0;
-
-            document.getElementById('modal-total-peru').textContent =
-                total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-            modalEl._totalPeru = total;
-            calcular();
-        });
-
-        const inputAnual  = document.getElementById('input-tasa-anual');
-        const dispMensual = document.getElementById('display-tasa-mensual');
-        const dispCuota   = document.getElementById('display-cuota');
-        const tablaBody   = document.getElementById('financiamiento-body');
-
-        document.getElementById('btn-anual-minus').addEventListener('click', function () {
-            const v = parseInt(inputAnual.value);
-            if (v > parseInt(inputAnual.min)) {
-                inputAnual.value = v - 1;
-                calcular();
-            }
-        });
-
-        document.getElementById('btn-anual-plus').addEventListener('click', function () {
-            const v = parseInt(inputAnual.value);
-            if (v < parseInt(inputAnual.max)) {
-                inputAnual.value = v + 1;
-                calcular();
-            }
-        });
-
-        function calcular() {
-            const iAnual   = parseInt(inputAnual.value) / 100;         // e.g. 0.25
-            const iMensual = Math.pow(1 + iAnual, 1 / 12) - 1;        // =((1+B2)^(1/12))-1
-            const total    = modalEl._totalPeru || 0;
-            const n        = 5;                                        // cuotas fijas
-            // =PAGO(i_mensual, n, -total)  →  PMT
-            const cuota    = (iMensual * total) / (1 - Math.pow(1 + iMensual, -n));
-
-            dispMensual.textContent = (iMensual * 100).toFixed(3) + '%';
-            dispCuota.textContent   = 'S/ ' + cuota.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-
-            renderTabla(total, iMensual, cuota, n);
-        }
-
-        function renderTabla(total, iMensual, cuota, n) {
-            tablaBody.innerHTML = '';
-
-            const formatMoney = (v) => 'S/ ' + v.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-
-            tablaBody.insertAdjacentHTML('beforeend', `
-                <tr>
-                    <td class="text-center">0</td>
-                    <td class="text-end">${formatMoney(total)}</td>
-                    <td class="text-end">-</td>
-                    <td class="text-end">-</td>
-                    <td class="text-end">-</td>
-                </tr>
-            `);
-
-            let saldo = total;
-
-            for (let t = 1; t <= n; t++) {
-                const interes = saldo * iMensual;
-                const amortizacion = cuota - interes;
-                saldo = saldo - amortizacion;
-
-                const saldoMostrar = t === n ? 0 : saldo;
-
-                tablaBody.insertAdjacentHTML('beforeend', `
-                    <tr>
-                        <td class="text-center">${t}</td>
-                        <td class="text-end">${formatMoney(saldoMostrar)}</td>
-                        <td class="text-end">${formatMoney(amortizacion)}</td>
-                        <td class="text-end">${formatMoney(interes)}</td>
-                        <td class="text-end">${formatMoney(cuota)}</td>
-                    </tr>
-                `);
-            }
-        }
-    })();
-    </script>
 
     <div class="offcanvas offcanvas-end" tabindex="-1" id="theme-settings-offcanvas">
         <div class="d-flex align-items-center gap-2 px-3 py-3 offcanvas-header border-bottom border-dashed">

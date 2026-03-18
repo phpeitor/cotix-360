@@ -271,6 +271,39 @@ class Cotizacion {
         return $stmt->rowCount() > 0;
     }
 
+    public function obtener_financiamiento(int $id): ?array
+    {
+        $sql = "SELECT id, tasa, cuota FROM cotizaciones WHERE id = :id LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    public function guardar_financiamiento(int $id, float $tasa, float $cuota, int $usuario_upd): bool
+    {
+        $sql = "UPDATE cotizaciones
+                SET tasa = :tasa,
+                    cuota = :cuota,
+                    updated_at = :updated_at,
+                    usuario_upd = :usuario_upd
+                WHERE id = :id
+                  AND tasa IS NULL
+                  AND cuota IS NULL";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':tasa', $tasa);
+        $stmt->bindValue(':cuota', $cuota);
+        $stmt->bindValue(':updated_at', $this->nowLima);
+        $stmt->bindValue(':usuario_upd', $usuario_upd, PDO::PARAM_INT);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    }
+
     public function g_cotizacion(array $data): int
     {
         $sql = "INSERT INTO cotizaciones
