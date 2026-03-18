@@ -16049,20 +16049,20 @@ const au = "Login Machine",
 			};
 			const Gt = async (e) => {
 				e.preventDefault();
-				
-				vt("Checking...");
-				ot.value = true;
-				re.value = false;
 
 				const usuario = B.trim();
 				const password = Ht.trim();
 
 				if (!usuario || !password) {
 					alertify.warning("⚠️ Ingrese usuario y contraseña");
-					ot.value = false;
-					vt(Hd);
 					return;
 				}
+
+				if (ot.value) return;
+				
+				vt("Checking...");
+				ot.value = true;
+				re.value = false;
 
 				const formData = new FormData();
 				formData.append("usuario", usuario);
@@ -16077,7 +16077,6 @@ const au = "Login Machine",
 					const data = await res.json();
 
 					if (data.ok) {
-						ot.value = false;
 						setTimeout(() => {
 							Sm(S)
 						}, 320);
@@ -16092,9 +16091,7 @@ const au = "Login Machine",
 					} else {
 						xm(Pt, !0);
 						alertify.error(data.message || "❌ Usuario o contraseña incorrectos");
-						setTimeout(() => {
-							ot.value = false;
-						}, 350);
+						ot.value = false;
 						vt(Hd);
 					}
 
@@ -16125,7 +16122,7 @@ const au = "Login Machine",
 						children: [Rn.jsx("label", {
 							children: Rn.jsx("input", {
 								type: "text",
-								className: "form-username",
+								className: "form-username" + (!B.trim() && ot.value ? " input-error" : ""),
 								name: "username",
 								placeholder: "Username",
 								onFocus: Yt,
@@ -16137,7 +16134,7 @@ const au = "Login Machine",
 						}), Rn.jsx("label", {
 							children: Rn.jsx("input", {
 								type: "password",
-								className: "form-pass",
+								className: "form-pass" + (!Ht.trim() && ot.value ? " input-error" : ""),
 								name: "password",
 								placeholder: "Password",
 								maxLength: 12,
@@ -16148,6 +16145,7 @@ const au = "Login Machine",
 							})
 						}), Rn.jsx("button", {
 							className: "login-btn",
+							disabled: ot.value,
 							children: Y
 						})]
 					})

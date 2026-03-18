@@ -1,0 +1,13 @@
+/**
+ * Estilos de validación para el formulario de login
+ */
+
+.input-error {
+    border: 2px solid #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.login-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
