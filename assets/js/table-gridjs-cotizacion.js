@@ -179,16 +179,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 <small class="text-muted fw-semibold">
                     Total 🇵🇪: $ ${totalPeruFmt}
                 </small>
-                ${tieneCuota ? `
-                    <br>
-                    <small class="text-muted fw-semibold">
-                        Cuota: $ ${cuotaFmt}
-                    </small>
-                    <br>
-                    <small class="text-muted fw-semibold">
-                        Total Final: $ ${totalFinalFmt}
-                    </small>
-                ` : ""}
             </div>
         `);
     }

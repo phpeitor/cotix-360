@@ -5,12 +5,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalFobEl     = document.getElementById("total_fob");
     const totalFleteEl   = document.getElementById("total_flete");
     const totalGastoEl   = document.getElementById("total_gasto");
+    const totalImpuestoEl = document.getElementById("total_impuesto");
     const totalPeruEl    = document.getElementById("total_peru");
     const totalFactorEl  = document.getElementById("total_factor");
     const usuarioEl = document.getElementById("usuario");
     const fechaEl   = document.getElementById("fecha");
     const estadoEl  = document.getElementById("estado");
-    const cuotaEstadoEl = document.getElementById("cuota_estado");
     const cotizacionIdEl = document.getElementById("cotizacion_id");
     const integerFormatter = new Intl.NumberFormat("en-US", {
         maximumFractionDigits: 0
@@ -23,6 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
         minimumFractionDigits: 4,
         maximumFractionDigits: 4
     });
+    const FINANCIAMIENTO_CUOTAS = 5;
+    let cuotaFinanciamiento = null;
 
     function formatInt(value) {
         return integerFormatter.format(Number(value) || 0);
@@ -34,6 +36,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function format4(value) {
         return decimal4Formatter.format(Number(value) || 0);
+    }
+
+    function calcularInteresFinanciamiento(totalPeruBase) {
+        if (cuotaFinanciamiento === null || Number.isNaN(cuotaFinanciamiento)) {
+            return 0;
+        }
+
+        const totalCuotas = cuotaFinanciamiento * FINANCIAMIENTO_CUOTAS;
+        const interes = totalCuotas - totalPeruBase;
+
+        return interes > 0 ? interes : 0;
     }
 
     let fleteTable = [];
@@ -239,6 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
             totalFobEl.textContent = format2(0);
             totalFleteEl.textContent = format2(0);
             totalGastoEl.textContent = format2(0);
+            if (totalImpuestoEl) totalImpuestoEl.textContent = format2(0);
             totalPeruEl.textContent  = format2(0);
             totalFactorEl.textContent = format4(0);
             return;
@@ -271,14 +285,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         totalFleteEl.textContent = format2(totalFlete);
 
-        const gasto = calcularGasto(totalFob);
-        totalGastoEl.textContent = format2(gasto);
+        const gastoBase = calcularGasto(totalFob);
+        const totalPeruBase = totalFob + totalFlete + gastoBase;
+        const interesFinanciamiento = calcularInteresFinanciamiento(totalPeruBase);
+        const gastoTotal = gastoBase + interesFinanciamiento;
 
-        const totalPeru = totalFob + totalFlete + gasto;
+        totalGastoEl.textContent = format2(gastoBase);
+        if (totalImpuestoEl) totalImpuestoEl.textContent = format2(interesFinanciamiento);
+
+        const totalPeru = totalPeruBase + interesFinanciamiento;
         totalPeruEl.textContent = format2(totalPeru);
 
         const rawFactor = totalFob > 0
-            ? (gasto + totalFlete) / totalFob
+            ? (gastoTotal + totalFlete) / totalFob
             : 0;
 
         totalFactorEl.textContent = format4(rawFactor);
@@ -349,9 +368,9 @@ document.addEventListener("DOMContentLoaded", () => {
             cotizacion.cuota !== "" &&
             !Number.isNaN(Number(cotizacion.cuota));
 
-        cuotaEstadoEl.textContent = cuotaValida
-            ? `+ $ ${format2(cotizacion.cuota)}`
-            : "";
+        cuotaFinanciamiento = cuotaValida
+            ? parseFloat(cotizacion.cuota)
+            : null;
 
         setEstadoIcon(cotizacion.estado);
     }
