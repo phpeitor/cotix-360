@@ -66,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
             { id: "total_items", name: "", hidden: true },
             { id: "total_peru", name: "", hidden: true },
             { id: "cuota", name: "", hidden: true },
+            { id: "interes_financiamiento", name: "", hidden: true },
 
             { id: "created_at", name: "Fecha", width: "150px" },
 
@@ -144,11 +145,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const total = Number(row?.cells?.[4]?.data ?? arr.length);
         const totalPeru = Number(row?.cells?.[5]?.data ?? 0);
         const cuotaRaw = row?.cells?.[6]?.data;
+        const interesRaw = row?.cells?.[7]?.data ?? 0;
         const tieneCuota = cuotaRaw !== null && cuotaRaw !== "" && !Number.isNaN(Number(cuotaRaw));
         const cuota = tieneCuota ? Number(cuotaRaw) : 0;
+        const interes = Number(interesRaw);
         const totalFinal = totalPeru + cuota;
 
         const totalPeruFmt = totalPeru.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        const interesFmt = interes.toLocaleString("en-US", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
@@ -169,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const list = arr.map(i => `<li>${i}</li>`).join("");
 
-        return gridjs.html(`
+        let itemsHtml = `
             <div>
                 <ul class="mb-1 ps-3">${list}</ul>
                 <small class="text-muted fw-semibold">
@@ -178,9 +186,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 <br>
                 <small class="text-muted fw-semibold">
                     Total 🇵🇪: $ ${totalPeruFmt}
-                </small>
-            </div>
-        `);
+                </small>`;
+        
+        if (interes > 0) {
+            itemsHtml += `
+                <br>
+                <small class="text-info fw-semibold">
+                    Interés: $ ${interesFmt}
+                </small>`;
+        }
+        
+        itemsHtml += `</div>`;
+
+        return gridjs.html(itemsHtml);
     }
 
     function renderAcciones(_, row) {

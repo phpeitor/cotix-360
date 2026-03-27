@@ -109,7 +109,18 @@ class Cotizacion {
             }
 
             $gasto = $this->calcularGasto($totalFob, $gastoTable);
-            $row['total_peru'] = round($totalFob + $totalFlete + $gasto, 2);
+            $totalPeruBase = round($totalFob + $totalFlete + $gasto, 2);
+            $row['total_peru'] = $totalPeruBase;
+
+            // Calcular interés financiero si existe cuota
+            $interesFinanciamiento = 0.0;
+            $cuotaValida = !empty($row['cuota']) && is_numeric($row['cuota']);
+            if ($cuotaValida) {
+                $cuota = (float)$row['cuota'];
+                $totalCuotas = $cuota * 5;
+                $interesFinanciamiento = max(0, round($totalCuotas - $totalPeruBase, 2));
+            }
+            $row['interes_financiamiento'] = $interesFinanciamiento;
         }
         unset($row);
 
