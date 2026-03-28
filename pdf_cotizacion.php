@@ -20,6 +20,37 @@ if (!$hash) {
 $cotizacionModel = new Cotizacion();
 $items      = new Item();
 
+function calcularInteresFinanciamientoPdf($tasa, $cuota, float $totalPeruBase, int $cuotas = 5): float
+{
+    if ($cuota === null || $cuota === '' || !is_numeric($cuota)) {
+        return 0.0;
+    }
+
+    $cuotaNum = (float)$cuota;
+    if ($cuotaNum <= 0) {
+        return 0.0;
+    }
+
+    if ($tasa !== null && $tasa !== '' && is_numeric($tasa) && (float)$tasa > 0) {
+        $iAnual = ((float)$tasa) / 100;
+        $iMensual = pow(1 + $iAnual, 1 / 12) - 1;
+        $saldo = $totalPeruBase;
+        $interesAcumulado = 0.0;
+
+        for ($t = 1; $t <= $cuotas; $t++) {
+            $interes = $saldo * $iMensual;
+            $amortizacion = $cuotaNum - $interes;
+            $saldo -= $amortizacion;
+            $interesAcumulado += round($interes, 2);
+        }
+
+        return max(0.0, round($interesAcumulado, 2));
+    }
+
+    $totalCuotas = $cuotaNum * $cuotas;
+    return max(0.0, round($totalCuotas - $totalPeruBase, 2));
+}
+
 $cotizacion = $cotizacionModel->obtenerPorHash($hash);
 $detalle    = $cotizacionModel->obtenerDetallePorHash($hash);
 $fleteTable = $items->obtenerFlete();
@@ -69,13 +100,16 @@ foreach ($pesosPorPais as $pais => $pesoPais) {
     );
 }
 $gasto = CotizacionCalc::calcularGasto($gastoTable, $totalFob);
-$totalPeru = $totalFob + $flete + $gasto;
-$cuota = isset($cotizacion['cuota']) && $cotizacion['cuota'] !== null
-    ? (float)$cotizacion['cuota']
-    : 0.0;
-$mostrarFinanciamiento = $cuota > 0;
-$totalFinal = $totalPeru + $cuota;
-$rawFactor = $totalFob ? ($flete + $gasto) / $totalFob : 0;
+$totalPeruBase = round($totalFob + $flete + $gasto, 2);
+$interes = calcularInteresFinanciamientoPdf(
+    $cotizacion['tasa'] ?? null,
+    $cotizacion['cuota'] ?? null,
+    $totalPeruBase,
+    5
+);
+$gastoTotal = $gasto + $interes;
+$totalPeru = $totalFob + $flete + $gastoTotal;
+$rawFactor = $totalFob ? ($flete + $gastoTotal) / $totalFob : 0;
 
 /* === Cálculo por item === */
 foreach ($detalle as &$item) {
@@ -233,10 +267,9 @@ ob_start();
     <strong>Total Peso:</strong> <?= number_format($totalPeso,2) ?><br>
     <?php if ($isAdmin): ?><strong>Total FOB:</strong> <?= number_format($totalFob,2) ?><br><?php endif; ?>
     <?php if ($isAdmin): ?><strong>Flete:</strong> <?= number_format($flete,2) ?><br><?php endif; ?>
-    <?php if ($isAdmin): ?><strong>Gasto:</strong> <?= number_format($gasto,2) ?><br><?php endif; ?>
+    <?php if ($isAdmin): ?><strong>Gastos:</strong> <?= number_format($gasto,2) ?><br><?php endif; ?>
+    <?php if ($isAdmin): ?><strong>Interés:</strong> <?= number_format($interes,2) ?><br><?php endif; ?>
     <?php if ($isAdmin): ?><strong>Total Perú:</strong> <?= number_format($totalPeru,2) ?><br><?php endif; ?>
-    <?php if ($isAdmin && $mostrarFinanciamiento): ?><strong>Cuota:</strong> <?= number_format($cuota,2) ?><br><?php endif; ?>
-    <?php if ($isAdmin && $mostrarFinanciamiento): ?><strong>Total Final:</strong> <?= number_format($totalFinal,2) ?><br><?php endif; ?>
     <?php if ($isAdmin): ?><strong>Factor:</strong> <?= number_format($rawFactor,4) ?><?php endif; ?>
 </p>
 </body>

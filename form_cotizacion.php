@@ -132,6 +132,13 @@
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:course-up-bold" class="text-danger"></iconify-icon> <span class="text-dark">Factor: </span> <span id="total_factor">0.00</span></p>
                                             </div>
                                         </div>
+                                        <div class="row mt-2 pt-2 border-top border-dashed">
+                                            <div class="col-12 text-end">
+                                                <p class="text-muted fw-medium fs-12 mb-0">
+                                                    Ajuste redondeo: <span id="total_ajuste_redondeo">0.00</span>
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="table-responsive">
                                         <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">

@@ -45,6 +45,7 @@ class Cotizacion {
                 c.estado,
                 c.created_at,
                 c.updated_at,
+                c.tasa,
                 c.cuota,
                 COALESCE(SUM(cd.cantidad), 0) AS total_items,
                 GROUP_CONCAT(
@@ -57,7 +58,7 @@ class Cotizacion {
             LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
             WHERE $where
             GROUP BY
-                c.id, p.usuario, c.estado, c.created_at, c.updated_at, c.cuota
+                c.id, p.usuario, c.estado, c.created_at, c.updated_at, c.tasa, c.cuota
             ORDER BY c.id DESC
         ";
 
@@ -112,14 +113,13 @@ class Cotizacion {
             $totalPeruBase = round($totalFob + $totalFlete + $gasto, 2);
             $row['total_peru'] = $totalPeruBase;
 
-            // Calcular interés financiero si existe cuota
-            $interesFinanciamiento = 0.0;
-            $cuotaValida = !empty($row['cuota']) && is_numeric($row['cuota']);
-            if ($cuotaValida) {
-                $cuota = (float)$row['cuota'];
-                $totalCuotas = $cuota * 5;
-                $interesFinanciamiento = max(0, round($totalCuotas - $totalPeruBase, 2));
-            }
+            // Calcular interés financiero igual que en el modal (sumando interés por periodo redondeado).
+            $interesFinanciamiento = $this->calcularInteresFinanciamiento(
+                $row['tasa'] ?? null,
+                $row['cuota'] ?? null,
+                $totalPeruBase,
+                5
+            );
             $row['interes_financiamiento'] = $interesFinanciamiento;
         }
         unset($row);
@@ -242,6 +242,37 @@ class Cotizacion {
         }
 
         return (float)$gastoTable[count($gastoTable) - 1]['costo'];
+    }
+
+    private function calcularInteresFinanciamiento($tasa, $cuota, float $totalPeruBase, int $cuotas = 5): float
+    {
+        if ($cuota === null || $cuota === '' || !is_numeric($cuota)) {
+            return 0.0;
+        }
+
+        $cuotaNum = (float)$cuota;
+        if ($cuotaNum <= 0) {
+            return 0.0;
+        }
+
+        if ($tasa !== null && $tasa !== '' && is_numeric($tasa) && (float)$tasa > 0) {
+            $iAnual = ((float)$tasa) / 100;
+            $iMensual = pow(1 + $iAnual, 1 / 12) - 1;
+            $saldo = $totalPeruBase;
+            $interesAcumulado = 0.0;
+
+            for ($t = 1; $t <= $cuotas; $t++) {
+                $interes = $saldo * $iMensual;
+                $amortizacion = $cuotaNum - $interes;
+                $saldo -= $amortizacion;
+                $interesAcumulado += round($interes, 2);
+            }
+
+            return max(0.0, round($interesAcumulado, 2));
+        }
+
+        $totalCuotas = $cuotaNum * $cuotas;
+        return max(0.0, round($totalCuotas - $totalPeruBase, 2));
     }
 
     public function obtenerPorHash(string $hash): ?array {

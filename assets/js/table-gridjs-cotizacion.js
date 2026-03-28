@@ -184,14 +184,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     Total items: ${total}
                 </small>
                 <br>
-                <small class="text-muted fw-semibold">
+                <small class="text-muted fw-semibold isadmin">
                     Total 🇵🇪: $ ${totalPeruFmt}
                 </small>`;
         
         if (interes > 0) {
             itemsHtml += `
                 <br>
-                <small class="text-info fw-semibold">
+                <small class="text-info fw-semibold isadmin">
                     Interés: $ ${interesFmt}
                 </small>`;
         }

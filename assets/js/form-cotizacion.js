@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalFleteEl   = document.getElementById("total_flete");
     const totalGastoEl   = document.getElementById("total_gasto");
     const totalImpuestoEl = document.getElementById("total_impuesto");
+    const totalAjusteRedondeoEl = document.getElementById("total_ajuste_redondeo");
     const totalPeruEl    = document.getElementById("total_peru");
     const totalFactorEl  = document.getElementById("total_factor");
     const usuarioEl = document.getElementById("usuario");
@@ -25,6 +26,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     const FINANCIAMIENTO_CUOTAS = 5;
     let cuotaFinanciamiento = null;
+    let tasaFinanciamiento = null;
+
+    function round2(value) {
+        return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+    }
 
     function formatInt(value) {
         return integerFormatter.format(Number(value) || 0);
@@ -43,10 +49,26 @@ document.addEventListener("DOMContentLoaded", () => {
             return 0;
         }
 
+        if (tasaFinanciamiento !== null && !Number.isNaN(tasaFinanciamiento) && tasaFinanciamiento > 0) {
+            const iAnual = tasaFinanciamiento / 100;
+            const iMensual = Math.pow(1 + iAnual, 1 / 12) - 1;
+            let saldo = totalPeruBase;
+            let interesAcumulado = 0;
+
+            for (let t = 1; t <= FINANCIAMIENTO_CUOTAS; t++) {
+                const interes = saldo * iMensual;
+                const amortizacion = cuotaFinanciamiento - interes;
+                saldo = saldo - amortizacion;
+                interesAcumulado += round2(interes);
+            }
+
+            return interesAcumulado > 0 ? round2(interesAcumulado) : 0;
+        }
+
         const totalCuotas = cuotaFinanciamiento * FINANCIAMIENTO_CUOTAS;
         const interes = totalCuotas - totalPeruBase;
 
-        return interes > 0 ? interes : 0;
+        return interes > 0 ? round2(interes) : 0;
     }
 
     let fleteTable = [];
@@ -253,6 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
             totalFleteEl.textContent = format2(0);
             totalGastoEl.textContent = format2(0);
             if (totalImpuestoEl) totalImpuestoEl.textContent = format2(0);
+            if (totalAjusteRedondeoEl) totalAjusteRedondeoEl.textContent = format2(0);
             totalPeruEl.textContent  = format2(0);
             totalFactorEl.textContent = format4(0);
             return;
@@ -293,8 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
         totalGastoEl.textContent = format2(gastoBase);
         if (totalImpuestoEl) totalImpuestoEl.textContent = format2(interesFinanciamiento);
 
-        const totalPeru = totalPeruBase + interesFinanciamiento;
-        totalPeruEl.textContent = format2(totalPeru);
+        const totalPeruObjetivo = totalPeruBase + interesFinanciamiento;
 
         const rawFactor = totalFob > 0
             ? (gastoTotal + totalFlete) / totalFob
@@ -302,8 +324,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         totalFactorEl.textContent = format4(rawFactor);
 
+        let totalPeruDesdeItems = 0;
+
         rows.forEach(tr => {
             const precio = parseFloat(tr.dataset.precio);
+            const qty = parseInt(tr.dataset.cantidad);
             const grupo  = tr.dataset.grupo;
             const margen_uti  = parseFloat(tr.dataset.margen || 0);
 
@@ -338,6 +363,14 @@ document.addEventListener("DOMContentLoaded", () => {
             );
             tr.querySelector(".precio-m").textContent = format2(precioM);
 
+            // Mantener el mismo criterio de redondeo visible para cuadrar con Total PE.
+            const totalFilaPeru = decimalAdjust(
+                'round',
+                precioM * qty,
+                '-2'
+            );
+            totalPeruDesdeItems += totalFilaPeru;
+
             // Utilidad
             const utilidad = decimalAdjust(
                 'round',
@@ -355,6 +388,18 @@ document.addEventListener("DOMContentLoaded", () => {
             tr.querySelector(".precio-cliente").textContent =
                 format2(precioCliente);
         });
+
+        const ajusteRedondeo = decimalAdjust(
+            'round',
+            totalPeruObjetivo - totalPeruDesdeItems,
+            '-2'
+        );
+
+        // Mostrar Total PE teorico y exponer la diferencia por redondeo de lineas.
+        totalPeruEl.textContent = format2(totalPeruObjetivo);
+        if (totalAjusteRedondeoEl) {
+            totalAjusteRedondeoEl.textContent = format2(ajusteRedondeo);
+        }
     }
 
     function setHeader(cotizacion) {
@@ -370,6 +415,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         cuotaFinanciamiento = cuotaValida
             ? parseFloat(cotizacion.cuota)
+            : null;
+
+        const tasaValida =
+            cotizacion.tasa !== null &&
+            cotizacion.tasa !== "" &&
+            !Number.isNaN(Number(cotizacion.tasa));
+
+        tasaFinanciamiento = tasaValida
+            ? parseFloat(cotizacion.tasa)
             : null;
 
         setEstadoIcon(cotizacion.estado);
