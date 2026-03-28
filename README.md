@@ -77,7 +77,7 @@ DOCUMENT_TYPE_ID=
 
 5. Levantar la aplicación.
 
-Opción A (Apache/XAMPP/WAMP)
+Opción A (Apache)
 
 - Copiar proyecto en htdocs.
 - Abrir: http://127.0.0.1/cotix/index.php
