@@ -12,7 +12,7 @@ try {
     $password = trim($_POST['password'] ?? '');
 
     if ($usuario === '' || $password === '') {
-        throw new Exception('Debe ingresar usuario y contraseña.');
+        throw new Exception('Debe ingresar usuario y password.');
     }
 
     $password = md5($password);
@@ -23,6 +23,14 @@ try {
     ]);
 
     if ($data) {
+        if ((int)($data['IDESTADO'] ?? 0) !== 1) {
+            echo json_encode([
+                'ok' => false,
+                'message' => 'Usuario desactivado contactar con el administrador del sistema 📵🙅‍♂️'
+            ]);
+            exit;
+        }
+
         $_SESSION['session_usuario'] = $data['USUARIO'];
         $_SESSION['session_id'] = $data['IDPERSONAL'];
         $_SESSION['session_nombre'] = $data['NOMBRES'];
@@ -67,7 +75,7 @@ try {
         
         echo json_encode(['ok' => true]);
     } else {
-        echo json_encode(['ok' => false, 'message' => '🚫 Usuario o contraseña incorrectos']);
+        echo json_encode(['ok' => false, 'message' => '🚫 Usuario o password incorrectos']);
     }
 } catch (Throwable $e) {
     http_response_code(500);
