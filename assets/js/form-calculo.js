@@ -381,7 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div>
                         <span class="text-muted fs-12">${modelo}</span><br>
-                        <h5 class="fs-14 mt-1">${item.descripcion}</h5>
+                        <h5 class="fs-14 mt-1 item-description">${item.descripcion}</h5>
                     </div>
                 </div>
             </td>

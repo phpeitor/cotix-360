@@ -59,13 +59,13 @@
                                         <div class="col-sm-auto">
                                             <div class="input-group">
                                                <input
-                                                        type="text"
-                                                        id="filterDate"
-                                                        class="form-control"
-                                                        data-provider="flatpickr"
-                                                        data-date-format="d M"
-                                                        data-range-date="true"
-                                                    />
+                                                    type="text"
+                                                    id="filterDate"
+                                                    class="form-control"
+                                                    data-provider="flatpickr"
+                                                    data-date-format="d M"
+                                                    data-range-date="true"
+                                                />
                                                 <span class="input-group-text bg-primary border-primary text-white">
                                                     <i class="ti ti-calendar fs-15"></i>
                                                 </span>

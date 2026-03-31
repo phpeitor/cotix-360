@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div>
                         <span class="text-muted fs-12">${item.modelo}</span><br>
-                        <h5 class="fs-14 mt-1">${item.descripcion}</h5>
+                        <h5 class="fs-14 mt-1 item-description">${item.descripcion}</h5>
                     </div>
                 </div>
             </td>
@@ -398,7 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Mostrar Total PE teorico y exponer la diferencia por redondeo de lineas.
         totalPeruEl.textContent = format2(totalPeruObjetivo);
         if (totalAjusteRedondeoEl) {
-            totalAjusteRedondeoEl.textContent = format2(ajusteRedondeo);
+            totalAjusteRedondeoEl.textContent = format2(Math.abs(ajusteRedondeo));
         }
     }
 
