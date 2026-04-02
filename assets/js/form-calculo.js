@@ -11,29 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalPeruEl = document.getElementById("total_peru");
     const totalFactorEl = document.getElementById("total_factor");
     const LIMITE_PESO = 100;
-    const integerFormatter = new Intl.NumberFormat("en-US", {
-        maximumFractionDigits: 0
-    });
-    const decimal2Formatter = new Intl.NumberFormat("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-    const decimal4Formatter = new Intl.NumberFormat("en-US", {
-        minimumFractionDigits: 4,
-        maximumFractionDigits: 4
-    });
-
-    function formatInt(value) {
-        return integerFormatter.format(Number(value) || 0);
-    }
-
-    function format2(value) {
-        return decimal2Formatter.format(Number(value) || 0);
-    }
-
-    function format4(value) {
-        return decimal4Formatter.format(Number(value) || 0);
-    }
 
     let fleteTable = [];
 
@@ -49,83 +26,9 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => gastoTable  = data)
         .catch(err => console.error("Error cargando gastos:", err));
 
-
-    function calcularGasto(totalFob) {
-        if (gastoTable.length === 0) return 0;
-
-        for (const row of gastoTable) {
-            const min = parseFloat(row.valor_inicial);
-            const max = parseFloat(row.valor_final);
-
-            if (totalFob >= min && totalFob <= max) {
-                return parseFloat(row.costo);
-            }
-        }
-
-        return parseFloat(gastoTable[gastoTable.length - 1].costo);
-    }
-
-    function normalizarPais(pais) {
-        return pais && pais.toString().trim().toUpperCase() === "USA"
-            ? "USA"
-            : "CHINA";
-    }
-
-    function getPesoPorPais() {
-        const pesos = {};
-
-        tbody.querySelectorAll("tr").forEach(tr => {
-            const qty  = parseInt(tr.querySelector("input").value);
-            const peso = parseFloat(tr.dataset.peso);
-            const pais = normalizarPais(tr.dataset.pais);
-
-            if (!pesos[pais]) pesos[pais] = 0;
-            pesos[pais] += peso * qty;
-        });
-
-        return pesos;
-    }
-
-    function calcularFletePorPais(pais, pesoTotal) {
-        const paisCalc = normalizarPais(pais);
-        let tarifas = fleteTable.filter(r => r.pais === paisCalc);
-
-        if (tarifas.length === 0) {
-            tarifas = fleteTable.filter(r => r.pais === "CHINA");
-        }
-
-        tarifas.sort((a, b) => parseFloat(a.peso) - parseFloat(b.peso));
-
-        for (const row of tarifas) {
-            if (pesoTotal <= parseFloat(row.peso)) {
-                return parseFloat(row.flete);
-            }
-        }
-
-        return parseFloat(tarifas[tarifas.length - 1].flete);
-    }
-
     /* ---------------------------------------------------
        FUNCIÓN: RE-CALCULAR TOTALES
     --------------------------------------------------- */
-    function getMargenByGrupo(grupo) {
-        if (!grupo) return 0.32;
-        const g = grupo.toString().toLowerCase();
-        if (g.includes("0")) return 0;
-        if (g.includes("1")) return 0.15;
-        if (g.includes("2")) return 0.25;
-        if (g.includes("3")) return 0.28;
-        if (g.includes("4")) return 0.30;
-        if (g.includes("5")) return 0.31;
-        if (g.includes("6")) return 0.33;
-        if (g.includes("7")) return 0.35;
-        if (g.includes("8")) return 0.36;
-        if (g.includes("9")) return 0.40;
-        if (g.includes("10")) return 0.45;
-        if (g.includes("11")) return 0.50;
-        if (g.includes("12")) return 0.55;
-        return 0.32;
-    }
 
     function recalculateTotals() {
         let totalItems = 0;
@@ -166,16 +69,16 @@ document.addEventListener("DOMContentLoaded", () => {
         totalPesoEl.textContent = format2(totalPeso);
         totalFobEl.textContent = format2(totalFob);
 
-        const pesosPorPais = getPesoPorPais();
+        const pesosPorPais = getPesoPorPais(tbody);
         let totalFlete = 0;
 
         for (const pais in pesosPorPais) {
-            totalFlete += calcularFletePorPais(pais, pesosPorPais[pais]);
+            totalFlete += calcularFletePorPais(pais, pesosPorPais[pais], fleteTable);
         }
 
         totalFleteEl.textContent = format2(totalFlete);
 
-        const gasto = calcularGasto(totalFob);
+        const gasto = calcularGasto(totalFob, gastoTable);
         totalGastoEl.textContent = format2(gasto);
 
         const totalPeru = totalFob + totalFlete + gasto;
@@ -249,32 +152,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* ---------------------------------------------------
-       FUNCIÓN: LOGO ALEATORIO
-    --------------------------------------------------- */
-    function getRandomLogo() {
-        const n = Math.floor(Math.random() * 9) + 1; // 1 al 9
-        return `assets/images/products/logo/logo-${n}.svg`;
-    }
-
-    /* ---------------------------------------------------
-       EVITAR AGREGAR DUPLICADOS
-    --------------------------------------------------- */
-    function itemAlreadyAdded(itemId) {
-        return [...tbody.querySelectorAll("tr")]
-            .some(tr => tr.dataset.itemId == itemId);
-    }
-
-    function getTotalPesoActual() {
-        let total = 0;
-        tbody.querySelectorAll("tr").forEach(tr => {
-            const qty  = parseInt(tr.querySelector("input").value);
-            const peso = parseFloat(tr.dataset.peso);
-            total += peso * qty;
-        });
-        return total;
-    }
-
-    /* ---------------------------------------------------
        CARGAR ITEMS SEGÚN BASE
     --------------------------------------------------- */
     baseSelect.addEventListener("change", async () => {
@@ -293,22 +170,36 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await res.json();
 
             choices.setChoices(
-                data.map(i => ({
-                    value: i.modelo,
-                    label: i.modelo,
-                    customProperties: {
-                        id: i.id,
-                        descripcion: i.descripcion,
-                        categoria: i.categoria_producto,
-                        grupo: i.grupo_descuento,
-                        clase: i.clase_producto,
-                        peso: parseFloat(i.peso),
-                        precio: parseFloat(i.precio_unitario),
-                        moneda: i.moneda,
-                        status: i.status,
-                        pais: i.pais_origen
-                    }
-                })),
+                data.map(i => {
+                    const descripcionValida = i.descripcion && i.descripcion.trim() && i.descripcion.trim() !== "-";
+                    const pesoRaw = i.peso;
+                    const pesoTexto = pesoRaw !== null && pesoRaw !== undefined && String(pesoRaw).trim() !== ""
+                        ? String(pesoRaw).trim()
+                        : "";
+                    const pesoNumero = Number(pesoTexto);
+                    const pesoClass = !Number.isNaN(pesoNumero) && pesoNumero === 0
+                        ? "text-danger"
+                        : "text-success";
+
+                    return {
+                        value: i.modelo,
+                        label: i.modelo
+                            + (descripcionValida ? ` ⮞ ${i.descripcion}` : "")
+                            + (pesoTexto ? ` ⮞ <span class="${pesoClass}">${pesoTexto}</span>` : ""),
+                        customProperties: {
+                            id: i.id,
+                            descripcion: i.descripcion,
+                            categoria: i.categoria_producto,
+                            grupo: i.grupo_descuento,
+                            clase: i.clase_producto,
+                            peso: parseFloat(i.peso),
+                            precio: parseFloat(i.precio_unitario),
+                            moneda: i.moneda,
+                            status: i.status,
+                            pais: i.pais_origen
+                        }
+                    };
+                }),
                 "value",
                 "label",
                 false
@@ -349,12 +240,12 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (itemAlreadyAdded(itemId)) {
+        if (itemAlreadyAdded(tbody, itemId)) {
             alertify.error("Este item ya fue agregado");
             return;
         }
 
-        const pesoActual = getTotalPesoActual();
+        const pesoActual = getTotalPesoActual(tbody);
         if (pesoActual + item.peso > LIMITE_PESO) {
             alertify.alert(
                 "Límite de peso",
@@ -442,7 +333,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const input = e.target.parentNode.querySelector("input");
             const tr = e.target.closest("tr");
             const pesoItem = parseFloat(tr.dataset.peso);
-            const totalPesoActual = getTotalPesoActual();
+            const totalPesoActual = getTotalPesoActual(tbody);
 
             if (totalPesoActual + pesoItem > LIMITE_PESO) {
                 alertify.alert(
@@ -504,7 +395,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        const pesoTotal = getTotalPesoActual();
+        const pesoTotal = getTotalPesoActual(tbody);
         if (pesoTotal > LIMITE_PESO) {
             alertify.alert(
                 "Límite de peso",
