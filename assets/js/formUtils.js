@@ -18,6 +18,11 @@ const decimal4Formatter = new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 4
 });
 
+const decimal6Formatter = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 6,
+    maximumFractionDigits: 6
+});
+
 // ==================== FUNCIONES DE FORMATO ====================
 function formatInt(value) {
     return integerFormatter.format(Number(value) || 0);
@@ -29,6 +34,34 @@ function format2(value) {
 
 function format4(value) {
     return decimal4Formatter.format(Number(value) || 0);
+}
+
+function format6(value) {
+    return decimal6Formatter.format(Number(value) || 0);
+}
+
+function formatDecimal(value, maxDecimals = 6) {
+    const num = Number(value) || 0;
+    const str = num.toString();
+    
+    // Si es notación científica, convertir
+    if (str.includes('e')) {
+        return num.toFixed(maxDecimals).replace(/\.?0+$/, '');
+    }
+    
+    // Obtener la parte decimal
+    const parts = str.split('.');
+    if (!parts[1]) return num.toFixed(2); // Sin decimales, mostrar 2
+    
+    const decimals = parts[1];
+    const significantDecimals = decimals.replace(/0+$/, ''); // Eliminar ceros al final
+    
+    // Si no hay decimales significativos, mostrar 2
+    if (!significantDecimals) return num.toFixed(2);
+    
+    // Si hay decimales significativos, mostrar hasta 6
+    const decimalPlaces = Math.min(significantDecimals.length, maxDecimals);
+    return num.toFixed(decimalPlaces);
 }
 
 // ==================== FUNCIONES UTILITARIAS ====================

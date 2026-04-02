@@ -95,9 +95,14 @@
                                     </div>
                                     <div class="border border-dashed p-2 rounded text-center isadmin">
                                         <div class="row">
-                                            
-                                            <div class="col-lg-2 col-4 border-end">
-                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total 🇵🇪: </span> <span id="total_peru">0.00</span></p>
+                                            <div class="col-lg-3 col-6 border-end">
+                                                <p class="text-muted fw-medium fs-14 mb-0"><i class="ti ti-currency-sol"></i> <span class="text-dark">Total S/. </span> <span id="total_soles">0.00</span></p>
+                                            </div>
+                                            <div class="col-lg-3 col-6 border-end">
+                                                <p class="text-muted fw-medium fs-14 mb-0"><i class="ti ti-currency-dollar"></i> <span class="text-dark">Total $ </span> <span id="total_dolares">0.00</span></p>
+                                            </div>
+                                            <div class="col-lg-4 col-12">
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total 🇵🇪 </span> <span id="total_peru">0.00</span></p>
                                             </div>
 
                                         </div>

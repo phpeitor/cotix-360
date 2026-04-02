@@ -3,6 +3,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const itemSelect = document.getElementById("choices-single-default");
     const btnAdd = document.getElementById("btnAdd");
     const tbody = document.querySelector("table.table tbody");
+    
+    // Elementos de totales
+    const totalItemEl = document.getElementById("total_item");
+    const totalSolesEl = document.getElementById("total_soles");
+    const totalDolaresEl = document.getElementById("total_dolares");
+
+    // Función para calcular totales
+    function calcularTotales() {
+        let contadorItems = 0;
+        let totalSoles = 0;
+        let totalDolares = 0;
+
+        tbody.querySelectorAll("tr").forEach(tr => {
+            const qty = parseInt(tr.querySelector("input").value);
+            const precio = parseFloat(tr.dataset.precio);
+            const moneda = tr.dataset.moneda;
+
+            contadorItems += qty;
+
+            if (moneda === "DOLLAR") {
+                totalDolares += precio * qty;
+            } else {
+                totalSoles += precio * qty;
+            }
+        });
+
+        totalItemEl.textContent = contadorItems;
+        totalSolesEl.textContent = format2(totalSoles);
+        totalDolaresEl.textContent = format2(totalDolares);
+    }
     /* ---------------------------------------------------
        CARGAR ITEMS SEGÚN BASE
     --------------------------------------------------- */
@@ -77,7 +107,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const tr = document.createElement("tr");
-        tr.dataset.itemId  = itemId ;
+        tr.dataset.itemId  = itemId;
+        tr.dataset.precio = item.precio;
+        tr.dataset.moneda = item.moneda;
 
         tr.innerHTML = `
             <td>
@@ -99,6 +131,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 <h5 class="fs-14 mt-1 fw-normal isadmin">${item.sub_cat_1}</h5>
                 <h5 class="fs-11 mt-1 fw-normal">${item.sub_cat_2}</h5>
             </td>
+             <td>
+                <span class="text-muted fs-12">${item.marca}</span>
+                <h5 class="fs-14 mt-1 fw-normal isadmin">${item.modelo}</h5>
+                <h5 class="fs-14 mt-1 fw-normal">${item.uni_medida}</h5>
+            </td>
 
             <td>
                 <span class="text-muted fs-12">Tipo</span>
@@ -117,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             </td>
 
-            <td><span class="text-muted fs-12">MSRP</span><h5 class="fs-14 mt-1 fw-normal">${format4(item.precio)} ${item.moneda}</h5></td>
+            <td><span class="text-muted fs-12">Precio</span><h5 class="fs-14 mt-1 fw-normal">${item.moneda === 'DOLLAR' ? '$' : 'S/.'}${formatDecimal(item.precio)}</h5></td>
             
             <td>
                 <a href="javascript:void(0)" class="text-danger btnDeleteItem">
@@ -129,6 +166,31 @@ document.addEventListener("DOMContentLoaded", () => {
         tbody.appendChild(tr);
         validarTdAdmin(tr);
         alertify.success("Item agregado");
+        calcularTotales();
+
+        // Eventos para cambiar cantidad
+        const inputQty = tr.querySelector("input");
+        const btnPlus = tr.querySelector(".plus");
+        const btnMinus = tr.querySelector(".minus");
+        const btnDelete = tr.querySelector(".btnDeleteItem");
+
+        btnPlus.addEventListener("click", () => {
+            inputQty.value = parseInt(inputQty.value) + 1;
+            calcularTotales();
+        });
+
+        btnMinus.addEventListener("click", () => {
+            if (parseInt(inputQty.value) > 1) {
+                inputQty.value = parseInt(inputQty.value) - 1;
+                calcularTotales();
+            }
+        });
+
+        btnDelete.addEventListener("click", () => {
+            tr.remove();
+            alertify.error("Item eliminado");
+            calcularTotales();
+        });
     });
 
 });
