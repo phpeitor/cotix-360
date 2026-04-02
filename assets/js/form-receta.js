@@ -81,12 +81,45 @@ document.addEventListener("DOMContentLoaded", () => {
         calcularTotales();
     }
 
+    function normalizarTipoCambio(rawValue) {
+        let valor = String(rawValue ?? "").replace(",", ".");
+
+        // Permitir solo digitos y punto decimal.
+        valor = valor.replace(/[^\d.]/g, "");
+
+        // Mantener solo el primer punto.
+        const primerPunto = valor.indexOf(".");
+        if (primerPunto !== -1) {
+            valor = valor.slice(0, primerPunto + 1) + valor.slice(primerPunto + 1).replace(/\./g, "");
+        }
+
+        // Limitar a maximo 3 decimales.
+        const partes = valor.split(".");
+        if (partes.length > 1) {
+            partes[1] = partes[1].slice(0, 3);
+            valor = `${partes[0]}.${partes[1]}`;
+        }
+
+        return valor;
+    }
+
     if (tipoCambioInput) {
         tipoCambioInput.addEventListener("input", () => {
+            tipoCambioInput.value = normalizarTipoCambio(tipoCambioInput.value);
+
             const tc = parseFloat(tipoCambioInput.value);
-            if (!Number.isFinite(tc) || tc < 0) {
-                tipoCambioInput.value = "0.000";
+            if (Number.isFinite(tc) && tc >= 0) {
+                calcularTotales();
+                return;
             }
+
+            calcularTotales();
+        });
+
+        tipoCambioInput.addEventListener("blur", () => {
+            const tc = parseFloat(normalizarTipoCambio(tipoCambioInput.value));
+            const valorFinal = Number.isFinite(tc) && tc >= 0 ? tc : 0;
+            tipoCambioInput.value = valorFinal.toFixed(3);
             calcularTotales();
         });
     }
