@@ -96,13 +96,23 @@
                                     <div class="border border-dashed p-2 rounded text-center isadmin">
                                         <div class="row">
                                             <div class="col-lg-3 col-6 border-end">
-                                                <p class="text-muted fw-medium fs-14 mb-0"><i class="ti ti-currency-sol"></i> <span class="text-dark">Total S/. </span> <span id="total_soles">0.00</span></p>
+                                                <p class="text-muted fw-medium fs-14 mb-0"><span class="text-dark">Total S/. </span> <span id="total_soles">0.00</span></p>
                                             </div>
                                             <div class="col-lg-3 col-6 border-end">
-                                                <p class="text-muted fw-medium fs-14 mb-0"><i class="ti ti-currency-dollar"></i> <span class="text-dark">Total $ </span> <span id="total_dolares">0.00</span></p>
+                                                <p class="text-muted fw-medium fs-14 mb-0"><span class="text-dark">Total $ </span> <span id="total_dolares">0.00</span></p>
                                             </div>
-                                            <div class="col-lg-4 col-12">
-                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total 🇵🇪 </span> <span id="total_peru">0.00</span></p>
+
+                                            <div class="col-lg-3 col-6 border-end">
+                                                <p class="text-muted fw-medium fs-12 mb-1"><span class="text-dark">Tipo de Cambio SUNAT (Venta)</span></p>
+                                                <div class="input-step border bg-body-secondary p-1 rounded-pill d-inline-flex overflow-visible">
+                                                    <button type="button" id="tcMinus" class="tc-minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
+                                                    <input type="number" id="tipo_cambio_sunat" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="1.000" min="0" step="0.001" />
+                                                    <button type="button" id="tcPlus" class="tc-plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-lg-3 col-12">
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total PE </span> <span id="total_peru">0.00</span></p>
                                             </div>
 
                                         </div>

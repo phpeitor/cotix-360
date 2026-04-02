@@ -8,6 +8,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalItemEl = document.getElementById("total_item");
     const totalSolesEl = document.getElementById("total_soles");
     const totalDolaresEl = document.getElementById("total_dolares");
+    const totalPeruEl = document.getElementById("total_peru");
+    const tipoCambioInput = document.getElementById("tipo_cambio_sunat");
+    const tcMinusBtn = document.querySelector(".tc-minus");
+    const tcPlusBtn = document.querySelector(".tc-plus");
+
+    function getTipoCambioActual() {
+        const tc = parseFloat(tipoCambioInput?.value);
+        return Number.isFinite(tc) && tc > 0 ? tc : 1;
+    }
 
     // Función para calcular totales
     function calcularTotales() {
@@ -30,9 +39,62 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         totalItemEl.textContent = contadorItems;
-        totalSolesEl.textContent = format2(totalSoles);
-        totalDolaresEl.textContent = format2(totalDolares);
+        totalSolesEl.textContent = format2(decimalAdjust('round', totalSoles, '-2'));
+        totalDolaresEl.textContent = format2(decimalAdjust('round', totalDolares, '-2'));
+
+        const tc = getTipoCambioActual();
+        const totalPE = totalSoles + (totalDolares * tc);
+        totalPeruEl.textContent = format2(decimalAdjust('round', totalPE, '-2'));
     }
+
+    async function cargarTipoCambioSunat() {
+        try {
+            const res = await fetch("controller/get_tipo_cambio.php");
+            const data = await res.json();
+
+            if (!res.ok || !data.ok) {
+                throw new Error(data.message || "No se pudo obtener tipo de cambio SUNAT");
+            }
+
+            // Para cotizar usamos tipo de cambio VENTA.
+            if (tipoCambioInput) {
+                tipoCambioInput.value = Number(data.venta || 1).toFixed(3);
+            }
+
+            calcularTotales();
+        } catch (error) {
+            console.error(error);
+            if (tipoCambioInput) {
+                tipoCambioInput.value = "1.000";
+            }
+            calcularTotales();
+            alertify.error("No se pudo cargar TC SUNAT; se usa 1.000");
+        }
+    }
+
+    function ajustarTipoCambio(delta) {
+        if (!tipoCambioInput) return;
+
+        const actual = getTipoCambioActual();
+        const nuevo = Math.max(0, decimalAdjust('round', actual + delta, '-3'));
+        tipoCambioInput.value = nuevo.toFixed(3);
+        calcularTotales();
+    }
+
+    if (tipoCambioInput) {
+        tipoCambioInput.addEventListener("input", () => {
+            const tc = parseFloat(tipoCambioInput.value);
+            if (!Number.isFinite(tc) || tc < 0) {
+                tipoCambioInput.value = "0.000";
+            }
+            calcularTotales();
+        });
+    }
+
+    tcMinusBtn?.addEventListener("click", () => ajustarTipoCambio(-0.001));
+    tcPlusBtn?.addEventListener("click", () => ajustarTipoCambio(0.001));
+
+    cargarTipoCambioSunat();
     /* ---------------------------------------------------
        CARGAR ITEMS SEGÚN BASE
     --------------------------------------------------- */
