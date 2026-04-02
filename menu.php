@@ -86,6 +86,11 @@ if (!tieneAcceso($archivoActual)) {
                                 <span class="menu-text">Plantilla de Cálculo</span>
                             </a>
                         </li>
+                         <li class="side-nav-item">
+                            <a href="receta.php" class="side-nav-link">
+                                <span class="menu-text">Plantilla de Receta</span>
+                            </a>
+                        </li>
                         <li class="side-nav-item">
                             <a href="cotizaciones.php" class="side-nav-link">
                                 <span class="menu-text">Cotizaciones</span>

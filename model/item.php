@@ -236,6 +236,16 @@ class Item {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function obtenerItemsReceta(string $tipo): ?array {
+        $sql = "SELECT *
+                FROM receta_items
+                WHERE tipo = :tipo";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':tipo', $tipo);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function obtenerFlete(): ?array {
         $sql = "SELECT *
                 FROM flete";
