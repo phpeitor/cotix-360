@@ -1,6 +1,6 @@
 # Cotix360
 
-[![forthebadge](/badges/made-with-javascript.svg)](https://www.linkedin.com/in/drphp/)
+[![forthebadge](/badges/made-with-javascript.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/built-with-love.svg)](https://www.linkedin.com/in/drphp/)
 
 Aplicación web para gestión de usuarios, carga de ítems y generación de cotizaciones con cálculo automático de costos, flete, gastos, interés, factor y precios finales.
