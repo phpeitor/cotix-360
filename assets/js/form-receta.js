@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const baseSelect = document.getElementById("filterBase");
     const itemSelect = document.getElementById("choices-single-default");
     const btnAdd = document.getElementById("btnAdd");
+    const qtyToAddInput = document.getElementById("qtyToAdd");
+    const qtyAddMinus = document.getElementById("qtyAddMinus");
+    const qtyAddPlus = document.getElementById("qtyAddPlus");
     const tbody = document.querySelector("table.table tbody");
     
     // Elementos de totales
@@ -10,21 +13,55 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalDolaresEl = document.getElementById("total_dolares");
     const totalPeruEl = document.getElementById("total_peru");
     const tipoCambioInput = document.getElementById("tipo_cambio_sunat");
+    const tipoCambioFechaEl = document.getElementById("tipo_cambio_sunat_fecha");
     const tcMinusBtn = document.querySelector(".tc-minus");
     const tcPlusBtn = document.querySelector(".tc-plus");
+    const previewButton = document.getElementById("btnPreviewReceta");
+    const previewModalEl = document.getElementById("previewRecetaModal");
+    const previewTableBody = document.getElementById("previewRecetaTableBody");
+    const previewTotalItemsEl = document.getElementById("previewTotalItems");
+    const previewTotalSolesEl = document.getElementById("previewTotalSoles");
+    const previewTotalDolaresEl = document.getElementById("previewTotalDolares");
+    const previewTotalPEEl = document.getElementById("previewTotalPE");
+    const paginationFromEl = document.getElementById("pagination_from");
+    const paginationToEl = document.getElementById("pagination_to");
+    const paginationWrapper = document.getElementById("pagination_wrapper");
+    const paginationList = document.getElementById("pagination_list");
+    const PAGE_SIZE = 10;
+    let currentPage = 1;
 
     function getTipoCambioActual() {
         const tc = parseFloat(tipoCambioInput?.value);
         return Number.isFinite(tc) && tc > 0 ? tc : 1;
     }
 
-    // Función para calcular totales
-    function calcularTotales() {
+    function setQtyToAdd(value) {
+        if (!qtyToAddInput) return;
+        const parsed = parseInt(value, 10);
+        const safeValue = Number.isInteger(parsed) ? parsed : 1;
+        qtyToAddInput.value = String(Math.min(100, Math.max(1, safeValue)));
+    }
+
+    qtyAddMinus?.addEventListener("click", () => {
+        const actual = parseInt(qtyToAddInput?.value || "1", 10);
+        setQtyToAdd(actual - 1);
+    });
+
+    qtyAddPlus?.addEventListener("click", () => {
+        const actual = parseInt(qtyToAddInput?.value || "1", 10);
+        setQtyToAdd(actual + 1);
+    });
+
+    function getRows() {
+        return [...tbody.querySelectorAll("tr")];
+    }
+
+    function getResumenTotales() {
         let contadorItems = 0;
         let totalSoles = 0;
         let totalDolares = 0;
 
-        tbody.querySelectorAll("tr").forEach(tr => {
+        getRows().forEach(tr => {
             const qty = parseInt(tr.querySelector("input").value);
             const precio = parseFloat(tr.dataset.precio);
             const moneda = tr.dataset.moneda;
@@ -38,13 +75,130 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        const tc = getTipoCambioActual();
+        const totalPE = totalSoles + (totalDolares * tc);
+
+        return { contadorItems, totalSoles, totalDolares, totalPE };
+    }
+
+    function renderPreviewTable() {
+        if (!previewTableBody) return;
+
+        const { contadorItems, totalSoles, totalDolares, totalPE } = getResumenTotales();
+
+        if (previewTotalItemsEl) previewTotalItemsEl.textContent = contadorItems;
+        if (previewTotalSolesEl) previewTotalSolesEl.textContent = format2(decimalAdjust('round', totalSoles, '-2'));
+        if (previewTotalDolaresEl) previewTotalDolaresEl.textContent = format2(decimalAdjust('round', totalDolares, '-2'));
+        if (previewTotalPEEl) previewTotalPEEl.textContent = format2(decimalAdjust('round', totalPE, '-2'));
+
+        previewTableBody.innerHTML = "";
+
+        getRows().forEach(tr => {
+            const qty = parseInt(tr.querySelector("input").value);
+            const precio = parseFloat(tr.dataset.precio);
+            const moneda = tr.dataset.moneda;
+            const monedaSimbolo = moneda === "DOLLAR" ? "$" : "S/.";
+
+            const itemNombre = tr.dataset.nombre || "";
+            const itemDescripcion = tr.dataset.descripcion || "";
+            const detalleLinea1 = [tr.dataset.categoria, tr.dataset.subcat1, tr.dataset.subcat2].filter(Boolean).join(" / ");
+            const detalleLinea2 = [tr.dataset.marca, tr.dataset.modelo, tr.dataset.unimedida].filter(Boolean).join(" / ");
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>
+                    <div class="item-title">${itemNombre}</div>
+                    ${itemDescripcion ? `<div class="item-subtitle">${itemDescripcion}</div>` : ""}
+                </td>
+                <td>
+                    <div class="item-title">${detalleLinea1 || "-"}</div>
+                    <div class="item-subtitle">${detalleLinea2 || "-"}</div>
+                </td>
+                <td>${tr.dataset.tipo || "-"}</td>
+                <td class="text-center">${qty}</td>
+                <td class="text-end">${monedaSimbolo} ${formatDecimal(precio)}</td>
+            `;
+
+            previewTableBody.appendChild(row);
+        });
+    }
+
+    function renderPagination() {
+        const rows = getRows();
+        const totalRows = rows.length;
+        const totalPages = Math.max(1, Math.ceil(totalRows / PAGE_SIZE));
+
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+
+        const startIndex = (currentPage - 1) * PAGE_SIZE;
+        const endIndex = startIndex + PAGE_SIZE;
+
+        rows.forEach((row, index) => {
+            row.classList.toggle("d-none", !(index >= startIndex && index < endIndex));
+        });
+
+        if (paginationFromEl) {
+            paginationFromEl.textContent = totalRows === 0 ? 0 : startIndex + 1;
+        }
+
+        if (paginationToEl) {
+            paginationToEl.textContent = Math.min(endIndex, totalRows);
+        }
+
+        if (paginationWrapper) {
+            paginationWrapper.classList.toggle("d-none", totalRows <= PAGE_SIZE);
+        }
+
+        if (paginationList) {
+            paginationList.innerHTML = "";
+
+            if (totalRows <= PAGE_SIZE) {
+                return;
+            }
+
+            const createPageItem = (label, page, disabled = false, active = false, icon = false) => {
+                const li = document.createElement("li");
+                li.className = `page-item ${disabled ? "disabled" : ""} ${active ? "active" : ""}`.trim();
+
+                const a = document.createElement("a");
+                a.href = "#";
+                a.className = "page-link";
+                a.innerHTML = icon ? label : label;
+
+                if (!disabled) {
+                    a.addEventListener("click", (event) => {
+                        event.preventDefault();
+                        currentPage = page;
+                        renderPagination();
+                    });
+                }
+
+                li.appendChild(a);
+                return li;
+            };
+
+            paginationList.appendChild(createPageItem('<i class="ti ti-chevron-left"></i>', Math.max(1, currentPage - 1), currentPage === 1, false, true));
+
+            for (let page = 1; page <= totalPages; page++) {
+                paginationList.appendChild(createPageItem(String(page), page, false, page === currentPage));
+            }
+
+            paginationList.appendChild(createPageItem('<i class="ti ti-chevron-right"></i>', Math.min(totalPages, currentPage + 1), currentPage === totalPages, false, true));
+        }
+    }
+
+    // Función para calcular totales
+    function calcularTotales() {
+        const { contadorItems, totalSoles, totalDolares, totalPE } = getResumenTotales();
+
         totalItemEl.textContent = contadorItems;
         totalSolesEl.textContent = format2(decimalAdjust('round', totalSoles, '-2'));
         totalDolaresEl.textContent = format2(decimalAdjust('round', totalDolares, '-2'));
-
-        const tc = getTipoCambioActual();
-        const totalPE = totalSoles + (totalDolares * tc);
         totalPeruEl.textContent = format2(decimalAdjust('round', totalPE, '-2'));
+
+        renderPagination();
     }
 
     async function cargarTipoCambioSunat() {
@@ -61,11 +215,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 tipoCambioInput.value = Number(data.venta || 1).toFixed(3);
             }
 
+            if (tipoCambioFechaEl && data.fecha) {
+                tipoCambioFechaEl.textContent = `- ${data.fecha}`;
+            }
+
             calcularTotales();
         } catch (error) {
             console.error(error);
             if (tipoCambioInput) {
                 tipoCambioInput.value = "1.000";
+            }
+            if (tipoCambioFechaEl) {
+                tipoCambioFechaEl.textContent = "";
             }
             calcularTotales();
             alertify.error("No se pudo cargar TC SUNAT; se usa 1.000");
@@ -126,6 +287,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     tcMinusBtn?.addEventListener("click", () => ajustarTipoCambio(-0.001));
     tcPlusBtn?.addEventListener("click", () => ajustarTipoCambio(0.001));
+
+    previewButton?.addEventListener("click", renderPreviewTable);
+    previewModalEl?.addEventListener("show.bs.modal", renderPreviewTable);
 
     cargarTipoCambioSunat();
     /* ---------------------------------------------------
@@ -190,9 +354,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const item = selected.customProperties;
         const itemId  = item.id;
+        const qtyInicial = parseInt(qtyToAddInput?.value, 10);
 
         if (!item) {
             alertify.error("El item no contiene información válida");
+            return;
+        }
+
+        if (!Number.isInteger(qtyInicial) || qtyInicial < 1 || qtyInicial > 100) {
+            alertify.error("Ingrese una cantidad valida (1 a 100)");
             return;
         }
 
@@ -205,6 +375,15 @@ document.addEventListener("DOMContentLoaded", () => {
         tr.dataset.itemId  = itemId;
         tr.dataset.precio = item.precio;
         tr.dataset.moneda = item.moneda;
+        tr.dataset.nombre = item.nombre;
+        tr.dataset.descripcion = item.descripcion;
+        tr.dataset.categoria = item.categoria;
+        tr.dataset.subcat1 = item.sub_cat_1;
+        tr.dataset.subcat2 = item.sub_cat_2;
+        tr.dataset.marca = item.marca;
+        tr.dataset.modelo = item.modelo;
+        tr.dataset.unimedida = item.uni_medida;
+        tr.dataset.tipo = item.tipo;
 
         tr.innerHTML = `
             <td>
@@ -244,7 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="text-muted fs-12">Cantidad</span> <br>
                 <div data-touchspin class="input-step border bg-body-secondary p-1 mt-1 rounded-pill d-inline-flex overflow-visible">
                     <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
-                    <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="1" min="0" max="100" readonly />
+                    <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="${qtyInicial}" min="0" max="100" readonly />
                     <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
                 </div>
             </td>
@@ -261,10 +440,13 @@ document.addEventListener("DOMContentLoaded", () => {
         tbody.appendChild(tr);
         validarTdAdmin(tr);
         alertify.success("Item agregado");
+        setQtyToAdd(1);
+        currentPage = Math.ceil(getRows().length / PAGE_SIZE);
         calcularTotales();
 
         // Eventos para cambiar cantidad
         const inputQty = tr.querySelector("input");
+        inputQty.value = String(qtyInicial);
         const btnPlus = tr.querySelector(".plus");
         const btnMinus = tr.querySelector(".minus");
         const btnDelete = tr.querySelector(".btnDeleteItem");

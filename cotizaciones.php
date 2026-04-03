@@ -119,7 +119,7 @@
         </div>
     </div>
     
-     <!-- Info Header Modal -->
+    <!-- Info Header Modal -->
     <div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
         <div class="modal-dialog" style="max-width: 760px;">
             <div class="modal-content">

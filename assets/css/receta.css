@@ -1,0 +1,40 @@
+.preview-modal .modal-dialog {
+    max-width: 96vw;
+}
+
+.preview-modal .modal-body {
+    padding: 1rem 1rem 1.25rem;
+}
+
+.preview-table.table-sm > :not(caption) > * > * {
+    padding: .35rem .5rem;
+}
+
+.preview-table td,
+.preview-table th {
+    font-size: .82rem;
+    vertical-align: middle;
+}
+
+.preview-table .item-title {
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.preview-table .item-subtitle {
+    font-size: .76rem;
+    color: var(--bs-secondary-color);
+    line-height: 1.1;
+}
+
+.preview-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem 1rem;
+    margin-bottom: 1rem;
+    font-size: .85rem;
+}
+
+.preview-summary .badge {
+    font-weight: 600;
+}
