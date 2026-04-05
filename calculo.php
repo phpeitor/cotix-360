@@ -81,7 +81,7 @@
                                         </div>
 
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">Item</label>
+                                            <label class="form-label">Item <code>(Nombre, Descripción, Peso)</code></label>
                                             <select id="choices-single-default" data-choices class="form-select" name="choices-single-default">
                                                 <option value="">-- Seleccione base --</option>
                                             </select>
