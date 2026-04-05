@@ -1,5 +1,7 @@
 <?php
 session_start();
+require_once __DIR__ . '/../config/permisos.php';
+
 $max_inactive = 90 * 60;
 
 if (!isset($_SESSION['session_usuario'])) {
@@ -18,4 +20,16 @@ if (isset($_SESSION['session_time'])) {
     } else {
         $_SESSION['session_time'] = time();
     }
+}
+
+$archivoActual = basename($_SERVER['SCRIPT_NAME'] ?? '');
+
+if ($archivoActual !== '' && !tieneAcceso($archivoActual)) {
+    if ($archivoActual === 'home.php') {
+        header('Location: ./index.php');
+        exit;
+    }
+
+    header('Location: ./home.php');
+    exit('Acceso denegado');
 }
