@@ -33,6 +33,37 @@
 		e.setAttribute("data-bs-theme", config.theme), e.setAttribute("data-menu-color", config.menu.color), e.setAttribute("data-topbar-color", config.topbar.color), e.setAttribute("data-layout-mode", config.layout.mode)
 	}
 
+	window.PERMISOS_STATE = window.PERMISOS_STATE || {
+		esAdmin: !1,
+		cargo: 0,
+		permisos: []
+	};
+
+	window.getPermisosState = window.getPermisosState || function() {
+		if (window.__PERMISOS_PROMISE__) return window.__PERMISOS_PROMISE__;
+
+		window.__PERMISOS_PROMISE__ = fetch("config/permisos-js.php")
+			.then(r => r.json())
+			.then(data => {
+				const permisos = Array.isArray(data.permisos) ? data.permisos : [];
+				const rol = Array.isArray(data.rol) ? data.rol : [];
+
+				window.PERMISOS_STATE = {
+					esAdmin: permisos[0] === "*",
+					cargo: rol[0] ?? 0,
+					permisos
+				};
+
+				return window.PERMISOS_STATE;
+			})
+			.catch(err => {
+				console.error("Permisos:", err);
+				return window.PERMISOS_STATE;
+			});
+
+		return window.__PERMISOS_PROMISE__;
+	};
+
     document.addEventListener("DOMContentLoaded", function () {
         const logoutBtn = document.getElementById("logout-btn");
         if (logoutBtn) {
@@ -49,12 +80,8 @@
 			});
         }
 
-		fetch('config/permisos-js.php')
-		.then(r => r.json())
-		.then(data => {
-
-			const permisos = data.permisos;
-			const esAdmin = permisos[0] === '*';
+		window.getPermisosState()
+		.then(({ permisos, esAdmin }) => {
 
 			/* ===============================
 			* 1. ITEMS SIMPLES + SUBITEMS
@@ -66,8 +93,7 @@
 				const url = a.getAttribute('href').split('/').pop();
 
 				if (!esAdmin && !permisos.includes(url)) {
-				const li = a.closest('.side-nav-item');
-				li?.classList.add('disabled');
+					a.closest('li')?.remove();
 				}
 			});
 
@@ -82,17 +108,37 @@
 				const subLinks = parentLi.querySelectorAll('.sub-menu a[href]');
 
 				const tieneAlgunPermiso = [...subLinks].some(a => {
-				const url = a.getAttribute('href').split('/').pop();
-				return esAdmin || permisos.includes(url);
+					const url = a.getAttribute('href').split('/').pop();
+					return esAdmin || permisos.includes(url);
 				});
 
 				if (!tieneAlgunPermiso) {
-				parentLi.classList.add('disabled');
+					parentLi?.remove();
 				}
 			});
 
 			/* ===============================
-			* 3. ISADMIN 
+			* 3. TITULOS SIN ITEMS
+			* =============================== */
+			document.querySelectorAll('.side-nav > li.side-nav-title').forEach(title => {
+				let sibling = title.nextElementSibling;
+				let tieneItemsEnSeccion = false;
+
+				while (sibling && !sibling.classList.contains('side-nav-title')) {
+					if (sibling.classList.contains('side-nav-item')) {
+						tieneItemsEnSeccion = true;
+						break;
+					}
+					sibling = sibling.nextElementSibling;
+				}
+
+				if (!tieneItemsEnSeccion) {
+					title.remove();
+				}
+			});
+
+			/* ===============================
+			* 4. ISADMIN 
 			* =============================== */
 			if (!esAdmin) {
 				document

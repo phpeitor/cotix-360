@@ -334,35 +334,21 @@ const customJS = () => {
 	}
 };
 
-function decimalAdjust(type, value, exp) {
-	if (typeof exp === 'undefined' || +exp === 0) {
-		return Math[type](value);
-	}
-	value = +value;
-	exp = +exp;
-	if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
-		return NaN;
-	}
-	value = value.toString().split('e');
-	value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
-	value = value.toString().split('e');
-	return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+let ES_ADMIN = !!window.PERMISOS_STATE?.esAdmin;
+let CARGO = window.PERMISOS_STATE?.cargo ?? 0;
+let LISTA_PERMISOS = window.PERMISOS_STATE?.permisos ?? [];
+
+if (typeof window.getPermisosState === "function") {
+	window.getPermisosState()
+		.then(state => {
+			ES_ADMIN = !!state.esAdmin;
+			LISTA_PERMISOS = Array.isArray(state.permisos) ? state.permisos : [];
+			CARGO = state.cargo ?? 0;
+		})
+		.catch(err => console.error("Permisos:", err));
+} else {
+	console.error("Permisos: getPermisosState no esta disponible. Verifica la carga previa de assets/js/config.js");
 }
-
-let ES_ADMIN = false;
-let CARGO = 0;
-let LISTA_PERMISOS = [];
-
-fetch('config/permisos-js.php')
-    .then(r => r.json())
-    .then(data => {
-
-        ES_ADMIN = data.permisos[0] === '*';
-        LISTA_PERMISOS = data.permisos;
-		CARGO = data.rol[0];
-		
-    })
-    .catch(err => console.error('Permisos:', err));
 
 function validarTdAdmin(tr) {
     if (!tr) return;
