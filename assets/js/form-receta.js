@@ -152,7 +152,14 @@ document.addEventListener("DOMContentLoaded", () => {
             false
         );
 
-        itemSelect.disabled = rows.length === 0;
+        if (rows.length === 0) {
+            itemSelect.disabled = true;
+            choices.disable();
+            return;
+        }
+
+        itemSelect.disabled = false;
+        choices.enable();
     }
 
     async function cargarRecetaOpciones(params) {

@@ -188,7 +188,7 @@
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Item</label>
+                            <label class="form-label">Item</label><code>(Nombre, Descripción, Modelo, Marca)</code>
                             <select id="choices-single-default" data-choices class="form-select" name="choices-single-default" disabled>
                                 <option value="">-- Seleccione filtros --</option>
                             </select>
