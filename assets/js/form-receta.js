@@ -576,18 +576,17 @@ document.addEventListener("DOMContentLoaded", () => {
                         </span>
                     </div>
                     <div>
-                        <span class="text-muted fs-12">${item.nombre}</span><br>
-                        <h5 class="fs-14 mt-1 item-description">${item.descripcion}</h5>
+                        <span class="text-muted fs-12">${item.categoria}</span>
+                        <h5 class="fs-14 mt-1 fw-normal isadmin">${item.sub_cat_1}</h5>
+                        <h5 class="fs-11 mt-1 fw-normal">${item.sub_cat_2}</h5>
                     </div>
                 </div>
             </td>
-
             <td>
-                <span class="text-muted fs-12">${item.categoria}</span>
-                <h5 class="fs-14 mt-1 fw-normal isadmin">${item.sub_cat_1}</h5>
-                <h5 class="fs-11 mt-1 fw-normal">${item.sub_cat_2}</h5>
+                <span class="text-muted fs-12">${item.nombre}</span><br>
+                <h5 class="fs-14 mt-1 item-description">${item.descripcion}</h5>
             </td>
-             <td>
+            <td>
                 <span class="text-muted fs-12">${item.marca}</span>
                 <h5 class="fs-14 mt-1 fw-normal isadmin">${item.modelo}</h5>
                 <h5 class="fs-14 mt-1 fw-normal">${item.uni_medida}</h5>

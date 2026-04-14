@@ -166,28 +166,28 @@
                             </select>
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Categoria</label>
                             <select id="categoria" class="form-select" disabled>
                                 <option value="">-- Seleccione --</option>
                             </select>
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Sub Categoria 1</label>
                             <select id="subCat1" class="form-select" disabled>
                                 <option value="">-- Seleccione --</option>
                             </select>
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Sub Categoria 2</label>
                             <select id="subCat2" class="form-select" disabled>
                                 <option value="">-- Seleccione --</option>
                             </select>
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">Item</label><code>(Nombre, Descripción, Modelo, Marca)</code>
                             <select id="choices-single-default" data-choices class="form-select" name="choices-single-default" disabled>
                                 <option value="">-- Seleccione filtros --</option>
