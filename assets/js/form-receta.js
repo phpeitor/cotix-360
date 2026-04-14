@@ -1,5 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     const baseSelect = document.getElementById("filterBase");
+    const categoriaSelect = document.getElementById("categoria");
+    const subCat1Select = document.getElementById("subCat1");
+    const subCat2Select = document.getElementById("subCat2");
     const itemSelect = document.getElementById("choices-single-default");
     const btnAdd = document.getElementById("btnAdd");
     const qtyToAddInput = document.getElementById("qtyToAdd");
@@ -51,6 +54,226 @@ document.addEventListener("DOMContentLoaded", () => {
         const actual = parseInt(qtyToAddInput?.value || "1", 10);
         setQtyToAdd(actual + 1);
     });
+
+    function resetNativeSelect(selectEl, placeholder, disabled = true) {
+        if (!selectEl) return;
+
+        selectEl.innerHTML = `<option value="">${placeholder}</option>`;
+        selectEl.disabled = disabled;
+    }
+
+    function setNativeSelectOptions(selectEl, rows, placeholder, valueKey) {
+        if (!selectEl) return;
+
+        selectEl.innerHTML = `<option value="">${placeholder}</option>`;
+
+        rows.forEach(row => {
+            const value = row[valueKey];
+            if (value === null || value === undefined || String(value).trim() === "") {
+                return;
+            }
+
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            selectEl.appendChild(option);
+        });
+
+        selectEl.disabled = rows.length === 0;
+    }
+
+    function resetItemSelect(placeholder = "-- Seleccione filtros --") {
+        if (!itemSelect) return;
+
+        const choices = itemSelect.choicesInstance;
+        if (choices) {
+            choices.clearChoices();
+            choices.setChoices([
+                { value: "", label: placeholder, disabled: true, selected: true }
+            ], "value", "label", true);
+        } else {
+            itemSelect.innerHTML = `<option value="">${placeholder}</option>`;
+        }
+
+        itemSelect.disabled = true;
+    }
+
+    function setItemOptions(rows) {
+        if (!itemSelect) return;
+
+        const choices = itemSelect.choicesInstance;
+        if (!choices) {
+            itemSelect.innerHTML = "";
+            rows.forEach(row => {
+                const option = document.createElement("option");
+                option.value = row.id;
+                option.textContent = row.nombre || row.modelo || row.descripcion || row.id;
+                itemSelect.appendChild(option);
+            });
+            itemSelect.disabled = rows.length === 0;
+            return;
+        }
+
+        choices.clearChoices();
+        choices.setChoices([
+            { value: "", label: "-- Seleccione item --", disabled: true, selected: true }
+        ], "value", "label", true);
+
+        choices.setChoices(
+            rows.map(i => {
+                const partes = [
+                    i.nombre,
+                    validarDescripcion(i.descripcion) ? i.descripcion : null,
+                    i.modelo,
+                    i.marca
+                ].filter(Boolean);
+
+                return {
+                    value: i.id,
+                    label: partes.join(" | "),
+                    customProperties: {
+                        id: i.id,
+                        descripcion: i.descripcion,
+                        uni_medida: i.uni_medida,
+                        precio: i.precio,
+                        categoria: i.categoria,
+                        sub_cat_1: i.sub_cat_1,
+                        sub_cat_2: i.sub_cat_2,
+                        marca: i.marca,
+                        modelo: i.modelo,
+                        nombre: i.nombre,
+                        moneda: i.moneda,
+                        tipo: i.tipo
+                    }
+                };
+            }),
+            "value",
+            "label",
+            false
+        );
+
+        itemSelect.disabled = rows.length === 0;
+    }
+
+    async function cargarRecetaOpciones(params) {
+        const query = new URLSearchParams(params);
+        const res = await fetch(`controller/get_receta_item.php?${query.toString()}`);
+        const data = await res.json();
+
+        if (!res.ok || !Array.isArray(data)) {
+            throw new Error(data?.message || "No se pudieron cargar las opciones");
+        }
+
+        return data;
+    }
+
+    function getFiltrosReceta() {
+        return {
+            tipo: baseSelect?.value || "",
+            categoria: categoriaSelect?.value || "",
+            sub_cat_1: subCat1Select?.value || "",
+            sub_cat_2: subCat2Select?.value || ""
+        };
+    }
+
+    async function cargarBasesReceta() {
+        try {
+            const bases = await cargarRecetaOpciones({ nivel: "bases" });
+            setNativeSelectOptions(baseSelect, bases, "-- Seleccione --", "tipo");
+            resetNativeSelect(categoriaSelect, "-- Seleccione --");
+            resetNativeSelect(subCat1Select, "-- Seleccione --");
+            resetNativeSelect(subCat2Select, "-- Seleccione --");
+            resetItemSelect();
+        } catch (error) {
+            console.error(error);
+            alertify.error("Error al cargar bases");
+        }
+    }
+
+    async function cargarCategoriasReceta() {
+        const { tipo } = getFiltrosReceta();
+
+        resetNativeSelect(categoriaSelect, "-- Seleccione --");
+        resetNativeSelect(subCat1Select, "-- Seleccione --");
+        resetNativeSelect(subCat2Select, "-- Seleccione --");
+        resetItemSelect();
+
+        if (!tipo) return;
+
+        try {
+            const categorias = await cargarRecetaOpciones({ nivel: "categorias", tipo });
+            setNativeSelectOptions(categoriaSelect, categorias, "-- Seleccione --", "categoria");
+            resetNativeSelect(subCat1Select, "-- Seleccione --");
+            resetNativeSelect(subCat2Select, "-- Seleccione --");
+            resetItemSelect();
+        } catch (error) {
+            console.error(error);
+            alertify.error("Error al cargar categorías");
+        }
+    }
+
+    async function cargarSubCategorias1Receta() {
+        const { tipo, categoria } = getFiltrosReceta();
+
+        resetNativeSelect(subCat1Select, "-- Seleccione --");
+        resetNativeSelect(subCat2Select, "-- Seleccione --");
+        resetItemSelect();
+
+        if (!tipo || !categoria) return;
+
+        try {
+            const subCategorias1 = await cargarRecetaOpciones({ nivel: "subcat1", tipo, categoria });
+            setNativeSelectOptions(subCat1Select, subCategorias1, "-- Seleccione --", "sub_cat_1");
+            resetNativeSelect(subCat2Select, "-- Seleccione --");
+            resetItemSelect();
+        } catch (error) {
+            console.error(error);
+            alertify.error("Error al cargar sub categoría 1");
+        }
+    }
+
+    async function cargarSubCategorias2Receta() {
+        const { tipo, categoria, sub_cat_1 } = getFiltrosReceta();
+
+        resetNativeSelect(subCat2Select, "-- Seleccione --");
+        resetItemSelect();
+
+        if (!tipo || !categoria || !sub_cat_1) return;
+
+        try {
+            const subCategorias2 = await cargarRecetaOpciones({ nivel: "subcat2", tipo, categoria, sub_cat_1 });
+            setNativeSelectOptions(subCat2Select, subCategorias2, "-- Seleccione --", "sub_cat_2");
+            resetItemSelect();
+        } catch (error) {
+            console.error(error);
+            alertify.error("Error al cargar sub categoría 2");
+        }
+    }
+
+    async function cargarItemsReceta() {
+        const filtros = getFiltrosReceta();
+
+        resetItemSelect();
+
+        if (!filtros.tipo || !filtros.categoria || !filtros.sub_cat_1 || !filtros.sub_cat_2) {
+            return;
+        }
+
+        try {
+            const items = await cargarRecetaOpciones({ nivel: "items", ...filtros });
+            setItemOptions(items);
+        } catch (error) {
+            console.error(error);
+            alertify.error("Error al cargar items");
+        }
+    }
+
+    baseSelect?.addEventListener("change", cargarCategoriasReceta);
+    categoriaSelect?.addEventListener("change", cargarSubCategorias1Receta);
+    subCat1Select?.addEventListener("change", cargarSubCategorias2Receta);
+    subCat2Select?.addEventListener("change", cargarItemsReceta);
+
+    cargarBasesReceta();
 
     function getRows() {
         return [...tbody.querySelectorAll("tr")];
@@ -292,53 +515,6 @@ document.addEventListener("DOMContentLoaded", () => {
     previewModalEl?.addEventListener("show.bs.modal", renderPreviewTable);
 
     cargarTipoCambioSunat();
-    /* ---------------------------------------------------
-       CARGAR ITEMS SEGÚN BASE
-    --------------------------------------------------- */
-    baseSelect.addEventListener("change", async () => {
-
-        const baseId = baseSelect.value;
-        const choices = itemSelect.choicesInstance;
-
-        try {
-            choices.clearChoices();
-
-            choices.setChoices([{ value: "", label: "-- Seleccione item --", disabled: true, selected: true }], "value", "label", true);
-
-            if (!baseId) return;
-
-            const res = await fetch(`controller/get_receta_item.php?tipo=${baseId}`);
-            const data = await res.json();
-
-            choices.setChoices(
-                data.map(i => ({
-                    value: i.id,
-                    label: i.nombre + (validarDescripcion(i.descripcion) ? ` ⮞ ${i.descripcion}` : ""),
-                    customProperties: {
-                        id: i.id,
-                        descripcion: i.descripcion,
-                        uni_medida: i.uni_medida,
-                        precio: i.precio,
-                        categoria: i.categoria,
-                        sub_cat_1: i.sub_cat_1,
-                        sub_cat_2: i.sub_cat_2,
-                        marca: i.marca,
-                        modelo: i.modelo,
-                        nombre: i.nombre,
-                        moneda: i.moneda,
-                        tipo: i.tipo
-                    }
-                })),
-                "value",
-                "label",
-                false
-            );
-
-        } catch (error) {
-            console.error(error);
-            alertify.error("Error al cargar items");
-        }
-    });
 
     /* ---------------------------------------------------
        BOTÓN + → AGREGAR ITEM

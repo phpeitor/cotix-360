@@ -163,15 +163,34 @@
                             <label class="form-label">Base</label>
                             <select id="filterBase" class="form-select">
                                 <option value="">-- Seleccione --</option>
-                                <option value="PRODUCTO">PRODUCTO</option>
-                                <option value="SERVICIO">SERVICIO</option>
                             </select>
                         </div>
 
-                        <div class="col-md-5 mb-3">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Categoria</label>
+                            <select id="categoria" class="form-select" disabled>
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Sub Categoria 1</label>
+                            <select id="subCat1" class="form-select" disabled>
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Sub Categoria 2</label>
+                            <select id="subCat2" class="form-select" disabled>
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Item</label>
-                            <select id="choices-single-default" data-choices class="form-select" name="choices-single-default">
-                                <option value="">-- Seleccione base --</option>
+                            <select id="choices-single-default" data-choices class="form-select" name="choices-single-default" disabled>
+                                <option value="">-- Seleccione filtros --</option>
                             </select>
                         </div>
 

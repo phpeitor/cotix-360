@@ -215,6 +215,80 @@ class Item {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    private function limpiarFiltroReceta(?string $valor): ?string {
+        $valor = trim((string)($valor ?? ''));
+        return $valor === '' ? null : $valor;
+    }
+
+    private function agregarFiltroReceta(string &$sql, array &$params, string $campo, ?string $valor): void {
+        $valor = $this->limpiarFiltroReceta($valor);
+        if ($valor === null) {
+            return;
+        }
+
+        $sql .= " AND {$campo} = :{$campo}";
+        $params[":{$campo}"] = $valor;
+    }
+
+    public function obtenerRecetaTipos(): array {
+        $sql = "SELECT DISTINCT tipo
+                FROM receta_items
+                WHERE tipo IS NOT NULL
+                AND TRIM(tipo) <> ''
+                ORDER BY tipo";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerRecetaCategorias(?string $tipo = null): array {
+        $sql = "SELECT DISTINCT categoria
+                FROM receta_items
+                WHERE categoria IS NOT NULL
+                AND TRIM(categoria) <> ''";
+        $params = [];
+
+        $this->agregarFiltroReceta($sql, $params, 'tipo', $tipo);
+        $sql .= " ORDER BY categoria";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerRecetaSubCategorias1(?string $tipo = null, ?string $categoria = null): array {
+        $sql = "SELECT DISTINCT sub_cat_1
+                FROM receta_items
+                WHERE sub_cat_1 IS NOT NULL
+                AND TRIM(sub_cat_1) <> ''";
+        $params = [];
+
+        $this->agregarFiltroReceta($sql, $params, 'tipo', $tipo);
+        $this->agregarFiltroReceta($sql, $params, 'categoria', $categoria);
+        $sql .= " ORDER BY sub_cat_1";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerRecetaSubCategorias2(?string $tipo = null, ?string $categoria = null, ?string $subCat1 = null): array {
+        $sql = "SELECT DISTINCT sub_cat_2
+                FROM receta_items
+                WHERE sub_cat_2 IS NOT NULL
+                AND TRIM(sub_cat_2) <> ''";
+        $params = [];
+
+        $this->agregarFiltroReceta($sql, $params, 'tipo', $tipo);
+        $this->agregarFiltroReceta($sql, $params, 'categoria', $categoria);
+        $this->agregarFiltroReceta($sql, $params, 'sub_cat_1', $subCat1);
+        $sql .= " ORDER BY sub_cat_2";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function obtenerItems(int $id): ?array {
         $sql = "SELECT 
                 id,
@@ -236,14 +310,38 @@ class Item {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerItemsReceta(string $tipo): ?array {
-        $sql = "SELECT *
+    public function obtenerItemsRecetaFiltrados(?string $tipo = null, ?string $categoria = null, ?string $subCat1 = null, ?string $subCat2 = null): array {
+        $sql = "SELECT 
+                    id,
+                    nombre,
+                    descripcion,
+                    uni_medida,
+                    precio,
+                    moneda,
+                    tipo,
+                    categoria,
+                    sub_cat_1,
+                    sub_cat_2,
+                    marca,
+                    modelo
                 FROM receta_items
-                WHERE tipo = :tipo";
+                WHERE 1 = 1";
+        $params = [];
+
+        $this->agregarFiltroReceta($sql, $params, 'tipo', $tipo);
+        $this->agregarFiltroReceta($sql, $params, 'categoria', $categoria);
+        $this->agregarFiltroReceta($sql, $params, 'sub_cat_1', $subCat1);
+        $this->agregarFiltroReceta($sql, $params, 'sub_cat_2', $subCat2);
+
+        $sql .= " ORDER BY nombre, modelo, id";
+
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':tipo', $tipo);
-        $stmt->execute();
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerItemsReceta(string $tipo): ?array {
+        return $this->obtenerItemsRecetaFiltrados($tipo, null, null, null);
     }
 
     public function obtenerFlete(): ?array {
