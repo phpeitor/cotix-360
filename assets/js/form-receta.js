@@ -344,7 +344,6 @@ document.addEventListener("DOMContentLoaded", () => {
        BOTÓN + → AGREGAR ITEM
     --------------------------------------------------- */
     btnAdd.addEventListener("click", () => {
-
         const selected = itemSelect.choicesInstance.getValue();
 
         if (!selected || !selected.value) {
