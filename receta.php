@@ -200,25 +200,17 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Item</th>
+                                            <th class="text-center">Cant.</th>
                                             <th class="text-end">Precio</th>
                                             <th class="text-center">Acción</th>
                                         </tr>
                                     </thead>
                                     <tbody id="recetaItemsTableBody">
                                         <tr>
-                                            <td colspan="5" class="text-center text-muted py-4">Selecciona Base, Categoria y Sub Categorias para cargar los items.</td>
+                                            <td colspan="4" class="text-center text-muted py-4">Selecciona Base, Categoria y Sub Categorias para cargar los items.</td>
                                         </tr>
                                     </tbody>
                                 </table>
-                            </div>
-                        </div>
-
-                        <div class="col-md-2 mb-3">
-                            <label class="form-label">Cantidad</label>
-                            <div class="input-step border bg-body-secondary p-1 rounded-pill d-inline-flex overflow-visible">
-                                <button type="button" id="qtyAddMinus" class="bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
-                                <input type="number" id="qtyToAdd" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="1" min="1" max="100" readonly />
-                                <button type="button" id="qtyAddPlus" class="bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
                             </div>
                         </div>
 

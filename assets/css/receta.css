@@ -47,12 +47,28 @@
 }
 
 .receta-items-table {
-    min-width: 900px;
+    min-width: 780px;
+    table-layout: fixed;
 }
 
-.receta-items-table td:first-child,
-.receta-items-table th:first-child {
-    max-width: 280px;
+.receta-items-table th:nth-child(1),
+.receta-items-table td:nth-child(1) {
+    width: 48%;
+}
+
+.receta-items-table th:nth-child(2),
+.receta-items-table td:nth-child(2) {
+    width: 18%;
+}
+
+.receta-items-table th:nth-child(3),
+.receta-items-table td:nth-child(3) {
+    width: 16%;
+}
+
+.receta-items-table th:nth-child(4),
+.receta-items-table td:nth-child(4) {
+    width: 18%;
 }
 
 .receta-items-table .item-title,

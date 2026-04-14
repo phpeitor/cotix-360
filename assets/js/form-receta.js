@@ -3,9 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const categoriaSelect = document.getElementById("categoria");
     const subCat1Select = document.getElementById("subCat1");
     const subCat2Select = document.getElementById("subCat2");
-    const qtyToAddInput = document.getElementById("qtyToAdd");
-    const qtyAddMinus = document.getElementById("qtyAddMinus");
-    const qtyAddPlus = document.getElementById("qtyAddPlus");
     const tbody = document.querySelector("table.table tbody");
     const itemsTableBody = document.getElementById("recetaItemsTableBody");
     const itemsResultCount = document.getElementById("itemsResultCount");
@@ -38,22 +35,32 @@ document.addEventListener("DOMContentLoaded", () => {
         return Number.isFinite(tc) && tc > 0 ? tc : 1;
     }
 
-    function setQtyToAdd(value) {
-        if (!qtyToAddInput) return;
+    function clampCantidad(value) {
         const parsed = parseInt(value, 10);
-        const safeValue = Number.isInteger(parsed) ? parsed : 1;
-        qtyToAddInput.value = String(Math.min(100, Math.max(1, safeValue)));
+        if (!Number.isInteger(parsed)) return 1;
+        return Math.min(100, Math.max(1, parsed));
     }
 
-    qtyAddMinus?.addEventListener("click", () => {
-        const actual = parseInt(qtyToAddInput?.value || "1", 10);
-        setQtyToAdd(actual - 1);
-    });
+    function createQtyStep(initialValue = 1) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "input-step border bg-body-secondary p-1 rounded-pill d-inline-flex overflow-visible receta-qty-step";
+        wrapper.innerHTML = `
+            <button type="button" class="qty-minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
+            <input type="number" class="qty-input text-dark text-center border-0 bg-body-secondary rounded h-100" value="${clampCantidad(initialValue)}" min="1" max="100" readonly />
+            <button type="button" class="qty-plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
+        `;
 
-    qtyAddPlus?.addEventListener("click", () => {
-        const actual = parseInt(qtyToAddInput?.value || "1", 10);
-        setQtyToAdd(actual + 1);
-    });
+        const input = wrapper.querySelector(".qty-input");
+        wrapper.querySelector(".qty-minus").addEventListener("click", () => {
+            input.value = String(clampCantidad(parseInt(input.value, 10) - 1));
+        });
+
+        wrapper.querySelector(".qty-plus").addEventListener("click", () => {
+            input.value = String(clampCantidad(parseInt(input.value, 10) + 1));
+        });
+
+        return { wrapper, input };
+    }
 
     function resetNativeSelect(selectEl, placeholder, disabled = true) {
         if (!selectEl) return;
@@ -127,6 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         ${itemDescripcion ? `<div class="item-subtitle">${itemDescripcion}</div>` : ""}
                         <div class="item-title">${detalleLinea1 || "-"}</div>
                     </td>
+                    <td class="text-center align-middle receta-qty-cell"></td>
                     <td class="text-end">${precioTexto}</td>
                     <td class="text-center">
                         <button type="button" class="btn btn-sm btn-primary btn-add-item-row">
@@ -141,16 +149,29 @@ document.addEventListener("DOMContentLoaded", () => {
             button.addEventListener("click", () => {
                 const row = button.closest("tr");
                 const payload = row?.dataset.itemPayload;
+                const qtyInput = row?.querySelector(".qty-input");
+                const qty = clampCantidad(qtyInput?.value);
                 if (!payload) return;
 
                 try {
                     const item = JSON.parse(decodeURIComponent(payload));
-                    agregarItemReceta(item);
+                    agregarItemReceta(item, qty);
                 } catch (error) {
                     console.error(error);
                     alertify.error("No se pudo agregar el item");
                 }
             });
+        });
+
+        itemsTableBody.querySelectorAll("tr[data-item-payload]").forEach(row => {
+            const payload = row.dataset.itemPayload;
+            if (!payload) return;
+
+            const qtyCell = row.querySelector(".receta-qty-cell");
+            if (!qtyCell) return;
+
+            const { wrapper } = createQtyStep(1);
+            qtyCell.appendChild(wrapper);
         });
     }
 
@@ -276,16 +297,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     cargarBasesReceta();
 
-    function agregarItemReceta(item) {
+    function agregarItemReceta(item, qtyInicial = 1) {
         const itemId = item.id;
-        const qtyInicial = parseInt(qtyToAddInput?.value, 10);
+        const qtyNormalizada = clampCantidad(qtyInicial);
 
         if (!item) {
             alertify.error("El item no contiene información válida");
             return;
         }
 
-        if (!Number.isInteger(qtyInicial) || qtyInicial < 1 || qtyInicial > 100) {
+        if (!Number.isInteger(qtyNormalizada) || qtyNormalizada < 1 || qtyNormalizada > 100) {
             alertify.error("Ingrese una cantidad valida (1 a 100)");
             return;
         }
@@ -347,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="text-muted fs-12">Cantidad</span> <br>
                 <div data-touchspin class="input-step border bg-body-secondary p-1 mt-1 rounded-pill d-inline-flex overflow-visible">
                     <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
-                    <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="${qtyInicial}" min="0" max="100" readonly />
+                    <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="${qtyNormalizada}" min="0" max="100" readonly />
                     <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
                 </div>
             </td>
@@ -364,12 +385,11 @@ document.addEventListener("DOMContentLoaded", () => {
         tbody.appendChild(tr);
         validarTdAdmin(tr);
         alertify.success("Item agregado");
-        setQtyToAdd(1);
         currentPage = Math.ceil(getRows().length / PAGE_SIZE);
         calcularTotales();
 
         const inputQty = tr.querySelector("input");
-        inputQty.value = String(qtyInicial);
+        inputQty.value = String(qtyNormalizada);
         const btnPlus = tr.querySelector(".plus");
         const btnMinus = tr.querySelector(".minus");
         const btnDelete = tr.querySelector(".btnDeleteItem");
