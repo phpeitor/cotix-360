@@ -3,12 +3,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const categoriaSelect = document.getElementById("categoria");
     const subCat1Select = document.getElementById("subCat1");
     const subCat2Select = document.getElementById("subCat2");
-    const itemSelect = document.getElementById("choices-single-default");
-    const btnAdd = document.getElementById("btnAdd");
     const qtyToAddInput = document.getElementById("qtyToAdd");
     const qtyAddMinus = document.getElementById("qtyAddMinus");
     const qtyAddPlus = document.getElementById("qtyAddPlus");
     const tbody = document.querySelector("table.table tbody");
+    const itemsTableBody = document.getElementById("recetaItemsTableBody");
+    const itemsResultCount = document.getElementById("itemsResultCount");
     
     // Elementos de totales
     const totalItemEl = document.getElementById("total_item");
@@ -82,84 +82,76 @@ document.addEventListener("DOMContentLoaded", () => {
         selectEl.disabled = rows.length === 0;
     }
 
-    function resetItemSelect(placeholder = "-- Seleccione filtros --") {
-        if (!itemSelect) return;
+    function renderItemsTable(rows, emptyMessage = "No hay items para mostrar con los filtros actuales.") {
+        if (!itemsTableBody) return;
 
-        const choices = itemSelect.choicesInstance;
-        if (choices) {
-            choices.clearChoices();
-            choices.setChoices([
-                { value: "", label: placeholder, disabled: true, selected: true }
-            ], "value", "label", true);
-        } else {
-            itemSelect.innerHTML = `<option value="">${placeholder}</option>`;
+        if (itemsResultCount) {
+            itemsResultCount.textContent = `${rows.length} resultado${rows.length === 1 ? "" : "s"}`;
         }
 
-        itemSelect.disabled = true;
-    }
+        if (!rows.length) {
+            itemsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">${emptyMessage}</td>
+                </tr>
+            `;
+            return;
+        }
 
-    function setItemOptions(rows) {
-        if (!itemSelect) return;
+        itemsTableBody.innerHTML = rows.map(item => {
+            const itemNombre = item.nombre || "-";
+            const itemDescripcion = item.descripcion || "";
+            const detalleLinea1 = [item.categoria, item.sub_cat_1, item.sub_cat_2].filter(Boolean).join(" / ");
+            const detalleLinea2 = [item.marca, item.modelo, item.uni_medida].filter(Boolean).join(" / ");
+            const monedaSimbolo = item.moneda === "DOLLAR" ? "$" : "S/.";
+            const precioTexto = `${monedaSimbolo} ${formatDecimal(item.precio)}`;
+            const itemPayload = encodeURIComponent(JSON.stringify({
+                id: item.id,
+                descripcion: item.descripcion,
+                uni_medida: item.uni_medida,
+                precio: item.precio,
+                categoria: item.categoria,
+                sub_cat_1: item.sub_cat_1,
+                sub_cat_2: item.sub_cat_2,
+                marca: item.marca,
+                modelo: item.modelo,
+                nombre: item.nombre,
+                moneda: item.moneda,
+                tipo: item.tipo
+            }));
 
-        const choices = itemSelect.choicesInstance;
-        if (!choices) {
-            itemSelect.innerHTML = "";
-            rows.forEach(row => {
-                const option = document.createElement("option");
-                option.value = row.id;
-                option.textContent = row.nombre || row.modelo || row.descripcion || row.id;
-                itemSelect.appendChild(option);
+            return `
+                <tr data-item-payload="${itemPayload}">
+                    <td>
+                        <div class="item-title">${itemNombre}</div>
+                        ${itemDescripcion ? `<div class="item-subtitle">${itemDescripcion}</div>` : ""}
+                        <div class="item-title">${detalleLinea1 || "-"}</div>
+                    </td>
+                    <td class="text-end">${precioTexto}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-primary btn-add-item-row">
+                            <i class="ti ti-plus"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+
+        itemsTableBody.querySelectorAll(".btn-add-item-row").forEach(button => {
+            button.addEventListener("click", () => {
+                const row = button.closest("tr");
+                const payload = row?.dataset.itemPayload;
+                if (!payload) return;
+
+                try {
+                    const item = JSON.parse(decodeURIComponent(payload));
+                    agregarItemReceta(item);
+                } catch (error) {
+                    console.error(error);
+                    alertify.error("No se pudo agregar el item");
+                }
             });
-            itemSelect.disabled = rows.length === 0;
-            return;
-        }
-
-        choices.clearChoices();
-        choices.setChoices([
-            { value: "", label: "-- Seleccione item --", disabled: true, selected: true }
-        ], "value", "label", true);
-
-        choices.setChoices(
-            rows.map(i => {
-                const partes = [
-                    i.nombre,
-                    validarDescripcion(i.descripcion) ? i.descripcion : null,
-                    i.modelo,
-                    i.marca
-                ].filter(Boolean);
-
-                return {
-                    value: i.id,
-                    label: partes.join(" | "),
-                    customProperties: {
-                        id: i.id,
-                        descripcion: i.descripcion,
-                        uni_medida: i.uni_medida,
-                        precio: i.precio,
-                        categoria: i.categoria,
-                        sub_cat_1: i.sub_cat_1,
-                        sub_cat_2: i.sub_cat_2,
-                        marca: i.marca,
-                        modelo: i.modelo,
-                        nombre: i.nombre,
-                        moneda: i.moneda,
-                        tipo: i.tipo
-                    }
-                };
-            }),
-            "value",
-            "label",
-            false
-        );
-
-        if (rows.length === 0) {
-            itemSelect.disabled = true;
-            choices.disable();
-            return;
-        }
-
-        itemSelect.disabled = false;
-        choices.enable();
+        });
     }
 
     async function cargarRecetaOpciones(params) {
@@ -190,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
             resetNativeSelect(categoriaSelect, "-- Seleccione --");
             resetNativeSelect(subCat1Select, "-- Seleccione --");
             resetNativeSelect(subCat2Select, "-- Seleccione --");
-            resetItemSelect();
+            renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
         } catch (error) {
             console.error(error);
             alertify.error("Error al cargar bases");
@@ -203,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resetNativeSelect(categoriaSelect, "-- Seleccione --");
         resetNativeSelect(subCat1Select, "-- Seleccione --");
         resetNativeSelect(subCat2Select, "-- Seleccione --");
-        resetItemSelect();
+        renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
 
         if (!tipo) return;
 
@@ -212,7 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setNativeSelectOptions(categoriaSelect, categorias, "-- Seleccione --", "categoria");
             resetNativeSelect(subCat1Select, "-- Seleccione --");
             resetNativeSelect(subCat2Select, "-- Seleccione --");
-            resetItemSelect();
+            renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
         } catch (error) {
             console.error(error);
             alertify.error("Error al cargar categorías");
@@ -224,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         resetNativeSelect(subCat1Select, "-- Seleccione --");
         resetNativeSelect(subCat2Select, "-- Seleccione --");
-        resetItemSelect();
+        renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
 
         if (!tipo || !categoria) return;
 
@@ -232,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const subCategorias1 = await cargarRecetaOpciones({ nivel: "subcat1", tipo, categoria });
             setNativeSelectOptions(subCat1Select, subCategorias1, "-- Seleccione --", "sub_cat_1");
             resetNativeSelect(subCat2Select, "-- Seleccione --");
-            resetItemSelect();
+            renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
         } catch (error) {
             console.error(error);
             alertify.error("Error al cargar sub categoría 1");
@@ -243,14 +235,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const { tipo, categoria, sub_cat_1 } = getFiltrosReceta();
 
         resetNativeSelect(subCat2Select, "-- Seleccione --");
-        resetItemSelect();
+        renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
 
         if (!tipo || !categoria || !sub_cat_1) return;
 
         try {
             const subCategorias2 = await cargarRecetaOpciones({ nivel: "subcat2", tipo, categoria, sub_cat_1 });
             setNativeSelectOptions(subCat2Select, subCategorias2, "-- Seleccione --", "sub_cat_2");
-            resetItemSelect();
+            renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
         } catch (error) {
             console.error(error);
             alertify.error("Error al cargar sub categoría 2");
@@ -260,17 +252,19 @@ document.addEventListener("DOMContentLoaded", () => {
     async function cargarItemsReceta() {
         const filtros = getFiltrosReceta();
 
-        resetItemSelect();
+        renderItemsTable([], "Cargando items...");
 
         if (!filtros.tipo || !filtros.categoria || !filtros.sub_cat_1 || !filtros.sub_cat_2) {
+            renderItemsTable([], "Selecciona todos los filtros para ver los items.");
             return;
         }
 
         try {
             const items = await cargarRecetaOpciones({ nivel: "items", ...filtros });
-            setItemOptions(items);
+            renderItemsTable(items, "No hay items para mostrar con los filtros actuales.");
         } catch (error) {
             console.error(error);
+            renderItemsTable([], "Error al cargar items.");
             alertify.error("Error al cargar items");
         }
     }
@@ -281,6 +275,123 @@ document.addEventListener("DOMContentLoaded", () => {
     subCat2Select?.addEventListener("change", cargarItemsReceta);
 
     cargarBasesReceta();
+
+    function agregarItemReceta(item) {
+        const itemId = item.id;
+        const qtyInicial = parseInt(qtyToAddInput?.value, 10);
+
+        if (!item) {
+            alertify.error("El item no contiene información válida");
+            return;
+        }
+
+        if (!Number.isInteger(qtyInicial) || qtyInicial < 1 || qtyInicial > 100) {
+            alertify.error("Ingrese una cantidad valida (1 a 100)");
+            return;
+        }
+
+        if (itemAlreadyAdded(tbody, itemId)) {
+            alertify.error("Este item ya fue agregado");
+            return;
+        }
+
+        const tr = document.createElement("tr");
+        tr.dataset.itemId  = itemId;
+        tr.dataset.precio = item.precio;
+        tr.dataset.moneda = item.moneda;
+        tr.dataset.nombre = item.nombre;
+        tr.dataset.descripcion = item.descripcion;
+        tr.dataset.categoria = item.categoria;
+        tr.dataset.subcat1 = item.sub_cat_1;
+        tr.dataset.subcat2 = item.sub_cat_2;
+        tr.dataset.marca = item.marca;
+        tr.dataset.modelo = item.modelo;
+        tr.dataset.unimedida = item.uni_medida;
+        tr.dataset.tipo = item.tipo;
+
+        tr.innerHTML = `
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="avatar-md flex-shrink-0 me-2">
+                        <span class="avatar-title bg-primary-subtle rounded-circle">
+                            <img src="${getRandomLogo()}" alt="" height="22">
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-muted fs-12">${item.nombre}</span><br>
+                        <h5 class="fs-14 mt-1 item-description">${item.descripcion}</h5>
+                    </div>
+                </div>
+            </td>
+
+            <td>
+                <span class="text-muted fs-12">${item.categoria}</span>
+                <h5 class="fs-14 mt-1 fw-normal isadmin">${item.sub_cat_1}</h5>
+                <h5 class="fs-11 mt-1 fw-normal">${item.sub_cat_2}</h5>
+            </td>
+             <td>
+                <span class="text-muted fs-12">${item.marca}</span>
+                <h5 class="fs-14 mt-1 fw-normal isadmin">${item.modelo}</h5>
+                <h5 class="fs-14 mt-1 fw-normal">${item.uni_medida}</h5>
+            </td>
+
+            <td>
+                <span class="text-muted fs-12">Tipo</span>
+                <h5 class="fs-14 mt-1 fw-normal">
+                    <i class="ti ti-circle-filled fs-12 ${item.tipo === "PRODUCTO" ? "text-success" : "text-info"}"></i>
+                    ${item.tipo}
+                </h5>
+            </td>
+
+            <td>
+                <span class="text-muted fs-12">Cantidad</span> <br>
+                <div data-touchspin class="input-step border bg-body-secondary p-1 mt-1 rounded-pill d-inline-flex overflow-visible">
+                    <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
+                    <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="${qtyInicial}" min="0" max="100" readonly />
+                    <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
+                </div>
+            </td>
+
+            <td><span class="text-muted fs-12">Precio</span><h5 class="fs-14 mt-1 fw-normal">${item.moneda === 'DOLLAR' ? '$' : 'S/.'}${formatDecimal(item.precio)}</h5></td>
+            
+            <td>
+                <a href="javascript:void(0)" class="text-danger btnDeleteItem">
+                    <i class="ti ti-trash fs-18"></i>
+                </a>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+        validarTdAdmin(tr);
+        alertify.success("Item agregado");
+        setQtyToAdd(1);
+        currentPage = Math.ceil(getRows().length / PAGE_SIZE);
+        calcularTotales();
+
+        const inputQty = tr.querySelector("input");
+        inputQty.value = String(qtyInicial);
+        const btnPlus = tr.querySelector(".plus");
+        const btnMinus = tr.querySelector(".minus");
+        const btnDelete = tr.querySelector(".btnDeleteItem");
+
+        btnPlus.addEventListener("click", () => {
+            inputQty.value = parseInt(inputQty.value) + 1;
+            calcularTotales();
+        });
+
+        btnMinus.addEventListener("click", () => {
+            if (parseInt(inputQty.value) > 1) {
+                inputQty.value = parseInt(inputQty.value) - 1;
+                calcularTotales();
+            }
+        });
+
+        btnDelete.addEventListener("click", () => {
+            tr.remove();
+            alertify.error("Item eliminado");
+            calcularTotales();
+        });
+    }
 
     function getRows() {
         return [...tbody.querySelectorAll("tr")];
@@ -381,52 +492,51 @@ document.addEventListener("DOMContentLoaded", () => {
             paginationWrapper.classList.toggle("d-none", totalRows <= PAGE_SIZE);
         }
 
-        if (paginationList) {
-            paginationList.innerHTML = "";
+        if (!paginationList) return;
 
-            if (totalRows <= PAGE_SIZE) {
-                return;
-            }
+        paginationList.innerHTML = "";
 
-            const createPageItem = (label, page, disabled = false, active = false, icon = false) => {
-                const li = document.createElement("li");
-                li.className = `page-item ${disabled ? "disabled" : ""} ${active ? "active" : ""}`.trim();
-
-                const a = document.createElement("a");
-                a.href = "#";
-                a.className = "page-link";
-                a.innerHTML = icon ? label : label;
-
-                if (!disabled) {
-                    a.addEventListener("click", (event) => {
-                        event.preventDefault();
-                        currentPage = page;
-                        renderPagination();
-                    });
-                }
-
-                li.appendChild(a);
-                return li;
-            };
-
-            paginationList.appendChild(createPageItem('<i class="ti ti-chevron-left"></i>', Math.max(1, currentPage - 1), currentPage === 1, false, true));
-
-            for (let page = 1; page <= totalPages; page++) {
-                paginationList.appendChild(createPageItem(String(page), page, false, page === currentPage));
-            }
-
-            paginationList.appendChild(createPageItem('<i class="ti ti-chevron-right"></i>', Math.min(totalPages, currentPage + 1), currentPage === totalPages, false, true));
+        if (totalRows <= PAGE_SIZE) {
+            return;
         }
+
+        const createPageItem = (label, page, disabled = false, active = false, icon = false) => {
+            const li = document.createElement("li");
+            li.className = `page-item ${disabled ? "disabled" : ""} ${active ? "active" : ""}`.trim();
+
+            const a = document.createElement("a");
+            a.href = "#";
+            a.className = "page-link";
+            a.innerHTML = icon ? label : label;
+
+            if (!disabled) {
+                a.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    currentPage = page;
+                    renderPagination();
+                });
+            }
+
+            li.appendChild(a);
+            return li;
+        };
+
+        paginationList.appendChild(createPageItem('<i class="ti ti-chevron-left"></i>', Math.max(1, currentPage - 1), currentPage === 1, false, true));
+
+        for (let page = 1; page <= totalPages; page++) {
+            paginationList.appendChild(createPageItem(String(page), page, false, page === currentPage));
+        }
+
+        paginationList.appendChild(createPageItem('<i class="ti ti-chevron-right"></i>', Math.min(totalPages, currentPage + 1), currentPage === totalPages, false, true));
     }
 
-    // Función para calcular totales
     function calcularTotales() {
         const { contadorItems, totalSoles, totalDolares, totalPE } = getResumenTotales();
 
-        totalItemEl.textContent = contadorItems;
-        totalSolesEl.textContent = format2(decimalAdjust('round', totalSoles, '-2'));
-        totalDolaresEl.textContent = format2(decimalAdjust('round', totalDolares, '-2'));
-        totalPeruEl.textContent = format2(decimalAdjust('round', totalPE, '-2'));
+        if (totalItemEl) totalItemEl.textContent = contadorItems;
+        if (totalSolesEl) totalSolesEl.textContent = format2(decimalAdjust('round', totalSoles, '-2'));
+        if (totalDolaresEl) totalDolaresEl.textContent = format2(decimalAdjust('round', totalDolares, '-2'));
+        if (totalPeruEl) totalPeruEl.textContent = format2(decimalAdjust('round', totalPE, '-2'));
 
         renderPagination();
     }
@@ -440,7 +550,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(data.message || "No se pudo obtener tipo de cambio SUNAT");
             }
 
-            // Para cotizar usamos tipo de cambio VENTA.
             if (tipoCambioInput) {
                 tipoCambioInput.value = Number(data.venta || 1).toFixed(3);
             }
@@ -475,16 +584,13 @@ document.addEventListener("DOMContentLoaded", () => {
     function normalizarTipoCambio(rawValue) {
         let valor = String(rawValue ?? "").replace(",", ".");
 
-        // Permitir solo digitos y punto decimal.
         valor = valor.replace(/[^\d.]/g, "");
 
-        // Mantener solo el primer punto.
         const primerPunto = valor.indexOf(".");
         if (primerPunto !== -1) {
             valor = valor.slice(0, primerPunto + 1) + valor.slice(primerPunto + 1).replace(/\./g, "");
         }
 
-        // Limitar a maximo 3 decimales.
         const partes = valor.split(".");
         if (partes.length > 1) {
             partes[1] = partes[1].slice(0, 3);
@@ -522,133 +628,5 @@ document.addEventListener("DOMContentLoaded", () => {
     previewModalEl?.addEventListener("show.bs.modal", renderPreviewTable);
 
     cargarTipoCambioSunat();
-
-    /* ---------------------------------------------------
-       BOTÓN + → AGREGAR ITEM
-    --------------------------------------------------- */
-    btnAdd.addEventListener("click", () => {
-        const selected = itemSelect.choicesInstance.getValue();
-
-        if (!selected || !selected.value) {
-            alertify.error("Seleccione un item");
-            return;
-        }
-
-        const item = selected.customProperties;
-        const itemId  = item.id;
-        const qtyInicial = parseInt(qtyToAddInput?.value, 10);
-
-        if (!item) {
-            alertify.error("El item no contiene información válida");
-            return;
-        }
-
-        if (!Number.isInteger(qtyInicial) || qtyInicial < 1 || qtyInicial > 100) {
-            alertify.error("Ingrese una cantidad valida (1 a 100)");
-            return;
-        }
-
-        if (itemAlreadyAdded(tbody, itemId)) {
-            alertify.error("Este item ya fue agregado");
-            return;
-        }
-
-        const tr = document.createElement("tr");
-        tr.dataset.itemId  = itemId;
-        tr.dataset.precio = item.precio;
-        tr.dataset.moneda = item.moneda;
-        tr.dataset.nombre = item.nombre;
-        tr.dataset.descripcion = item.descripcion;
-        tr.dataset.categoria = item.categoria;
-        tr.dataset.subcat1 = item.sub_cat_1;
-        tr.dataset.subcat2 = item.sub_cat_2;
-        tr.dataset.marca = item.marca;
-        tr.dataset.modelo = item.modelo;
-        tr.dataset.unimedida = item.uni_medida;
-        tr.dataset.tipo = item.tipo;
-
-        tr.innerHTML = `
-            <td>
-                <div class="d-flex align-items-center">
-                    <div class="avatar-md flex-shrink-0 me-2">
-                        <span class="avatar-title bg-primary-subtle rounded-circle">
-                            <img src="${getRandomLogo()}" alt="" height="22">
-                        </span>
-                    </div>
-                    <div>
-                        <span class="text-muted fs-12">${item.categoria}</span>
-                        <h5 class="fs-14 mt-1 fw-normal isadmin">${item.sub_cat_1}</h5>
-                        <h5 class="fs-11 mt-1 fw-normal">${item.sub_cat_2}</h5>
-                    </div>
-                </div>
-            </td>
-            <td>
-                <span class="text-muted fs-12">${item.nombre}</span><br>
-                <h5 class="fs-14 mt-1 item-description">${item.descripcion}</h5>
-            </td>
-            <td>
-                <span class="text-muted fs-12">${item.marca}</span>
-                <h5 class="fs-14 mt-1 fw-normal isadmin">${item.modelo}</h5>
-                <h5 class="fs-14 mt-1 fw-normal">${item.uni_medida}</h5>
-            </td>
-
-            <td>
-                <span class="text-muted fs-12">Tipo</span>
-                <h5 class="fs-14 mt-1 fw-normal">
-                    <i class="ti ti-circle-filled fs-12 ${item.tipo === "PRODUCTO" ? "text-success" : "text-info"}"></i>
-                    ${item.tipo}
-                </h5>
-            </td>
-
-            <td>
-                <span class="text-muted fs-12">Cantidad</span> <br>
-                <div data-touchspin class="input-step border bg-body-secondary p-1 mt-1 rounded-pill d-inline-flex overflow-visible">
-                    <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
-                    <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="${qtyInicial}" min="0" max="100" readonly />
-                    <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
-                </div>
-            </td>
-
-            <td><span class="text-muted fs-12">Precio</span><h5 class="fs-14 mt-1 fw-normal">${item.moneda === 'DOLLAR' ? '$' : 'S/.'}${formatDecimal(item.precio)}</h5></td>
-            
-            <td>
-                <a href="javascript:void(0)" class="text-danger btnDeleteItem">
-                    <i class="ti ti-trash fs-18"></i>
-                </a>
-            </td>
-        `;
-
-        tbody.appendChild(tr);
-        validarTdAdmin(tr);
-        alertify.success("Item agregado");
-        setQtyToAdd(1);
-        currentPage = Math.ceil(getRows().length / PAGE_SIZE);
-        calcularTotales();
-
-        // Eventos para cambiar cantidad
-        const inputQty = tr.querySelector("input");
-        inputQty.value = String(qtyInicial);
-        const btnPlus = tr.querySelector(".plus");
-        const btnMinus = tr.querySelector(".minus");
-        const btnDelete = tr.querySelector(".btnDeleteItem");
-
-        btnPlus.addEventListener("click", () => {
-            inputQty.value = parseInt(inputQty.value) + 1;
-            calcularTotales();
-        });
-
-        btnMinus.addEventListener("click", () => {
-            if (parseInt(inputQty.value) > 1) {
-                inputQty.value = parseInt(inputQty.value) - 1;
-                calcularTotales();
-            }
-        });
-
-        btnDelete.addEventListener("click", () => {
-            tr.remove();
-            alertify.error("Item eliminado");
-            calcularTotales();
-        });
-    });
 
 });

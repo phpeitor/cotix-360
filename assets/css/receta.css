@@ -39,6 +39,30 @@
     font-weight: 600;
 }
 
+.receta-items-table-wrap {
+    max-height: 44vh;
+    overflow: auto;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .5rem;
+}
+
+.receta-items-table {
+    min-width: 900px;
+}
+
+.receta-items-table td:first-child,
+.receta-items-table th:first-child {
+    max-width: 280px;
+}
+
+.receta-items-table .item-title,
+.receta-items-table .item-subtitle {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.35;
+}
+
 .form-receta .table-custom td:first-child {
     max-width: 560px;
 }

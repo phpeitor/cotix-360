@@ -187,11 +187,30 @@
                             </select>
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Item</label><code>(Nombre, Descripción, Modelo, Marca)</code>
-                            <select id="choices-single-default" data-choices class="form-select" name="choices-single-default" disabled>
-                                <option value="">-- Seleccione filtros --</option>
-                            </select>
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                                <div>
+                                    <label class="form-label mb-0">Items disponibles</label>
+                                    <span class="text-muted fs-12 d-block">Selecciona un item desde la tabla para agregarlo a la receta.</span>
+                                </div>
+                                <span class="badge bg-light text-dark" id="itemsResultCount">0 resultados</span>
+                            </div>
+                            <div class="table-responsive receta-items-table-wrap">
+                                <table class="table table-sm table-hover align-middle mb-0 receta-items-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Item</th>
+                                            <th class="text-end">Precio</th>
+                                            <th class="text-center">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recetaItemsTableBody">
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted py-4">Selecciona Base, Categoria y Sub Categorias para cargar los items.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <div class="col-md-2 mb-3">
@@ -203,11 +222,6 @@
                             </div>
                         </div>
 
-                        <div class="col-md-2 mb-1">
-                            <div class="p-lg-3">
-                                <a href="javascript:void(0);" class="btn btn-sm btn-primary rounded-circle btn-icon" id="btnAdd"><i class="ti ti-plus"></i></a>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
