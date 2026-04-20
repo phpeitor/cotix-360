@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const previewTotalSolesEl = document.getElementById("previewTotalSoles");
     const previewTotalDolaresEl = document.getElementById("previewTotalDolares");
     const previewTotalPEEl = document.getElementById("previewTotalPE");
+    const recetaForm = document.querySelector("form.form-receta");
     const paginationFromEl = document.getElementById("pagination_from");
     const paginationToEl = document.getElementById("pagination_to");
     const paginationWrapper = document.getElementById("pagination_wrapper");
@@ -560,6 +561,88 @@ document.addEventListener("DOMContentLoaded", () => {
 
         renderPagination();
     }
+
+    function getItemsParaGuardarReceta() {
+        return getRows().map(tr => ({
+            item_id: parseInt(tr.dataset.itemId, 10) || 0,
+            categoria: tr.dataset.categoria || "",
+            sub_cat_1: tr.dataset.subcat1 || "",
+            sub_cat_2: tr.dataset.subcat2 || "",
+            marca: tr.dataset.marca || "",
+            modelo: tr.dataset.modelo || "",
+            nombre: tr.dataset.nombre || "",
+            descripcion: tr.dataset.descripcion || "",
+            uni_medida: tr.dataset.unimedida || "",
+            precio: parseFloat(tr.dataset.precio) || 0,
+            moneda: tr.dataset.moneda || "",
+            tipo: tr.dataset.tipo || "",
+            cantidad: clampCantidad(tr.querySelector("input")?.value)
+        }));
+    }
+
+    function limpiarRecetaGuardada() {
+        tbody.innerHTML = "";
+        currentPage = 1;
+        calcularTotales();
+    }
+
+    recetaForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const submitBtn = recetaForm.querySelector("[type='submit']");
+
+        if (submitBtn?.disabled) {
+            return;
+        }
+
+        const items = getItemsParaGuardarReceta();
+
+        if (!items.length) {
+            alertify.error("Agrega al menos un item antes de guardar la receta");
+            return;
+        }
+
+        if (items.some(item => !item.item_id || item.cantidad < 1)) {
+            alertify.error("Hay items inválidos en la receta");
+            return;
+        }
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add("opacity-50", "cursor-not-allowed");
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append("items", JSON.stringify(items));
+            formData.append("tipo_cambio", String(getTipoCambioActual()));
+
+            const res = await fetch("controller/add_receta.php", {
+                method: "POST",
+                body: formData,
+            });
+
+            const ct = res.headers.get("content-type") || "";
+            const json = ct.includes("application/json")
+                ? await res.json()
+                : { ok: false, message: await res.text() };
+
+            if (!res.ok || !json.ok) {
+                throw new Error(json.message || "No se pudo guardar la receta");
+            }
+
+            limpiarRecetaGuardada();
+            alertify.success("Receta guardada correctamente");
+        } catch (error) {
+            console.error(error);
+            alertify.error(error.message || "Fallo al guardar la receta");
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
+            }
+        }
+    });
 
     async function cargarTipoCambioSunat() {
         try {
