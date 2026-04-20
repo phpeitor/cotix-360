@@ -21,7 +21,7 @@
 
 <body>
     <div class="wrapper">
-           <?php include __DIR__ . '/layout/menu.php'; ?>
+            <?php include __DIR__ . '/layout/menu.php'; ?>
         <header class="app-topbar">
            <?php include __DIR__ . '/layout/navbar.php'; ?>
         </header>
@@ -101,6 +101,7 @@
             </div>
 
             <?php include __DIR__ . '/layout/footer.html'; ?>
+
         </div>
     </div>
     
@@ -178,7 +179,7 @@
                 </div>
             </div>
         </div>
-    </div><!-- /.modal -->
+    </div>
     <?php include __DIR__ . '/layout/theme.html'; ?>
 
     <script src="./assets/js/vendor.min.js"></script>
