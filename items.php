@@ -29,7 +29,7 @@
 
 <body>
     <div class="wrapper">
-            <?php include __DIR__ . 'layout/menu.php'; ?>
+            <?php include __DIR__ . '/layout/menu.php'; ?>
         <header class="app-topbar">
             <?php include __DIR__ . '/layout/navbar.php'; ?>
         </header>

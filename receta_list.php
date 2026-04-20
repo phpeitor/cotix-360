@@ -23,7 +23,7 @@
     <div class="wrapper">
             <?php include __DIR__ . '/layout/menu.php'; ?>
         <header class="app-topbar">
-           <?php include __DIR__ . '/layout/navbar.php'; ?>
+            <?php include __DIR__ . '/layout/navbar.php'; ?>
         </header>
 
         <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">

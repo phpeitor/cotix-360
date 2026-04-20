@@ -85,6 +85,11 @@
                                 <span class="menu-text">Cotizaciones</span>
                             </a>
                         </li>
+                        <li class="side-nav-item">
+                            <a href="receta_list.php" class="side-nav-link">
+                                <span class="menu-text">Recetas</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </li>
