@@ -2,6 +2,10 @@
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../model/receta.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 try {
     $fec_ini = $_GET['fec_ini'] ?? $_POST['fec_ini'] ?? null;
     $fec_fin = $_GET['fec_fin'] ?? $_POST['fec_fin'] ?? null;
