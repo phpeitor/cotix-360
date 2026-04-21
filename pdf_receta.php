@@ -1,0 +1,166 @@
+<?php
+use Dompdf\Dompdf;
+require_once __DIR__ . "/vendor/autoload.php";
+require_once __DIR__ . "/model/receta.php";
+require_once __DIR__ . "/model/item.php";
+
+/*ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+*/
+
+$hash = $_GET['id'] ?? null;
+if (!$hash) {
+    http_response_code(400);
+    exit("ID inválido");
+}
+
+$recetaModel = new Receta();
+$items      = new Item();
+
+$receta = $recetaModel->obtenerPorHash($hash);
+$detalle    = $recetaModel->obtenerDetallePorHash($hash);
+
+$isAdmin = isset($_SESSION['session_cargo']) && $_SESSION['session_cargo'] == 1;
+
+if (!$receta || !$detalle) {
+    http_response_code(404);
+    exit("Receta no encontrada");
+}
+
+$totalItems = 0;
+
+foreach ($detalle as &$item) {
+    $qty    = (int)$item['cantidad'];
+    $precio = (float)$item['precio'];
+
+    $totalItems += $qty;
+
+}
+
+ob_start();
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF <?= md5($receta['id']) ?></title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 10px; }
+        h2 { margin-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 4px; }
+        th { background: #f2f2f2; }
+        .right { text-align: right; }
+        .center { text-align: center; }
+        .watermark {
+            position: fixed;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 80px;
+            font-weight: bold;
+            color: rgba(0,0,0,0.08);
+            z-index: -1;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .watermark.aprobada {
+            color: rgba(25, 135, 84, 0.15); 
+        }
+
+        .watermark.anulada {
+            color: rgba(220, 53, 69, 0.15); 
+        }
+    </style>
+</head>
+<body>
+<?php
+    $estado = strtolower($receta['estado'] ?? '');
+    $wmClass = '';
+
+    if ($estado === 'aprobada') {
+        $wmClass = 'aprobada';
+    } elseif ($estado === 'anulada') {
+        $wmClass = 'anulada';
+    }
+?>
+
+<?php if ($wmClass): ?>
+    <div class="watermark <?= $wmClass ?>">
+        <?= htmlspecialchars($receta['estado']) ?>
+    </div>
+<?php endif; ?>
+
+<h2 style="text-align:center; margin-bottom:4px;">
+    RECETA COMERCIAL
+</h2>
+<p style="text-align:center; font-size:11px; margin-top:0;">
+    Documento informativo – No constituye factura
+</p>
+<hr>
+<p>
+    <strong>ID:</strong> <?= $receta['id'] ?><br>
+    <strong>Usuario Registro:</strong> <?= $receta['usuario'] ?><br>
+    <strong>Fec. Registro:</strong> <?= $receta['created_at'] ?><br>
+    <strong>Usuario Modifica:</strong> <?= $receta['usu_upd'] ?><br>
+    <strong>Fec. Modifica:</strong> <?= $receta['updated_at'] ?><br>
+    <strong>Estado:</strong> <?= $receta['estado'] ?>
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Item Descripción</th>
+            <th>Item Detalle</th>
+            <th>Categoria</th>
+            <th>Tipo</th>
+            <th>Precio</th>
+            <th>Cantidad</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($detalle as $i): ?>
+        <tr>
+            <td class="left">
+                <b><?= $i['nombre'] ?></b><br>
+                <?= $i['descripcion'] ?><br>
+            </td>
+            <td class="left">
+                <b><?= $i['marca'] ?></b><br>
+                <?= $i['modelo'] ?><br>
+                <?= $i['uni_medida'] ?><br>
+            </td>
+            <td class="left">
+                <b><?= $i['categoria'] ?></b><br>
+                <?= $i['sub_cat_1'] ?><br>
+                <?= $i['sub_cat_2'] ?><br>
+            </td>
+            <td class="center"><?= $i['tipo'] ?></td>
+            <td class="right"><?= number_format((float)$i['precio'], 2) ?></td>
+            <td class="center"><?= $i['cantidad'] ?></td>
+        </tr>
+        <?php endforeach ?>
+    </tbody>
+</table>
+<br>
+<p>
+    <strong>Total Items:</strong> <?= $totalItems ?><br>
+</p>
+</body>
+</html>
+
+<?php
+
+$html = ob_get_clean();
+/*echo $html;
+exit;
+*/
+$pdf = new Dompdf();
+$pdf->loadHtml($html);
+$pdf->setPaper('A4', 'portrait');
+$pdf->render();
+$pdf->stream("receta_" . md5($receta['id']) . ".pdf", ["Attachment" => false]);
