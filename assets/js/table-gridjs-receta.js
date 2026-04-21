@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 width: "280px",
                 formatter: (cell, row) => renderItems(cell, row)
             },
-            
+
             { id: "total_items", name: "", hidden: true },
 
             { id: "created_at", name: "Fecha", width: "150px" },
@@ -162,11 +162,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderAcciones(_, row) {
         const id = row.cells[0].data;
         const estado = row.cells[2].data;
-        const totalPeru = Number(row?.cells?.[5]?.data ?? 0);
         const hashId = md5(String(id));
 
         let botones = `
-            <a href="form_cotizacion.php?id=${hashId}" 
+            <a href="form_receta.php?id=${hashId}" 
                 class="btn btn-soft-primary btn-icon btn-sm rounded-circle"
                 data-bs-toggle="tooltip"
                 data-bs-title="Ver"
@@ -186,10 +185,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     <i class="ti ti-x"></i>
                 </button>
 
-                <a href="pdf_cotizacion.php?id=${hashId}"
+                <a href="pdf_receta.php?id=${hashId}"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Abrir cotización en PDF"
+                title="Abrir receta en PDF"
                 class="btn btn-soft-warning btn-icon btn-sm rounded-circle">
                     <i class="ti ti-file"></i>
                 </a>
@@ -243,8 +242,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const accion = btn.dataset.accion;
 
         const texto = accion === "aprobar"
-            ? "¿Deseas aprobar esta cotización?"
-            : "¿Deseas anular esta cotización?";
+            ? "¿Deseas aprobar esta receta?"
+            : "¿Deseas anular esta receta?";
 
         alertify.confirm("Confirmar",texto,
             () => actualizarEstado(id, accion),
@@ -253,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function actualizarEstado(id, accion) {
-        fetch("controller/upd_estado.php", {
+        fetch("controller/upd_estado_receta.php", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams({ id, accion })
@@ -264,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 alertify.error(resp.message || "Error");
                 return;
             }
-            alertify.success(`Cotización ${resp.estado}`);
+            alertify.success(`Receta ${resp.estado}`);
             grid.forceRender();
         })
         .catch(() => alertify.error("Error de conexión"));

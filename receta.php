@@ -15,7 +15,7 @@
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/receta.css" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/receta.css?v=1.0" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -148,7 +148,7 @@
 
     <!-- Info Header Modal -->
     <div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="max-width: 760px;">
+        <div class="modal-dialog" style="max-width: 840px;">
             <div class="modal-content">
                 <div class="modal-header text-bg-info border-0">
                     <h4 class="modal-title" id="info-header-modalLabel">

@@ -49,6 +49,7 @@
 .receta-items-table {
     min-width: 780px;
     table-layout: fixed;
+    font-size: 13px;
 }
 
 .receta-items-table th:nth-child(1),
@@ -77,6 +78,7 @@
     overflow-wrap: anywhere;
     word-break: break-word;
     line-height: 1.35;
+    font-size: 13px;
 }
 
 .form-receta .table-custom td:first-child {
