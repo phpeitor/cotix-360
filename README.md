@@ -23,6 +23,13 @@ Aplicación web para gestión de usuarios, carga de ítems y generación de coti
 	- Precio M, utilidad y precio cliente
 - Historial de cotizaciones.
 - Exportación de cotización a PDF.
+- Módulo de recetas comerciales:
+	- Creación de receta con tipo de cambio SUNAT.
+	- Guardado de cabecera en `recetas` y detalle en `receta_detalle`.
+	- Consulta de recetas por rango de fechas.
+	- Vista de receta en modo solo lectura.
+	- Aprobación/anulación de receta.
+	- Exportación de receta a PDF con totales por moneda y total Perú.
 
 ## Stack técnico
 
@@ -111,6 +118,7 @@ cotix/
 4. Generación de cotización y cálculo de totales.
 5. Financiamiento (tasa, cuota e interés por períodos).
 6. Consulta de cotizaciones y exportación PDF.
+7. Creación, consulta, aprobación/anulación y exportación de recetas.
 
 ## Reglas de cálculo relevantes
 
@@ -131,12 +139,24 @@ cotix/
 - Guardar cotización: controller/add_cotizacion.php
 - Financiamiento: controller/financiamiento_cotizacion.php
 - Carga Excel ítems: controller/cargar_items.php
+- Receta (tabla): controller/table_receta.php
+- Receta (detalle): controller/get_receta.php
+- Guardar receta: controller/add_receta.php
+- Actualizar estado receta: controller/upd_estado_receta.php
 
 ## Exportación PDF
 
 - Archivo principal: pdf_cotizacion.php
 - Genera PDF con Dompdf.
 - Incluye cálculos de Total Perú, Factor e Interés para mantener consistencia con la cotización.
+- Archivo principal receta: pdf_receta.php
+- El PDF de receta concatena símbolo de moneda al precio (`S/` o `$`).
+- Calcula y muestra `Total S/`, `Total $` y `Total Perú` (con tipo de cambio).
+- Muestra el tipo de cambio solo cuando `Total $ > 0`.
+
+## Convenciones de desarrollo
+
+- Ver reglas del proyecto en `REGLAS_DESARROLLO.md`.
 
 ## Solución de problemas
 
