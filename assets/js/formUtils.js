@@ -13,6 +13,11 @@ const decimal2Formatter = new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 2
 });
 
+const decimal3Formatter = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 3,
+    maximumFractionDigits: 3
+});
+
 const decimal4Formatter = new Intl.NumberFormat("en-US", {
     minimumFractionDigits: 4,
     maximumFractionDigits: 4
@@ -30,6 +35,10 @@ function formatInt(value) {
 
 function format2(value) {
     return decimal2Formatter.format(Number(value) || 0);
+}
+
+function format3(value) {
+    return decimal3Formatter.format(Number(value) || 0);
 }
 
 function format4(value) {

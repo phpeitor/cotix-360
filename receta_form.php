@@ -118,7 +118,7 @@
                                             </div>
 
                                             <div class="col-lg-3 col-6 border-end">
-                                                <p class="text-muted fw-medium fs-12 mb-1"><span class="text-dark">Tipo de Cambio SUNAT (Venta)</span> <span id="tipo_cambio_sunat_fecha" class="text-muted"></span>: <span id="tipo_cambio_sunat" class="text-muted">3.333</span></p>
+                                                <p class="text-muted fw-medium fs-12 mb-1"><span class="text-dark">Tipo de Cambio SUNAT (Venta)</span> <span id="tipo_cambio_sunat" class="text-muted">0.000</span></p>
                                             </div>
                                             
                                             <div class="col-lg-3 col-12">
@@ -129,6 +129,16 @@
                                     </div>
                                     <div class="table-responsive">
                                         <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Item</th>
+                                                    <th>Detalle</th>
+                                                    <th>Tipo</th>
+                                                    <th class="text-center">Cant.</th>
+                                                    <th class="text-end">Precio</th>
+                                                    <th class="text-end">Total</th>
+                                                </tr>
+                                            </thead>
                                             <tbody>
                                                 
                                             </tbody>
@@ -156,8 +166,7 @@
                                                 </li>
                                             </ul>
                                         </div>
-
-                                    </div> 
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -169,115 +178,6 @@
         </div>
     </div>
 
-    <!-- Info Header Modal -->
-    <div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="max-width: 840px;">
-            <div class="modal-content">
-                <div class="modal-header text-bg-info border-0">
-                    <h4 class="modal-title" id="info-header-modalLabel">
-                        Buscar item para agregar a la receta
-                    </h4>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Base</label>
-                            <select id="filterBase" class="form-select">
-                                <option value="">-- Seleccione --</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Categoria</label>
-                            <select id="categoria" class="form-select" disabled>
-                                <option value="">-- Seleccione --</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Sub Categoria 1</label>
-                            <select id="subCat1" class="form-select" disabled>
-                                <option value="">-- Seleccione --</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Sub Categoria 2</label>
-                            <select id="subCat2" class="form-select" disabled>
-                                <option value="">-- Seleccione --</option>
-                            </select>
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
-                                <div>
-                                    <label class="form-label mb-0">Items disponibles</label>
-                                    <span class="text-muted fs-12 d-block">Selecciona un item desde la tabla para agregarlo a la receta.</span>
-                                </div>
-                                <span class="badge bg-light text-dark" id="itemsResultCount">0 resultados</span>
-                            </div>
-                            <div class="table-responsive receta-items-table-wrap">
-                                <table class="table table-sm table-hover align-middle mb-0 receta-items-table">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Item</th>
-                                            <th class="text-center">Cant.</th>
-                                            <th class="text-end">Precio</th>
-                                            <th class="text-center">Acción</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="recetaItemsTableBody">
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted py-4">Selecciona Base, Categoria y Sub Categorias para cargar los items.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div><!--modal -->
-
-    <div class="modal fade preview-modal" id="previewRecetaModal" tabindex="-1" aria-labelledby="previewRecetaModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-xl">
-            <div class="modal-content">
-                <div class="modal-header border-0 pb-0">
-                    <div>
-                        <h4 class="modal-title mb-1" id="previewRecetaModalLabel">Vista previa de receta</h4>
-                        <p class="text-muted mb-0 fs-13">Detalle completo de todos los items sin paginación.</p>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="preview-summary">
-                        <span class="badge bg-light text-dark">Items: <span id="previewTotalItems">0</span></span>
-                        <span class="badge bg-light text-dark">S/.: <span id="previewTotalSoles">0.00</span></span>
-                        <span class="badge bg-light text-dark">$: <span id="previewTotalDolares">0.00</span></span>
-                        <span class="badge bg-light text-dark">PE: <span id="previewTotalPE">0.00</span></span>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover align-middle mb-0 preview-table">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Item</th>
-                                    <th>Detalle</th>
-                                    <th>Tipo</th>
-                                    <th class="text-center">Cant.</th>
-                                    <th class="text-end">Precio</th>
-                                </tr>
-                            </thead>
-                            <tbody id="previewRecetaTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     <?php include __DIR__ . '/layout/theme.html'; ?>
 
     <script src="./assets/js/vendor.min.js"></script>
