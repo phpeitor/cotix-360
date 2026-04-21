@@ -29,14 +29,31 @@ if (!$receta || !$detalle) {
 }
 
 $totalItems = 0;
+$totalSoles = 0.0;
+$totalDolares = 0.0;
+$tipoCambio = (float)($receta['tipo_cambio'] ?? 1);
 
 foreach ($detalle as &$item) {
     $qty    = (int)$item['cantidad'];
     $precio = (float)$item['precio'];
+    $moneda = strtoupper(trim((string)($item['moneda'] ?? '')));
+    $subtotal = $precio * $qty;
 
     $totalItems += $qty;
 
+    if ($moneda === 'DOLLAR') {
+        $totalDolares += $subtotal;
+        $item['simbolo_moneda'] = '$';
+    } else {
+        $totalSoles += $subtotal;
+        $item['simbolo_moneda'] = 'S/';
+    }
+
+    $item['precio_formateado'] = $item['simbolo_moneda'] . ' ' . number_format($precio, 2);
+
 }
+
+$totalPeru = $totalSoles + ($totalDolares * $tipoCambio);
 
 ob_start();
 ?>
@@ -140,7 +157,7 @@ ob_start();
                 <?= $i['sub_cat_2'] ?><br>
             </td>
             <td class="center"><?= $i['tipo'] ?></td>
-            <td class="right"><?= number_format((float)$i['precio'], 2) ?></td>
+            <td class="right"><?= htmlspecialchars($i['precio_formateado']) ?></td>
             <td class="center"><?= $i['cantidad'] ?></td>
         </tr>
         <?php endforeach ?>
@@ -149,6 +166,10 @@ ob_start();
 <br>
 <p>
     <strong>Total Items:</strong> <?= $totalItems ?><br>
+    <strong>Total S/:</strong> S/ <?= number_format($totalSoles, 2) ?><br>
+    <strong>Total $:</strong> $ <?= number_format($totalDolares, 2) ?><br>
+    <strong>Total Perú:</strong> S/ <?= number_format($totalPeru, 2) ?><br>
+    <strong>Tipo de Cambio:</strong> <?= number_format($tipoCambio, 3) ?><br>
 </p>
 </body>
 </html>
