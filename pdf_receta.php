@@ -166,10 +166,12 @@ ob_start();
 <br>
 <p>
     <strong>Total Items:</strong> <?= $totalItems ?><br>
-    <strong>Total S/:</strong> S/ <?= number_format($totalSoles, 2) ?><br>
-    <strong>Total $:</strong> $ <?= number_format($totalDolares, 2) ?><br>
-    <strong>Total Perú:</strong> S/ <?= number_format($totalPeru, 2) ?><br>
-    <strong>Tipo de Cambio:</strong> <?= number_format($tipoCambio, 3) ?><br>
+    <strong>Total S/:</strong> <?= number_format($totalSoles, 2) ?><br>
+    <?php if ($totalDolares > 0): ?>
+        <strong>Total $:</strong> <?= number_format($totalDolares, 2) ?><br>
+        <strong>Total Perú:</strong> S/ <?= number_format($totalPeru, 2) ?><br>
+        <strong>Tipo de Cambio:</strong> <?= number_format($tipoCambio, 3) ?><br>
+    <?php endif; ?>
 </p>
 </body>
 </html>
