@@ -633,6 +633,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             limpiarRecetaGuardada();
             alertify.success("Receta guardada correctamente");
+            window.location.href = `recetas.php?id=${md5(String(resp.id))}`;
+
         } catch (error) {
             console.error(error);
             alertify.error(error.message || "Fallo al guardar la receta");

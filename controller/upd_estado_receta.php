@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-require_once __DIR__ . '/../model/cotizacion.php';
+require_once __DIR__ . '/../model/receta.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -31,8 +31,8 @@ try {
         ? 'Aprobada'
         : 'Anulada';
 
-    $cotizacion = new Cotizacion();
-    $ok = $cotizacion->actualizar_estado((int)$id, $estado,(int)$_SESSION['session_id']);
+    $receta = new Receta();
+    $ok = $receta->actualizar_estado((int)$id, $estado,(int)$_SESSION['session_id']);
 
     if (!$ok) {
         throw new Exception("No se pudo actualizar el estado");
