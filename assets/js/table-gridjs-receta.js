@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const hashId = md5(String(id));
 
         let botones = `
-            <a href="form_receta.php?id=${hashId}" 
+            <a href="receta_form.php?id=${hashId}" 
                 class="btn btn-soft-primary btn-icon btn-sm rounded-circle"
                 data-bs-toggle="tooltip"
                 data-bs-title="Ver"
