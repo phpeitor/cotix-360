@@ -8,6 +8,89 @@ document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
     const hashParam = urlParams.get("id");
 
+    const initialSelectState = {
+        grupo: getSelectValues(filterGrupo),
+        clase: getSelectValues(filterClase),
+        categoria: getSelectValues(filterCategoria)
+    };
+
+    const selectLabels = {
+        grupo: "Grupo Descuento",
+        clase: "Clase Producto",
+        categoria: "Categoría Producto"
+    };
+
+    function getSelectValues(selectEl) {
+        if (!selectEl) return [];
+
+        return Array.from(selectEl.options)
+            .map(option => option.value)
+            .filter(value => String(value).trim() !== "");
+    }
+
+    function setSelectOptions(selectEl, values, label) {
+        if (!selectEl) return;
+
+        const selectedBefore = selectEl.value;
+        const sanitized = [...new Set(values.map(v => String(v).trim()).filter(Boolean))];
+
+        selectEl.innerHTML = `<option value="">-- Todos --</option>`;
+
+        sanitized.forEach(value => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            selectEl.appendChild(option);
+        });
+
+        if (sanitized.includes(selectedBefore)) {
+            selectEl.value = selectedBefore;
+        } else {
+            selectEl.value = "";
+        }
+
+        selectEl.disabled = sanitized.length === 0;
+        if (sanitized.length === 0) {
+            selectEl.title = `Sin ${label} para la base seleccionada`;
+        } else {
+            selectEl.removeAttribute("title");
+        }
+    }
+
+    function applyInitialDependentSelects() {
+        setSelectOptions(filterGrupo, initialSelectState.grupo, selectLabels.grupo);
+        setSelectOptions(filterClase, initialSelectState.clase, selectLabels.clase);
+        setSelectOptions(filterCategoria, initialSelectState.categoria, selectLabels.categoria);
+    }
+
+    async function cargarFiltrosDependientes(baseId) {
+        if (!baseId) {
+            applyInitialDependentSelects();
+            return;
+        }
+
+        try {
+            const res = await fetch(`controller/get_select_item.php?id=${encodeURIComponent(baseId)}`);
+            const data = await res.json();
+
+            if (!res.ok || !Array.isArray(data)) {
+                throw new Error(data?.message || "No se pudieron cargar los filtros por base");
+            }
+
+            const grupos = data.map(item => item.grupo_descuento);
+            const clases = data.map(item => item.clase_producto);
+            const categorias = data.map(item => item.categoria_producto);
+
+            setSelectOptions(filterGrupo, grupos, selectLabels.grupo);
+            setSelectOptions(filterClase, clases, selectLabels.clase);
+            setSelectOptions(filterCategoria, categorias, selectLabels.categoria);
+        } catch (error) {
+            console.error(error);
+            alertify.error("Error al cargar filtros por base");
+            applyInitialDependentSelects();
+        }
+    }
+
     const isMd5 = (val) => /^[a-f0-9]{32}$/i.test(val);
     if (
         (filterMd5Input && isMd5(filterMd5Input.value)) ||
@@ -47,6 +130,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     document.getElementById("btn_buscar").addEventListener("click", loadTable);
+
+    filterBase?.addEventListener("change", async () => {
+        await cargarFiltrosDependientes(filterBase.value);
+    });
 
     const grid = new gridjs.Grid({
         columns: [

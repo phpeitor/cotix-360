@@ -182,36 +182,60 @@ class Item {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function select_grupo_descuento(): array{
+    public function select_grupo_descuento($base = null): array{
          $sql = "SELECT grupo_descuento, count(1) as ctd 
                 FROM item a
                 left join carga b on a.id_carga=b.id
-                where b.estado=1
-                group by grupo_descuento";
+                where b.estado=1";
+        $params = [];
+
+        if ($base !== null && $base !== '') {
+            $sql .= " and id_carga=?";
+            $params[] = $base;
+        }
+
+        $sql .= " group by grupo_descuento";
+
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function select_clase_producto(): array{
+    public function select_clase_producto($base = null): array{
          $sql = "SELECT clase_producto, count(1) as ctd 
                 FROM item a
                 left join carga b on a.id_carga=b.id
-                where b.estado=1
-                group by clase_producto";
+                where b.estado=1";
+        $params = [];
+
+        if ($base !== null && $base !== '') {
+            $sql .= " and id_carga=?";
+            $params[] = $base;
+        }
+
+        $sql .= " group by clase_producto";
+
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function select_categoria_producto(): array{
+    public function select_categoria_producto($base = null): array{
          $sql = "SELECT categoria_producto, count(1) as ctd 
                 FROM item a
                 left join carga b on a.id_carga=b.id
-                where b.estado=1
-                group by categoria_producto";
+                where b.estado=1";
+        $params = [];
+
+        if ($base !== null && $base !== '') {
+            $sql .= " and id_carga=?";
+            $params[] = $base;
+        }
+
+        $sql .= " group by categoria_producto";
+
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -291,17 +315,17 @@ class Item {
 
     public function obtenerItems(int $id): ?array {
         $sql = "SELECT 
-                id,
-                modelo,
-                descripcion,
-                categoria_producto,
-                grupo_descuento,
-                clase_producto,
-                precio_unitario,
-                moneda,
-                peso,
-                pais_origen,
-                status
+                    id,
+                    modelo,
+                    descripcion,
+                    categoria_producto,
+                    grupo_descuento,
+                    clase_producto,
+                    precio_unitario,
+                    moneda,
+                    peso,
+                    pais_origen,
+                    status
                 FROM item
                 WHERE id_carga = :id and estado=1";
         $stmt = $this->conn->prepare($sql);

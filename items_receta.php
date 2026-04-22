@@ -3,10 +3,10 @@
   require_once __DIR__ . "/model/item.php";
 
   $selects = new Item();
-  $bases = $selects->select_bases();
-  $grupos = $selects->select_grupo_descuento();
-  $clases = $selects->select_clase_producto();
-  $categorias = $selects->select_categoria_producto();
+  $tipos = $selects->obtenerRecetaTipos();
+  $categorias = $selects->obtenerRecetaCategorias();
+  $sub_cat_1 = $selects->obtenerRecetaSubCategorias1();
+  $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
 
 ?>
 <!DOCTYPE html>
@@ -78,40 +78,40 @@
                                 <div class="row mb-3" id="filtros">
                                     <div class="col-md-3">
                                         <label class="form-label">Tipo</label>
-                                        <select id="filterBase" class="form-select">
+                                        <select id="filterTipo" class="form-select">
                                             <option value="">-- Todas --</option>
-                                            <?php foreach ($bases as $b): ?>
-                                                <option value="<?= $b['id'] ?>"><?= $b['base'] ?></option>
+                                            <?php foreach ($tipos as $b): ?>
+                                                <option value="<?= $b['tipo'] ?>"><?= $b['tipo'] ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
 
                                     <div class="col-md-3">
-                                        <label class="form-label">Grupo Descuento</label>
-                                        <select id="filterGrupo" class="form-select">
-                                            <option value="">-- Todos --</option>
-                                            <?php foreach ($grupos as $b): ?>
-                                                <option value="<?= $b['grupo_descuento'] ?>"><?= $b['grupo_descuento'] ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <label class="form-label">Clase Producto</label>
-                                        <select id="filterClase" class="form-select">
-                                            <option value="">-- Todas --</option>
-                                            <?php foreach ($clases as $b): ?>
-                                                <option value="<?= $b['clase_producto'] ?>"><?= $b['clase_producto'] ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <label class="form-label">Categoría Producto</label>
+                                        <label class="form-label">Categoría</label>
                                         <select id="filterCategoria" class="form-select">
-                                            <option value="">-- Todas --</option>
+                                            <option value="">-- Todos --</option>
                                             <?php foreach ($categorias as $b): ?>
-                                                <option value="<?= $b['categoria_producto'] ?>"><?= $b['categoria_producto'] ?></option>
+                                                <option value="<?= $b['categoria'] ?>"><?= $b['categoria'] ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label">Sub Categoría 1</label>
+                                        <select id="filterSubCategoria1" class="form-select">
+                                            <option value="">-- Todas --</option>
+                                            <?php foreach ($sub_cat_1 as $b): ?>
+                                                <option value="<?= $b['sub_cat_1'] ?>"><?= $b['sub_cat_1'] ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label">Sub Categoría 2</label>
+                                        <select id="filterSubCategoria2" class="form-select">
+                                            <option value="">-- Todas --</option>
+                                            <?php foreach ($sub_cat_2 as $b): ?>
+                                                <option value="<?= $b['sub_cat_2'] ?>"><?= $b['sub_cat_2'] ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
@@ -132,7 +132,7 @@
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
-    <script src="./assets/js/table-gridjs-item.js"></script>
+    <script src="./assets/js/table-gridjs-item-receta.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
