@@ -73,12 +73,12 @@
                             </div>
 
                             <div class="card-body">
-                                <form class="needs-validation form-upd-item" novalidate="">
+                                <form class="needs-validation form-add-item-receta" novalidate="">
                                     <div class="row">
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label">Tipo</label>
-                                            <select id="filterTipo" class="form-select">
+                                            <select id="filterTipo" class="form-select" required>
                                                 <option value="">-- Todas --</option>
                                                 <?php foreach ($tipos as $b): ?>
                                                     <option value="<?= $b['tipo'] ?>"><?= $b['tipo'] ?></option>
@@ -88,7 +88,7 @@
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label">Categoría</label>
-                                            <select id="filterCategoria" class="form-select">
+                                            <select id="filterCategoria" class="form-select" required>
                                                 <option value="">-- Todos --</option>
                                                 <?php foreach ($categorias as $b): ?>
                                                     <option value="<?= $b['categoria'] ?>"><?= $b['categoria'] ?></option>
@@ -98,7 +98,7 @@
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label">Sub Categoría 1</label>
-                                            <select id="filterSubCategoria1" class="form-select">
+                                            <select id="filterSubCategoria1" class="form-select" required>
                                                 <option value="">-- Todas --</option>
                                                 <?php foreach ($sub_cat_1 as $b): ?>
                                                     <option value="<?= $b['sub_cat_1'] ?>"><?= $b['sub_cat_1'] ?></option>
@@ -108,7 +108,7 @@
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label">Sub Categoría 2</label>
-                                            <select id="filterSubCategoria2" class="form-select">
+                                            <select id="filterSubCategoria2" class="form-select" required>
                                                 <option value="">-- Todas --</option>
                                                 <?php foreach ($sub_cat_2 as $b): ?>
                                                     <option value="<?= $b['sub_cat_2'] ?>"><?= $b['sub_cat_2'] ?></option>
@@ -136,7 +136,7 @@
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label" for="marca">Marca</label>
-                                            <input type="text" class="form-control" id="marca" name="marca" placeholder="Marca" required="" maxlength="70">
+                                            <input type="text" class="form-control" id="marca" name="marca" placeholder="PROMART" required="" maxlength="70">
                                             <div class="valid-feedback">Looks good!</div>
                                         </div>
 
@@ -168,12 +168,6 @@
                                             <label class="form-label" for="precio">Precio </label>
                                             <input type="number" class="form-control" id="precio" name="precio" placeholder="100.00" required="" min="1" max="9999999" step="0.01">
                                             <div class="invalid-feedback">Please provide a valid precio.</div>
-                                        </div>
-
-                                        <div class="col-md-2 mb-3">
-                                            <label class="form-label d-block">Estado</label>
-                                            <input type="checkbox" id="switch3" name="estado" data-switch="success" />
-                                            <label for="switch3" data-on-label="Yes" data-off-label="No"></label></h4>
                                         </div>
                                     </div>
 

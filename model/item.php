@@ -444,5 +444,59 @@ class Item {
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
         return $data ?: null;
     }
+
+    public function guardarItemReceta(array $data): bool
+    {
+        $sql = "INSERT INTO receta_items (
+                    categoria,
+                    sub_cat_1,
+                    sub_cat_2,
+                    marca,
+                    modelo,
+                    nombre,
+                    descripcion,
+                    uni_medida,
+                    precio,
+                    stock,
+                    moneda,
+                    tipo,
+                    created_at,
+                    cantidad
+                ) VALUES (
+                    :categoria,
+                    :sub_cat_1,
+                    :sub_cat_2,
+                    :marca,
+                    :modelo,
+                    :nombre,
+                    :descripcion,
+                    :uni_medida,
+                    :precio,
+                    :stock,
+                    :moneda,
+                    :tipo,
+                    :created_at,
+                    :cantidad
+                )";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', (int)($data['receta_id'] ?? 0), PDO::PARAM_INT);
+        $stmt->bindValue(':item_id', (int)($data['item_id'] ?? 0), PDO::PARAM_INT);
+        $stmt->bindValue(':categoria', (string)($data['categoria'] ?? ''));
+        $stmt->bindValue(':sub_cat_1', (string)($data['sub_cat_1'] ?? ''));
+        $stmt->bindValue(':sub_cat_2', (string)($data['sub_cat_2'] ?? ''));
+        $stmt->bindValue(':marca', (string)($data['marca'] ?? ''));
+        $stmt->bindValue(':modelo', (string)($data['modelo'] ?? ''));
+        $stmt->bindValue(':nombre', (string)($data['nombre'] ?? ''));
+        $stmt->bindValue(':descripcion', (string)($data['descripcion'] ?? ''));
+        $stmt->bindValue(':uni_medida', (string)($data['uni_medida'] ?? ''));
+        $stmt->bindValue(':precio', (float)($data['precio'] ?? 0));
+        $stmt->bindValue(':moneda', (string)($data['moneda'] ?? ''));
+        $stmt->bindValue(':tipo', (string)($data['tipo'] ?? ''));
+        $stmt->bindValue(':created_at', $this->nowLima);
+        $stmt->bindValue(':cantidad', (int)($data['cantidad'] ?? 0), PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
 }
 ?>
