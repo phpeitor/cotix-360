@@ -56,6 +56,11 @@
                                 <span class="menu-text">Lista</span>
                             </a>
                         </li>
+                        <li class="side-nav-item">
+                            <a href="items_receta.php" class="side-nav-link">
+                                <span class="menu-text">Base Receta</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </li>
