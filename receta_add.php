@@ -1,5 +1,12 @@
 <?php
   require_once __DIR__ . "/controller/check_session.php";
+  require_once __DIR__ . "/model/item.php";
+
+  $selects = new Item();
+  $tipos = $selects->obtenerRecetaTipos();
+  $categorias = $selects->obtenerRecetaCategorias();
+  $sub_cat_1 = $selects->obtenerRecetaSubCategorias1();
+  $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -61,16 +68,63 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
-                                <h4 class="header-title mb-0">Modificar Item </h4>
-                                <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='items.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
+                                <h4 class="header-title mb-0">Registrar Item </h4>
+                                <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='items_receta.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                             </div>
 
                             <div class="card-body">
                                 <form class="needs-validation form-upd-item" novalidate="">
                                     <div class="row">
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Tipo</label>
+                                            <select id="filterTipo" class="form-select">
+                                                <option value="">-- Todas --</option>
+                                                <?php foreach ($tipos as $b): ?>
+                                                    <option value="<?= $b['tipo'] ?>"><?= $b['tipo'] ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Categoría</label>
+                                            <select id="filterCategoria" class="form-select">
+                                                <option value="">-- Todos --</option>
+                                                <?php foreach ($categorias as $b): ?>
+                                                    <option value="<?= $b['categoria'] ?>"><?= $b['categoria'] ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Sub Categoría 1</label>
+                                            <select id="filterSubCategoria1" class="form-select">
+                                                <option value="">-- Todas --</option>
+                                                <?php foreach ($sub_cat_1 as $b): ?>
+                                                    <option value="<?= $b['sub_cat_1'] ?>"><?= $b['sub_cat_1'] ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Sub Categoría 2</label>
+                                            <select id="filterSubCategoria2" class="form-select">
+                                                <option value="">-- Todas --</option>
+                                                <?php foreach ($sub_cat_2 as $b): ?>
+                                                    <option value="<?= $b['sub_cat_2'] ?>"><?= $b['sub_cat_2'] ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label" for="nombre">Nombre</label>
+                                            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Item Name" required="" maxlength="200">
+                                            <div class="invalid-feedback">Please provide a nombre.</div>
+                                        </div>
+
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label" for="descripcion">Descripcion</label>
-                                            <input type="text" class="form-control" id="descripcion" name="descripcion" placeholder="ZB H 50PPR DUAL CHNL" required="" maxlength="150">
+                                            <input type="text" class="form-control" id="descripcion" name="descripcion" placeholder="ZB H 50PPR DUAL CHNL" required="" maxlength="350">
                                             <div class="invalid-feedback">Please provide a descripcion.</div>
                                         </div>
 
@@ -81,48 +135,38 @@
                                         </div>
 
                                         <div class="col-md-3 mb-3">
-                                            <label class="form-label" for="categoria">Categoria</label>
-                                            <input type="text" class="form-control" id="categoria" name="categoria" placeholder="Categoria" required="" maxlength="70">
+                                            <label class="form-label" for="marca">Marca</label>
+                                            <input type="text" class="form-control" id="marca" name="marca" placeholder="Marca" required="" maxlength="70">
                                             <div class="valid-feedback">Looks good!</div>
                                         </div>
 
                                         <div class="col-md-3 mb-3">
-                                            <label class="form-label">Grupo</label>
-                                            <select id="grupo" name="grupo" class="form-select" required="">
+                                            <label class="form-label" for="uni_medida">Unidad Medida</label>
+                                            <input type="text" class="form-control" id="uni_medida" name="uni_medida" placeholder="UND" required="" maxlength="70">
+                                            <div class="valid-feedback">Looks good!</div>
+                                        </div>
+
+                                        <div class="col-md-2 mb-3">
+                                            <label class="form-label" for="stock">Stock</label>
+                                            <input type="number" class="form-control" id="stock" name="stock" placeholder="0" required="" min="0" step="1" max="100">
+                                            <div class="valid-feedback">Looks good!</div>
+                                        </div>
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Moneda</label>
+                                            <select id="moneda" name="moneda" class="form-select" required="">
                                                 <option value="">-- Seleccione --</option>
-                                                <option value="Default">Default</option>
-                                                <?php for ($i = 0; $i <= 9; $i++): ?>
-                                                    <option value="Group <?= $i ?>">Group <?= $i ?></option>
-                                                <?php endfor; ?>
+                                                <option value="SOL">S/</option>
+                                                <option value="DOLLAR">$</option>
                                             </select>
                                             <div class="invalid-feedback">
                                                 Please select an option.
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="row">
-                                        <div class="col-md-3 mb-3">
-                                            <label class="form-label" for="clase">Clase</label>
-                                            <input type="text" class="form-control" id="clase" name="clase" placeholder="Clase" required="" maxlength="70">
-                                            <div class="invalid-feedback">Please provide a valid clase.</div>
-                                        </div>
-
-                                        <div class="col-md-3 mb-3">
-                                            <label class="form-label" for="origen">Origen</label>
-                                            <input type="text" class="form-control" id="origen" name="origen" placeholder="Origen" required="" maxlength="70">
-                                            <div class="invalid-feedback">Please provide a valid origen.</div>
-                                        </div>
-
-                                        <div class="col-md-2 mb-3">
-                                            <label class="form-label" for="peso">Peso</label>
-                                            <input type="number" class="form-control" id="peso" name="peso" placeholder="Peso" required="" step="0.01">
-                                            <div class="invalid-feedback">Please provide a valid peso.</div>
-                                        </div>
-
-                                        <div class="col-md-2 mb-3">
-                                            <label class="form-label" for="precio">Precio Un.</label>
-                                            <input type="number" class="form-control" id="precio" name="precio" placeholder="Precio" required="" step="0.01">
+                                         <div class="col-md-2 mb-3">
+                                            <label class="form-label" for="precio">Precio </label>
+                                            <input type="number" class="form-control" id="precio" name="precio" placeholder="100.00" required="" min="1" max="9999999" step="0.01">
                                             <div class="invalid-feedback">Please provide a valid precio.</div>
                                         </div>
 
