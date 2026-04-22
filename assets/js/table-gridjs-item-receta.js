@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
             { id: "id", name: "ID", width: "70px" },
             {
                 id: "nombre",
-                name: "Descripción",
+                name: "Nombre Descripción",
                 width: "220px",
                 formatter: (cell, row) => {
                     const nombre = String(cell || "").trim();
@@ -142,9 +142,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             },
             { id: "descripcion", hidden: true },
-            { id: "categoria", name: "Categoría", width: "120px" },
-            { id: "sub_cat_1", name: "Sub Cat 1", width: "120px" },
-            { id: "sub_cat_2", name: "Sub Cat 2", width: "120px" },
+            {
+                id: "categoria",
+                name: "Categoría | SubCat1 | SubCat2",
+                width: "260px",
+                formatter: (cell, row) => {
+                    const categoria = String(cell || "").trim();
+                    const subCat1 = String(row?.cells?.[4]?.data || "").trim();
+                    const subCat2 = String(row?.cells?.[5]?.data || "").trim();
+                    const parts = [categoria, subCat1, subCat2].filter(Boolean);
+
+                    return parts.join(" | ") || "-";
+                }
+            },
+            { id: "sub_cat_1", hidden: true },
+            { id: "sub_cat_2", hidden: true },
             { id: "marca", name: "Marca", width: "100px" },
             { id: "modelo", name: "Modelo", width: "100px" },
             { id: "uni_medida", name: "Uni. Medida", width: "100px" },
