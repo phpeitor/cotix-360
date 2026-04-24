@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentPage = 1;
     let receta = null;
     let detalle = [];
+    let cambiosPrecioByItem = new Map();
     const hash = getQueryParam("id");
 
     init();
@@ -39,6 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
             alertify.error("ID de receta inválido");
             return;
         }
+
+        initTooltips();
 
         cargarReceta(hash);
 
@@ -68,10 +71,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             receta = data.receta;
             detalle = Array.isArray(data.detalle) ? data.detalle : [];
+            const cambiosPrecio = Array.isArray(data.cambios_precio) ? data.cambios_precio : [];
+            cambiosPrecioByItem = new Map(cambiosPrecio.map(item => [Number(item.item_id), item]));
             currentPage = 1;
 
             renderHeader();
-            renderAlertasCambioPrecio(Array.isArray(data.cambios_precio) ? data.cambios_precio : []);
+            renderAlertasCambioPrecio(cambiosPrecio);
             renderBody();
             renderPagination();
             calcularTotales();
@@ -131,6 +136,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getMonedaSimbolo(moneda) {
         return String(moneda || "").toUpperCase() === "DOLLAR" ? "$" : "S/.";
+    }
+
+    function formatMoneda(moneda, monto) {
+        return `${getMonedaSimbolo(moneda)} ${formatDecimal(Number(monto) || 0)}`;
+    }
+
+    function escapeAttr(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function initTooltips(scope = document) {
+        if (typeof bootstrap === "undefined" || !bootstrap.Tooltip) return;
+        scope.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+            bootstrap.Tooltip.getOrCreateInstance(el);
+        });
     }
 
     function getSubtotal(item) {
@@ -224,9 +249,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const detalleLinea1 = [item.categoria, item.sub_cat_1, item.sub_cat_2].filter(Boolean).join(" / ");
             const detalleLinea2 = [item.marca, item.modelo, item.uni_medida].filter(Boolean).join(" / ");
             const itemId = Number(item.item_id) || Number(item.id) || 0;
+            const cambioPrecio = cambiosPrecioByItem.get(itemId);
+            const tooltipCambioPrecio = cambioPrecio
+                ? escapeAttr(`Precio actualizado: ${formatMoneda(cambioPrecio.moneda_receta, cambioPrecio.precio_receta)} ➡️ ${formatMoneda(cambioPrecio.moneda_actual, cambioPrecio.precio_actual)}`)
+                : "";
 
             return `
-                <tr data-item-id="${itemId}">
+                <tr data-item-id="${itemId}" class="${cambioPrecio ? "table-warning" : ""}">
                     <td>
                         <div class="d-flex align-items-center">
                             <div class="avatar-md flex-shrink-0 me-2">
@@ -235,7 +264,9 @@ document.addEventListener("DOMContentLoaded", () => {
                                 </span>
                             </div>
                             <div>
-                                <span class="text-muted fs-12">${item.nombre || ""}</span><br>
+                                <span class="text-muted fs-12">${item.nombre || ""}
+                                    ${cambioPrecio ? `<span class="ms-1" data-bs-toggle="tooltip" data-bs-title="${tooltipCambioPrecio}"><i class="ti ti-alert-circle text-warning fs-16"></i></span>` : ""}
+                                </span><br>
                                 <h5 class="fs-14 mt-1 item-description">${item.descripcion || ""}</h5>
                             </div>
                         </div>
@@ -252,10 +283,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         </h5>
                     </td>
                     <td class="text-center">
-                        <div class="input-step border bg-body-secondary p-1 rounded-pill d-inline-flex overflow-visible">
-                            <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100 btn-qty-minus" data-id="${itemId}">-</button>
-                            <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="${cantidad}" readonly>
-                            <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100 btn-qty-plus" data-id="${itemId}">+</button>
+                        <div class="input-step border bg-body-secondary px-1 py-0 rounded-pill d-inline-flex align-items-center overflow-visible" style="height:30px;">
+                            <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center btn-qty-minus" style="width:22px;min-width:22px;height:22px;" data-id="${itemId}">-</button>
+                            <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100 fw-semibold" style="width:30px;font-size:12px;" value="${cantidad}" readonly>
+                            <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center btn-qty-plus" style="width:22px;min-width:22px;height:22px;" data-id="${itemId}">+</button>
                         </div>
                     </td>
                     <td class="text-end">
@@ -286,6 +317,8 @@ document.addEventListener("DOMContentLoaded", () => {
         tbody.querySelectorAll(".btn-delete-item").forEach(btn => {
             btn.addEventListener("click", () => eliminarItem(btn.dataset.id));
         });
+
+        initTooltips(tbody);
     }
 
     function renderEmptyState(message) {
@@ -641,10 +674,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!qtyCell) return;
 
             qtyCell.innerHTML = `
-                <div class="input-step border bg-body-secondary p-1 rounded-pill d-inline-flex overflow-visible">
-                    <button type="button" class="qty-minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
-                    <input type="number" class="qty-input text-dark text-center border-0 bg-body-secondary rounded h-100" value="1" min="1" max="100" readonly>
-                    <button type="button" class="qty-plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
+                <div data-touchspin class="input-step border bg-body-secondary px-1 py-0 mt-1 rounded-pill d-inline-flex align-items-center overflow-visible" style="height:28px;">
+                    <button type="button" class="qty-minus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:20px;min-width:20px;height:20px;">-</button>
+                    <input type="number" class="qty-input text-dark text-center border-0 bg-body-secondary rounded h-100 fw-semibold" style="width:30px;font-size:12px;" value="1" min="1" max="100" readonly>
+                    <button type="button" class="qty-plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:20px;min-width:20px;height:20px;">+</button>
                 </div>
             `;
 

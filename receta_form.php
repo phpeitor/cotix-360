@@ -103,7 +103,6 @@
 
                                 <div class="d-flex align-items-center gap-2">
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal"><i class="ti ti-search fs-18"></i></button>
-                                    <button type="button" class="btn btn-warning btn-sm" id="btnReloadPrecios">reload</button>
                                     <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='receta_list.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                                 </div>
                             </div>
@@ -173,6 +172,9 @@
                                             </ul>
                                         </div>
                                         <div class="col-sm-auto mt-3 mt-sm-0">
+                                            <button type="button" class="btn btn-warning btn-icon me-1" id="btnReloadPrecios" data-bs-toggle="tooltip" data-bs-title="Sincronizar precios actualizados">
+                                                <i class="ti ti-refresh"></i>
+                                            </button>
                                             <button type="submit" class="btn btn-success btn-icon">
                                                 <i class="ti ti-device-floppy"></i>
                                             </button>
