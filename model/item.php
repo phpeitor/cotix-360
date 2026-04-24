@@ -460,8 +460,7 @@ class Item {
                     stock,
                     moneda,
                     tipo,
-                    created_at,
-                    cantidad
+                    created_at
                 ) VALUES (
                     :categoria,
                     :sub_cat_1,
@@ -475,8 +474,7 @@ class Item {
                     :stock,
                     :moneda,
                     :tipo,
-                    :created_at,
-                    :cantidad
+                    :created_at
                 )";
 
         $stmt = $this->conn->prepare($sql);
@@ -491,10 +489,10 @@ class Item {
         $stmt->bindValue(':descripcion', (string)($data['descripcion'] ?? ''));
         $stmt->bindValue(':uni_medida', (string)($data['uni_medida'] ?? ''));
         $stmt->bindValue(':precio', (float)($data['precio'] ?? 0));
+        $stmt->bindValue(':stock', (int)($data['stock'] ?? 0), PDO::PARAM_INT);
         $stmt->bindValue(':moneda', (string)($data['moneda'] ?? ''));
         $stmt->bindValue(':tipo', (string)($data['tipo'] ?? ''));
         $stmt->bindValue(':created_at', $this->nowLima);
-        $stmt->bindValue(':cantidad', (int)($data['cantidad'] ?? 0), PDO::PARAM_INT);
 
         return $stmt->execute();
     }

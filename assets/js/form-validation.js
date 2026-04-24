@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const forms = document.querySelectorAll(
-    ".form-add-user, .form-upd-user, .form-upd-item"
+    ".form-add-user, .form-upd-user, .form-upd-item, .form-add-item-receta"
   );
 
   const form =
@@ -107,6 +107,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (form.classList.contains("form-upd-item")) {
         actionUrl = "controller/upd_item.php";
         redirectUrl = "items.php";
+      }
+
+      if (["form-add-item-receta", "form-upd-item-receta"].some(c => form.classList.contains(c))) {
+        const isUpdate = form.dataset.mode === "update";
+        actionUrl = isUpdate
+          ? "controller/upd_item_receta.php"
+          : "controller/add_item_receta.php";
+        redirectUrl = "item_recetas.php";
       }
 
       try {
