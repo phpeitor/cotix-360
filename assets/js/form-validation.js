@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
         actionUrl = isUpdate
           ? "controller/upd_item_receta.php"
           : "controller/add_item_receta.php";
-        redirectUrl = "item_recetas.php";
+        redirectUrl = "items_receta.php";
       }
 
       try {

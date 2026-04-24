@@ -71,7 +71,7 @@
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
                                 <h4 class="header-title mb-0">Base Items</h4>
                                 <div class="d-flex align-items-center gap-2">
-                                    <a href="receta_add.php" id="btn_registrar" class="btn btn-sm rounded-pill btn-success"><i class="ti ti-plus fs-22"></i></a>
+                                    <a href="add_item_receta.php" id="btn_registrar" class="btn btn-sm rounded-pill btn-success"><i class="ti ti-plus fs-22"></i></a>
                                     <a href="#" id="btn_buscar" class="btn btn-sm rounded-pill btn-info"><i class="ti ti-search fs-22"></i> Buscar</a>
                                 </div>
                             </div>

@@ -2,6 +2,10 @@
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../model/item.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 try {
 
     if (!isset($_SESSION['session_id']) || $_SESSION['session_id'] <= 0) {
@@ -22,7 +26,6 @@ try {
     }
 
     $item = new Item();
-    $item->begin();
     $itemId = $item->guardarItemReceta([
         'categoria' => $_POST['categoria'] ?? '',
         'sub_cat_1' => $_POST['sub_cat_1'] ?? '',
@@ -38,19 +41,12 @@ try {
         'tipo' => $_POST['tipo'] ?? '',
     ]);
 
-    $item->commit();
-
     echo json_encode([
         'ok' => true,
         'id' => $itemId
     ]);
 
 } catch (Throwable $e) {
-
-    if (isset($item)) {
-        $item->rollback();
-    }
-
     http_response_code(500);
     echo json_encode([
         'ok' => false,

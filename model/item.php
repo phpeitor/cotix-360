@@ -445,7 +445,7 @@ class Item {
         return $data ?: null;
     }
 
-    public function guardarItemReceta(array $data): bool
+    public function guardarItemReceta(array $data): int
     {
         $sql = "INSERT INTO receta_items (
                     categoria,
@@ -478,8 +478,6 @@ class Item {
                 )";
 
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':receta_id', (int)($data['receta_id'] ?? 0), PDO::PARAM_INT);
-        $stmt->bindValue(':item_id', (int)($data['item_id'] ?? 0), PDO::PARAM_INT);
         $stmt->bindValue(':categoria', (string)($data['categoria'] ?? ''));
         $stmt->bindValue(':sub_cat_1', (string)($data['sub_cat_1'] ?? ''));
         $stmt->bindValue(':sub_cat_2', (string)($data['sub_cat_2'] ?? ''));
@@ -494,7 +492,9 @@ class Item {
         $stmt->bindValue(':tipo', (string)($data['tipo'] ?? ''));
         $stmt->bindValue(':created_at', $this->nowLima);
 
-        return $stmt->execute();
+        $stmt->execute();
+
+        return (int)$this->conn->lastInsertId();
     }
 }
 ?>
