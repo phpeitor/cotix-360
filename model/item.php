@@ -525,5 +525,17 @@ class Item {
         $stmt->execute();
         return $stmt->rowCount() > 0;
     }
+
+    public function obtenerItemRecetaPorHash(string $hash): ?array {
+        $sql = "SELECT *
+                FROM receta_items
+                WHERE MD5(id) = :hash
+                LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $data ?: null;
+    }
 }
 ?>

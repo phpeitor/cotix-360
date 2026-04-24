@@ -73,7 +73,7 @@
                             </div>
 
                             <div class="card-body">
-                                <form class="needs-validation form-add-item-receta" novalidate="">
+                                <form class="needs-validation form-upd-item-receta" novalidate="">
                                     <div class="row">
 
                                         <div class="col-md-3 mb-3">

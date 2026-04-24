@@ -2,7 +2,16 @@
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../model/item.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 try {
+    if (!isset($_SESSION['session_id']) || (int)$_SESSION['session_id'] <= 0) {
+        echo json_encode(['ok' => false, 'message' => 'Sesión expirada o usuario no autenticado']);
+        exit;
+    }
+
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         echo json_encode(['ok' => false, 'message' => 'Método no permitido']);
         exit;

@@ -314,14 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (json.ok) {
                     alertify.success("✅ Registro suspendido correctamente");
-
-                    grid.updateConfig({
-                        server: {
-                            url: "",
-                            method: "GET",
-                            then: (data) => data
-                        }
-                    }).forceRender();
+                    await cargarTabla();
 
                 } else {
                     alertify.error("❌ Error al suspender: " + json.message);

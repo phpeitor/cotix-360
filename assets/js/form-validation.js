@@ -1,11 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
   const forms = document.querySelectorAll(
-    ".form-add-user, .form-upd-user, .form-upd-item, .form-add-item-receta"
+    ".form-add-user, .form-upd-user, .form-upd-item, .form-add-item-receta, .form-upd-item-receta"
   );
 
   const form =
   document.querySelector("form.form-upd-user") ||
-  document.querySelector("form.form-upd-item");
+  document.querySelector("form.form-upd-item") ||
+  document.querySelector("form.form-upd-item-receta");
 
   const params = new URLSearchParams(window.location.search);
   const hash = params.get("hash");
@@ -67,6 +68,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (hash && form.classList.contains("form-upd-item")) {
     cargarItem(hash);
+    prepararFormularioEdicion(form, hash);
+  }
+
+  if (hash && form.classList.contains("form-upd-item-receta")) {
+    cargarItemReceta(hash);
     prepararFormularioEdicion(form, hash);
   }
 
@@ -212,6 +218,45 @@ async function cargarItem(hash) {
     } catch (err) {
         console.error("❌ Error al cargar item:", err);
     }
+}
+
+async function cargarItemReceta(hash) {
+  try {
+    const res = await fetch(`controller/get_item_receta.php?hash=${hash}`);
+    const json = await res.json();
+
+    if (!json.ok) {
+      alertify.error(json.message || "Item receta no encontrado");
+      return;
+    }
+
+    const i = json.data;
+
+    const tipoEl = document.querySelector('#filterTipo');
+    const categoriaEl = document.querySelector('#filterCategoria');
+    const subCat1El = document.querySelector('#filterSubCategoria1');
+    const subCat2El = document.querySelector('#filterSubCategoria2');
+
+    if (tipoEl) tipoEl.value = i.tipo ?? '';
+    if (categoriaEl) categoriaEl.value = i.categoria ?? '';
+    if (subCat1El) subCat1El.value = i.sub_cat_1 ?? '';
+    if (subCat2El) subCat2El.value = i.sub_cat_2 ?? '';
+
+    document.querySelector('#nombre').value = i.nombre ?? '';
+    document.querySelector('#descripcion').value = i.descripcion ?? '';
+    document.querySelector('#modelo').value = i.modelo ?? '';
+    document.querySelector('#marca').value = i.marca ?? '';
+    document.querySelector('#uni_medida').value = i.uni_medida ?? '';
+    if (document.querySelector('#stock')) {
+      document.querySelector('#stock').value = i.stock ?? 0;
+    }
+    document.querySelector('#moneda').value = i.moneda ?? '';
+    document.querySelector('#precio').value = i.precio ?? '';
+    document.querySelector('#switch3').checked = parseInt(i.estado) === 1;
+
+  } catch (err) {
+    console.error("❌ Error al cargar item receta:", err);
+  }
 }
 
 function prepararFormularioEdicion(form, hash) {
