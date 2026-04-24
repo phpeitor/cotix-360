@@ -347,7 +347,8 @@ class Item {
                     sub_cat_1,
                     sub_cat_2,
                     marca,
-                    modelo
+                    modelo,
+                    estado
                 FROM receta_items
                 WHERE 1 = 1";
         $params = [];
@@ -495,6 +496,34 @@ class Item {
         $stmt->execute();
 
         return (int)$this->conn->lastInsertId();
+    }
+
+    public function bajaItemReceta(int $id): bool {
+        $sql = "UPDATE receta_items 
+                SET estado = 0
+                WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
+    }
+
+    public function actualizarItemRecetaPorHash(string $hash, array $data): bool {
+        $sql = "UPDATE receta_items 
+                SET descripcion = :descripcion,
+                    precio = :precio,
+                    moneda = :moneda,
+                    estado = :estado    
+                WHERE MD5(id) = :hash";
+        $stmt = $this->conn->prepare($sql);
+
+        $stmt->bindValue(':descripcion', $data['descripcion']);
+        $stmt->bindValue(':precio', $data['precio']);
+        $stmt->bindValue(':moneda', $data['moneda']);
+        $stmt->bindValue(':estado', (int)$data['estado'], PDO::PARAM_INT);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
     }
 }
 ?>

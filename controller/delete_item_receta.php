@@ -11,7 +11,7 @@ try {
     $id = (int) $_POST['id'];
     $item = new Item();
 
-    if ($item->baja($id)) {
+    if ($item->bajaItemReceta($id)) {
         echo json_encode(['ok' => true, 'message' => 'Item de baja correctamente']);
     } else {
         echo json_encode(['ok' => false, 'message' => 'No se pudo dar de baja el item']);

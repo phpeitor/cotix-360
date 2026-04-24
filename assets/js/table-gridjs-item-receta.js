@@ -171,7 +171,53 @@ document.addEventListener("DOMContentLoaded", () => {
                     return gridjs.html(`${simbolo} ${Number(cell || 0).toFixed(2)}`);
                 }
             },
-            { id: "moneda", hidden: true }
+            { id: "moneda", hidden: true },
+            {
+                id: "estado",
+                name: "Estado",
+                width: "80px",
+                formatter: (cell) => {
+                    const v = String(cell ?? "").trim();
+                    if (v === "1") {
+                        return gridjs.html(`<span class="badge bg-success">ACTIVE</span>`);
+                    }
+                    if (v === "0") {
+                        return gridjs.html(`<span class="badge bg-danger">SUSPENDED</span>`);
+                    }
+                    return gridjs.html(`<span class="badge bg-dark text-light">NDF</span>`);
+                }
+            },
+            {
+                id: "acciones",
+                name: "Opciones",
+                width: "90px",
+                sort: false,
+                formatter: (_, row) => {
+                    const cells = row.cells;
+
+                    const id = cells[0].data;
+                    const estado = String(cells[12].data).trim(); 
+                    const idHash = md5(String(id));
+                    console.log("ID:", id, "Estado:", estado, "Hash:", idHash);
+
+                    const btnDelete = estado === "1"
+                    ? `
+                        <button class="btn-delete btn btn-soft-danger btn-icon" data-id="${id}">
+                            <i class="ti ti-trash-x"></i>
+                        </button>
+                    `
+                    : ``;
+
+                    return gridjs.html(`
+                        <div style="gap:.5rem;justify-content:center;">
+                            <button class="btn-edit btn btn-outline-primary btn-icon" data-hash="${idHash}">
+                                <i class="ti ti-pencil-bolt"></i>
+                            </button>
+                             ${btnDelete}
+                        </div>
+                    `);
+                }
+            }
         ],
         data: [],
         search: true,
@@ -227,5 +273,68 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     cargarTabla();
+
+    document.addEventListener("click", async (e) => {
+
+        // --- BOTÓN EDITAR ---
+        const btnEdit = e.target.closest(".btn-edit");
+        if (btnEdit) {
+            const idHash = btnEdit.getAttribute("data-hash");
+            console.log("Editar ID Hash:", idHash);
+            if (!idHash) return;
+            window.location.href = "upd_item_receta.php?hash=" + idHash;
+            return;
+        }
+
+        // --- BOTÓN ELIMINAR ---
+        const btnDelete = e.target.closest(".btn-delete");
+        if (btnDelete) {
+            const id = btnDelete.dataset.id;
+            if (!id) return;
+
+            const confirmed = await new Promise((resolve) => {
+                alertify.confirm(
+                    "Confirmar eliminación",
+                    "¿Seguro que deseas eliminar el registro " + id + "?",
+                    function () { resolve(true); },    // OK
+                    function () { resolve(false); }    // Cancelar
+                );
+            });
+
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch("controller/delete_item_receta.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: "id=" + encodeURIComponent(id)
+                });
+
+                const json = await res.json();
+
+                if (json.ok) {
+                    alertify.success("✅ Registro suspendido correctamente");
+
+                    grid.updateConfig({
+                        server: {
+                            url: "",
+                            method: "GET",
+                            then: (data) => data
+                        }
+                    }).forceRender();
+
+                } else {
+                    alertify.error("❌ Error al suspender: " + json.message);
+                }
+
+            } catch (err) {
+                console.error(err);
+                alertify.error("❌ Error de red al suspender");
+            }
+
+            return;
+        }
+
+    });
 
 });

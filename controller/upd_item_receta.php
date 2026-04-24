@@ -16,27 +16,15 @@ try {
     $hash = $_POST['hash'];
 
     $data = [
-        'modelo'            => $_POST['modelo'] ?? '',
         'descripcion'       => $_POST['descripcion'] ?? '',
-        'precio_unitario'   => $_POST['precio'] ?? '',
-        'grupo_descuento'   => $_POST['grupo'] ?? '',
-        'pais_origen'       => $_POST['origen'] ?? '',
-        'peso'              => $_POST['peso'] ?? 0,
+        'precio'   => $_POST['precio'] ?? '',
+        'moneda'            => $_POST['moneda'] ?? '',
         'estado'            => isset($_POST['estado']) ? 1 : 0,
     ];
 
     $item = new Item();
 
-    $existe = $item->valida_modelo_upd($data['modelo'], $hash);
-    if ($existe) {
-        echo json_encode([
-            'ok' => false,
-            'message' => 'El modelo ya está registrado por otro item'
-        ]);
-        exit;
-    }
-
-    $ok = $item->actualizarPorHash($hash, $data);
+    $ok = $item->actualizarItemRecetaPorHash($hash, $data);
 
     echo json_encode([
         'ok' => $ok,
