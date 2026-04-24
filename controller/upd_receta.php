@@ -45,6 +45,15 @@ try {
     }
 
     $receta = new Receta();
+    $rowReceta = $receta->obtenerPorId($recetaId);
+    if (!$rowReceta) {
+        throw new Exception('Receta no encontrada');
+    }
+
+    if (strcasecmp((string)($rowReceta['estado'] ?? ''), 'Enviada') !== 0) {
+        throw new Exception('Solo se puede modificar recetas con estado Enviada');
+    }
+
     $receta->begin();
 
     $okCabecera = $receta->actualizarCabeceraEdicion(

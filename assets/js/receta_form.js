@@ -76,6 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
             currentPage = 1;
 
             renderHeader();
+            aplicarBloqueoPorEstado();
             renderAlertasCambioPrecio(cambiosPrecio);
             renderBody();
             renderPagination();
@@ -118,6 +119,37 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         avatar.innerHTML = `<iconify-icon icon="${icon}" class="fs-28 ${color}"></iconify-icon>`;
+    }
+
+    function isRecetaEditable() {
+        return String(receta?.estado || "").toLowerCase() === "enviada";
+    }
+
+    function aplicarBloqueoPorEstado() {
+        const editable = isRecetaEditable();
+        const btnGuardar = recetaForm?.querySelector("[type='submit']");
+        const btnBuscar = document.querySelector("[data-bs-target='#info-header-modal']");
+
+        if (btnGuardar) {
+            btnGuardar.disabled = !editable;
+            btnGuardar.classList.toggle("opacity-50", !editable);
+            btnGuardar.classList.toggle("cursor-not-allowed", !editable);
+            btnGuardar.title = editable ? "" : "Solo editable cuando el estado es Enviada";
+        }
+
+        if (btnReloadPrecios) {
+            btnReloadPrecios.disabled = !editable;
+            btnReloadPrecios.classList.toggle("opacity-50", !editable);
+            btnReloadPrecios.classList.toggle("cursor-not-allowed", !editable);
+            btnReloadPrecios.title = editable ? "" : "Solo disponible cuando el estado es Enviada";
+        }
+
+        if (btnBuscar) {
+            btnBuscar.disabled = !editable;
+            btnBuscar.classList.toggle("opacity-50", !editable);
+            btnBuscar.classList.toggle("cursor-not-allowed", !editable);
+            btnBuscar.title = editable ? "" : "Solo disponible cuando el estado es Enviada";
+        }
     }
 
     function renderAlertasCambioPrecio(cambios) {
@@ -208,6 +240,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function actualizarCantidad(itemId, delta) {
+        if (!isRecetaEditable()) {
+            alertify.error("Solo se puede modificar recetas con estado Enviada");
+            return;
+        }
+
         const idx = detalle.findIndex(x => Number(x.item_id) === Number(itemId));
         if (idx < 0) return;
 
@@ -219,6 +256,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function eliminarItem(itemId) {
+        if (!isRecetaEditable()) {
+            alertify.error("Solo se puede modificar recetas con estado Enviada");
+            return;
+        }
+
         detalle = detalle.filter(x => Number(x.item_id) !== Number(itemId));
 
         if (!detalle.length) {
@@ -242,6 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         tbody.innerHTML = rows.map(item => {
+            const editable = isRecetaEditable();
             const cantidad = Number(item.cantidad) || 0;
             const precio = Number(item.precio) || 0;
             const subtotal = getSubtotal(item);
@@ -284,9 +327,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                     <td class="text-center">
                         <div class="input-step border bg-body-secondary px-1 py-0 rounded-pill d-inline-flex align-items-center overflow-visible" style="height:30px;">
-                            <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center btn-qty-minus" style="width:22px;min-width:22px;height:22px;" data-id="${itemId}">-</button>
+                            <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center btn-qty-minus" style="width:22px;min-width:22px;height:22px;" data-id="${itemId}" ${editable ? "" : "disabled"}>-</button>
                             <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100 fw-semibold" style="width:30px;font-size:12px;" value="${cantidad}" readonly>
-                            <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center btn-qty-plus" style="width:22px;min-width:22px;height:22px;" data-id="${itemId}">+</button>
+                            <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center btn-qty-plus" style="width:22px;min-width:22px;height:22px;" data-id="${itemId}" ${editable ? "" : "disabled"}>+</button>
                         </div>
                     </td>
                     <td class="text-end">
@@ -298,7 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <h5 class="fs-14 mt-1 fw-normal mb-0">${formatDecimal(subtotal)}</h5>
                     </td>
                     <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-danger btn-delete-item" data-id="${itemId}">
+                        <button type="button" class="btn btn-sm btn-danger btn-delete-item" data-id="${itemId}" ${editable ? "" : "disabled"}>
                             <i class="ti ti-trash"></i>
                         </button>
                     </td>
@@ -396,6 +439,11 @@ document.addEventListener("DOMContentLoaded", () => {
     async function guardarReceta(e) {
         e.preventDefault();
 
+        if (!isRecetaEditable()) {
+            alertify.error("Solo se puede modificar recetas con estado Enviada");
+            return;
+        }
+
         if (!receta || !receta.id) {
             alertify.error("Receta inválida");
             return;
@@ -462,6 +510,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function sincronizarPrecios() {
         if (!hash) return;
+
+        if (!isRecetaEditable()) {
+            alertify.error("Solo se puede recargar precios en recetas con estado Enviada");
+            return;
+        }
 
         try {
             const fd = new FormData();
@@ -644,6 +697,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         itemsTableBody.innerHTML = rows.map(item => {
+            const editable = isRecetaEditable();
             const itemNombre = item.nombre || "-";
             const itemDescripcion = item.descripcion || "";
             const detalleLinea1 = [item.categoria, item.sub_cat_1, item.sub_cat_2].filter(Boolean).join(" / ");
@@ -661,7 +715,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td class="text-center align-middle receta-qty-cell"></td>
                     <td class="text-end">${precioTexto}</td>
                     <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-primary btn-add-item-row">
+                        <button type="button" class="btn btn-sm btn-primary btn-add-item-row" ${editable ? "" : "disabled"}>
                             <i class="ti ti-plus"></i>
                         </button>
                     </td>
@@ -710,6 +764,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function agregarItemReceta(item, qtyInicial = 1) {
+        if (!isRecetaEditable()) {
+            alertify.error("Solo se puede modificar recetas con estado Enviada");
+            return;
+        }
+
         const itemId = Number(item.id) || Number(item.item_id) || 0;
         if (!itemId) {
             alertify.error("Item inválido");

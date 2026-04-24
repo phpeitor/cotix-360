@@ -191,6 +191,19 @@ class Receta {
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
+    public function obtenerPorId(int $id): ?array {
+        $sql = "SELECT c.*,p.usuario, p2.usuario as usu_upd
+                FROM recetas c
+                LEFT JOIN personal p on p.IDPERSONAL=c.usuario_id
+                LEFT JOIN personal p2 on p2.IDPERSONAL=c.usuario_upd
+                WHERE c.id = :id
+                LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
     public function obtenerDetallePorHash(string $hash): array {
         $sql = "SELECT *
                 FROM receta_detalle

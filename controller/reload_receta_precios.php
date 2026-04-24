@@ -36,6 +36,10 @@ try {
         throw new Exception('Receta no encontrada');
     }
 
+    if (strcasecmp((string)($row['estado'] ?? ''), 'Enviada') !== 0) {
+        throw new Exception('Solo se puede recargar precios en recetas con estado Enviada');
+    }
+
     $receta->begin();
     $actualizados = $receta->sincronizarPreciosDetalle((int)$row['id']);
 
