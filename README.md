@@ -28,7 +28,10 @@ Aplicación web para gestión de usuarios, carga de ítems y generación de coti
 	- Creación de receta con tipo de cambio SUNAT.
 	- Guardado de cabecera en `recetas` y detalle en `receta_detalle`.
 	- Consulta de recetas por rango de fechas.
-	- Vista de receta en modo solo lectura.
+	- Vista de receta con edición de detalle (agregar, quitar y ajustar cantidad).
+	- Detección de cambios de precio contra catálogo (`receta_items`) con alerta visual por fila e ícono informativo con tooltip.
+	- Recarga/sincronización de precios de detalle desde catálogo con botón `reload`.
+	- Restricción funcional: solo se permite editar y recargar precios cuando la receta está en estado `Enviada`.
 	- Aprobación/anulación de receta.
 	- Exportación de receta a PDF con totales por moneda y total Perú.
 
@@ -119,7 +122,7 @@ cotix/
 4. Generación de cotización y cálculo de totales.
 5. Financiamiento (tasa, cuota e interés por períodos).
 6. Consulta de cotizaciones y exportación PDF.
-7. Creación, consulta, aprobación/anulación y exportación de recetas.
+7. Creación, consulta, edición controlada, aprobación/anulación y exportación de recetas.
 
 ## Reglas de cálculo relevantes
 
@@ -143,6 +146,8 @@ cotix/
 - Receta (tabla): controller/table_receta.php
 - Receta (detalle): controller/get_receta.php
 - Guardar receta: controller/add_receta.php
+- Actualizar receta (detalle/cantidades): controller/upd_receta.php
+- Recargar precios de receta: controller/reload_receta_precios.php
 - Actualizar estado receta: controller/upd_estado_receta.php
 
 ## Exportación PDF
