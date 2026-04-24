@@ -205,9 +205,11 @@ class Receta {
     }
 
     public function obtenerDetallePorHash(string $hash): array {
-        $sql = "SELECT *
-                FROM receta_detalle
-                WHERE MD5(receta_id) = :hash";
+        $sql = "SELECT a.*,b.orden
+                FROM receta_detalle a
+                left join vw_receta_items_orden b on a.tipo=b.tipo and a.sub_cat_1=b.sub_cat_1
+                WHERE MD5(receta_id) = :hash
+                order by tipo asc, orden asc, sub_cat_2 asc";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':hash', $hash);
         $stmt->execute();
