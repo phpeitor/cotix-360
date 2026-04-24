@@ -101,10 +101,15 @@
                                     </div>
                                 </div>
 
-                                <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='receta_list.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal"><i class="ti ti-search fs-18"></i></button>
+                                    <button type="button" class="btn btn-warning btn-sm" id="btnReloadPrecios">reload</button>
+                                    <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='receta_list.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
+                                </div>
                             </div>
                             <form class="needs-validation form-receta" novalidate="">
                                 <div class="card-body p-0">
+                                    <div id="alertPrecioCambio" class="alert alert-warning m-2 d-none" role="alert"></div>
                                     <div class="bg-success bg-opacity-10 py-1 text-center">
                                         <p class="m-0"><b id="total_item">0</b> item(s) agregados</p>
                                     </div>
@@ -137,6 +142,7 @@
                                                     <th class="text-center">Cant.</th>
                                                     <th class="text-end">Precio</th>
                                                     <th class="text-end">Total</th>
+                                                    <th class="text-center">Acción</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -166,6 +172,11 @@
                                                 </li>
                                             </ul>
                                         </div>
+                                        <div class="col-sm-auto mt-3 mt-sm-0">
+                                            <button type="submit" class="btn btn-success btn-icon">
+                                                <i class="ti ti-device-floppy"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </form>
@@ -175,6 +186,78 @@
             <!-- End page-container-->                                  
             </div>
             <?php include __DIR__ . '/layout/footer.html'; ?>
+        </div>
+    </div>
+
+    <div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="max-width: 840px;">
+            <div class="modal-content">
+                <div class="modal-header text-bg-info border-0">
+                    <h4 class="modal-title" id="info-header-modalLabel">
+                        Buscar item para agregar a la receta
+                    </h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Base</label>
+                            <select id="filterBase" class="form-select">
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Categoria</label>
+                            <select id="categoria" class="form-select" disabled>
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Sub Categoria 1</label>
+                            <select id="subCat1" class="form-select" disabled>
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Sub Categoria 2</label>
+                            <select id="subCat2" class="form-select" disabled>
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                                <div>
+                                    <label class="form-label mb-0">Items disponibles</label>
+                                    <span class="text-muted fs-12 d-block">Selecciona un item desde la tabla para agregarlo a la receta.</span>
+                                </div>
+                                <span class="badge bg-light text-dark" id="itemsResultCount">0 resultados</span>
+                            </div>
+                            <div class="table-responsive receta-items-table-wrap">
+                                <table class="table table-sm table-hover align-middle mb-0 receta-items-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Item</th>
+                                            <th class="text-center">Cant.</th>
+                                            <th class="text-end">Precio</th>
+                                            <th class="text-center">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recetaItemsTableBody">
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">Selecciona Base, Categoria y Sub Categorias para cargar los items.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

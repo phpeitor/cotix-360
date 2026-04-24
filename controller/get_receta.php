@@ -22,10 +22,12 @@ try {
     }
 
     $detalle = $recetaModel->obtenerDetallePorHash($hash);
+    $cambiosPrecio = $recetaModel->obtenerCambiosPrecio((int)$receta['id']);
 
     echo json_encode([
         'receta' => $receta,
-        'detalle'    => $detalle
+        'detalle' => $detalle,
+        'cambios_precio' => $cambiosPrecio
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 } catch (Throwable $e) {

@@ -633,7 +633,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             limpiarRecetaGuardada();
             alertify.success("Receta guardada correctamente");
-            window.location.href = `receta_form.php?id=${md5(String(json.id))}`;
+            window.location.href = `receta_list.php?id=${md5(String(json.id))}`;
 
         } catch (error) {
             console.error(error);

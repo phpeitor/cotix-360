@@ -213,4 +213,67 @@ class Receta {
         $stmt->execute();
         return $stmt->rowCount() > 0;
     }
+
+    public function actualizarCabeceraEdicion(int $id, float $tipoCambio, int $usuarioUpd): bool
+    {
+        $sql = "UPDATE recetas
+                SET tipo_cambio = :tipo_cambio,
+                    updated_at = :updated_at,
+                    usuario_upd = :usuario_upd
+                WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':tipo_cambio', $tipoCambio);
+        $stmt->bindValue(':updated_at', $this->nowLima);
+        $stmt->bindValue(':usuario_upd', $usuarioUpd, PDO::PARAM_INT);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function eliminarDetalle(int $recetaId): bool
+    {
+        $sql = "DELETE FROM receta_detalle WHERE receta_id = :receta_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function obtenerCambiosPrecio(int $recetaId): array
+    {
+        $sql = "SELECT
+                    d.item_id,
+                    d.nombre,
+                    d.precio AS precio_receta,
+                    d.moneda AS moneda_receta,
+                    r.precio AS precio_actual,
+                    r.moneda AS moneda_actual
+                FROM receta_detalle d
+                INNER JOIN receta_items r ON r.id = d.item_id
+                WHERE d.receta_id = :receta_id
+                  AND (
+                    ROUND(COALESCE(d.precio, 0), 4) <> ROUND(COALESCE(r.precio, 0), 4)
+                    OR COALESCE(d.moneda, '') <> COALESCE(r.moneda, '')
+                  )
+                ORDER BY d.item_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function sincronizarPreciosDetalle(int $recetaId): int
+    {
+        $sql = "UPDATE receta_detalle d
+                INNER JOIN receta_items r ON r.id = d.item_id
+                SET d.precio = r.precio,
+                    d.moneda = r.moneda
+                WHERE d.receta_id = :receta_id
+                  AND (
+                    ROUND(COALESCE(d.precio, 0), 4) <> ROUND(COALESCE(r.precio, 0), 4)
+                    OR COALESCE(d.moneda, '') <> COALESCE(r.moneda, '')
+                  )";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+        return (int)$stmt->rowCount();
+    }
 }
