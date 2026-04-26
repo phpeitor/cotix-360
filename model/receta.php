@@ -275,6 +275,47 @@ class Receta {
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
+    public function obtenerCambiosPrecioFirma(int $recetaId): array
+    {
+        $sql = "SELECT
+                    COUNT(*) AS total,
+                    COALESCE(
+                        SUM(
+                            CAST(
+                                CRC32(
+                                    CONCAT_WS(
+                                        '|',
+                                        d.item_id,
+                                        ROUND(COALESCE(d.precio, 0), 4),
+                                        COALESCE(d.moneda, ''),
+                                        ROUND(COALESCE(r.precio, 0), 4),
+                                        COALESCE(r.moneda, '')
+                                    )
+                                ) AS UNSIGNED
+                            )
+                        ),
+                        0
+                    ) AS checksum
+                FROM receta_detalle d
+                INNER JOIN receta_items r ON r.id = d.item_id
+                WHERE d.receta_id = :receta_id
+                  AND (
+                    ROUND(COALESCE(d.precio, 0), 4) <> ROUND(COALESCE(r.precio, 0), 4)
+                    OR COALESCE(d.moneda, '') <> COALESCE(r.moneda, '')
+                  )";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        return [
+            'count' => (int)($row['total'] ?? 0),
+            'checksum' => (string)($row['checksum'] ?? '0'),
+        ];
+    }
+
     public function sincronizarPreciosDetalle(int $recetaId): int
     {
         $sql = "UPDATE receta_detalle d

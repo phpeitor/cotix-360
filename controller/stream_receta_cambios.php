@@ -66,6 +66,7 @@ try {
     $startedAt = time();
     $pollSeconds = 5;
     $pingEvery = 3;
+    $estadoRefreshEvery = 6;
     $maxLifetimeSeconds = 40;
     $ticks = 0;
     $recetaId = (int)$receta['id'];
@@ -75,7 +76,7 @@ try {
         $ticks++;
 
         // Refresh estado less frequently; avoids an extra query on every cycle.
-        if (($ticks % $pingEvery) === 0) {
+        if (($ticks % $estadoRefreshEvery) === 0) {
             $recetaActual = $recetaModel->obtenerPorId($recetaId);
             if (!$recetaActual) {
                 sse_send('error', [
@@ -86,15 +87,21 @@ try {
             $estadoActual = (string)($recetaActual['estado'] ?? '');
         }
 
-        $cambios = $recetaModel->obtenerCambiosPrecio($recetaId);
-        $signature = md5(json_encode($cambios, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $firma = $recetaModel->obtenerCambiosPrecioFirma($recetaId);
+        $signature = $firma['count'] . '|' . $firma['checksum'];
 
         if ($signature !== $lastSignature) {
             $lastSignature = $signature;
+
+            $cambios = [];
+            if ((int)$firma['count'] > 0) {
+                $cambios = $recetaModel->obtenerCambiosPrecio($recetaId);
+            }
+
             sse_send('price_changes', [
                 'receta_id' => $recetaId,
                 'estado' => $estadoActual,
-                'count' => count($cambios),
+                'count' => (int)$firma['count'],
                 'cambios' => $cambios,
                 'timestamp' => date('c')
             ]);
