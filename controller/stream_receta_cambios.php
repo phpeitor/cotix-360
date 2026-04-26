@@ -36,6 +36,9 @@ if (!isset($_SESSION['session_id']) || (int)$_SESSION['session_id'] <= 0) {
     exit;
 }
 
+// Important for performance: release session lock so other tabs/requests are not blocked.
+session_write_close();
+
 $hash = $_GET['id'] ?? null;
 if (!$hash) {
     sse_send('error', [
@@ -56,45 +59,57 @@ try {
     }
 
     // Hint for browser reconnection delay.
-    echo "retry: 3000\n\n";
+    echo "retry: 5000\n\n";
     flush();
 
     $lastSignature = null;
     $startedAt = time();
+    $pollSeconds = 5;
+    $pingEvery = 3;
+    $maxLifetimeSeconds = 40;
+    $ticks = 0;
+    $recetaId = (int)$receta['id'];
+    $estadoActual = (string)($receta['estado'] ?? '');
 
     while (!connection_aborted()) {
-        $recetaActual = $recetaModel->obtenerPorHash((string)$hash);
-        if (!$recetaActual) {
-            sse_send('error', [
-                'message' => 'La receta ya no existe'
-            ]);
-            break;
+        $ticks++;
+
+        // Refresh estado less frequently; avoids an extra query on every cycle.
+        if (($ticks % $pingEvery) === 0) {
+            $recetaActual = $recetaModel->obtenerPorId($recetaId);
+            if (!$recetaActual) {
+                sse_send('error', [
+                    'message' => 'La receta ya no existe'
+                ]);
+                break;
+            }
+            $estadoActual = (string)($recetaActual['estado'] ?? '');
         }
 
-        $cambios = $recetaModel->obtenerCambiosPrecio((int)$recetaActual['id']);
+        $cambios = $recetaModel->obtenerCambiosPrecio($recetaId);
         $signature = md5(json_encode($cambios, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
         if ($signature !== $lastSignature) {
             $lastSignature = $signature;
             sse_send('price_changes', [
-                'receta_id' => (int)$recetaActual['id'],
-                'estado' => (string)($recetaActual['estado'] ?? ''),
+                'receta_id' => $recetaId,
+                'estado' => $estadoActual,
                 'count' => count($cambios),
                 'cambios' => $cambios,
                 'timestamp' => date('c')
             ]);
-        } else {
+        } elseif (($ticks % $pingEvery) === 0) {
             sse_send('ping', [
                 'timestamp' => date('c')
             ]);
         }
 
         // Rotate connection periodically so EventSource reconnects cleanly.
-        if ((time() - $startedAt) >= 55) {
+        if ((time() - $startedAt) >= $maxLifetimeSeconds) {
             break;
         }
 
-        sleep(2);
+        sleep($pollSeconds);
     }
 } catch (Throwable $e) {
     sse_send('error', [
