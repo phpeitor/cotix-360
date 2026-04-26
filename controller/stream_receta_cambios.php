@@ -29,6 +29,11 @@ function sse_send(string $event, array $payload): void
     flush();
 }
 
+function es_estado_enviada(string $estado): bool
+{
+    return strtolower(trim($estado)) === 'enviada';
+}
+
 if (!isset($_SESSION['session_id']) || (int)$_SESSION['session_id'] <= 0) {
     sse_send('error', [
         'message' => 'Sesion expirada o usuario no autenticado'
@@ -64,19 +69,34 @@ try {
 
     $lastSignature = null;
     $startedAt = time();
-    $pollSeconds = 5;
-    $pingEvery = 3;
-    $estadoRefreshEvery = 6;
+    $pollFastSeconds = 2;
+    $pollIdleSeconds = 6;
+    $activeWindowSeconds = 20;
+    $pingFastEverySeconds = 6;
+    $pingIdleEverySeconds = 18;
+    $estadoRefreshEverySeconds = 30;
     $maxLifetimeSeconds = 40;
-    $ticks = 0;
     $recetaId = (int)$receta['id'];
     $estadoActual = (string)($receta['estado'] ?? '');
 
+    if (!es_estado_enviada($estadoActual)) {
+        sse_send('stream_disabled', [
+            'receta_id' => $recetaId,
+            'estado' => $estadoActual,
+            'message' => 'Stream detenido: la receta no esta en estado Enviada'
+        ]);
+        exit;
+    }
+
+    $lastChangeAt = 0;
+    $lastPingAt = time();
+    $lastEstadoCheckAt = time();
+
     while (!connection_aborted()) {
-        $ticks++;
+        $now = time();
 
         // Refresh estado less frequently; avoids an extra query on every cycle.
-        if (($ticks % $estadoRefreshEvery) === 0) {
+        if (($now - $lastEstadoCheckAt) >= $estadoRefreshEverySeconds) {
             $recetaActual = $recetaModel->obtenerPorId($recetaId);
             if (!$recetaActual) {
                 sse_send('error', [
@@ -85,11 +105,22 @@ try {
                 break;
             }
             $estadoActual = (string)($recetaActual['estado'] ?? '');
+            $lastEstadoCheckAt = $now;
+
+            if (!es_estado_enviada($estadoActual)) {
+                sse_send('stream_disabled', [
+                    'receta_id' => $recetaId,
+                    'estado' => $estadoActual,
+                    'message' => 'Stream detenido: la receta cambio a estado no editable'
+                ]);
+                break;
+            }
         }
 
         $firma = $recetaModel->obtenerCambiosPrecioFirma($recetaId);
         $signature = $firma['count'] . '|' . $firma['checksum'];
 
+        $previousSignature = $lastSignature;
         if ($signature !== $lastSignature) {
             $lastSignature = $signature;
 
@@ -105,10 +136,22 @@ try {
                 'cambios' => $cambios,
                 'timestamp' => date('c')
             ]);
-        } elseif (($ticks % $pingEvery) === 0) {
-            sse_send('ping', [
-                'timestamp' => date('c')
-            ]);
+
+            // Initial baseline event should not force fast polling mode.
+            if ($previousSignature !== null) {
+                $lastChangeAt = $now;
+            }
+            $lastPingAt = $now;
+        } else {
+            $isActiveWindow = ($lastChangeAt > 0) && (($now - $lastChangeAt) <= $activeWindowSeconds);
+            $pingEverySeconds = $isActiveWindow ? $pingFastEverySeconds : $pingIdleEverySeconds;
+
+            if (($now - $lastPingAt) >= $pingEverySeconds) {
+                sse_send('ping', [
+                    'timestamp' => date('c')
+                ]);
+                $lastPingAt = $now;
+            }
         }
 
         // Rotate connection periodically so EventSource reconnects cleanly.
@@ -116,7 +159,11 @@ try {
             break;
         }
 
-        sleep($pollSeconds);
+        $nowAfterWork = time();
+        $isActiveWindow = ($lastChangeAt > 0) && (($nowAfterWork - $lastChangeAt) <= $activeWindowSeconds);
+        $sleepSeconds = $isActiveWindow ? $pollFastSeconds : $pollIdleSeconds;
+
+        sleep($sleepSeconds);
     }
 } catch (Throwable $e) {
     sse_send('error', [

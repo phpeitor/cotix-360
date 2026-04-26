@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let cambiosPrecioByItem = new Map();
     let cambiosStreamSignature = "";
     let cambiosEventSource = null;
+    let streamHabilitado = true;
     const hash = getQueryParam("id");
 
     init();
@@ -59,11 +60,19 @@ document.addEventListener("DOMContentLoaded", () => {
         cargarBasesReceta();
 
         window.addEventListener("beforeunload", () => {
-            if (cambiosEventSource) {
-                cambiosEventSource.close();
-                cambiosEventSource = null;
-            }
+            detenerStreamCambios(false);
         });
+    }
+
+    function detenerStreamCambios(desactivar = false) {
+        if (cambiosEventSource) {
+            cambiosEventSource.close();
+            cambiosEventSource = null;
+        }
+
+        if (desactivar) {
+            streamHabilitado = false;
+        }
     }
 
     function getQueryParam(param) {
@@ -88,6 +97,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             renderHeader();
             aplicarBloqueoPorEstado();
+
+            if (!isRecetaEditable()) {
+                detenerStreamCambios(true);
+            }
+
             renderAlertasCambioPrecio(cambiosPrecio, false);
             renderBody();
             renderPagination();
@@ -195,14 +209,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function conectarStreamCambiosPrecio() {
-        if (!hash || typeof window.EventSource === "undefined") {
+        if (!hash || typeof window.EventSource === "undefined" || !streamHabilitado) {
             return;
         }
 
-        if (cambiosEventSource) {
-            cambiosEventSource.close();
-            cambiosEventSource = null;
-        }
+        detenerStreamCambios(false);
 
         const streamUrl = `controller/stream_receta_cambios.php?id=${encodeURIComponent(hash)}`;
         cambiosEventSource = new EventSource(streamUrl);
@@ -223,12 +234,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (receta && typeof payload.estado === "string") {
                     receta.estado = payload.estado;
                     aplicarBloqueoPorEstado();
+
+                    if (!isRecetaEditable()) {
+                        detenerStreamCambios(true);
+                        return;
+                    }
                 }
 
                 renderAlertasCambioPrecio(cambios, cambios.length > 0);
                 renderBody();
             } catch (error) {
                 console.error("Error procesando evento SSE:", error);
+            }
+        });
+
+        cambiosEventSource.addEventListener("stream_disabled", event => {
+            try {
+                const payload = JSON.parse(event.data || "{}");
+                if (receta && typeof payload.estado === "string") {
+                    receta.estado = payload.estado;
+                    aplicarBloqueoPorEstado();
+                }
+
+                detenerStreamCambios(true);
+            } catch (error) {
+                detenerStreamCambios(true);
             }
         });
 
