@@ -31,6 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let receta = null;
     let detalle = [];
     let cambiosPrecioByItem = new Map();
+    let cambiosStreamSignature = "";
+    let cambiosEventSource = null;
     const hash = getQueryParam("id");
 
     init();
@@ -42,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         initTooltips();
+        conectarStreamCambiosPrecio();
 
         cargarReceta(hash);
 
@@ -54,6 +57,13 @@ document.addEventListener("DOMContentLoaded", () => {
         btnReloadPrecios?.addEventListener("click", sincronizarPrecios);
 
         cargarBasesReceta();
+
+        window.addEventListener("beforeunload", () => {
+            if (cambiosEventSource) {
+                cambiosEventSource.close();
+                cambiosEventSource = null;
+            }
+        });
     }
 
     function getQueryParam(param) {
@@ -73,11 +83,12 @@ document.addEventListener("DOMContentLoaded", () => {
             detalle = Array.isArray(data.detalle) ? data.detalle : [];
             const cambiosPrecio = Array.isArray(data.cambios_precio) ? data.cambios_precio : [];
             cambiosPrecioByItem = new Map(cambiosPrecio.map(item => [Number(item.item_id), item]));
+            cambiosStreamSignature = getCambiosPrecioSignature(cambiosPrecio);
             currentPage = 1;
 
             renderHeader();
             aplicarBloqueoPorEstado();
-            renderAlertasCambioPrecio(cambiosPrecio);
+            renderAlertasCambioPrecio(cambiosPrecio, false);
             renderBody();
             renderPagination();
             calcularTotales();
@@ -152,7 +163,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function renderAlertasCambioPrecio(cambios) {
+    function getCambiosPrecioSignature(cambios) {
+        const normalized = (Array.isArray(cambios) ? cambios : [])
+            .map(item => ({
+                item_id: Number(item.item_id || 0),
+                precio_receta: Number(item.precio_receta || 0),
+                moneda_receta: String(item.moneda_receta || ""),
+                precio_actual: Number(item.precio_actual || 0),
+                moneda_actual: String(item.moneda_actual || "")
+            }))
+            .sort((a, b) => a.item_id - b.item_id);
+
+        return JSON.stringify(normalized);
+    }
+
+    function renderAlertasCambioPrecio(cambios, shouldNotify = true) {
         if (!alertPrecioCambioEl) return;
 
         if (!cambios.length) {
@@ -163,7 +188,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
         alertPrecioCambioEl.classList.remove("d-none");
         alertPrecioCambioEl.innerHTML = `Se detectaron <b>${cambios.length}</b> item(s) con precio actualizado en catálogo. Usa <b>reload</b> para sincronizar.`;
-        alertify.warning(`Se detectaron ${cambios.length} cambios de precio.`);
+
+        if (shouldNotify) {
+            alertify.warning(`Se detectaron ${cambios.length} cambios de precio.`);
+        }
+    }
+
+    function conectarStreamCambiosPrecio() {
+        if (!hash || typeof window.EventSource === "undefined") {
+            return;
+        }
+
+        if (cambiosEventSource) {
+            cambiosEventSource.close();
+            cambiosEventSource = null;
+        }
+
+        const streamUrl = `controller/stream_receta_cambios.php?id=${encodeURIComponent(hash)}`;
+        cambiosEventSource = new EventSource(streamUrl);
+
+        cambiosEventSource.addEventListener("price_changes", event => {
+            try {
+                const payload = JSON.parse(event.data || "{}");
+                const cambios = Array.isArray(payload.cambios) ? payload.cambios : [];
+                const nextSignature = getCambiosPrecioSignature(cambios);
+
+                if (nextSignature === cambiosStreamSignature) {
+                    return;
+                }
+
+                cambiosStreamSignature = nextSignature;
+                cambiosPrecioByItem = new Map(cambios.map(item => [Number(item.item_id), item]));
+
+                if (receta && typeof payload.estado === "string") {
+                    receta.estado = payload.estado;
+                    aplicarBloqueoPorEstado();
+                }
+
+                renderAlertasCambioPrecio(cambios, cambios.length > 0);
+                renderBody();
+            } catch (error) {
+                console.error("Error procesando evento SSE:", error);
+            }
+        });
+
+        cambiosEventSource.addEventListener("error", () => {
+            // EventSource reconecta automaticamente.
+        });
     }
 
     function getMonedaSimbolo(moneda) {
@@ -294,7 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const itemId = Number(item.item_id) || Number(item.id) || 0;
             const cambioPrecio = cambiosPrecioByItem.get(itemId);
             const tooltipCambioPrecio = cambioPrecio
-                ? escapeAttr(`Precio actualizado: ${formatMoneda(cambioPrecio.moneda_receta, cambioPrecio.precio_receta)} ➡️ ${formatMoneda(cambioPrecio.moneda_actual, cambioPrecio.precio_actual)}`)
+                ? escapeAttr(`Precio actualizado: ${formatMoneda(cambioPrecio.moneda_receta, cambioPrecio.precio_receta)} -> ${formatMoneda(cambioPrecio.moneda_actual, cambioPrecio.precio_actual)}`)
                 : "";
 
             return `
