@@ -29,9 +29,12 @@ Aplicación web para gestión de usuarios, carga de ítems y generación de coti
 	- Guardado de cabecera en `recetas` y detalle en `receta_detalle`.
 	- Consulta de recetas por rango de fechas.
 	- Vista de receta con edición de detalle (agregar, quitar y ajustar cantidad).
+	- Notificación en tiempo real de cambios de precio (SSE) sin refrescar página.
+	- Sincronización entre múltiples pestañas/ventanas abiertas de la misma receta.
 	- Detección de cambios de precio contra catálogo (`receta_items`) con alerta visual por fila e ícono informativo con tooltip.
 	- Recarga/sincronización de precios de detalle desde catálogo con botón `reload`.
 	- Restricción funcional: solo se permite editar y recargar precios cuando la receta está en estado `Enviada`.
+	- Restricción de stream: el canal en tiempo real solo permanece activo en estado `Enviada`; en otros estados se detiene para reducir consumo.
 	- Aprobación/anulación de receta.
 	- Exportación de receta a PDF con totales por moneda y total Perú.
 
@@ -148,7 +151,24 @@ cotix/
 - Guardar receta: controller/add_receta.php
 - Actualizar receta (detalle/cantidades): controller/upd_receta.php
 - Recargar precios de receta: controller/reload_receta_precios.php
+- Stream de cambios de precio (SSE): controller/stream_receta_cambios.php
 - Actualizar estado receta: controller/upd_estado_receta.php
+
+## Tiempo real (SSE) en recetas
+
+- El stream SSE se usa para detectar cambios de precio de `receta_items` en la vista de receta sin recargar.
+- El frontend consume el stream con `EventSource` y actualiza alertas/filas en vivo.
+- El stream solo notifica cuando la receta está en estado `Enviada`.
+- Si la receta cambia a estado no editable (`Aprobada`, `Anulada`, etc.), el backend emite desactivación y el frontend cierra la conexión.
+
+### Optimización de rendimiento del stream
+
+- Se libera el lock de sesión (`session_write_close`) para no bloquear otras requests de la misma sesión.
+- Se usa firma liviana en BD (`count + checksum`) y solo se trae detalle completo cuando hay cambios reales.
+- Polling adaptativo:
+	- Modo activo: intervalo corto para respuesta rápida después de cambios.
+	- Modo idle: intervalo mayor cuando no hay actividad.
+- Heartbeat (`ping`) y refresh de estado con frecuencia desacoplada para reducir carga.
 
 ## Exportación PDF
 
