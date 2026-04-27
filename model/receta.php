@@ -178,6 +178,56 @@ class Receta {
         return $rows;
     }
 
+    public function firmaListaReceta(string $fec_ini, string $fec_fin): array
+    {
+        $sessionCargo = $_SESSION['session_cargo'] ?? null;
+        $sessionId = $_SESSION['session_id'] ?? null;
+        $isAdmin = in_array((int)$sessionCargo, [1, 3], true);
+
+        $where = "c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)";
+
+        if (!$isAdmin) {
+            if ((int)$sessionId <= 0) {
+                return [
+                    'total_recetas' => 0,
+                    'max_receta_id' => 0,
+                    'total_detalle' => 0,
+                ];
+            }
+
+            $where .= " AND c.usuario_id = :usuario_id";
+        }
+
+        $sql = "SELECT
+                    COUNT(*) AS total_recetas,
+                    COALESCE(MAX(c.id), 0) AS max_receta_id,
+                    COALESCE(SUM(COALESCE(d.total_detalle, 0)), 0) AS total_detalle
+                FROM recetas c
+                LEFT JOIN (
+                    SELECT receta_id, COUNT(*) AS total_detalle
+                    FROM receta_detalle
+                    GROUP BY receta_id
+                ) d ON d.receta_id = c.id
+                WHERE $where";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':fec_ini', $fec_ini);
+        $stmt->bindValue(':fec_fin', $fec_fin);
+
+        if (!$isAdmin) {
+            $stmt->bindValue(':usuario_id', (int)$sessionId, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        return [
+            'total_recetas' => (int)($row['total_recetas'] ?? 0),
+            'max_receta_id' => (int)($row['max_receta_id'] ?? 0),
+            'total_detalle' => (int)($row['total_detalle'] ?? 0),
+        ];
+    }
+
     public function obtenerPorHash(string $hash): ?array {
         $sql = "SELECT c.*,p.usuario, p2.usuario as usu_upd
                 FROM recetas c

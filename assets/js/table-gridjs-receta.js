@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
+    let recetaListEventSource = null;
+    let streamSignature = "";
 
     function initTooltips() {
         document.querySelectorAll('[data-bs-toggle="tooltip"], .btn-tooltip').forEach(el => {
@@ -89,6 +91,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     grid.on("ready", aplicarPermisosAdmin);
 
+    conectarStreamRecetaList();
+
     /* ---------------------------------------------------
        🔎 BOTÓN BUSCAR
     --------------------------------------------------- */
@@ -100,6 +104,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 then: res => res.data
             }
         }).forceRender();
+
+        conectarStreamRecetaList();
+    });
+
+    window.addEventListener("beforeunload", () => {
+        if (recetaListEventSource) {
+            recetaListEventSource.close();
+            recetaListEventSource = null;
+        }
     });
 
     function buildUrl() {
@@ -117,6 +130,66 @@ document.addEventListener("DOMContentLoaded", () => {
         return "controller/table_receta.php?" + new URLSearchParams({
             fec_ini,
             fec_fin
+        });
+    }
+
+    function getCurrentDateRangeIso() {
+        const fp = dateInput._flatpickr;
+        if (fp && fp.selectedDates.length === 2) {
+            return {
+                fec_ini: formatISO(fp.selectedDates[0]),
+                fec_fin: formatISO(fp.selectedDates[1])
+            };
+        }
+
+        return {
+            fec_ini: formatISO(pastDate),
+            fec_fin: formatISO(today)
+        };
+    }
+
+    function conectarStreamRecetaList() {
+        if (typeof window.EventSource === "undefined") {
+            return;
+        }
+
+        const { fec_ini, fec_fin } = getCurrentDateRangeIso();
+        const nextSignature = `${fec_ini}|${fec_fin}`;
+
+        if (streamSignature === nextSignature && recetaListEventSource) {
+            return;
+        }
+
+        streamSignature = nextSignature;
+
+        if (recetaListEventSource) {
+            recetaListEventSource.close();
+            recetaListEventSource = null;
+        }
+
+        const streamUrl = "controller/stream_receta.php?" + new URLSearchParams({ fec_ini, fec_fin });
+        recetaListEventSource = new EventSource(streamUrl);
+
+        recetaListEventSource.addEventListener("new_receta", event => {
+            try {
+                const payload = JSON.parse(event.data || "{}");
+                const nuevas = Number(payload.nuevas_recetas || 0);
+
+                grid.forceRender();
+
+                if (nuevas > 0) {
+                    const etiqueta = nuevas === 1 ? "nueva receta" : `${nuevas} nuevas recetas`;
+                    alertify.success(`Se detecto ${etiqueta}.`);
+                } else {
+                    alertify.message("Se actualizo el listado de recetas.");
+                }
+            } catch (error) {
+                console.error("Error procesando stream_receta:", error);
+            }
+        });
+
+        recetaListEventSource.addEventListener("error", () => {
+            // EventSource maneja reconexion automatica.
         });
     }
 
