@@ -73,12 +73,19 @@ try {
             $previousTotal = $baseline['total_recetas'];
             $newTotal = $firma['total_recetas'];
             $nuevasRecetas = max(0, $newTotal - $previousTotal);
+            $usuarioReceta = '';
+
+            if ((int)$firma['max_receta_id'] > 0) {
+                $ultimaReceta = $recetaModel->obtenerPorId((int)$firma['max_receta_id']);
+                $usuarioReceta = (string)($ultimaReceta['usuario'] ?? '');
+            }
 
             if ($nuevasRecetas > 0 || $firma['max_receta_id'] > $baseline['max_receta_id']) {
                 sse_send('new_receta', [
                     'nuevas_recetas' => $nuevasRecetas,
                     'total_recetas' => $newTotal,
                     'max_receta_id' => $firma['max_receta_id'],
+                    'usuario_receta' => $usuarioReceta,
                     'timestamp' => date('c')
                 ]);
             }

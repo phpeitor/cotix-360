@@ -174,12 +174,14 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 const payload = JSON.parse(event.data || "{}");
                 const nuevas = Number(payload.nuevas_recetas || 0);
+                const usuarioReceta = String(payload.usuario_receta || "").trim();
 
                 grid.forceRender();
 
                 if (nuevas > 0) {
                     const etiqueta = nuevas === 1 ? "nueva receta" : `${nuevas} nuevas recetas`;
-                    alertify.success(`Se detecto ${etiqueta}.`);
+                    const sufijo = usuarioReceta ? ` de ${usuarioReceta}` : "";
+                    alertify.success(`Se detecto ${etiqueta}${sufijo}.`);
                 } else {
                     alertify.message("Se actualizo el listado de recetas.");
                 }
