@@ -93,6 +93,7 @@
                                                 <option value="1">Admin</option>
                                                 <option value="2">Gestor</option>
                                                 <option value="3">Supervisor</option>
+                                                <option value="4">Agente</option>
                                             </select>
                                             <div class="invalid-feedback">
                                                 Please select an option.

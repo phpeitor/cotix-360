@@ -18,7 +18,18 @@
     "acceso": [
       "home.php",
       "cotizaciones.php",
-      "form_cotizacion.php"
+      "form_cotizacion.php",
+      "pdf_cotizacion.php"
+    ]
+  },
+  "4": {
+    "nombre": "Agente",
+    "acceso": [
+      "home.php",
+      "receta.php",
+      "receta_list.php",
+      "receta_form.php",
+      "pdf_receta.php"
     ]
   }
 }
