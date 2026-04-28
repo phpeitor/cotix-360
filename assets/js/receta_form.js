@@ -36,6 +36,31 @@ document.addEventListener("DOMContentLoaded", () => {
     let streamHabilitado = true;
     const hash = getQueryParam("id");
 
+    function normalizarTextoDetalle(valor) {
+        const texto = String(valor ?? "").trim();
+        return texto === "" || texto === "-" ? "" : texto;
+    }
+
+    function formatearRutaDetalle(valores) {
+        const partes = [];
+
+        valores.forEach(valor => {
+            const texto = normalizarTextoDetalle(valor);
+
+            if (!texto) {
+                return;
+            }
+
+            if (partes[partes.length - 1] === texto) {
+                return;
+            }
+
+            partes.push(texto);
+        });
+
+        return partes.join(" / ");
+    }
+
     init();
 
     function init() {
@@ -390,7 +415,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const precio = Number(item.precio) || 0;
             const subtotal = getSubtotal(item);
             const monedaSimbolo = getMonedaSimbolo(item.moneda);
-            const detalleLinea1 = [item.categoria, item.sub_cat_1, item.sub_cat_2].filter(Boolean).join(" / ");
+            const itemDescripcion = normalizarTextoDetalle(item.descripcion);
+            const detalleLinea1 = formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]);
             const detalleLinea2 = [item.marca, item.modelo, item.uni_medida].filter(Boolean).join(" / ");
             const itemId = Number(item.item_id) || Number(item.id) || 0;
             const cambioPrecio = cambiosPrecioByItem.get(itemId);
@@ -411,7 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <span class="text-muted fs-12">${item.nombre || ""}
                                     ${cambioPrecio ? `<span class="ms-1" data-bs-toggle="tooltip" data-bs-title="${tooltipCambioPrecio}"><i class="ti ti-alert-circle text-warning fs-16"></i></span>` : ""}
                                 </span><br>
-                                <h5 class="fs-14 mt-1 item-description">${item.descripcion || ""}</h5>
+                                <h5 class="fs-14 mt-1 item-description">${itemDescripcion}</h5>
                             </div>
                         </div>
                     </td>
@@ -800,8 +826,8 @@ document.addEventListener("DOMContentLoaded", () => {
         itemsTableBody.innerHTML = rows.map(item => {
             const editable = isRecetaEditable();
             const itemNombre = item.nombre || "-";
-            const itemDescripcion = item.descripcion || "";
-            const detalleLinea1 = [item.categoria, item.sub_cat_1, item.sub_cat_2].filter(Boolean).join(" / ");
+            const itemDescripcion = normalizarTextoDetalle(item.descripcion);
+            const detalleLinea1 = formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]);
             const monedaSimbolo = String(item.moneda || "").toUpperCase() === "DOLLAR" ? "$" : "S/.";
             const precioTexto = `${monedaSimbolo} ${formatDecimal(item.precio)}`;
             const itemPayload = encodeURIComponent(JSON.stringify(item));

@@ -31,6 +31,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const PAGE_SIZE = 10;
     let currentPage = 1;
 
+    function normalizarTextoDetalle(valor) {
+        const texto = String(valor ?? "").trim();
+        if (!texto || texto === "-") {
+            return "";
+        }
+
+        return texto;
+    }
+
+    function formatearRutaDetalle(valores) {
+        const partes = [];
+
+        valores.forEach(valor => {
+            const texto = normalizarTextoDetalle(valor);
+
+            if (!texto) {
+                return;
+            }
+
+            if (partes[partes.length - 1] === texto) {
+                return;
+            }
+
+            partes.push(texto);
+        });
+
+        return partes.join(" / ");
+    }
+
     function getTipoCambioActual() {
         const tc = parseFloat(tipoCambioInput?.value);
         return Number.isFinite(tc) && tc > 0 ? tc : 1;
@@ -108,8 +137,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         itemsTableBody.innerHTML = rows.map(item => {
             const itemNombre = item.nombre || "-";
-            const itemDescripcion = item.descripcion || "";
-            const detalleLinea1 = [item.categoria, item.sub_cat_1, item.sub_cat_2].filter(Boolean).join(" / ");
+            const itemDescripcion = normalizarTextoDetalle(item.descripcion);
+            const detalleLinea1 = formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]);
             const detalleLinea2 = [item.marca, item.modelo, item.uni_medida].filter(Boolean).join(" / ");
             const monedaSimbolo = item.moneda === "DOLLAR" ? "$" : "S/.";
             const precioTexto = `${monedaSimbolo} ${formatDecimal(item.precio)}`;
@@ -462,8 +491,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const monedaSimbolo = moneda === "DOLLAR" ? "$" : "S/.";
 
             const itemNombre = tr.dataset.nombre || "";
-            const itemDescripcion = tr.dataset.descripcion || "";
-            const detalleLinea1 = [tr.dataset.categoria, tr.dataset.subcat1, tr.dataset.subcat2].filter(Boolean).join(" / ");
+            const itemDescripcion = normalizarTextoDetalle(tr.dataset.descripcion);
+            const detalleLinea1 = formatearRutaDetalle([tr.dataset.categoria, tr.dataset.subcat1, tr.dataset.subcat2]);
             const detalleLinea2 = [tr.dataset.marca, tr.dataset.modelo, tr.dataset.unimedida].filter(Boolean).join(" / ");
 
             const row = document.createElement("tr");

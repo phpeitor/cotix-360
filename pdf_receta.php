@@ -55,6 +55,39 @@ foreach ($detalle as &$item) {
 
 $totalPeru = $totalSoles + ($totalDolares * $tipoCambio);
 
+function normalizarTextoDetallePdf($valor): string
+{
+    $texto = trim((string)($valor ?? ''));
+
+    if ($texto === '' || $texto === '-') {
+        return '';
+    }
+
+    return $texto;
+}
+
+function formatearRutaDetallePdf(array $valores): string
+{
+    $partes = [];
+
+    foreach ($valores as $valor) {
+        $texto = normalizarTextoDetallePdf($valor);
+
+        if ($texto === '') {
+            continue;
+        }
+
+        $ultimo = end($partes);
+        if ($ultimo === $texto) {
+            continue;
+        }
+
+        $partes[] = $texto;
+    }
+
+    return implode(' / ', $partes);
+}
+
 ob_start();
 ?>
 
@@ -143,18 +176,23 @@ ob_start();
         <?php foreach ($detalle as $i): ?>
         <tr>
             <td class="left">
-                <b><?= $i['nombre'] ?></b><br>
-                <?= $i['descripcion'] ?><br>
+                <b><?= htmlspecialchars($i['nombre']) ?></b><br>
+                <?php $descripcion = normalizarTextoDetallePdf($i['descripcion']); ?>
+                <?php if ($descripcion !== ''): ?>
+                    <?= htmlspecialchars($descripcion) ?><br>
+                <?php endif; ?>
             </td>
             <td class="left">
-                <b><?= $i['marca'] ?></b><br>
-                <?= $i['modelo'] ?><br>
-                <?= $i['uni_medida'] ?><br>
+                <b><?= htmlspecialchars($i['marca']) ?></b><br>
+                <?= htmlspecialchars($i['modelo']) ?><br>
+                <?= htmlspecialchars($i['uni_medida']) ?><br>
             </td>
             <td class="left">
-                <b><?= $i['categoria'] ?></b><br>
-                <?= $i['sub_cat_1'] ?><br>
-                <?= $i['sub_cat_2'] ?><br>
+                <b><?= htmlspecialchars($i['categoria']) ?></b><br>
+                <?php $rutaDetalle = formatearRutaDetallePdf([$i['sub_cat_1'], $i['sub_cat_2']]); ?>
+                <?php if ($rutaDetalle !== ''): ?>
+                    <?= htmlspecialchars($rutaDetalle) ?><br>
+                <?php endif; ?>
             </td>
             <td class="center"><?= $i['tipo'] ?></td>
             <td class="right"><?= htmlspecialchars($i['precio_formateado']) ?></td>
