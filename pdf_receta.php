@@ -32,6 +32,9 @@ $totalItems = 0;
 $totalSoles = 0.0;
 $totalDolares = 0.0;
 $tipoCambio = (float)($receta['tipo_cambio'] ?? 1);
+// Totales por tipo (convertidos a S/.)
+$totalProductoPeru = 0.0;
+$totalServicioPeru = 0.0;
 
 foreach ($detalle as &$item) {
     $qty    = (int)$item['cantidad'];
@@ -47,6 +50,15 @@ foreach ($detalle as &$item) {
     } else {
         $totalSoles += $subtotal;
         $item['simbolo_moneda'] = 'S/';
+    }
+
+    // Sumar al total por tipo en soles (convertir dólares usando tipo de cambio)
+    $subtotalPeru = ($moneda === 'DOLLAR') ? ($subtotal * $tipoCambio) : $subtotal;
+    $tipoNormalized = strtoupper(trim((string)($item['tipo'] ?? '')));
+    if ($tipoNormalized === 'PRODUCTO') {
+        $totalProductoPeru += $subtotalPeru;
+    } else {
+        $totalServicioPeru += $subtotalPeru;
     }
 
     $item['precio_formateado'] = $item['simbolo_moneda'] . ' ' . number_format($precio, 2);
@@ -202,6 +214,11 @@ ob_start();
     </tbody>
 </table>
 <br>
+<br>
+<p>
+    <strong>Total Producto:</strong> S/ <?= number_format($totalProductoPeru, 2) ?><br>
+    <strong>Total Servicio:</strong> S/ <?= number_format($totalServicioPeru, 2) ?><br>
+</p>
 <p>
     <strong>Total Items:</strong> <?= $totalItems ?><br>
     <strong>Total S/:</strong> <?= number_format($totalSoles, 2) ?><br>
