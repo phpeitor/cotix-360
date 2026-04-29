@@ -222,11 +222,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!cambios.length) {
             alertPrecioCambioEl.classList.add("d-none");
             alertPrecioCambioEl.textContent = "";
+            if (btnReloadPrecios) btnReloadPrecios.classList.add("d-none");
             return;
         }
 
         alertPrecioCambioEl.classList.remove("d-none");
         alertPrecioCambioEl.innerHTML = `Se detectaron <b>${cambios.length}</b> item(s) con precio actualizado en catálogo. Usa <b>reload</b> para sincronizar.`;
+
+        if (btnReloadPrecios) btnReloadPrecios.classList.remove("d-none");
 
         if (shouldNotify) {
             alertify.warning(`Se detectaron ${cambios.length} cambios de precio.`);

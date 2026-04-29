@@ -29,6 +29,7 @@
       "receta.php",
       "receta_list.php",
       "receta_form.php",
+      "items_receta.php",
       "pdf_receta.php"
     ]
   }

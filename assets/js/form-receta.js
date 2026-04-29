@@ -214,6 +214,10 @@ document.addEventListener("DOMContentLoaded", () => {
             throw new Error(data?.message || "No se pudieron cargar las opciones");
         }
 
+        if ((params?.nivel || "") === "items") {
+            return data.filter(item => String(item?.estado) === "1");
+        }
+
         return data;
     }
 
