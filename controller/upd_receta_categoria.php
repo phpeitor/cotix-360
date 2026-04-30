@@ -54,6 +54,7 @@ try {
             'subtotal' => (float)($item['subtotal'] ?? 0),
             'cantidad' => (float)($item['cantidad'] ?? 0),
             'margen' => (float)($item['margen'] ?? 0),
+            'moneda' => (string)($item['moneda'] ?? ''),
         ]);
 
         if (!$ok) {

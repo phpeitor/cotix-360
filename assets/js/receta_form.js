@@ -283,10 +283,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const cantidad = Number(row.cantidad) || 0;
             const margen = Math.min(100, Math.max(0, Number(row.margen) || 0));
             const categoriaTexto = escapeHtml(row.sub_cat_1 || "-");
-            const monedaSimbolo = String(row.moneda || "").toUpperCase() === "DOLLAR" ? "$" : "S/.";
+            const monedaRaw = String(row.moneda || "");
+            const monedaSimbolo = monedaRaw.toUpperCase() === "DOLLAR" ? "$" : "S/.";
 
             return `
-                <tr class="receta-categoria-row" data-idx="${idx}" data-subcat="${escapeHtml(row.sub_cat_1 || "")}" data-subtotal="${subtotal}" data-cantidad="${cantidad}" data-margen="${margen}">
+                <tr class="receta-categoria-row" data-idx="${idx}" data-subcat="${escapeHtml(row.sub_cat_1 || "")}" data-subtotal="${subtotal}" data-cantidad="${cantidad}" data-margen="${margen}" data-moneda="${escapeAttr(monedaRaw)}">
                     <td>
                         <strong>${categoriaTexto}</strong>
                     </td>
@@ -295,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td class="text-center">
                         <div class="input-step border bg-body-secondary p-1 rounded-pill d-inline-flex align-items-center overflow-visible" style="min-width:140px;">
                             <button type="button" class="btn-margen-minus bg-light text-dark border-0 rounded-circle fs-18 lh-1" data-bs-title="Disminuir margen" data-bs-placement="top" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">−</button>
-                            <input type="number" class="input-margen-categoria text-dark text-center border-0 bg-body-secondary rounded" value="${margen.toFixed(2)}" min="0" max="100" step="0.01" style="width:70px;height:26px;font-size:14px;" readonly>
+                            <input type="number" class="input-margen-categoria text-dark text-center border-0 bg-body-secondary rounded" value="${margen.toFixed(2)}" min="0" max="100" step="0.01" style="width:70px;height:26px;font-size:14px;">
                             <button type="button" class="btn-margen-plus bg-light text-dark border-0 rounded-circle fs-18 lh-1" data-bs-title="Aumentar margen" data-bs-placement="top" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">+</button>
                         </div>
                     </td>
@@ -306,13 +307,48 @@ document.addEventListener("DOMContentLoaded", () => {
         recetaCategoriaTableBody.querySelectorAll(".receta-categoria-row").forEach((tr, idx) => {
             const input = tr.querySelector(".input-margen-categoria");
             if (!input) return;
+
+            const normalizarMargen = () => {
+                const parsed = Number(String(input.value ?? "").replace(/,/g, "."));
+
+                if (!Number.isFinite(parsed)) {
+                    input.value = "0.00";
+                    return 0;
+                }
+
+                const clamped = Math.min(100, Math.max(0, parsed));
+                input.value = clamped.toFixed(2);
+                return clamped;
+            };
+
+            input.addEventListener("input", () => {
+                const parsed = Number(String(input.value ?? "").replace(/,/g, "."));
+
+                if (!Number.isFinite(parsed)) {
+                    return;
+                }
+
+                if (parsed > 100) {
+                    input.value = "100";
+                    return;
+                }
+
+                if (parsed < 0) {
+                    input.value = "0";
+                }
+            });
+
+            input.addEventListener("blur", () => {
+                normalizarMargen();
+            });
+
             tr.querySelector(".btn-margen-minus")?.addEventListener("click", (e) => {
                 e.preventDefault();
-                input.value = String(Math.max(0, Number(input.value) - 0.01).toFixed(2));
+                input.value = Math.max(0, normalizarMargen() - 0.01).toFixed(2);
             });
             tr.querySelector(".btn-margen-plus")?.addEventListener("click", (e) => {
                 e.preventDefault();
-                input.value = String(Math.min(100, Number(input.value) + 0.01).toFixed(2));
+                input.value = Math.min(100, normalizarMargen() + 0.01).toFixed(2);
             });
         });
 
@@ -378,7 +414,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             
             const margenInput = tr.querySelector(".input-margen-categoria");
-            const margenValue = Number(margenInput?.value || 0);
+            const margenValue = Number(String(margenInput?.value || 0).replace(/,/g, "."));
+            if (!Number.isFinite(margenValue)) {
+                alertify.error("El margen debe ser numérico.");
+                return;
+            }
+
             if (margenValue > 100) {
                 alertify.error("El margen máximo permitido es 100%.");
                 margenInput.value = "100.00";
@@ -390,6 +431,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 subtotal: Number(tr.getAttribute("data-subtotal") || 0),
                 cantidad: Number(tr.getAttribute("data-cantidad") || 0),
                 margen: Math.min(100, Math.max(0, margenValue)),
+                moneda: tr.getAttribute("data-moneda") || '',
             });
         });
         

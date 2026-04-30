@@ -435,13 +435,15 @@ class Receta {
                     sub_cat_1,
                     subtotal,
                     cantidad,
-                    margen
+                    margen,
+                    moneda
                 ) VALUES (
                     :receta_id,
                     :sub_cat_1,
                     :subtotal,
                     :cantidad,
-                    :margen
+                    :margen,
+                    :moneda
                 )";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':receta_id', (int)($data['receta_id'] ?? 0), PDO::PARAM_INT);
@@ -449,6 +451,7 @@ class Receta {
         $stmt->bindValue(':subtotal', (float)($data['subtotal'] ?? 0));
         $stmt->bindValue(':cantidad', (float)($data['cantidad'] ?? 0));
         $stmt->bindValue(':margen', (float)($data['margen'] ?? 0));
+        $stmt->bindValue(':moneda', (string)($data['moneda'] ?? ''));
 
         return $stmt->execute();
     }
