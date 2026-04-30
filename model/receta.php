@@ -397,7 +397,8 @@ class Receta {
                             ')'
                         ) AS sub_cat_1,
                         SUM(COALESCE(cantidad, 0)) AS cantidad,
-                        CONCAT(CASE WHEN moneda = 'SOL' THEN 'S/.' ELSE '$' END, SUM(precio * cantidad)) AS subtotal,
+                        SUM(COALESCE(precio, 0) * COALESCE(cantidad, 0)) AS subtotal,
+                        moneda,
                         receta_id
                     FROM receta_detalle
                     WHERE receta_id = :receta_id

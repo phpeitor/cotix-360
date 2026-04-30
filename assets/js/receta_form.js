@@ -272,11 +272,18 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        const parseSubtotal = value => {
+            const texto = String(value ?? "").replace(/[^\d.,-]/g, "").replace(/,/g, "");
+            const parsed = parseFloat(texto);
+            return Number.isFinite(parsed) ? parsed : 0;
+        };
+
         recetaCategoriaTableBody.innerHTML = rows.map((row, idx) => {
-            const subtotal = Number(row.subtotal) || 0;
+            const subtotal = parseSubtotal(row.subtotal);
             const cantidad = Number(row.cantidad) || 0;
-            const margen = Number(row.margen) || 0;
+            const margen = Math.min(100, Math.max(0, Number(row.margen) || 0));
             const categoriaTexto = escapeHtml(row.sub_cat_1 || "-");
+            const monedaSimbolo = String(row.moneda || "").toUpperCase() === "DOLLAR" ? "$" : "S/.";
 
             return `
                 <tr class="receta-categoria-row" data-idx="${idx}" data-subcat="${escapeHtml(row.sub_cat_1 || "")}" data-subtotal="${subtotal}" data-cantidad="${cantidad}" data-margen="${margen}">
@@ -284,12 +291,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         <strong>${categoriaTexto}</strong>
                     </td>
                     <td class="text-end">${format2(decimalAdjust("round", cantidad, "-2"))}</td>
-                    <td class="text-end">${format2(decimalAdjust("round", subtotal, "-2"))}</td>
+                    <td class="text-end">${monedaSimbolo} ${format2(decimalAdjust("round", subtotal, "-2"))}</td>
                     <td class="text-center">
                         <div class="input-step border bg-body-secondary p-1 rounded-pill d-inline-flex align-items-center overflow-visible" style="min-width:140px;">
-                            <button type="button" class="btn-margen-minus bg-light text-dark border-0 rounded-circle fs-18 lh-1" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">−</button>
-                            <input type="number" class="input-margen-categoria text-dark text-center border-0 bg-body-secondary rounded" value="${margen.toFixed(2)}" min="0" max="100" step="0.01" style="width:70px;height:26px;font-size:14px;">
-                            <button type="button" class="btn-margen-plus bg-light text-dark border-0 rounded-circle fs-18 lh-1" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">+</button>
+                            <button type="button" class="btn-margen-minus bg-light text-dark border-0 rounded-circle fs-18 lh-1" data-bs-title="Disminuir margen" data-bs-placement="top" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">−</button>
+                            <input type="number" class="input-margen-categoria text-dark text-center border-0 bg-body-secondary rounded" value="${margen.toFixed(2)}" min="0" max="100" step="0.01" style="width:70px;height:26px;font-size:14px;" readonly>
+                            <button type="button" class="btn-margen-plus bg-light text-dark border-0 rounded-circle fs-18 lh-1" data-bs-title="Aumentar margen" data-bs-placement="top" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">+</button>
                         </div>
                     </td>
                 </tr>
@@ -308,6 +315,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 input.value = String(Math.min(100, Number(input.value) + 0.01).toFixed(2));
             });
         });
+
+        initTooltips(recetaCategoriaTableBody);
     }
 
     async function cargarCategoriasRecetaModal() {
@@ -363,24 +372,26 @@ document.addEventListener("DOMContentLoaded", () => {
         const rows = [];
         
         tableRows?.forEach(tr => {
-            const subCat = tr.getAttribute("data-subcat") || "";
+            const subCat = tr.getAttribute("data-subcat") || tr.querySelector("strong")?.textContent || "";
             if (!subCat?.trim()) {
-                console.warn("Fila sin sub_cat_1:", tr);
                 return;
             }
             
-            const margenValue = tr.querySelector(".input-margen-categoria")?.value;
-            console.log("Fila capturada:", {subCat, margenValue, tr});
+            const margenInput = tr.querySelector(".input-margen-categoria");
+            const margenValue = Number(margenInput?.value || 0);
+            if (margenValue > 100) {
+                alertify.error("El margen máximo permitido es 100%.");
+                margenInput.value = "100.00";
+                return;
+            }
             
             rows.push({
                 sub_cat_1: subCat,
                 subtotal: Number(tr.getAttribute("data-subtotal") || 0),
                 cantidad: Number(tr.getAttribute("data-cantidad") || 0),
-                margen: Number(margenValue || 0),
+                margen: Math.min(100, Math.max(0, margenValue)),
             });
         });
-
-        console.log("Rows capturadas para guardar:", rows);
         
         if (!rows.length) {
             alertify.error("No hay categorías para guardar");
@@ -498,7 +509,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function initTooltips(scope = document) {
         if (typeof bootstrap === "undefined" || !bootstrap.Tooltip) return;
-        scope.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+        scope.querySelectorAll('[data-bs-toggle="tooltip"], [data-bs-title]').forEach(el => {
             bootstrap.Tooltip.getOrCreateInstance(el);
         });
     }

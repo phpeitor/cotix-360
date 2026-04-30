@@ -102,9 +102,9 @@
                                 </div>
 
                                 <div class="d-flex align-items-center gap-2">
-                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-categoria-modal"><i class="ti ti-box fs-18"></i></button>
-                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal"><i class="ti ti-search fs-18"></i></button>
-                                    <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='receta_list.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
+                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-categoria-modal" data-bs-title="Márgen" data-bs-placement="bottom"><i class="ti ti-box fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom"><i class="ti ti-search fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='receta_list.php'" data-bs-title="Volver" data-bs-placement="bottom"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                                 </div>
                             </div>
                             <form class="needs-validation form-receta" novalidate="">
