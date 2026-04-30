@@ -265,7 +265,7 @@
     </div>
 
     <div id="info-categoria-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-categoria-modalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-fullscreen-lg-down" role="document">
             <div class="modal-content">
                 <div class="modal-header text-bg-warning border-0">
                     <h4 class="modal-title" id="info-categoria-modalLabel">

@@ -272,25 +272,42 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        recetaCategoriaTableBody.innerHTML = rows.map(row => {
+        recetaCategoriaTableBody.innerHTML = rows.map((row, idx) => {
             const subtotal = Number(row.subtotal) || 0;
             const cantidad = Number(row.cantidad) || 0;
             const margen = Number(row.margen) || 0;
             const categoriaTexto = escapeHtml(row.sub_cat_1 || "-");
 
             return `
-                <tr data-sub-cat-1="${escapeHtml(row.sub_cat_1 || "")}" data-subtotal="${subtotal}" data-cantidad="${cantidad}">
+                <tr class="receta-categoria-row" data-idx="${idx}" data-subcat="${escapeHtml(row.sub_cat_1 || "")}" data-subtotal="${subtotal}" data-cantidad="${cantidad}" data-margen="${margen}">
                     <td>
                         <strong>${categoriaTexto}</strong>
                     </td>
                     <td class="text-end">${format2(decimalAdjust("round", cantidad, "-2"))}</td>
                     <td class="text-end">${format2(decimalAdjust("round", subtotal, "-2"))}</td>
-                    <td class="text-end" style="max-width:140px;">
-                        <input type="number" class="form-control form-control-sm text-end input-margen-categoria" max=100 min="0" step="0.01" value="${margen.toFixed(2)}">
+                    <td class="text-center">
+                        <div class="input-step border bg-body-secondary p-1 rounded-pill d-inline-flex align-items-center overflow-visible" style="min-width:140px;">
+                            <button type="button" class="btn-margen-minus bg-light text-dark border-0 rounded-circle fs-18 lh-1" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">−</button>
+                            <input type="number" class="input-margen-categoria text-dark text-center border-0 bg-body-secondary rounded" value="${margen.toFixed(2)}" min="0" max="100" step="0.01" style="width:70px;height:26px;font-size:14px;" readonly>
+                            <button type="button" class="btn-margen-plus bg-light text-dark border-0 rounded-circle fs-18 lh-1" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">+</button>
+                        </div>
                     </td>
                 </tr>
             `;
         }).join("");
+
+        recetaCategoriaTableBody.querySelectorAll(".receta-categoria-row").forEach((tr, idx) => {
+            const input = tr.querySelector(".input-margen-categoria");
+            if (!input) return;
+            tr.querySelector(".btn-margen-minus")?.addEventListener("click", (e) => {
+                e.preventDefault();
+                input.value = String(Math.max(0, Number(input.value) - 0.01).toFixed(2));
+            });
+            tr.querySelector(".btn-margen-plus")?.addEventListener("click", (e) => {
+                e.preventDefault();
+                input.value = String(Math.min(100, Number(input.value) + 0.01).toFixed(2));
+            });
+        });
     }
 
     async function cargarCategoriasRecetaModal() {
@@ -342,13 +359,29 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const rows = [...(recetaCategoriaTableBody?.querySelectorAll("tr[data-sub-cat-1]") || [])].map(tr => ({
-            sub_cat_1: tr.dataset.subCat1 || tr.dataset.sub_cat_1 || "",
-            subtotal: Number(tr.dataset.subtotal || 0),
-            cantidad: Number(tr.dataset.cantidad || 0),
-            margen: Number(tr.querySelector(".input-margen-categoria")?.value || 0),
-        })).filter(row => row.sub_cat_1);
+        const tableRows = recetaCategoriaTableBody?.querySelectorAll(".receta-categoria-row");
+        const rows = [];
+        
+        tableRows?.forEach(tr => {
+            const subCat = tr.getAttribute("data-subcat") || "";
+            if (!subCat?.trim()) {
+                console.warn("Fila sin sub_cat_1:", tr);
+                return;
+            }
+            
+            const margenValue = tr.querySelector(".input-margen-categoria")?.value;
+            console.log("Fila capturada:", {subCat, margenValue, tr});
+            
+            rows.push({
+                sub_cat_1: subCat,
+                subtotal: Number(tr.getAttribute("data-subtotal") || 0),
+                cantidad: Number(tr.getAttribute("data-cantidad") || 0),
+                margen: Number(margenValue || 0),
+            });
+        });
 
+        console.log("Rows capturadas para guardar:", rows);
+        
         if (!rows.length) {
             alertify.error("No hay categorías para guardar");
             return;
