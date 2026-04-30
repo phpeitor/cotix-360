@@ -17,6 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const alertCategoriaRecetaEl = document.getElementById("alertCategoriaReceta");
     const recetaCategoriaTableBody = document.getElementById("recetaCategoriaTableBody");
     const btnGuardarRecetaCategoria = document.getElementById("btnGuardarRecetaCategoria");
+    const totalFormulaSolesEl = document.getElementById("totalFormulaSoles");
+    const totalFormulaDolaresEl = document.getElementById("totalFormulaDolares");
 
     const baseSelect = document.getElementById("filterBase");
     const categoriaSelect = document.getElementById("categoria");
@@ -254,6 +256,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderCategoriasRecetaModal(rows, source) {
         if (!recetaCategoriaTableBody) return;
 
+        const limpiarResumenFormula = () => {
+            if (totalFormulaSolesEl) totalFormulaSolesEl.textContent = "0.00";
+            if (totalFormulaDolaresEl) totalFormulaDolaresEl.textContent = "0.00";
+        };
+
         if (alertCategoriaRecetaEl) {
             alertCategoriaRecetaEl.classList.remove("d-none");
             alertCategoriaRecetaEl.classList.toggle("alert-warning", source === "detalle");
@@ -266,9 +273,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!rows.length) {
             recetaCategoriaTableBody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="text-center text-muted py-4">No hay categorías para mostrar.</td>
+                    <td colspan="5" class="text-center text-muted py-4">No hay categorías para mostrar.</td>
                 </tr>
             `;
+            limpiarResumenFormula();
             return;
         }
 
@@ -278,10 +286,22 @@ document.addEventListener("DOMContentLoaded", () => {
             return Number.isFinite(parsed) ? parsed : 0;
         };
 
+        const calcularTotalConMargen = (subtotal, margenPct) => {
+            const subtotalNum = Number(subtotal) || 0;
+            const margenDecimal = (Number(margenPct) || 0) / 100;
+
+            if (margenDecimal >= 1) {
+                return 0;
+            }
+
+            return subtotalNum / (1 - margenDecimal);
+        };
+
         recetaCategoriaTableBody.innerHTML = rows.map((row, idx) => {
             const subtotal = parseSubtotal(row.subtotal);
             const cantidad = Number(row.cantidad) || 0;
             const margen = Math.min(100, Math.max(0, Number(row.margen) || 0));
+            const totalConMargen = calcularTotalConMargen(subtotal, margen);
             const categoriaTexto = escapeHtml(row.sub_cat_1 || "-");
             const monedaRaw = String(row.moneda || "");
             const monedaSimbolo = monedaRaw.toUpperCase() === "DOLLAR" ? "$" : "S/.";
@@ -300,13 +320,56 @@ document.addEventListener("DOMContentLoaded", () => {
                             <button type="button" class="btn-margen-plus bg-light text-dark border-0 rounded-circle fs-18 lh-1" data-bs-title="Aumentar margen" data-bs-placement="top" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">+</button>
                         </div>
                     </td>
+                    <td class="text-end fw-semibold total-margen-cell">${monedaSimbolo} ${format2(decimalAdjust("round", totalConMargen, "-2"))}</td>
                 </tr>
             `;
         }).join("");
 
         recetaCategoriaTableBody.querySelectorAll(".receta-categoria-row").forEach((tr, idx) => {
             const input = tr.querySelector(".input-margen-categoria");
+            const totalCell = tr.querySelector(".total-margen-cell");
+            const monedaRow = String(tr.getAttribute("data-moneda") || "").toUpperCase();
+            const monedaSimboloRow = monedaRow === "DOLLAR" ? "$" : "S/.";
             if (!input) return;
+
+            const actualizarResumenFormula = () => {
+                let totalSoles = 0;
+                let totalDolares = 0;
+
+                recetaCategoriaTableBody.querySelectorAll(".receta-categoria-row").forEach(row => {
+                    const subtotalRow = Number(row.getAttribute("data-subtotal") || 0);
+                    const monedaRowRaw = String(row.getAttribute("data-moneda") || "").toUpperCase();
+                    const inputRow = row.querySelector(".input-margen-categoria");
+                    const margenRow = Number(String(inputRow?.value ?? "0").replace(/,/g, "."));
+                    const margenNormalizado = Number.isFinite(margenRow) ? Math.min(100, Math.max(0, margenRow)) : 0;
+                    const totalRow = calcularTotalConMargen(subtotalRow, margenNormalizado);
+
+                    if (monedaRowRaw === "DOLLAR") {
+                        totalDolares += totalRow;
+                    } else {
+                        totalSoles += totalRow;
+                    }
+                });
+
+                if (totalFormulaSolesEl) {
+                    totalFormulaSolesEl.textContent = format2(decimalAdjust("round", totalSoles, "-2"));
+                }
+
+                if (totalFormulaDolaresEl) {
+                    totalFormulaDolaresEl.textContent = format2(decimalAdjust("round", totalDolares, "-2"));
+                }
+            };
+
+            const actualizarTotalConMargen = () => {
+                if (!totalCell) return;
+
+                const subtotalRow = Number(tr.getAttribute("data-subtotal") || 0);
+                const margenRow = Number(String(input.value ?? "0").replace(/,/g, "."));
+                const margenNormalizado = Number.isFinite(margenRow) ? Math.min(100, Math.max(0, margenRow)) : 0;
+                const total = calcularTotalConMargen(subtotalRow, margenNormalizado);
+                totalCell.textContent = `${monedaSimboloRow} ${format2(decimalAdjust("round", total, "-2"))}`;
+                actualizarResumenFormula();
+            };
 
             const normalizarMargen = () => {
                 const parsed = Number(String(input.value ?? "").replace(/,/g, "."));
@@ -318,6 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const clamped = Math.min(100, Math.max(0, parsed));
                 input.value = clamped.toFixed(2);
+                actualizarTotalConMargen();
                 return clamped;
             };
 
@@ -330,12 +394,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (parsed > 100) {
                     input.value = "100";
+                    actualizarTotalConMargen();
                     return;
                 }
 
                 if (parsed < 0) {
                     input.value = "0";
                 }
+
+                actualizarTotalConMargen();
             });
 
             input.addEventListener("blur", () => {
@@ -345,12 +412,20 @@ document.addEventListener("DOMContentLoaded", () => {
             tr.querySelector(".btn-margen-minus")?.addEventListener("click", (e) => {
                 e.preventDefault();
                 input.value = Math.max(0, normalizarMargen() - 0.01).toFixed(2);
+                actualizarTotalConMargen();
             });
             tr.querySelector(".btn-margen-plus")?.addEventListener("click", (e) => {
                 e.preventDefault();
                 input.value = Math.min(100, normalizarMargen() + 0.01).toFixed(2);
+                actualizarTotalConMargen();
             });
+
+            actualizarTotalConMargen();
         });
+
+        if (!recetaCategoriaTableBody.querySelector(".receta-categoria-row")) {
+            limpiarResumenFormula();
+        }
 
         initTooltips(recetaCategoriaTableBody);
     }
@@ -363,7 +438,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (recetaCategoriaTableBody) {
             recetaCategoriaTableBody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="text-center text-muted py-4">Cargando categorías...</td>
+                    <td colspan="5" class="text-center text-muted py-4">Cargando categorías...</td>
                 </tr>
             `;
         }
@@ -389,7 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (recetaCategoriaTableBody) {
                 recetaCategoriaTableBody.innerHTML = `
                     <tr>
-                        <td colspan="4" class="text-center text-muted py-4">No se pudieron cargar las categorías.</td>
+                        <td colspan="5" class="text-center text-muted py-4">No se pudieron cargar las categorías.</td>
                     </tr>
                 `;
             }

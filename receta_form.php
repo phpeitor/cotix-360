@@ -285,11 +285,12 @@
                                     <th class="text-end">Cantidad</th>
                                     <th class="text-end">Subtotal</th>
                                     <th class="text-end">Margen %</th>
+                                    <th class="text-end">Total Fórmula</th>
                                 </tr>
                             </thead>
                             <tbody id="recetaCategoriaTableBody">
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">Abre el modal para cargar las categorías.</td>
+                                    <td colspan="5" class="text-center text-muted py-4">Abre el modal para cargar las categorías.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -297,6 +298,10 @@
                 </div>
 
                 <div class="modal-footer border-0">
+                    <div class="me-auto d-flex align-items-center gap-3 flex-wrap">
+                        <div class="small text-muted fw-semibold">Total S/: <span id="totalFormulaSoles">0.00</span></div>
+                        <div class="small text-muted fw-semibold">Total $: <span id="totalFormulaDolares">0.00</span></div>
+                    </div>
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
                     <button type="button" class="btn btn-warning" id="btnGuardarRecetaCategoria">Guardar</button>
                 </div>
