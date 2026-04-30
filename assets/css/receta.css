@@ -46,7 +46,7 @@
     border-radius: .5rem;
 }
 
-.receta-items-table {
+.receta-items-table, #recetaCategoriaTableBody {
     min-width: 780px;
     table-layout: fixed;
     font-size: 13px;

@@ -385,55 +385,36 @@ class Receta {
 
     public function obtenerCategoriasParaEdicion(int $recetaId): array
     {
-        try {
-            $sql = "SELECT
-                        sub_cat_1,
-                        SUM(COALESCE(subtotal, 0)) AS subtotal,
+        $sql = "SELECT
+                    a.*, 
+                    COALESCE(b.margen, 0) AS margen
+                FROM (
+                    SELECT 
+                        CONCAT(
+                            sub_cat_1,
+                            ' (',
+                            GROUP_CONCAT(DISTINCT sub_cat_2 ORDER BY sub_cat_2 SEPARATOR ', '),
+                            ')'
+                        ) AS sub_cat_1,
                         SUM(COALESCE(cantidad, 0)) AS cantidad,
-                        COALESCE(MAX(margen), 0) AS margen
-                    FROM receta_categoria
+                        CONCAT(CASE WHEN moneda = 'SOL' THEN 'S/.' ELSE '$' END, SUM(precio * cantidad)) AS subtotal,
+                        receta_id
+                    FROM receta_detalle
                     WHERE receta_id = :receta_id
-                    GROUP BY sub_cat_1
-                    ORDER BY sub_cat_1";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
-            $stmt->execute();
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-
-            if (!empty($rows)) {
-                return [
-                    'source' => 'tabla',
-                    'rows' => $rows,
-                ];
-            }
-        } catch (Throwable $e) {
-            // Si la tabla no existe o falla la consulta, caemos al agregado desde detalle.
-        }
-
-        $sql = "SELECT 
-                    CONCAT(
-                        sub_cat_1,
-                        ' (',
-                        GROUP_CONCAT(DISTINCT sub_cat_2 ORDER BY sub_cat_2 SEPARATOR ', '),
-                        ')'
-                    ) AS sub_cat_1,
-                SUM(COALESCE(cantidad, 0)) AS cantidad,
-                SUM(precio * cantidad) AS subtotal
-                FROM receta_detalle
-                WHERE receta_id = :receta_id
-                GROUP BY sub_cat_1
-                ORDER BY sub_cat_1";
+                    GROUP BY sub_cat_1, moneda, receta_id
+                ) AS a
+                LEFT JOIN receta_categoria b
+                    ON a.receta_id = b.receta_id
+                   AND a.sub_cat_1 = b.sub_cat_1
+                WHERE a.receta_id = :receta_id
+                ORDER BY a.sub_cat_1";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        foreach ($rows as &$row) {
-            $row['margen'] = 0;
-        }
-
         return [
-            'source' => 'detalle',
+            'source' => 'detalle+margen',
             'rows' => $rows,
         ];
     }

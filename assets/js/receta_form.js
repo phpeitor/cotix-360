@@ -288,7 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td class="text-center">
                         <div class="input-step border bg-body-secondary p-1 rounded-pill d-inline-flex align-items-center overflow-visible" style="min-width:140px;">
                             <button type="button" class="btn-margen-minus bg-light text-dark border-0 rounded-circle fs-18 lh-1" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">−</button>
-                            <input type="number" class="input-margen-categoria text-dark text-center border-0 bg-body-secondary rounded" value="${margen.toFixed(2)}" min="0" max="100" step="0.01" style="width:70px;height:26px;font-size:14px;" readonly>
+                            <input type="number" class="input-margen-categoria text-dark text-center border-0 bg-body-secondary rounded" value="${margen.toFixed(2)}" min="0" max="100" step="0.01" style="width:70px;height:26px;font-size:14px;">
                             <button type="button" class="btn-margen-plus bg-light text-dark border-0 rounded-circle fs-18 lh-1" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">+</button>
                         </div>
                     </td>
