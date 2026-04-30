@@ -282,8 +282,8 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Categoría</th>
-                                    <th class="text-end">Subtotal</th>
                                     <th class="text-end">Cantidad</th>
+                                    <th class="text-end">Subtotal</th>
                                     <th class="text-end">Margen %</th>
                                 </tr>
                             </thead>
@@ -298,7 +298,7 @@
 
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-warning" id="btnGuardarRecetaCategoria">Guardar márgenes</button>
+                    <button type="button" class="btn btn-warning" id="btnGuardarRecetaCategoria">Guardar</button>
                 </div>
             </div>
         </div>

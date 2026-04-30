@@ -256,12 +256,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (alertCategoriaRecetaEl) {
             alertCategoriaRecetaEl.classList.remove("d-none");
-            alertCategoriaRecetaEl.classList.remove("alert-danger", "alert-warning", "alert-info");
             alertCategoriaRecetaEl.classList.toggle("alert-warning", source === "detalle");
             alertCategoriaRecetaEl.classList.toggle("alert-info", source !== "detalle");
             alertCategoriaRecetaEl.textContent = source === "detalle"
-                ? "No existen registros en receta_categoria. Se muestran los totales agregados desde receta_detalle para que definas los márgenes."
-                : "Se muestran los márgenes guardados en receta_categoria.";
+                ? "No existen registros. Se muestran los totales por categoría para que definas los márgenes."
+                : "Se muestran los márgenes guardados previamente.";
         }
 
         if (!rows.length) {
@@ -284,10 +283,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>
                         <strong>${categoriaTexto}</strong>
                     </td>
-                    <td class="text-end">${format2(decimalAdjust("round", subtotal, "-2"))}</td>
                     <td class="text-end">${format2(decimalAdjust("round", cantidad, "-2"))}</td>
+                    <td class="text-end">${format2(decimalAdjust("round", subtotal, "-2"))}</td>
                     <td class="text-end" style="max-width:140px;">
-                        <input type="number" class="form-control form-control-sm text-end input-margen-categoria" min="0" step="0.01" value="${margen.toFixed(2)}">
+                        <input type="number" class="form-control form-control-sm text-end input-margen-categoria" max=100 min="0" step="0.01" value="${margen.toFixed(2)}">
                     </td>
                 </tr>
             `;
@@ -320,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error(error);
             if (alertCategoriaRecetaEl) {
                 alertCategoriaRecetaEl.classList.remove("d-none");
-                alertCategoriaRecetaEl.classList.remove("alert-info", "alert-warning");
+                alertCategoriaRecetaEl.classList.remove("alert-info");
                 alertCategoriaRecetaEl.classList.add("alert-danger");
                 alertCategoriaRecetaEl.textContent = error.message || "Error al cargar categorías";
             }

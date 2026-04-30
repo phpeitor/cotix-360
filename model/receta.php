@@ -410,10 +410,15 @@ class Receta {
             // Si la tabla no existe o falla la consulta, caemos al agregado desde detalle.
         }
 
-        $sql = "SELECT
-                    sub_cat_1,
-                    SUM(COALESCE(precio, 0)) AS subtotal,
-                    SUM(COALESCE(cantidad, 0)) AS cantidad
+        $sql = "SELECT 
+                    CONCAT(
+                        sub_cat_1,
+                        ' (',
+                        GROUP_CONCAT(DISTINCT sub_cat_2 ORDER BY sub_cat_2 SEPARATOR ', '),
+                        ')'
+                    ) AS sub_cat_1,
+                SUM(COALESCE(cantidad, 0)) AS cantidad,
+                SUM(precio * cantidad) AS subtotal
                 FROM receta_detalle
                 WHERE receta_id = :receta_id
                 GROUP BY sub_cat_1
