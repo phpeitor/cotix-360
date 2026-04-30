@@ -102,6 +102,7 @@
                                 </div>
 
                                 <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-categoria-modal"><i class="ti ti-box fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal"><i class="ti ti-search fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='receta_list.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                                 </div>
@@ -258,6 +259,46 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-categoria-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-categoria-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header text-bg-warning border-0">
+                    <h4 class="modal-title" id="info-categoria-modalLabel">
+                        Márgenes por categoría
+                    </h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="alertCategoriaReceta" class="alert alert-info d-none" role="alert"></div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Categoría</th>
+                                    <th class="text-end">Subtotal</th>
+                                    <th class="text-end">Cantidad</th>
+                                    <th class="text-end">Margen %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recetaCategoriaTableBody">
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">Abre el modal para cargar las categorías.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-warning" id="btnGuardarRecetaCategoria">Guardar márgenes</button>
                 </div>
             </div>
         </div>

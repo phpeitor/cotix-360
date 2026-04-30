@@ -13,6 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const tipoCambioEl = document.getElementById("tipo_cambio_sunat");
     const btnReloadPrecios = document.getElementById("btnReloadPrecios");
     const alertPrecioCambioEl = document.getElementById("alertPrecioCambio");
+    const infoCategoriaModalEl = document.getElementById("info-categoria-modal");
+    const alertCategoriaRecetaEl = document.getElementById("alertCategoriaReceta");
+    const recetaCategoriaTableBody = document.getElementById("recetaCategoriaTableBody");
+    const btnGuardarRecetaCategoria = document.getElementById("btnGuardarRecetaCategoria");
 
     const baseSelect = document.getElementById("filterBase");
     const categoriaSelect = document.getElementById("categoria");
@@ -61,6 +65,15 @@ document.addEventListener("DOMContentLoaded", () => {
         return partes.join(" / ");
     }
 
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
     init();
 
     function init() {
@@ -81,6 +94,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         recetaForm?.addEventListener("submit", guardarReceta);
         btnReloadPrecios?.addEventListener("click", sincronizarPrecios);
+        btnGuardarRecetaCategoria?.addEventListener("click", guardarCategoriasRecetaModal);
+        infoCategoriaModalEl?.addEventListener("show.bs.modal", cargarCategoriasRecetaModal);
 
         cargarBasesReceta();
 
@@ -233,6 +248,143 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (shouldNotify) {
             alertify.warning(`Se detectaron ${cambios.length} cambios de precio.`);
+        }
+    }
+
+    function renderCategoriasRecetaModal(rows, source) {
+        if (!recetaCategoriaTableBody) return;
+
+        if (alertCategoriaRecetaEl) {
+            alertCategoriaRecetaEl.classList.remove("d-none");
+            alertCategoriaRecetaEl.classList.remove("alert-danger", "alert-warning", "alert-info");
+            alertCategoriaRecetaEl.classList.toggle("alert-warning", source === "detalle");
+            alertCategoriaRecetaEl.classList.toggle("alert-info", source !== "detalle");
+            alertCategoriaRecetaEl.textContent = source === "detalle"
+                ? "No existen registros en receta_categoria. Se muestran los totales agregados desde receta_detalle para que definas los márgenes."
+                : "Se muestran los márgenes guardados en receta_categoria.";
+        }
+
+        if (!rows.length) {
+            recetaCategoriaTableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-4">No hay categorías para mostrar.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        recetaCategoriaTableBody.innerHTML = rows.map(row => {
+            const subtotal = Number(row.subtotal) || 0;
+            const cantidad = Number(row.cantidad) || 0;
+            const margen = Number(row.margen) || 0;
+            const categoriaTexto = escapeHtml(row.sub_cat_1 || "-");
+
+            return `
+                <tr data-sub-cat-1="${escapeHtml(row.sub_cat_1 || "")}" data-subtotal="${subtotal}" data-cantidad="${cantidad}">
+                    <td>
+                        <strong>${categoriaTexto}</strong>
+                    </td>
+                    <td class="text-end">${format2(decimalAdjust("round", subtotal, "-2"))}</td>
+                    <td class="text-end">${format2(decimalAdjust("round", cantidad, "-2"))}</td>
+                    <td class="text-end" style="max-width:140px;">
+                        <input type="number" class="form-control form-control-sm text-end input-margen-categoria" min="0" step="0.01" value="${margen.toFixed(2)}">
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    async function cargarCategoriasRecetaModal() {
+        if (!receta?.id) {
+            return;
+        }
+
+        if (recetaCategoriaTableBody) {
+            recetaCategoriaTableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-4">Cargando categorías...</td>
+                </tr>
+            `;
+        }
+
+        try {
+            const res = await fetch(`controller/get_receta_categoria.php?id=${encodeURIComponent(receta.id)}`);
+            const data = await res.json();
+
+            if (!res.ok || !data.ok) {
+                throw new Error(data.message || "No se pudieron cargar las categorías");
+            }
+
+            renderCategoriasRecetaModal(Array.isArray(data.rows) ? data.rows : [], data.source || "detalle");
+        } catch (error) {
+            console.error(error);
+            if (alertCategoriaRecetaEl) {
+                alertCategoriaRecetaEl.classList.remove("d-none");
+                alertCategoriaRecetaEl.classList.remove("alert-info", "alert-warning");
+                alertCategoriaRecetaEl.classList.add("alert-danger");
+                alertCategoriaRecetaEl.textContent = error.message || "Error al cargar categorías";
+            }
+
+            if (recetaCategoriaTableBody) {
+                recetaCategoriaTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">No se pudieron cargar las categorías.</td>
+                    </tr>
+                `;
+            }
+
+            alertify.error(error.message || "Error al cargar categorías");
+        }
+    }
+
+    async function guardarCategoriasRecetaModal() {
+        if (!receta?.id) {
+            alertify.error("Receta inválida");
+            return;
+        }
+
+        const rows = [...(recetaCategoriaTableBody?.querySelectorAll("tr[data-sub-cat-1]") || [])].map(tr => ({
+            sub_cat_1: tr.dataset.subCat1 || tr.dataset.sub_cat_1 || "",
+            subtotal: Number(tr.dataset.subtotal || 0),
+            cantidad: Number(tr.dataset.cantidad || 0),
+            margen: Number(tr.querySelector(".input-margen-categoria")?.value || 0),
+        })).filter(row => row.sub_cat_1);
+
+        if (!rows.length) {
+            alertify.error("No hay categorías para guardar");
+            return;
+        }
+
+        const btn = btnGuardarRecetaCategoria;
+        if (btn) {
+            btn.disabled = true;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append("receta_id", String(receta.id));
+            formData.append("items", JSON.stringify(rows));
+
+            const res = await fetch("controller/upd_receta_categoria.php", {
+                method: "POST",
+                body: formData,
+            });
+
+            const json = await res.json();
+
+            if (!res.ok || !json.ok) {
+                throw new Error(json.message || "No se pudieron guardar las categorías");
+            }
+
+            alertify.success(`Se guardaron ${json.guardados || rows.length} categorías`);
+            await cargarCategoriasRecetaModal();
+        } catch (error) {
+            console.error(error);
+            alertify.error(error.message || "Error al guardar categorías");
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+            }
         }
     }
 

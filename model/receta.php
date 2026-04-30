@@ -382,4 +382,87 @@ class Receta {
         $stmt->execute();
         return (int)$stmt->rowCount();
     }
+
+    public function obtenerCategoriasParaEdicion(int $recetaId): array
+    {
+        try {
+            $sql = "SELECT
+                        sub_cat_1,
+                        SUM(COALESCE(subtotal, 0)) AS subtotal,
+                        SUM(COALESCE(cantidad, 0)) AS cantidad,
+                        COALESCE(MAX(margen), 0) AS margen
+                    FROM receta_categoria
+                    WHERE receta_id = :receta_id
+                    GROUP BY sub_cat_1
+                    ORDER BY sub_cat_1";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+            if (!empty($rows)) {
+                return [
+                    'source' => 'tabla',
+                    'rows' => $rows,
+                ];
+            }
+        } catch (Throwable $e) {
+            // Si la tabla no existe o falla la consulta, caemos al agregado desde detalle.
+        }
+
+        $sql = "SELECT
+                    sub_cat_1,
+                    SUM(COALESCE(precio, 0)) AS subtotal,
+                    SUM(COALESCE(cantidad, 0)) AS cantidad
+                FROM receta_detalle
+                WHERE receta_id = :receta_id
+                GROUP BY sub_cat_1
+                ORDER BY sub_cat_1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        foreach ($rows as &$row) {
+            $row['margen'] = 0;
+        }
+
+        return [
+            'source' => 'detalle',
+            'rows' => $rows,
+        ];
+    }
+
+    public function eliminarCategoriasReceta(int $recetaId): bool
+    {
+        $sql = "DELETE FROM receta_categoria WHERE receta_id = :receta_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function guardarCategoriaReceta(array $data): bool
+    {
+        $sql = "INSERT INTO receta_categoria (
+                    receta_id,
+                    sub_cat_1,
+                    subtotal,
+                    cantidad,
+                    margen
+                ) VALUES (
+                    :receta_id,
+                    :sub_cat_1,
+                    :subtotal,
+                    :cantidad,
+                    :margen
+                )";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', (int)($data['receta_id'] ?? 0), PDO::PARAM_INT);
+        $stmt->bindValue(':sub_cat_1', (string)($data['sub_cat_1'] ?? ''));
+        $stmt->bindValue(':subtotal', (float)($data['subtotal'] ?? 0));
+        $stmt->bindValue(':cantidad', (float)($data['cantidad'] ?? 0));
+        $stmt->bindValue(':margen', (float)($data['margen'] ?? 0));
+
+        return $stmt->execute();
+    }
 }
