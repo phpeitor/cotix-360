@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <a href="pdf_cotizacion.php?id=${hashId}"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Abrir cotización en PDF"
+                title="PDF"
                 class="btn btn-soft-warning btn-icon btn-sm rounded-circle">
                     <i class="ti ti-file"></i>
                 </a>

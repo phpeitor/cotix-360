@@ -263,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <a href="pdf_receta.php?id=${hashId}"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Abrir receta en PDF"
+                title="PDF"
                 class="btn btn-soft-warning btn-icon btn-sm rounded-circle">
                     <i class="ti ti-file"></i>
                 </a>
