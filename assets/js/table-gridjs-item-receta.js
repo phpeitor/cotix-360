@@ -5,6 +5,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const filterSubCategoria2 = document.getElementById("filterSubCategoria2");
     const btnBuscar = document.getElementById("btn_buscar");
     const tableEl = document.getElementById("table-gridjs");
+    const alertPrecioCambio = document.getElementById("alertPrecioCambio");
+    const userCargo = Number(tableEl?.dataset?.userCargo || 0);
+    const isTecnico = userCargo === 4;
+    let precioCeroEventSource = null;
+    let precioCeroSignature = "";
 
     function collectOptions(selectEl) {
         return Array.from(selectEl?.options || [])
@@ -44,6 +49,22 @@ document.addEventListener("DOMContentLoaded", () => {
         return rows
             .map(row => row?.[key])
             .filter(value => value !== null && value !== undefined && String(value).trim() !== "");
+    }
+
+    function ocultarAlertaPrecioCero() {
+        if (!alertPrecioCambio) return;
+        alertPrecioCambio.classList.add("d-none");
+        alertPrecioCambio.innerHTML = "";
+    }
+
+    function mostrarAlertaPrecioCero(total, items) {
+        if (!alertPrecioCambio) return;
+
+        const listado = items.slice(0, 3).map(item => item.nombre || item.modelo || `ID ${item.id}`).join(", ");
+        const suffix = listado ? `: ${listado}${items.length > 3 ? "..." : ""}` : "";
+
+        alertPrecioCambio.innerHTML = `<strong>Atención:</strong> Hay ${total} productos con precio en 0${suffix}.`;
+        alertPrecioCambio.classList.remove("d-none");
     }
 
     async function fetchRecetaOpciones(params) {
@@ -165,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 id: "precio",
                 name: "Precio",
                 width: "100px",
-                hidden: window.userCargo === 4,
+                hidden: isTecnico,
                 formatter: (cell, row) => {
                     const moneda = row?.cells?.[11]?.data;
                     const simbolo = moneda === "DOLLAR" ? "$" : "S/.";
@@ -273,7 +294,58 @@ document.addEventListener("DOMContentLoaded", () => {
         cargarTabla();
     });
 
+    function conectarStreamPrecioCero() {
+        if (isTecnico || typeof window.EventSource === "undefined") {
+            return;
+        }
+
+        if (precioCeroEventSource) {
+            precioCeroEventSource.close();
+            precioCeroEventSource = null;
+        }
+
+        precioCeroEventSource = new EventSource("controller/stream_precio_0.php");
+
+        precioCeroEventSource.addEventListener("precio_cero", event => {
+            try {
+                const payload = JSON.parse(event.data || "{}");
+                const total = Number(payload.total || 0);
+                const items = Array.isArray(payload.items) ? payload.items : [];
+                const nextSignature = `${total}|${items.map(item => item.id).join(",")}`;
+
+                if (precioCeroSignature === nextSignature) {
+                    return;
+                }
+
+                precioCeroSignature = nextSignature;
+
+                if (total > 0) {
+                    mostrarAlertaPrecioCero(total, items);
+                    const detalle = items.slice(0, 3).map(item => item.nombre || item.modelo || `ID ${item.id}`).join(", ");
+                    const suffix = detalle ? `: ${detalle}${items.length > 3 ? "..." : ""}` : "";
+                    alertify.warning(`Hay ${total} productos con precio en 0${suffix}.`);
+                } else {
+                    ocultarAlertaPrecioCero();
+                }
+            } catch (error) {
+                console.error("Error procesando stream_precio_0:", error);
+            }
+        });
+
+        precioCeroEventSource.addEventListener("error", () => {
+            // EventSource maneja reconexión automática.
+        });
+    }
+
     cargarTabla();
+    conectarStreamPrecioCero();
+
+    window.addEventListener("beforeunload", () => {
+        if (precioCeroEventSource) {
+            precioCeroEventSource.close();
+            precioCeroEventSource = null;
+        }
+    });
 
     document.addEventListener("click", async (e) => {
 

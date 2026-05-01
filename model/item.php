@@ -537,5 +537,52 @@ class Item {
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
         return $data ?: null;
     }
+
+    public function firmaItemsPrecioCero(): array {
+        $sql = "SELECT
+                    COUNT(*) AS total,
+                    COALESCE(MAX(id), 0) AS max_id,
+                    COALESCE(SUM(CRC32(CONCAT(id, '|', COALESCE(modelo, ''), '|', COALESCE(nombre, ''), '|', COALESCE(precio, 0), '|', COALESCE(moneda, '')))), 0) AS checksum
+                FROM receta_items
+                WHERE COALESCE(precio, 0) = 0
+                  AND COALESCE(estado, 1) = 1";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+
+        $data = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        return [
+            'total' => (int)($data['total'] ?? 0),
+            'max_id' => (int)($data['max_id'] ?? 0),
+            'checksum' => (string)($data['checksum'] ?? '0')
+        ];
+    }
+
+    public function obtenerItemsPrecioCero(int $limit = 10): array {
+        $sql = "SELECT
+                    id,
+                    nombre,
+                    descripcion,
+                    modelo,
+                    marca,
+                    tipo,
+                    categoria,
+                    sub_cat_1,
+                    sub_cat_2,
+                    moneda,
+                    precio
+                FROM receta_items
+                WHERE COALESCE(precio, 0) = 0
+                  AND COALESCE(estado, 1) = 1
+                ORDER BY id DESC
+                LIMIT :limit";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

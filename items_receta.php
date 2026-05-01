@@ -78,6 +78,7 @@
 
                             <div class="card-body">
                                 <input type="hidden" id="filterMd5">
+                                <div id="alertPrecioCambio" class="alert alert-warning m-2 d-none" role="alert"></div>
                                 <div class="row mb-3" id="filtros">
                                     <div class="col-md-3">
                                         <label class="form-label">Tipo</label>
@@ -120,7 +121,7 @@
                                     </div>
                                 </div>
 
-                                <div id="table-gridjs"></div>
+                                <div id="table-gridjs" data-user-cargo="<?= (int)$_SESSION['session_cargo'] ?>"></div>
                             </div>
                         </div>
                     </div>
@@ -132,10 +133,6 @@
     </div>
     <?php include __DIR__ . '/layout/theme.html'; ?>
 
-    <script>
-        // Pasar cargo del usuario al JavaScript
-        window.userCargo = <?= (int)$_SESSION['session_cargo'] ?>;
-    </script>
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
