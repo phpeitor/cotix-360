@@ -24,6 +24,7 @@ $detalle    = $recetaModel->obtenerDetallePorHash($hash);
 $categorias = $recetaModel->obtenerCategoriasParaEdicion((int)$receta['id']);
 
 $isAdmin = isset($_SESSION['session_cargo']) && $_SESSION['session_cargo'] == 1;
+$esTecnico = isset($_SESSION['session_cargo']) && (int)$_SESSION['session_cargo'] === 4;
 
 if (!$receta || !$detalle) {
     http_response_code(404);
@@ -250,7 +251,9 @@ ob_start();
             <th>Item Detalle</th>
             <th>Categoria</th>
             <th>Tipo</th>
+            <?php if (!$esTecnico): ?>
             <th>Precio</th>
+            <?php endif; ?>
             <th>Cantidad</th>
 
         </tr>
@@ -278,7 +281,9 @@ ob_start();
                 <?php endif; ?>
             </td>
             <td class="center"><?= $i['tipo'] ?></td>
+            <?php if (!$esTecnico): ?>
             <td class="right"><?= htmlspecialchars($i['precio_formateado']) ?></td>
+            <?php endif; ?>
             <td class="center"><?= $i['cantidad'] ?></td>
         </tr>
         <?php endforeach ?>
@@ -287,27 +292,35 @@ ob_start();
 <br>
 <br>
 <table style="width: 100%; border-collapse: collapse;">
-    <tr>
-        <td style="border: 1px solid #ccc; padding: 8px; vertical-align: top; width: 33%;">
-            <strong>Total Producto:</strong> S/ <?= number_format($totalProductoPeru, 2) ?><br>
-            <strong>Total Servicio:</strong> S/ <?= number_format($totalServicioPeru, 2) ?>
-        </td>
-        <td style="border: 1px solid #ccc; padding: 8px; vertical-align: top; width: 33%;">
-            <strong>Total Items:</strong> <?= $totalItems ?><br>
-            <strong>Total S/:</strong> <?= number_format($totalSoles, 2) ?><br>
-            <?php if ($totalDolares > 0): ?>
-                <strong>Total $:</strong> <?= number_format($totalDolares, 2) ?><br>
-                <strong>Total Perú:</strong> S/ <?= number_format($totalPeru, 2) ?>
-            <?php endif; ?>
-        </td>
-        <td style="border: 1px solid #ccc; padding: 8px; vertical-align: top; width: 33%;">
-            <strong>Total Margen S/:</strong> S/ <?= number_format($totalMargenSoles, 2) ?><br>
-            <?php if ($totalMargenDolares > 0): ?>
-                <strong>Total Margen $:</strong> $ <?= number_format($totalMargenDolares, 2) ?><br>
-            <?php endif; ?>
-            <strong>Total Margen Perú:</strong> S/ <?= number_format($totalMargenPeru, 2) ?>
-        </td>
-    </tr>
+    <?php if ($esTecnico): ?>
+        <tr>
+            <td style="border: 1px solid #ccc; padding: 8px; vertical-align: top; width: 100%;">
+                <strong>Total Items:</strong> <?= $totalItems ?>
+            </td>
+        </tr>
+    <?php else: ?>
+        <tr>
+            <td style="border: 1px solid #ccc; padding: 8px; vertical-align: top; width: 33%;">
+                <strong>Total Producto:</strong> S/ <?= number_format($totalProductoPeru, 2) ?><br>
+                <strong>Total Servicio:</strong> S/ <?= number_format($totalServicioPeru, 2) ?>
+            </td>
+            <td style="border: 1px solid #ccc; padding: 8px; vertical-align: top; width: 33%;">
+                <strong>Total Items:</strong> <?= $totalItems ?><br>
+                <strong>Total S/:</strong> <?= number_format($totalSoles, 2) ?><br>
+                <?php if ($totalDolares > 0): ?>
+                    <strong>Total $:</strong> <?= number_format($totalDolares, 2) ?><br>
+                    <strong>Total Perú:</strong> S/ <?= number_format($totalPeru, 2) ?>
+                <?php endif; ?>
+            </td>
+            <td style="border: 1px solid #ccc; padding: 8px; vertical-align: top; width: 33%;">
+                <strong>Total Margen S/:</strong> S/ <?= number_format($totalMargenSoles, 2) ?><br>
+                <?php if ($totalMargenDolares > 0): ?>
+                    <strong>Total Margen $:</strong> $ <?= number_format($totalMargenDolares, 2) ?><br>
+                <?php endif; ?>
+                <strong>Total Margen Perú:</strong> S/ <?= number_format($totalMargenPeru, 2) ?>
+            </td>
+        </tr>
+    <?php endif; ?>
 </table>
 </table>
 

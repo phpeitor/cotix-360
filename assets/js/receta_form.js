@@ -313,7 +313,19 @@ document.addEventListener("DOMContentLoaded", () => {
             const cantidad = Number(row.cantidad) || 0;
             const margen = Math.min(100, Math.max(0, Number(row.margen) || 0));
             const totalConMargen = calcularTotalConMargen(subtotal, margen);
-            const categoriaTexto = escapeHtml(row.sub_cat_1 || "-");
+            // Evitar mostrar duplicados como "X (X)" — si el contenido dentro
+            // del paréntesis es igual al texto base, mostrar solo el base.
+            const rawSubCat = String(row.sub_cat_1 || "-").trim();
+            let displayCategoria = rawSubCat;
+            const m = rawSubCat.match(/^(.+?)\s*\((.+)\)\s*$/);
+            if (m) {
+                const base = m[1].trim();
+                const inside = m[2].trim();
+                if (base.toUpperCase() === inside.toUpperCase()) {
+                    displayCategoria = base;
+                }
+            }
+            const categoriaTexto = escapeHtml(displayCategoria);
             const monedaRaw = String(row.moneda || "");
             const monedaSimbolo = monedaRaw.toUpperCase() === "DOLLAR" ? "$" : "S/.";
 
