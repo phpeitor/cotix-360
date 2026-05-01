@@ -167,6 +167,12 @@ ob_start();
         .watermark.anulada {
             color: rgba(220, 53, 69, 0.15); 
         }
+        /* Encabezado sin bordes */
+        table.header-table, table.header-table th, table.header-table td {
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+        }
     </style>
 </head>
 <body>
@@ -187,12 +193,35 @@ ob_start();
     </div>
 <?php endif; ?>
 
-<h2 style="text-align:center; margin-bottom:4px;">
-    RECETA COMERCIAL
-</h2>
-<p style="text-align:center; font-size:11px; margin-top:0;">
-    Documento informativo – No constituye factura
-</p>
+<?php
+    // Intentar incrustar logo como data URI para Dompdf (ruta relativa a este archivo)
+    $logoPath = __DIR__ . '/assets/images/logo-dark.png';
+    $logoDataUri = '';
+    if (file_exists($logoPath) && is_readable($logoPath)) {
+        $mime = function_exists('mime_content_type') ? mime_content_type($logoPath) : 'image/png';
+        $data = @file_get_contents($logoPath);
+        if ($data !== false) {
+            $logoDataUri = 'data:' . ($mime ?: 'image/png') . ';base64,' . base64_encode($data);
+        }
+    }
+?>
+
+<table class="header-table" style="width:100%; border-collapse:collapse; margin-bottom:6px;">
+    <tr>
+        <td style="width:20%; vertical-align: top;">
+            <?php if ($logoDataUri): ?>
+                <img src="<?= $logoDataUri ?>" alt="Logo" style="width: 80px; height: auto;">
+            <?php else: ?>
+                <div style="font-size:12px;color:#666;">Logo</div>
+            <?php endif; ?>
+        </td>
+        <td style="width:60%; text-align:center; vertical-align: middle;">
+            <h2 style="margin:0; padding:0;">RECETA COMERCIAL</h2>
+            <p style="margin:2px 0 0 0; font-size:11px;">Documento informativo – No constituye factura</p>
+        </td>
+        <td style="width:20%;"></td>
+    </tr>
+</table>
 <hr>
 <p>
     <strong>ID:</strong> <?= $receta['id'] ?><br>
