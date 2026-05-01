@@ -1,4 +1,5 @@
 <?php
+session_start();
 use Dompdf\Dompdf;
 require_once __DIR__ . "/vendor/autoload.php";
 require_once __DIR__ . "/model/receta.php";
@@ -20,6 +21,7 @@ $items      = new Item();
 
 $receta = $recetaModel->obtenerPorHash($hash);
 $detalle    = $recetaModel->obtenerDetallePorHash($hash);
+$categorias = $recetaModel->obtenerCategoriasParaEdicion((int)$receta['id']);
 
 $isAdmin = isset($_SESSION['session_cargo']) && $_SESSION['session_cargo'] == 1;
 
@@ -66,6 +68,35 @@ foreach ($detalle as &$item) {
 }
 
 $totalPeru = $totalSoles + ($totalDolares * $tipoCambio);
+
+// Calcular totales con margen por moneda
+$totalMargenSoles = 0.0;
+$totalMargenDolares = 0.0;
+
+if (isset($categorias['rows']) && is_array($categorias['rows'])) {
+    foreach ($categorias['rows'] as $cat) {
+        $subtotal = (float)($cat['subtotal'] ?? 0);
+        $margenPct = (float)($cat['margen'] ?? 0);
+        $monedaCat = strtoupper(trim((string)($cat['moneda'] ?? '')));
+        
+        // Calcular total con margen: subtotal / (1 - margen_decimal)
+        $margenDecimal = $margenPct / 100;
+        if ($margenDecimal < 1) {
+            $totalConMargen = $subtotal / (1 - $margenDecimal);
+        } else {
+            $totalConMargen = 0;
+        }
+        
+        if ($monedaCat === 'DOLLAR') {
+            $totalMargenDolares += $totalConMargen;
+        } else {
+            $totalMargenSoles += $totalConMargen;
+        }
+    }
+}
+
+// Calcular Total Margen Perú
+$totalMargenPeru = $totalMargenSoles + ($totalMargenDolares * $tipoCambio);
 
 function normalizarTextoDetallePdf($valor): string
 {
@@ -215,18 +246,33 @@ ob_start();
 </table>
 <br>
 <br>
-<p>
-    <strong>Total Producto:</strong> S/ <?= number_format($totalProductoPeru, 2) ?><br>
-    <strong>Total Servicio:</strong> S/ <?= number_format($totalServicioPeru, 2) ?><br>
-</p>
-<p>
-    <strong>Total Items:</strong> <?= $totalItems ?><br>
-    <strong>Total S/:</strong> <?= number_format($totalSoles, 2) ?><br>
-    <?php if ($totalDolares > 0): ?>
-        <strong>Total $:</strong> <?= number_format($totalDolares, 2) ?><br>
-        <strong>Total Perú:</strong> S/ <?= number_format($totalPeru, 2) ?><br>
-        <strong>Tipo de Cambio:</strong> <?= number_format($tipoCambio, 3) ?><br>
-    <?php endif; ?>
+<table style="width: 100%; border-collapse: collapse;">
+    <tr>
+        <td style="border: 1px solid #ccc; padding: 8px; vertical-align: top; width: 33%;">
+            <strong>Total Producto:</strong> S/ <?= number_format($totalProductoPeru, 2) ?><br>
+            <strong>Total Servicio:</strong> S/ <?= number_format($totalServicioPeru, 2) ?>
+        </td>
+        <td style="border: 1px solid #ccc; padding: 8px; vertical-align: top; width: 33%;">
+            <strong>Total Items:</strong> <?= $totalItems ?><br>
+            <strong>Total S/:</strong> <?= number_format($totalSoles, 2) ?><br>
+            <?php if ($totalDolares > 0): ?>
+                <strong>Total $:</strong> <?= number_format($totalDolares, 2) ?><br>
+                <strong>Total Perú:</strong> S/ <?= number_format($totalPeru, 2) ?>
+            <?php endif; ?>
+        </td>
+        <td style="border: 1px solid #ccc; padding: 8px; vertical-align: top; width: 33%;">
+            <strong>Total Margen S/:</strong> S/ <?= number_format($totalMargenSoles, 2) ?><br>
+            <?php if ($totalMargenDolares > 0): ?>
+                <strong>Total Margen $:</strong> $ <?= number_format($totalMargenDolares, 2) ?><br>
+            <?php endif; ?>
+            <strong>Total Margen Perú:</strong> S/ <?= number_format($totalMargenPeru, 2) ?>
+        </td>
+    </tr>
+</table>
+<p style="font-size: 9px; color: #555;">
+    <strong>Tipo de Cambio SUNAT:</strong> <?= number_format($tipoCambio, 3) ?> |
+    <strong>Generado por:</strong> <?= htmlspecialchars($_SESSION['session_usuario'] ?? $receta['usu_upd'] ?? $receta['usuario'] ?? 'Desconocido') ?> |
+    <strong>Fec. Impresión:</strong> <?= date('Y-m-d H:i:s') ?>
 </p>
 </body>
 </html>
@@ -235,8 +281,7 @@ ob_start();
 
 $html = ob_get_clean();
 /*echo $html;
-exit;
-*/
+exit;*/
 $pdf = new Dompdf();
 $pdf->loadHtml($html);
 $pdf->setPaper('A4', 'portrait');

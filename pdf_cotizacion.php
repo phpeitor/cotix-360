@@ -1,4 +1,5 @@
 <?php
+session_start();
 use Dompdf\Dompdf;
 require_once __DIR__ . "/vendor/autoload.php";
 require_once __DIR__ . "/model/cotizacion.php";
