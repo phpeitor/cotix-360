@@ -201,7 +201,7 @@ cotix/
 - Publicar script SQL oficial de inicialización.
 - Definir licencia formal del proyecto.
 
-## Implementaciones recientes (2026-04-30)
+## Implementaciones recientes
 
 - Márgenes por categoría en modal `info-categoria-modal` con guardado de márgenes por `sub_cat_1` y soporte de `moneda`.
 - Se agregó (migración creada) la columna `moneda` en `receta_categoria` para mantener totales por moneda. Archivo de migración: `db/migrations/2026-04-30_add_moneda_to_receta_categoria.sql` (ejecutar en BD).
