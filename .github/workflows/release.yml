@@ -13,8 +13,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "release_notes_file=release-notes/${VERSION}.md" >> $GITHUB_OUTPUT
+
+      - name: Read release notes
+        id: read_notes
+        run: |
+          FILE="release-notes/${{ steps.extract_version.outputs.version }}.md"
+          if [ -f "$FILE" ]; then
+            echo "body<<EOF" >> $GITHUB_OUTPUT
+            cat "$FILE" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "body=Release ${{ steps.extract_version.outputs.version }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          body: ${{ steps.read_notes.outputs.body }}
           generate_release_notes: true
           make_latest: true
