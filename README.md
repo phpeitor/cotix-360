@@ -201,6 +201,33 @@ cotix/
 - Publicar script SQL oficial de inicialización.
 - Definir licencia formal del proyecto.
 
+## Implementaciones recientes (2026-04-30)
+
+- Márgenes por categoría en modal `info-categoria-modal` con guardado de márgenes por `sub_cat_1` y soporte de `moneda`.
+- Se agregó (migración creada) la columna `moneda` en `receta_categoria` para mantener totales por moneda. Archivo de migración: `db/migrations/2026-04-30_add_moneda_to_receta_categoria.sql` (ejecutar en BD).
+- Cálculo de `Total Fórmula` por categoría: subtotal / (1 - margen_decimal) y resumen agregado en el modal (totales S/ y $).
+- Mejora en el PDF de receta (`pdf_receta.php`): incrustación de logo como data URI, totales por moneda, total Perú (con tipo de cambio), y condicionamiento de visibilidad de columnas/totales según permisos.
+- Permisos por cargo (session_cargo): para `cargo == 4` (Técnico) se oculta la columna Precio y los totales sensibles en la UI y en la exportación PDF; esta regla aplica en frontend y backend.
+- Eliminación de JS inline en vistas: los datos del servidor se pasan vía `data-*` (ej. `data-user-cargo`) y la lógica move a `assets/js/receta_form.js` y otros archivos JS dedicados.
+- Normalización en modal de categorías: se evita mostrar duplicados del tipo "X (X)" mostrando solo "X".
+- SSE nuevo: `controller/stream_precio_0.php` emite avisos sobre ítems con `precio = 0` y el frontend muestra alertas (div `#alertPrecioCambio`).
+- Mejora del stream de cambios: `stream_receta_cambios.php` mantiene firma/cheksum y polling adaptativo; el frontend compara firmas antes de refrescar detalle.
+- Modelos y controladores actualizados: `model/receta.php` (obtenerCategoriasParaEdicion, guardarCategoriaReceta), `model/item.php` (nuevos select/firmas), `controller/get_receta_categoria.php`, `controller/upd_receta_categoria.php`, `controller/stream_precio_0.php`.
+- UI: tooltips añadidos al enlace PDF y comportamiento visual de alertas en listas/filas cuando hay cambios de precio.
+
+Nota: algunas modificaciones requieren aplicar la migración SQL mencionada y verificar permisos de sesión al desplegar en producción.
+
+## Reglas de desarrollo y negocio recientes
+
+- No mezclar JS ni CSS dentro de vistas PHP/HTML; usar archivos en `assets/js/` y `assets/css/`.
+- Pasar datos del servidor al cliente mediante `data-*` (evitar inline <script> que introduzca variables de sesión directamente en HTML).
+- Regla de permisos: `session_cargo === 4` (Técnico) → ocultar columna Precio y totales sensibles en todas las vistas y en el PDF. Esta restricción debe aplicarse en frontend y validarse en backend cuando corresponda.
+- Migraciones: cuando un `model` requiere una nueva columna (ej. `moneda` en `receta_categoria`), crear y documentar la migración en `db/migrations/` y ejecutar en BD antes de desplegar.
+- SSE: endpoints en tiempo real deben llamar `session_write_close()` luego de validar la sesión para no bloquear la ejecución de otras requests de la misma sesión.
+- Dompdf: evitar CSS y layouts incompatibles (por ejemplo `position: fixed` puede provocar errores de reflow en Dompdf). Preferir pies estáticos o soluciones compatibles con Dompdf.
+- Validar siempre reglas críticas de negocio en frontend y backend (ej. edición solo en estado `Enviada`, ocultar precios por cargo, límites de margen 0-100).
+- Normalización de datos: limpiar y deduplicar rutas/categorías en UI para evitar mostrar valores redundantes (e.g., "ALIMENTACIÓN (ALIMENTACIÓN)").
+
 ## Licencia
 
 Uso interno del proyecto. Si se distribuirá a terceros, definir una licencia explícita.

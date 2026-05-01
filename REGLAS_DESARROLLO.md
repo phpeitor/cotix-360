@@ -43,3 +43,30 @@ Mantener consistencia de código, facilitar mantenimiento y reducir regresiones.
 2. Evitar refactor masivo si no es parte del requerimiento.
 3. Mantener formato y convenciones ya usadas en el proyecto.
 4. Usar comentarios solo cuando el bloque no sea evidente por sí mismo.
+
+## Reglas de negocio y operativas recientes
+
+- No usar JavaScript inline en vistas: pasar valores del servidor mediante `data-*` (por ejemplo `data-user-cargo`) y leerlos desde `assets/js/*`.
+- Permisos por `session_cargo`:
+  - `cargo === 4` (Técnico): ocultar columna `Precio` y totales sensibles en UI y PDF. Implementar la validación en frontend y backend cuando afecte cálculo o seguridad de datos.
+- Migraciones: documentar y agregar archivo SQL en `db/migrations/` cuando se cambie el esquema (ej. `moneda` en `receta_categoria`); ejecutar migraciones antes de desplegar.
+- SSE:
+  - Siempre llamar `session_write_close()` después de validar sesión en endpoints SSE para evitar bloquear otras requests de la misma sesión.
+  - Usar firmas/cheksum y contar cambios antes de traer detalle completo.
+  - Emitir eventos claros (`price_changes`, `ping`, `stream_disabled`).
+- PDF (Dompdf): evitar reglas CSS que provoquen reflow o errores (por ejemplo `position: fixed` para footers); preferir pies estáticos compatibles con Dompdf.
+- Formatos y normalización:
+  - Normalizar etiquetas de categorías para no mostrar duplicados del tipo "X (X)".
+  - Incluir símbolo de moneda en `precio_formateado` en el backend para uso directo en PDFs.
+- Validaciones numéricas:
+  - Márgenes entre `0` y `100` (validar en frontend y backend).
+  - No permitir `margenDecimal >= 1` al calcular `subtotal / (1 - margen)`.
+
+## Documentación de cambios recientes
+
+- Modal `info-categoria-modal` para edición de márgenes por `sub_cat_1` y suma de totales por moneda.
+- Nuevo endpoint SSE: `controller/stream_precio_0.php` (notifica ítems con `precio = 0`).
+- Actualizaciones en modelos: `model/receta.php` (obtenerCategoriasParaEdicion, guardarCategoriaReceta) y `model/item.php`.
+- Actualizaciones en vistas y JS: `receta_form.php`, `assets/js/receta_form.js`, `items_receta.php`, `assets/js/table-gridjs-item-receta.js`, `pdf_receta.php`.
+
+Asegúrate de revisar estas reglas en cada PR que afecte recetas, PDFs o streams SSE.
