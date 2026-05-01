@@ -173,6 +173,18 @@ ob_start();
             background: transparent !important;
             padding: 0 !important;
         }
+        .pdf-footer {
+            position: fixed;
+            bottom: 8px;
+            left: 20px;
+            right: 20px;
+            font-size: 9px;
+            color: #555;
+            text-align: center;
+            border-top: 1px solid #e6e6e6;
+            padding-top: 6px;
+            background: transparent;
+        }
     </style>
 </head>
 <body>
@@ -220,9 +232,8 @@ ob_start();
             <p style="margin:2px 0 0 0; font-size:11px;">Documento informativo – No constituye factura</p>
         </td>
         <td style="width:20%;"></td>
-    </tr>
-</table>
-<hr>
+    </table>
+
 <p>
     <strong>ID:</strong> <?= $receta['id'] ?><br>
     <strong>Usuario Registro:</strong> <?= $receta['usuario'] ?><br>
@@ -298,11 +309,13 @@ ob_start();
         </td>
     </tr>
 </table>
-<p style="font-size: 9px; color: #555;">
+</table>
+
+<div class="pdf-footer">
     <strong>Tipo de Cambio SUNAT:</strong> <?= number_format($tipoCambio, 3) ?> |
     <strong>Generado por:</strong> <?= htmlspecialchars($_SESSION['session_usuario'] ?? $receta['usu_upd'] ?? $receta['usuario'] ?? 'Desconocido') ?> |
     <strong>Fec. Impresión:</strong> <?= date('Y-m-d H:i:s') ?>
-</p>
+</div>
 </body>
 </html>
 
