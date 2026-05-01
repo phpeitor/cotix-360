@@ -158,11 +158,13 @@
                                             </div>
                                         </div>
 
+                                        <?php if ((int)$_SESSION['session_cargo'] !== 4): ?>
                                         <div class="col-md-2 mb-3">
                                             <label class="form-label" for="precio">Precio </label>
                                             <input type="number" class="form-control" id="precio" name="precio" placeholder="100.00" required="" min="1" max="9999999" step="0.01">
                                             <div class="invalid-feedback">Please provide a valid precio.</div>
                                         </div>
+                                        <?php endif; ?>
 
                                         <div class="col-md-2 mb-3">
                                             <label class="form-label d-block">Estado</label>

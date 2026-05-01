@@ -165,6 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 id: "precio",
                 name: "Precio",
                 width: "100px",
+                hidden: window.userCargo === 4,
                 formatter: (cell, row) => {
                     const moneda = row?.cells?.[11]?.data;
                     const simbolo = moneda === "DOLLAR" ? "$" : "S/.";

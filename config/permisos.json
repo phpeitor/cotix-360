@@ -23,14 +23,25 @@
     ]
   },
   "4": {
-    "nombre": "Agente",
+    "nombre": "Tecnico",
     "acceso": [
       "home.php",
       "receta.php",
       "receta_list.php",
       "receta_form.php",
       "items_receta.php",
-      "pdf_receta.php"
+      "pdf_receta.php",
+      "add_item_receta.php",
+      "upd_item_receta.php"
+    ]
+  },
+  "5": {
+    "nombre": "Compras",
+    "acceso": [
+      "home.php",
+      "items_receta.php",
+      "add_item_receta.php",
+      "upd_item_receta.php"
     ]
   }
 }

@@ -132,6 +132,10 @@
     </div>
     <?php include __DIR__ . '/layout/theme.html'; ?>
 
+    <script>
+        // Pasar cargo del usuario al JavaScript
+        window.userCargo = <?= (int)$_SESSION['session_cargo'] ?>;
+    </script>
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>

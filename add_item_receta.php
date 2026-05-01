@@ -124,7 +124,7 @@
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label" for="descripcion">Descripcion</label>
-                                            <input type="text" class="form-control" id="descripcion" name="descripcion" placeholder="ZB H 50PPR DUAL CHNL" required="" maxlength="350">
+                                            <input type="text" class="form-control" id="descripcion" name="descripcion" placeholder="ZB H 50PPR DUAL CHNL" maxlength="350">
                                             <div class="invalid-feedback">Please provide a descripcion.</div>
                                         </div>
 
@@ -146,9 +146,9 @@
                                             <div class="valid-feedback">Looks good!</div>
                                         </div>
 
-                                        <div class="col-md-2 mb-3">
+                                        <div class="col-md-2 mb-3" style="display: none;">
                                             <label class="form-label" for="stock">Stock</label>
-                                            <input type="number" class="form-control" id="stock" name="stock" placeholder="0" required="" min="0" step="1" max="100">
+                                            <input type="number" class="form-control" id="stock" name="stock" placeholder="0" value="0" min="0" step="1" max="100">
                                             <div class="valid-feedback">Looks good!</div>
                                         </div>
 
@@ -164,11 +164,13 @@
                                             </div>
                                         </div>
 
-                                         <div class="col-md-2 mb-3">
+                                        <?php if ((int)$_SESSION['session_cargo'] !== 4): ?>
+                                        <div class="col-md-2 mb-3">
                                             <label class="form-label" for="precio">Precio </label>
-                                            <input type="number" class="form-control" id="precio" name="precio" placeholder="100.00" required="" min="1" max="9999999" step="0.01">
+                                            <input type="number" class="form-control" id="precio" name="precio" placeholder="100.00" value="0" required="" min="0" max="9999999" step="0.01">
                                             <div class="invalid-feedback">Please provide a valid precio.</div>
                                         </div>
+                                        <?php endif; ?>
                                     </div>
 
                                     <button class="btn btn-primary" type="submit">Enviar</button>

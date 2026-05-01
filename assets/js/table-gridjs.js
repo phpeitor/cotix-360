@@ -23,7 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     const badge = cargo == 1
                     ? `<span class="badge badge-outline-dark rounded-pill">Admin</span>`
                     : cargo == 4
-                    ? `<span class="badge badge-outline-info rounded-pill">Agente</span>`
+                    ? `<span class="badge badge-outline-info rounded-pill">Tecnico</span>`
+                    : cargo == 5
+                    ? `<span class="badge badge-outline-warning rounded-pill">Compras</span>`
                     : cargo == 3
                     ? `<span class="badge badge-outline-danger rounded-pill">Supervisor</span>`
                     : `<span class="badge badge-outline-secondary rounded-pill">Gestor</span>`;
