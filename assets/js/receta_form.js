@@ -32,6 +32,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const paginationWrapper = document.getElementById("pagination_wrapper");
     const paginationList = document.getElementById("pagination_list");
 
+    const userCargo = Number(recetaForm?.dataset?.userCargo || 0);
+    const isTecnico = userCargo === 4;
+    const btnInfoCategoriaModal = document.querySelector('[data-bs-target="#info-categoria-modal"]');
+
+    if (isTecnico && btnInfoCategoriaModal) {
+        btnInfoCategoriaModal.disabled = true;
+        btnInfoCategoriaModal.setAttribute("aria-disabled", "true");
+        btnInfoCategoriaModal.title = "No disponible para este cargo";
+        btnInfoCategoriaModal.classList.add("opacity-50", "cursor-not-allowed");
+    }
+
     const PAGE_SIZE = 10;
     let currentPage = 1;
     let receta = null;
@@ -774,11 +785,11 @@ document.addEventListener("DOMContentLoaded", () => {
                             <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center btn-qty-plus" style="width:22px;min-width:22px;height:22px;" data-id="${itemId}" ${editable ? "" : "disabled"}>+</button>
                         </div>
                     </td>
-                    <td class="text-end">
+                    <td class="text-end ${isTecnico ? "d-none" : ""}">
                         <span class="text-muted fs-12">${monedaSimbolo}</span>
                         <h5 class="fs-14 mt-1 fw-normal mb-0">${formatDecimal(precio)}</h5>
                     </td>
-                    <td class="text-end">
+                    <td class="text-end ${isTecnico ? "d-none" : ""}">
                         <span class="text-muted fs-12">${monedaSimbolo}</span>
                         <h5 class="fs-14 mt-1 fw-normal mb-0">${formatDecimal(subtotal)}</h5>
                     </td>
@@ -1124,6 +1135,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderItemsTable(rows, emptyMessage = "No hay items para mostrar con los filtros actuales.") {
         if (!itemsTableBody) return;
+        const precioColumnHidden = isTecnico;
 
         if (itemsResultCount) {
             itemsResultCount.textContent = `${rows.length} resultado${rows.length === 1 ? "" : "s"}`;
@@ -1132,7 +1144,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!rows.length) {
             itemsTableBody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="text-center text-muted py-4">${emptyMessage}</td>
+                    <td colspan="${precioColumnHidden ? 3 : 4}" class="text-center text-muted py-4">${emptyMessage}</td>
                 </tr>
             `;
             return;
@@ -1155,7 +1167,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="item-title">${detalleLinea1 || "-"}</div>
                     </td>
                     <td class="text-center align-middle receta-qty-cell"></td>
-                    <td class="text-end">${precioTexto}</td>
+                    <td class="text-end ${precioColumnHidden ? "d-none" : ""}">${precioTexto}</td>
                     <td class="text-center">
                         <button type="button" class="btn btn-sm btn-primary btn-add-item-row" ${editable ? "" : "disabled"}>
                             <i class="ti ti-plus"></i>

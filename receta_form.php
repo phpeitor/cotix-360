@@ -102,12 +102,12 @@
                                 </div>
 
                                 <div class="d-flex align-items-center gap-2">
-                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-categoria-modal" data-bs-title="Márgen" data-bs-placement="bottom"><i class="ti ti-box fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-categoria-modal" data-bs-title="Márgen" data-bs-placement="bottom" <?= (int)$_SESSION['session_cargo'] === 4 ? 'disabled aria-disabled="true" title="No disponible para este cargo"' : '' ?>><i class="ti ti-box fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom"><i class="ti ti-search fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='receta_list.php'" data-bs-title="Volver" data-bs-placement="bottom"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                                 </div>
                             </div>
-                            <form class="needs-validation form-receta" novalidate="">
+                            <form class="needs-validation form-receta" novalidate="" data-user-cargo="<?= (int)$_SESSION['session_cargo'] ?>">
                                 <div class="card-body p-0">
                                     <div id="alertPrecioCambio" class="alert alert-warning m-2 d-none" role="alert"></div>
                                     <div class="bg-success bg-opacity-10 py-1 text-center">
@@ -140,8 +140,8 @@
                                                     <th>Detalle</th>
                                                     <th>Tipo</th>
                                                     <th class="text-center">Cant.</th>
-                                                    <th class="text-end">Precio</th>
-                                                    <th class="text-end">Total</th>
+                                                    <th class="text-end <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>">Precio</th>
+                                                    <th class="text-end <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>">Total</th>
                                                     <th class="text-center">Acción</th>
                                                 </tr>
                                             </thead>
@@ -246,7 +246,7 @@
                                         <tr>
                                             <th>Item</th>
                                             <th class="text-center">Cant.</th>
-                                            <th class="text-end">Precio</th>
+                                            <th class="text-end <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>">Precio</th>
                                             <th class="text-center">Acción</th>
                                         </tr>
                                     </thead>

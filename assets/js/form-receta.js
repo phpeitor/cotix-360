@@ -28,6 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const paginationToEl = document.getElementById("pagination_to");
     const paginationWrapper = document.getElementById("pagination_wrapper");
     const paginationList = document.getElementById("pagination_list");
+    const userCargo = Number(recetaForm?.dataset?.userCargo || 0);
+    const isTecnico = userCargo === 4;
     const PAGE_SIZE = 10;
     let currentPage = 1;
 
@@ -121,6 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderItemsTable(rows, emptyMessage = "No hay items para mostrar con los filtros actuales.") {
         if (!itemsTableBody) return;
+        const precioColumnHidden = isTecnico;
 
         if (itemsResultCount) {
             itemsResultCount.textContent = `${rows.length} resultado${rows.length === 1 ? "" : "s"}`;
@@ -129,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!rows.length) {
             itemsTableBody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">${emptyMessage}</td>
+                    <td colspan="${precioColumnHidden ? 3 : 4}" class="text-center text-muted py-4">${emptyMessage}</td>
                 </tr>
             `;
             return;
@@ -165,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="item-title">${detalleLinea1 || "-"}</div>
                     </td>
                     <td class="text-center align-middle receta-qty-cell"></td>
-                    <td class="text-end">${precioTexto}</td>
+                    <td class="text-end ${precioColumnHidden ? "d-none" : ""}">${precioTexto}</td>
                     <td class="text-center">
                         <button type="button" class="btn btn-sm btn-primary btn-add-item-row">
                             <i class="ti ti-plus"></i>
@@ -407,7 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             </td>
 
-            <td><span class="text-muted fs-12">Precio</span><h5 class="fs-14 mt-1 fw-normal">${item.moneda === 'DOLLAR' ? '$' : 'S/.'}${formatDecimal(item.precio)}</h5></td>
+            <td class="${isTecnico ? "d-none" : ""}"><span class="text-muted fs-12">Precio</span><h5 class="fs-14 mt-1 fw-normal">${item.moneda === 'DOLLAR' ? '$' : 'S/.'}${formatDecimal(item.precio)}</h5></td>
             
             <td>
                 <a href="javascript:void(0)" class="text-danger btnDeleteItem">
@@ -478,6 +481,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderPreviewTable() {
         if (!previewTableBody) return;
+        const precioColumnHidden = isTecnico;
 
         const { contadorItems, totalSoles, totalDolares, totalPE } = getResumenTotales();
 
@@ -511,7 +515,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </td>
                 <td>${tr.dataset.tipo || "-"}</td>
                 <td class="text-center">${qty}</td>
-                <td class="text-end">${monedaSimbolo} ${formatDecimal(precio)}</td>
+                <td class="text-end ${precioColumnHidden ? "d-none" : ""}">${monedaSimbolo} ${formatDecimal(precio)}</td>
             `;
 
             previewTableBody.appendChild(row);

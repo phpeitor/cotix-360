@@ -70,7 +70,7 @@
                                     <button type="button" class="btn btn-dark btn-icon"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                                 </div>
                             </div>
-                            <form class="needs-validation form-receta" novalidate="">
+                            <form class="needs-validation form-receta" novalidate="" data-user-cargo="<?= (int)$_SESSION['session_cargo'] ?>">
                                 <div class="card-body p-0">
                                     <div class="bg-success bg-opacity-10 py-1 text-center">
                                         <p class="m-0"><b id="total_item">0</b> item(s) agregados</p>
@@ -201,7 +201,7 @@
                                         <tr>
                                             <th>Item</th>
                                             <th class="text-center">Cant.</th>
-                                            <th class="text-end">Precio</th>
+                                            <th class="text-end <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>">Precio</th>
                                             <th class="text-center">Acción</th>
                                         </tr>
                                     </thead>
@@ -245,7 +245,7 @@
                                     <th>Detalle</th>
                                     <th>Tipo</th>
                                     <th class="text-center">Cant.</th>
-                                    <th class="text-end">Precio</th>
+                                    <th class="text-end <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>">Precio</th>
                                 </tr>
                             </thead>
                             <tbody id="previewRecetaTableBody"></tbody>
