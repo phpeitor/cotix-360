@@ -264,6 +264,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 title="PDF"
+                data-bs-toggle="tooltip"
+                data-bs-title="PDF"
                 class="btn btn-soft-warning btn-icon btn-sm rounded-circle">
                     <i class="ti ti-file"></i>
                 </a>
