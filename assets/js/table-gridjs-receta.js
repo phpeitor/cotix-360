@@ -1,6 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
     let recetaListEventSource = null;
     let streamSignature = "";
+    let pendingPdfHash = "";
+
+    const successModalEl = document.getElementById("success-alert-modal");
+    const inputNombreReceta = document.getElementById("input-nombre-receta");
+    const btnGuardarNombreReceta = document.getElementById("btn-guardar-nombre-receta");
+    const successModal = successModalEl ? new bootstrap.Modal(successModalEl) : null;
 
     function initTooltips() {
         document.querySelectorAll('[data-bs-toggle="tooltip"], .btn-tooltip').forEach(el => {
@@ -266,7 +272,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 title="PDF"
                 data-bs-toggle="tooltip"
                 data-bs-title="PDF"
-                class="btn btn-soft-warning btn-icon btn-sm rounded-circle">
+                class="btn btn-soft-warning btn-icon btn-sm rounded-circle btn-pdf-receta"
+                data-hash="${hashId}">
                     <i class="ti ti-file"></i>
                 </a>
             `;
@@ -326,6 +333,99 @@ document.addEventListener("DOMContentLoaded", () => {
             () => actualizarEstado(id, accion),
             () => {}
         );
+    });
+
+    document.addEventListener("click", async (e) => {
+        const btnPdf = e.target.closest(".btn-pdf-receta");
+        if (!btnPdf) return;
+
+        e.preventDefault();
+
+        const hash = String(btnPdf.dataset.hash || "").trim();
+        if (!hash) {
+            alertify.error("No se pudo identificar la receta");
+            return;
+        }
+
+        try {
+            const res = await fetch(`controller/get_receta.php?id=${encodeURIComponent(hash)}`);
+            const json = await res.json();
+
+            if (!res.ok || json.error || !json.receta) {
+                alertify.error(json.message || "No se pudo validar la receta");
+                return;
+            }
+
+            const nombreReceta = String(json.receta.nombre ?? "").trim();
+
+            if (nombreReceta !== "") {
+                window.open(`pdf_receta.php?id=${encodeURIComponent(hash)}`, "_blank", "noopener,noreferrer");
+                return;
+            }
+
+            pendingPdfHash = hash;
+            if (inputNombreReceta) {
+                inputNombreReceta.value = "";
+                inputNombreReceta.focus();
+            }
+
+            successModal?.show();
+        } catch (error) {
+            alertify.error("Error de conexion al validar nombre de receta");
+        }
+    });
+
+    btnGuardarNombreReceta?.addEventListener("click", async () => {
+        const nombre = String(inputNombreReceta?.value ?? "").trim();
+
+        if (!pendingPdfHash) {
+            alertify.error("No hay receta seleccionada");
+            return;
+        }
+
+        if (!nombre) {
+            alertify.error("Ingrese el nombre de la receta");
+            inputNombreReceta?.focus();
+            return;
+        }
+
+        try {
+            btnGuardarNombreReceta.disabled = true;
+
+            const body = new URLSearchParams({
+                hash: pendingPdfHash,
+                nombre
+            });
+
+            const res = await fetch("controller/upd_nombre_receta.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body
+            });
+
+            const json = await res.json();
+
+            if (!res.ok || !json.success) {
+                alertify.error(json.message || "No se pudo guardar el nombre");
+                return;
+            }
+
+            successModal?.hide();
+            alertify.success("Nombre de receta guardado");
+            window.open(`pdf_receta.php?id=${encodeURIComponent(pendingPdfHash)}`, "_blank", "noopener,noreferrer");
+            grid.forceRender();
+        } catch (error) {
+            alertify.error("Error de conexion al guardar nombre");
+        } finally {
+            btnGuardarNombreReceta.disabled = false;
+        }
+    });
+
+    successModalEl?.addEventListener("hidden.bs.modal", () => {
+        pendingPdfHash = "";
+        if (inputNombreReceta) {
+            inputNombreReceta.value = "";
+        }
     });
 
     function actualizarEstado(id, accion) {

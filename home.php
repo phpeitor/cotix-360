@@ -312,6 +312,7 @@
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
+    <script src="./assets/js/formUtils.js"></script>
     <script src="./assets/js/dashboard-sales.js"></script>
     <script src="./assets/js/dashboard.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>

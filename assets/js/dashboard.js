@@ -50,12 +50,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         const contadores = json.data?.contadores?.[0];
 
         if (contadores) {
-            contUser.textContent  = contadores.usuarios     ?? 0;
-            contItem.textContent  = contadores.items        ?? 0;
-            contCoti.textContent  = contadores.cotizaciones ?? 0;
-            contCarga.textContent = contadores.carga        ?? 0;
-            contReceta.textContent = contadores.recetas     ?? 0;
-            contItemReceta.textContent = contadores.receta_items ?? 0;
+            contUser.textContent  = formatInt(contadores.usuarios ?? 0);
+            contItem.textContent  = formatInt(contadores.items ?? 0);
+            contCoti.textContent  = formatInt(contadores.cotizaciones ?? 0);
+            contCarga.textContent = formatInt(contadores.carga ?? 0);
+            contReceta.textContent = formatInt(contadores.recetas ?? 0);
+            contItemReceta.textContent = formatInt(contadores.receta_items ?? 0);
         }
 
         /* =====================================================

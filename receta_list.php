@@ -182,6 +182,25 @@
     </div>
     <?php include __DIR__ . '/layout/theme.html'; ?>
 
+    <div id="success-alert-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content modal-filled bg-success">
+                <div class="modal-body p-4">
+                    <div class="text-center">
+                        <i class="ti ti-check h1"></i>
+                        <h4 class="mt-2">CotixPDF!</h4>
+                        <p class="mt-3">Congratulations! 🎉 Para continuar debe de ingresar un nombre a la receta.</p>
+                        <input type="text" id="input-nombre-receta" class="form-control mt-2" placeholder="Nombre de la receta" maxlength="50" />
+                        <div class="d-flex justify-content-center gap-2 mt-2">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-secondary" id="btn-guardar-nombre-receta">Continuar</button>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
