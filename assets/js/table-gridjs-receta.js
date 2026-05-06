@@ -363,6 +363,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
+            // Si el usuario es técnico (cargo === 4) no mostrar modal, abrir PDF directamente
+            if (typeof CARGO !== 'undefined' && Number(CARGO) === 4) {
+                window.open(`pdf_receta.php?id=${encodeURIComponent(hash)}`, "_blank", "noopener,noreferrer");
+                return;
+            }
+
             pendingPdfHash = hash;
             if (inputNombreReceta) {
                 inputNombreReceta.value = "";

@@ -242,7 +242,7 @@ ob_start();
     </table>
 
 <p>
-    <strong>ID:</strong> <?= ifnull($receta['nombre'], $receta['id']) ?><br>
+    <strong>ID:</strong> <?= $receta['nombre'] ?? $receta['id'] ?><br>
     <strong>Usuario Registro:</strong> <?= $receta['usuario'] ?><br>
     <strong>Fec. Registro:</strong> <?= $receta['created_at'] ?><br>
     <strong>Usuario Modifica:</strong> <?= $receta['usu_upd'] ?><br>
