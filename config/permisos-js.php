@@ -23,15 +23,20 @@ if (!isset($permisosJson[$rol])) {
     exit;
 }
 
+$cargoNumerico = (int)$rol;
+$nombreCargo = $permisosJson[$rol]['nombre'] ?? 'Desconocido';
+
 if ($permisosJson[$rol]['acceso'] === '*') {
     echo json_encode([
-        'rol' => $rol,
+        'cargo' => $cargoNumerico,
+        'nombre' => $nombreCargo,
         'permisos' => ['*']
     ]);
     exit;
 }
 
 echo json_encode([
-    'rol' => $rol,
+    'cargo' => $cargoNumerico,
+    'nombre' => $nombreCargo,
     'permisos' => $permisosJson[$rol]['acceso']
 ]);

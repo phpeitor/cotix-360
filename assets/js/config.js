@@ -46,11 +46,13 @@
 			.then(r => r.json())
 			.then(data => {
 				const permisos = Array.isArray(data.permisos) ? data.permisos : [];
-				const rol = Array.isArray(data.rol) ? data.rol : [];
+				const cargo = Number(data.cargo ?? 0);
+				const nombre = String(data.nombre ?? '');
 
 				window.PERMISOS_STATE = {
 					esAdmin: permisos[0] === "*",
-					cargo: rol[0] ?? 0,
+					cargo: cargo,
+					nombre: nombre,
 					permisos
 				};
 
