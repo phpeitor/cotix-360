@@ -2,19 +2,25 @@ document.addEventListener("DOMContentLoaded", function () {
   fetch("controller/dashboard_graf.php")
     .then(res => res.json())
     .then(resp => {
-      if (resp.error) return;
+		if (resp.error) return;
 
-	  const STATUS_COLORS = {
-		Enviada:  "#6C757D",
-		Aprobada: "#53cd48ff",
-		Anulada:  "#ce7e7e"
-	  };
+		const STATUS_COLORS = {
+			Enviada:  "#6C757D",
+			Aprobada: "#53cd48ff",
+			Anulada:  "#ce7e7e"
+		};
 
 		const renderRadialChart = (selector, legendSelector, donutData) => {
 				const chartHost = document.querySelector(selector);
 				const legend = document.querySelector(legendSelector);
+				const wrapper = chartHost ? chartHost.closest(".col-xxl-4") : null;
 
-				if (!chartHost || !legend || !Array.isArray(donutData)) return;
+				if (!chartHost || !legend || !Array.isArray(donutData) || donutData.length === 0) {
+					if (wrapper) {
+						wrapper.style.display = "none";
+					}
+					return;
+				}
 
 				const total = donutData.reduce((sum, i) => sum + Number(i.ctd), 0);
 				const series = donutData.map(i =>
