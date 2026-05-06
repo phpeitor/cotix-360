@@ -161,7 +161,7 @@
                                         <?php if ((int)$_SESSION['session_cargo'] !== 4): ?>
                                         <div class="col-md-2 mb-3">
                                             <label class="form-label" for="precio">Precio </label>
-                                            <input type="number" class="form-control" id="precio" name="precio" placeholder="100.00" required="" min="0" max="9999999" step="0.01">
+                                            <input type="number" class="form-control" id="precio" name="precio" placeholder="100.00" required="" min="0" max="9999999" step="0.01" <?= ((int)$_SESSION['session_cargo'] === 3) ? 'disabled' : '' ?>>
                                             <div class="invalid-feedback">Please provide a valid precio.</div>
                                         </div>
                                         <?php endif; ?>
