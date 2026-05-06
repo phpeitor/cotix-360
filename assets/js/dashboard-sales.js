@@ -4,75 +4,67 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(resp => {
       if (resp.error) return;
 
-      const donut = resp.data.donut;
 	  const STATUS_COLORS = {
 		Enviada:  "#6C757D",
 		Aprobada: "#53cd48ff",
 		Anulada:  "#ce7e7e"
 	  };
 
-	  const total = donut.reduce((sum, i) => sum + Number(i.ctd), 0);
-	  const series = donut.map(i =>
-		total > 0 ? Math.round((i.ctd / total) * 100) : 0
-		);
+		const renderRadialChart = (selector, legendSelector, donutData) => {
+				const chartHost = document.querySelector(selector);
+				const legend = document.querySelector(legendSelector);
 
-	  const labels = donut.map(i => i.estado);
+				if (!chartHost || !legend || !Array.isArray(donutData)) return;
 
-      const chartColors = donut.map(i =>
-		STATUS_COLORS[i.estado] || "#999999"
-		);
+				const total = donutData.reduce((sum, i) => sum + Number(i.ctd), 0);
+				const series = donutData.map(i =>
+					total > 0 ? Math.round((Number(i.ctd) / total) * 100) : 0
+					);
+				const labels = donutData.map(i => i.estado);
+				const chartColors = donutData.map(i => STATUS_COLORS[i.estado] || "#999999");
 
-      const chart = new ApexCharts(
-        document.querySelector("#multiple-radialbar"),
-        {
-          chart: { height: 330, type: "radialBar" },
-          plotOptions: {
-           radialBar: {
+				const chart = new ApexCharts(chartHost, {
+					chart: { height: 330, type: "radialBar" },
+					plotOptions: {
+						radialBar: {
 				track: { margin: "17%" },
 				hollow: { size: "1%" },
 				dataLabels: {
-				name: {
-					show: true
-				},
-				value: {
-					show: true,
-					formatter: val => `${val}%`
+					name: { show: true },
+					value: {
+						show: true,
+						formatter: val => `${val}%`
+					}
 				}
-				}
-			}
-          },
-          stroke: { lineCap: "round" },
-          colors: chartColors,
-          series: series,
-          labels: labels
-        }
-      );
+			  }
+					},
+					stroke: { lineCap: "round" },
+					colors: chartColors,
+					series,
+					labels
+				});
 
-      chart.render();
+				chart.render();
 
-      /* ======================
-         LEGEND / LISTADO
-      ====================== */
+				legend.innerHTML = "";
 
-      const legend = document.getElementById("donut-legend");
-      legend.innerHTML = "";
+				donutData.forEach(item => {
+					const color = STATUS_COLORS[item.estado] || "#999";
 
-      donut.forEach((item, index) => {
-        const color = STATUS_COLORS[item.estado] || "#999";
+					legend.innerHTML += `
+						<div class="d-flex justify-content-between align-items-center p-1">
+							<div>
+								<i class="ti ti-circle-filled fs-12 align-middle me-1" style="color:${color}"></i>
+								<span class="align-middle fw-semibold">${item.estado}</span>
+							</div>
+							<span class="fw-semibold text-muted float-end">${item.ctd}</span>
+						</div>
+					`;
+				});
+			};
 
-        legend.innerHTML += `
-          <div class="d-flex justify-content-between align-items-center p-1">
-            <div>
-              <i class="ti ti-circle-filled fs-12 align-middle me-1"
-           		style="color:${color}"></i>
-              <span class="align-middle fw-semibold">${item.estado}</span>
-            </div>
-            <span class="fw-semibold text-muted float-end">
-              ${item.ctd}
-            </span>
-          </div>
-        `;
-      });
+			renderRadialChart("#multiple-radialbar", "#donut-legend", resp.data.donut);
+			renderRadialChart("#multiple-radialbar-receta", "#donut-legend-receta", resp.data.donut_receta);
 
 		/* ======================
 		REVENUE CHART (LINE / BAR)
