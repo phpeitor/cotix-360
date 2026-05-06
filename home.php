@@ -84,7 +84,7 @@
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Number of Orders">Total Usuarios</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Usuarios">Total Usuarios</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
@@ -104,7 +104,7 @@
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Number of Orders">Total Cotizaciones</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Cotizaciones">Total Cotizaciones</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
@@ -124,7 +124,7 @@
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Number of Orders">Total Items</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Items">Total Items</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
@@ -144,7 +144,7 @@
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Number of Orders">Total Excels</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Excels">Total Excels</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
@@ -160,6 +160,39 @@
                                     </div>
                                 </div>
                             </div><!-- end col -->
+
+                            <div class="col">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Recetas">Total Recetas</h5>
+                                        <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
+                                            <div class="user-img fs-42 flex-shrink-0">
+                                                <span class="avatar-title text-bg-primary rounded-circle fs-22">
+                                                    <iconify-icon icon="solar:document-add-broken"></iconify-icon>
+                                                </span>
+                                            </div>
+                                            <h3 id="total_receta" class="mb-0 fw-bold">0</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- end col -->
+
+                            <div class="col">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Items">Total Items Receta</h5>
+                                        <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
+                                            <div class="user-img fs-42 flex-shrink-0">
+                                                <span class="avatar-title text-bg-primary rounded-circle fs-22">
+                                                    <iconify-icon icon="solar:cart-large-2-outline"></iconify-icon>
+                                                </span>
+                                            </div>
+                                            <h3 id="total_item_receta" class="mb-0 fw-bold">0</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- end col -->
+
                         </div><!-- end row -->
 
                         <div class="row">
@@ -188,10 +221,26 @@
                                 </div> <!-- end card-->
                             </div> <!-- end col-->
 
+                            <div class="col-xxl-4">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center border-bottom border-dashed">
+                                        <h4 class="header-title"> Status Recetas</h4>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <div id="multiple-radialbar-receta" class="apex-charts"></div>
+
+                                        <div class="row mt-2">
+                                           <div class="col" id="donut-legend-receta"></div>
+                                        </div>
+                                    </div>
+                                </div> <!-- end card-->
+                            </div> <!-- end col-->
+
                             <div class="col-xxl-8">
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between align-items-center">
-                                        <h4 class="header-title">Overview</h4>
+                                        <h4 class="header-title">Overview Cotizaciones</h4>
                                         <div class="dropdown">
                                             <a href="#" class="dropdown-toggle drop-arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="ti ti-dots-vertical"></i>

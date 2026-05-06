@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const contItem = document.getElementById("total_item");
     const contCoti = document.getElementById("total_cotizacion");
     const contCarga = document.getElementById("total_carga");
+    const contItemReceta = document.getElementById("total_item_receta");
+    const contReceta = document.getElementById("total_receta");
 
     const dateInput = document.getElementById("filterDate");
 
@@ -52,6 +54,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             contItem.textContent  = contadores.items        ?? 0;
             contCoti.textContent  = contadores.cotizaciones ?? 0;
             contCarga.textContent = contadores.carga        ?? 0;
+            contReceta.textContent = contadores.recetas     ?? 0;
+            contItemReceta.textContent = contadores.receta_items ?? 0;
         }
 
         /* =====================================================

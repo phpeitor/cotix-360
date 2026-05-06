@@ -61,7 +61,9 @@ class Dashboard {
             (SELECT COUNT(*) FROM personal WHERE idestado = 1) AS usuarios,
             (SELECT COUNT(*) FROM item WHERE estado = 1) AS items,
             (SELECT COUNT(*) FROM cotizaciones) AS cotizaciones,
-            (SELECT COUNT(*) FROM carga) AS carga;
+            (SELECT COUNT(*) FROM carga) AS carga,
+            (SELECT COUNT(*) FROM recetas) AS recetas,
+            (SELECT COUNT(*) FROM receta_items WHERE estado = 1) AS receta_items;
         ";
 
         $stmt = $this->conn->prepare($sql);
@@ -114,6 +116,19 @@ class Dashboard {
         $sql = "
             SELECT estado, COUNT(*) AS ctd
             FROM cotizaciones
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            GROUP BY estado;
+        ";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function graf_donut_receta(): array
+    {
+        $sql = "
+            SELECT estado, COUNT(*) AS ctd
+            FROM recetas
             WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
             GROUP BY estado;
         ";

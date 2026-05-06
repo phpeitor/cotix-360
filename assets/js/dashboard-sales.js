@@ -161,9 +161,6 @@ document.addEventListener("DOMContentLoaded", function () {
 				}
 			}
 		);
-
 		revenueChart.render();
-
 	});
-
 });
