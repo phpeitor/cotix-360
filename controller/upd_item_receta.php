@@ -26,6 +26,9 @@ try {
 
     $data = [
         'descripcion'       => $_POST['descripcion'] ?? '',
+        'modelo'            => $_POST['modelo'] ?? '',
+        'marca'             => $_POST['marca'] ?? '',
+        'uni_medida'        => $_POST['uni_medida'] ?? '',
         'precio'   => $_POST['precio'] ?? '',
         'moneda'            => $_POST['moneda'] ?? '',
         'estado'            => isset($_POST['estado']) ? 1 : 0,

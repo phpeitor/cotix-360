@@ -510,14 +510,20 @@ class Item {
 
     public function actualizarItemRecetaPorHash(string $hash, array $data): bool {
         $sql = "UPDATE receta_items 
-                SET descripcion = :descripcion,
+                SET marca = :marca,
+                    modelo = :modelo,
+                    descripcion = :descripcion,
+                    uni_medida = :uni_medida,
                     precio = :precio,
                     moneda = :moneda,
                     estado = :estado    
                 WHERE MD5(id) = :hash";
         $stmt = $this->conn->prepare($sql);
 
+        $stmt->bindValue(':marca', $data['marca']);
+        $stmt->bindValue(':modelo', $data['modelo']);
         $stmt->bindValue(':descripcion', $data['descripcion']);
+        $stmt->bindValue(':uni_medida', $data['uni_medida']);
         $stmt->bindValue(':precio', $data['precio']);
         $stmt->bindValue(':moneda', $data['moneda']);
         $stmt->bindValue(':estado', (int)$data['estado'], PDO::PARAM_INT);

@@ -130,19 +130,19 @@
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label" for="modelo">Modelo</label>
-                                            <input type="text" class="form-control" id="modelo" name="modelo" placeholder="ZBH00502" required="" disabled maxlength="70">
+                                            <input type="text" class="form-control" id="modelo" name="modelo" placeholder="ZBH00502" required="" maxlength="70">
                                             <div class="valid-feedback">Looks good!</div>
                                         </div>
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label" for="marca">Marca</label>
-                                            <input type="text" class="form-control" id="marca" name="marca" placeholder="PROMART" required="" disabled maxlength="70">
+                                            <input type="text" class="form-control" id="marca" name="marca" placeholder="PROMART" required="" maxlength="70">
                                             <div class="valid-feedback">Looks good!</div>
                                         </div>
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label" for="uni_medida">Unidad Medida</label>
-                                            <input type="text" class="form-control" id="uni_medida" name="uni_medida" placeholder="UND" required="" disabled maxlength="70">
+                                            <input type="text" class="form-control" id="uni_medida" name="uni_medida" placeholder="UND" required="" maxlength="70">
                                             <div class="valid-feedback">Looks good!</div>
                                         </div>
 
