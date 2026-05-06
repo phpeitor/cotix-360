@@ -99,6 +99,12 @@ if (isset($categorias['rows']) && is_array($categorias['rows'])) {
 // Calcular Total Margen Perú
 $totalMargenPeru = $totalMargenSoles + ($totalMargenDolares * $tipoCambio);
 
+// Calcular IGV (18%)
+$igvMargenPeru = $totalMargenPeru * 0.18;
+
+// Calcular Total con IGV
+$totalConIgv = $totalMargenPeru + $igvMargenPeru;
+
 function normalizarTextoDetallePdf($valor): string
 {
     $texto = trim((string)($valor ?? ''));
@@ -317,7 +323,9 @@ ob_start();
                 <?php if ($totalMargenDolares > 0): ?>
                     <strong>Total Margen $:</strong> $ <?= number_format($totalMargenDolares, 2) ?><br>
                 <?php endif; ?>
-                <strong>Total Margen Perú:</strong> S/ <?= number_format($totalMargenPeru, 2) ?>
+                <strong>Total Margen Perú:</strong> S/ <?= number_format($totalMargenPeru, 2) ?><br>
+                <strong>IGV 18%:</strong> S/ <?= number_format($igvMargenPeru, 2) ?><br>
+                <strong>Total + IGV:</strong> S/ <?= number_format($totalConIgv, 2) ?>
             </td>
         </tr>
     <?php endif; ?>
