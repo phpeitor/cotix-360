@@ -23,7 +23,7 @@ table {
     left: 0;
     right: 0;
     height: 18mm;
-    background: #0066cc;
+    background: #29c69f;
     z-index: 0;
 }
 
@@ -40,16 +40,16 @@ table {
 
 .corner-top-right {
     top: 0;
-    right: 0;
-    border-top: 50mm solid #2d9b7f;
-    border-left: 50mm solid transparent;
+    right: -1mm;
+    border-top: 28mm solid #2d9b7f;
+    border-left: 30mm solid transparent;
 }
 
 .corner-bottom-left {
     left: 0;
     bottom: 0;
-    border-bottom: 50mm solid #2d9b7f;
-    border-right: 50mm solid transparent;
+    border-bottom: 28mm solid #2d9b7f;
+    border-right: 30mm solid transparent;
 }
 
 .watermark {
@@ -99,7 +99,7 @@ table {
 .project-box-text {
     font-size: 13px;
     font-weight: bold;
-    color: #0f86c2;
+    color: #046c5b;
     letter-spacing: 1px;
     margin: 0;
 }
@@ -127,7 +127,7 @@ table {
     line-height: 1;
     font-weight: bold;
     letter-spacing: 2px;
-    color: #0e84c2;
+    color: #046c5b;
 }
 
 .panels {
@@ -149,7 +149,7 @@ table {
 
 .panel-name {
     font-size: 13px;
-    color: #197fb6;
+    color: #046c5b;
     letter-spacing: 1px;
     margin: 0 0 0.8mm 0;
 }
@@ -165,7 +165,7 @@ table {
 }
 
 .section-head th {
-    background: #0f86c2;
+    background: #046c5b;
     color: #fff;
     font-size: 13px;
     letter-spacing: 1px;
@@ -292,6 +292,19 @@ table {
     font-size: 10px;
     letter-spacing: 0.5px;
     color: #222;
+}
+
+.pdf-footer {
+    position: fixed;
+    bottom: 10mm;
+    left: 15mm;
+    right: 15mm;
+    font-size: 9px;
+    color: #222121;
+    text-align: center;
+    border-top: 1px solid #e6e6e6;
+    padding-top: 4px;
+    z-index: 10;
 }
 
 .right { text-align: right; }

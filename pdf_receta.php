@@ -311,12 +311,14 @@ ob_start();
             </tr>
         <?php endif; ?>
     </table>
+    
+    <div style="margin-bottom: 30mm;"></div>
+</div>
 
-    <div style="margin-top: 5mm; font-size: 9px; color: #555; text-align: center; border-top: 1px solid #e6e6e6; padding-top: 4px;">
-        <strong>Tipo de Cambio SUNAT:</strong> <?= number_format($tipoCambio, 3) ?> |
-        <strong>Generado por:</strong> <?= htmlspecialchars($_SESSION['session_usuario'] ?? $receta['usu_upd'] ?? $receta['usuario'] ?? 'Desconocido') ?> |
-        <strong>Fec. Impresión:</strong> <?= date('Y-m-d H:i:s') ?>
-    </div>
+<div class="pdf-footer">
+    <strong>Tipo de Cambio SUNAT:</strong> <?= number_format($tipoCambio, 3) ?> |
+    <strong>Generado por:</strong> <?= htmlspecialchars($_SESSION['session_usuario'] ?? $receta['usu_upd'] ?? $receta['usuario'] ?? 'Desconocido') ?> |
+    <strong>Fec. Impresión:</strong> <?= date('Y-m-d H:i:s') ?>
 </div>
 </body>
 </html>
