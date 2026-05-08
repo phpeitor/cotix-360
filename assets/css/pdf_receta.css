@@ -78,7 +78,7 @@ table {
 }
 
 .hero-left {
-    width: 34%;
+    width: 10%;
     text-align: center;
 }
 
@@ -123,7 +123,7 @@ table {
 
 .title {
     margin: 0;
-    font-size: 29px;
+    font-size: 14px;
     line-height: 1;
     font-weight: bold;
     letter-spacing: 2px;

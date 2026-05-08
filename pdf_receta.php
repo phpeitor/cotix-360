@@ -188,7 +188,6 @@ ob_start();
     $nombreReceta = trim((string)($receta['nombre'] ?? 'RECETA'));
     $empresaLinea1 = 'Sistema interno';
     $empresaLinea2 = 'Lima, Perú';
-    $empresaLinea3 = 'Documento generado en PDF';
 ?>
 
 <div class="top-band"></div>
@@ -198,10 +197,10 @@ ob_start();
 
 <div class="page">
     <?php
-        $logoPath = __DIR__ . '/assets/images/logo-dark.png';
+        $logoPath = __DIR__ . '/assets/images/mg-indusol-logo.svg';
         $logoDataUri = '';
         if (file_exists($logoPath) && is_readable($logoPath)) {
-            $mime = 'image/png';
+            $mime = 'image/svg+xml';
             $data = @file_get_contents($logoPath);
             if ($data !== false) {
                 $logoDataUri = 'data:' . $mime . ';base64,' . base64_encode($data);
@@ -232,10 +231,9 @@ ob_start();
                 <p class="panel-line">Estado: <?= escaparPdf($receta['estado'] ?? 'N/D') ?></p>
             </td>
             <td class="panel" style="padding-left: 6mm; text-align: right;">
-                <div class="panel-title">EMPRESA</div>
+                <div class="panel-title">MG INDUSOL</div>
                 <p class="panel-line"><?= escaparPdf($empresaLinea1) ?></p>
                 <p class="panel-line"><?= escaparPdf($empresaLinea2) ?></p>
-                <p class="panel-line"><?= escaparPdf($empresaLinea3) ?></p>
             </td>
         </tr>
     </table>
