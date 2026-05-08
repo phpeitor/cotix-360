@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnGuardarRecetaCategoria = document.getElementById("btnGuardarRecetaCategoria");
     const totalFormulaSolesEl = document.getElementById("totalFormulaSoles");
     const totalFormulaDolaresEl = document.getElementById("totalFormulaDolares");
+    const inputRecetaNombre = document.getElementById("inputRecetaNombre");
 
     const baseSelect = document.getElementById("filterBase");
     const categoriaSelect = document.getElementById("categoria");
@@ -475,6 +476,16 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             renderCategoriasRecetaModal(Array.isArray(data.rows) ? data.rows : [], data.source || "detalle");
+            // establecer el nombre de la receta en el input (si existe)
+            try {
+                if (inputRecetaNombre) {
+                    inputRecetaNombre.value = String(receta?.nombre || "").replace(/^PROY-/, "");
+                    // deshabilitar edición si no está en estado Enviada
+                    inputRecetaNombre.disabled = !isRecetaEditable();
+                }
+            } catch (e) {
+                console.error(e);
+            }
         } catch (error) {
             console.error(error);
             if (alertCategoriaRecetaEl) {
@@ -494,6 +505,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
             alertify.error(error.message || "Error al cargar categorías");
         }
+    }
+
+    // Actualizar nombre de receta cuando el usuario cambia el input (blur)
+    if (inputRecetaNombre) {
+        let pending = false;
+        inputRecetaNombre.addEventListener("blur", async () => {
+            if (!receta || pending) return;
+            const nuevo = String(inputRecetaNombre.value || "").trim();
+            const actual = String(receta.nombre || "").replace(/^PROY-/, "").trim();
+            if (nuevo === "" || nuevo === actual) return;
+
+            if (!confirm('¿Actualizar nombre de la receta a "' + nuevo + '"?')) {
+                inputRecetaNombre.value = actual;
+                return;
+            }
+
+            pending = true;
+            try {
+                const form = new FormData();
+                form.append('hash', String(hash || ''));
+                form.append('nombre', nuevo);
+
+                const res = await fetch('controller/upd_nombre_receta.php', {
+                    method: 'POST',
+                    body: form
+                });
+
+                const json = await res.json();
+                if (!res.ok || !json.success) {
+                    throw new Error(json.message || 'No se pudo actualizar el nombre');
+                }
+
+                alertify.success(json.message || 'Nombre actualizado');
+                // recargar la receta para reflejar cambios en UI
+                await cargarReceta(hash);
+            } catch (err) {
+                console.error(err);
+                alertify.error(err.message || 'Error al actualizar nombre');
+                // revertir valor
+                inputRecetaNombre.value = String(receta?.nombre || "").replace(/^PROY-/, "");
+            } finally {
+                pending = false;
+            }
+        });
     }
 
     async function guardarCategoriasRecetaModal() {

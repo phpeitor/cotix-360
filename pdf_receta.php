@@ -228,7 +228,7 @@ ob_start();
                 <div class="panel-title">RECETA</div>
                 <div class="panel-name"><?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Sin responsable') ?></div>
                 <p class="panel-line">Usuario registro: <?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Desconocido') ?></p>
-                <p class="panel-line">Estado: <?= escaparPdf($receta['estado'] ?? 'N/D') ?></p>
+                <p class="panel-line">Estado: <?= escaparPdf($receta['estado'] ?? 'N/D') ?> (<?= escaparPdf($receta['usu_upd'] ?? 'N/D') ?>)</p>
             </td>
             <td class="panel" style="padding-left: 6mm; text-align: right;">
                 <div class="panel-title">MG INDUSOL</div>
@@ -241,9 +241,11 @@ ob_start();
     <table class="section-table">
         <thead>
             <tr class="section-head">
-                <th style="width: 78%;">DESCRIPCIÓN</th>
-                <th style="width: 10%;">CANT.</th>
-                <th style="width: 12%;">PRECIO</th>
+                <th style="width: <?= $esTecnico ? '88%' : '78%'; ?>;">DESCRIPCIÓN</th>
+                <th style="width: 12%;">CANT.</th>
+                <?php if (!$esTecnico): ?>
+                    <th style="width: 12%;">PRECIO</th>
+                <?php endif; ?>
             </tr>
         </thead>
         <tbody>
@@ -272,7 +274,9 @@ ob_start();
                         <div class="item-meta">Tipo: <?= escaparPdf((string)($i['tipo'] ?? '')) ?></div>
                     </td>
                     <td class="item-qty"><?= (int)$cantidad ?></td>
-                    <td class="item-price"><?= escaparPdf(formatearMontoPdf($subtotalLinea, $simboloLinea)) ?></td>
+                    <?php if (!$esTecnico): ?>
+                        <td class="item-price"><?= escaparPdf(formatearMontoPdf($subtotalLinea, $simboloLinea)) ?></td>
+                    <?php endif; ?>
                 </tr>
             <?php endforeach; ?>
         </tbody>
