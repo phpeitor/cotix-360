@@ -5,6 +5,45 @@ require_once __DIR__ . "/vendor/autoload.php";
 require_once __DIR__ . "/model/receta.php";
 require_once __DIR__ . "/model/item.php";
 
+// Helpers para formateo y seguridad en el PDF
+function escaparPdf($value) {
+    return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+function formatearFechaPdf($fecha) {
+    if (empty($fecha)) return '';
+    try {
+        $dt = new DateTime($fecha);
+        return $dt->format('Y-m-d H:i');
+    } catch (Exception $e) {
+        return (string)$fecha;
+    }
+}
+
+function formatearNumeroRecetaPdf($id) {
+    return sprintf('RC-%06d', (int)$id);
+}
+
+function formatearMontoPdf($monto, $simbolo = 'S/') {
+    $monto = (float)$monto;
+    return $simbolo . ' ' . number_format($monto, 2);
+}
+
+function normalizarTextoDetallePdf($texto) {
+    if ($texto === null) return '';
+    $text = strip_tags((string)$texto);
+    $text = trim(preg_replace('/\s+/', ' ', $text));
+    return $text;
+}
+
+function formatearRutaDetallePdf(array $partes) {
+    $clean = array_filter(array_map(function($p){
+        $s = trim((string)$p);
+        return $s === '' ? null : $s;
+    }, $partes));
+    return implode(' / ', $clean);
+}
+
 /*ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -68,406 +107,59 @@ foreach ($detalle as &$item) {
 
 }
 
+// Calcular totales adicionales (Total Perú y Totales de Margen por categoría)
 $totalPeru = $totalSoles + ($totalDolares * $tipoCambio);
 
-// Calcular totales con margen por moneda
 $totalMargenSoles = 0.0;
 $totalMargenDolares = 0.0;
+$totalMargenPeru = 0.0;
+$igvMargenPeru = 0.0;
+$totalConIgv = 0.0;
 
-if (isset($categorias['rows']) && is_array($categorias['rows'])) {
+if (is_array($categorias) && isset($categorias['rows']) && is_array($categorias['rows'])) {
     foreach ($categorias['rows'] as $cat) {
-        $subtotal = (float)($cat['subtotal'] ?? 0);
-        $margenPct = (float)($cat['margen'] ?? 0);
+        $subtotalCat = (float)($cat['subtotal'] ?? 0);
         $monedaCat = strtoupper(trim((string)($cat['moneda'] ?? '')));
-        
-        // Calcular total con margen: subtotal / (1 - margen_decimal)
-        $margenDecimal = $margenPct / 100;
-        if ($margenDecimal < 1) {
-            $totalConMargen = $subtotal / (1 - $margenDecimal);
-        } else {
-            $totalConMargen = 0;
+        $margenPct = (float)($cat['margen'] ?? 0);
+        $margenDecimal = $margenPct / 100.0;
+        if ($margenDecimal >= 1) {
+            $margenDecimal = 0; // evitar división por cero o valores inválidos
         }
-        
+
+        $totalConMargenCat = $margenDecimal > 0 ? ($subtotalCat / (1 - $margenDecimal)) : $subtotalCat;
+        $margenMonto = $totalConMargenCat - $subtotalCat;
+
         if ($monedaCat === 'DOLLAR') {
-            $totalMargenDolares += $totalConMargen;
+            $totalMargenDolares += $margenMonto;
+            $totalMargenPeru += ($margenMonto * $tipoCambio);
         } else {
-            $totalMargenSoles += $totalConMargen;
+            $totalMargenSoles += $margenMonto;
+            $totalMargenPeru += $margenMonto;
         }
     }
-}
 
-// Calcular Total Margen Perú
-$totalMargenPeru = $totalMargenSoles + ($totalMargenDolares * $tipoCambio);
-
-// Calcular IGV (18%)
-$igvMargenPeru = $totalMargenPeru * 0.18;
-
-// Calcular Total con IGV
-$totalConIgv = $totalMargenPeru + $igvMargenPeru;
-
-function normalizarTextoDetallePdf($valor): string
-{
-    $texto = trim((string)($valor ?? ''));
-
-    if ($texto === '' || $texto === '-') {
-        return '';
-    }
-
-    return $texto;
-}
-
-function formatearRutaDetallePdf(array $valores): string
-{
-    $partes = [];
-
-    foreach ($valores as $valor) {
-        $texto = normalizarTextoDetallePdf($valor);
-
-        if ($texto === '') {
-            continue;
-        }
-
-        $ultimo = end($partes);
-        if ($ultimo === $texto) {
-            continue;
-        }
-
-        $partes[] = $texto;
-    }
-
-    return implode(' / ', $partes);
-}
-
-function escaparPdf(?string $valor): string
-{
-    return htmlspecialchars((string)($valor ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-}
-
-function formatearFechaPdf(?string $valor): string
-{
-    if (!$valor) {
-        return '-';
-    }
-
-    try {
-        $fecha = new DateTimeImmutable($valor);
-    } catch (Throwable $e) {
-        return trim((string)$valor);
-    }
-
-    $meses = [
-        'January' => 'enero',
-        'February' => 'febrero',
-        'March' => 'marzo',
-        'April' => 'abril',
-        'May' => 'mayo',
-        'June' => 'junio',
-        'July' => 'julio',
-        'August' => 'agosto',
-        'September' => 'septiembre',
-        'October' => 'octubre',
-        'November' => 'noviembre',
-        'December' => 'diciembre',
-    ];
-
-    $mes = $meses[$fecha->format('F')] ?? strtolower($fecha->format('F'));
-    return strtoupper($fecha->format('d')) . ' DE ' . strtoupper($mes) . ' DE ' . $fecha->format('Y');
-}
-
-function formatearNumeroRecetaPdf($id): string
-{
-    return str_pad((string)((int)$id), 5, '0', STR_PAD_LEFT);
-}
-
-function formatearMontoPdf(float $monto, string $simbolo = 'S/'): string
-{
-    return $simbolo . ' ' . number_format($monto, 2);
+    $igvMargenPeru = $totalMargenPeru * 0.18;
+    $totalConIgv = $totalMargenPeru + $igvMargenPeru;
 }
 
 ob_start();
 ?>
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Receta <?= md5($receta['id']) ?></title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Receta PDF</title>
+<?php
+    // Cargar archivo CSS externo para Dompdf
+    $cssPath = __DIR__ . '/assets/css/pdf_receta.css';
+    $cssContent = '';
+    if (file_exists($cssPath) && is_readable($cssPath)) {
+        $cssContent = file_get_contents($cssPath);
+    }
+?>
     <style>
-        @page { margin: 18mm 15mm 16mm 15mm; }
-
-        body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 10px;
-            color: #202124;
-            position: relative;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .page {
-            position: relative;
-            z-index: 2;
-        }
-
-        .top-band,
-        .bottom-band {
-            position: fixed;
-            left: 0;
-            right: 0;
-            height: 18mm;
-            background: #148fd0;
-            z-index: 0;
-        }
-
-        .top-band { top: 0; }
-        .bottom-band { bottom: 0; }
-
-        .corner-top-right,
-        .corner-bottom-left {
-            position: fixed;
-            width: 0;
-            height: 0;
-            z-index: 1;
-        }
-
-        .corner-top-right {
-            top: 0;
-            right: 0;
-            border-top: 30mm solid #8ad9c7;
-            border-left: 30mm solid transparent;
-        }
-
-        .corner-bottom-left {
-            left: 0;
-            bottom: 0;
-            border-bottom: 30mm solid #8ad9c7;
-            border-right: 30mm solid transparent;
-        }
-
-        .watermark {
-            position: fixed;
-            top: 45%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 80px;
-            font-weight: bold;
-            color: rgba(0,0,0,0.08);
-            z-index: -1;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-
-        .watermark.aprobada { color: rgba(25, 135, 84, 0.15); }
-        .watermark.anulada { color: rgba(220, 53, 69, 0.15); }
-
-        .hero {
-            margin-top: 18mm;
-            padding-top: 8mm;
-        }
-
-        .hero td {
-            vertical-align: top;
-        }
-
-        .hero-left {
-            width: 34%;
-        }
-
-        .hero-right {
-            width: 66%;
-            text-align: right;
-        }
-
-        .doc-number {
-            font-size: 11px;
-            letter-spacing: 1px;
-            margin: 0 0 2mm 0;
-        }
-
-        .doc-date {
-            font-size: 11px;
-            letter-spacing: 1px;
-            margin: 0;
-        }
-
-        .title {
-            margin: 0;
-            font-size: 29px;
-            line-height: 1;
-            font-weight: bold;
-            letter-spacing: 2px;
-            color: #0e84c2;
-        }
-
-        .panels {
-            margin-top: 5mm;
-        }
-
-        .panel {
-            width: 50%;
-            vertical-align: top;
-        }
-
-        .panel-title {
-            font-size: 13px;
-            font-weight: bold;
-            color: #3d3d3d;
-            letter-spacing: 0.5px;
-            margin: 0 0 1mm 0;
-        }
-
-        .panel-name {
-            font-size: 13px;
-            color: #197fb6;
-            letter-spacing: 1px;
-            margin: 0 0 0.8mm 0;
-        }
-
-        .panel-line {
-            margin: 0 0 0.6mm 0;
-            font-size: 10.5px;
-            letter-spacing: 0.4px;
-        }
-
-        .section-table {
-            margin-top: 6mm;
-        }
-
-        .section-head th {
-            background: #0f86c2;
-            color: #fff;
-            font-size: 13px;
-            letter-spacing: 1px;
-            padding: 2.5mm 3mm;
-            border: none;
-        }
-
-        .item-row td {
-            border-bottom: 0.35mm solid #4f4f4f;
-            padding: 2mm 2mm 2.5mm 2mm;
-            vertical-align: top;
-        }
-
-        .item-description {
-            font-size: 11px;
-            letter-spacing: 0.3px;
-            margin-bottom: 0.6mm;
-        }
-
-        .item-subline {
-            color: #4f4f4f;
-            font-size: 9.5px;
-            line-height: 1.35;
-            margin-bottom: 0.4mm;
-        }
-
-        .item-meta {
-            color: #6a6a6a;
-            font-size: 8.5px;
-            letter-spacing: 0.3px;
-        }
-
-        .item-qty {
-            text-align: center;
-            width: 12%;
-            color: #4f4f4f;
-        }
-
-        .item-price {
-            width: 22%;
-            text-align: right;
-            font-size: 12px;
-            letter-spacing: 0.4px;
-            white-space: nowrap;
-        }
-
-        .summary-wrap {
-            margin-top: 8mm;
-            width: 100%;
-        }
-
-        .summary-box {
-            width: 48%;
-            margin-left: 52%;
-            background: #ededed;
-            padding: 3mm 4mm;
-            box-sizing: border-box;
-        }
-
-        .summary-box td {
-            padding: 1.6mm 0;
-            font-size: 10px;
-            letter-spacing: 0.8px;
-        }
-
-        .summary-label {
-            width: 72%;
-            text-align: center;
-            color: #4a4a4a;
-        }
-
-        .summary-value {
-            width: 28%;
-            text-align: left;
-            color: #222;
-            white-space: nowrap;
-        }
-
-        .summary-total td {
-            padding-top: 2.6mm;
-            font-size: 11px;
-            color: #1c1c1c;
-        }
-
-        .payment {
-            margin-top: 9mm;
-            width: 55%;
-        }
-
-        .payment-title {
-            margin: 0 0 2.5mm 0;
-            font-size: 13px;
-            font-weight: bold;
-            letter-spacing: 0.8px;
-            color: #3d3d3d;
-        }
-
-        .payment-line {
-            margin: 0 0 1mm 0;
-            font-size: 10px;
-            letter-spacing: 0.2px;
-        }
-
-        .signatures {
-            margin-top: 18mm;
-            width: 100%;
-        }
-
-        .signature-cell {
-            width: 50%;
-            vertical-align: bottom;
-            text-align: center;
-            padding-top: 12mm;
-        }
-
-        .signature-line {
-            width: 90%;
-            margin: 0 auto 2.5mm auto;
-            border-top: 0.35mm solid #4f4f4f;
-            height: 1px;
-        }
-
-        .signature-label {
-            font-size: 10px;
-            letter-spacing: 0.5px;
-            color: #222;
-        }
-
-        .right { text-align: right; }
-        .center { text-align: center; }
+    <?= $cssContent ?>
     </style>
 </head>
 <body>
@@ -494,7 +186,6 @@ ob_start();
     $usuarioRegistro = trim((string)($receta['usuario'] ?? ''));
     $usuarioActual = trim((string)($_SESSION['session_usuario'] ?? $receta['usu_upd'] ?? $receta['usuario'] ?? ''));
     $nombreReceta = trim((string)($receta['nombre'] ?? 'RECETA'));
-    $empresaNombre = 'COTIX';
     $empresaLinea1 = 'Sistema interno';
     $empresaLinea2 = 'Lima, Perú';
     $empresaLinea3 = 'Documento generado en PDF';
@@ -506,11 +197,25 @@ ob_start();
 <div class="corner-bottom-left"></div>
 
 <div class="page">
+    <?php
+        $logoPath = __DIR__ . '/assets/images/logo-dark.png';
+        $logoDataUri = '';
+        if (file_exists($logoPath) && is_readable($logoPath)) {
+            $mime = 'image/png';
+            $data = @file_get_contents($logoPath);
+            if ($data !== false) {
+                $logoDataUri = 'data:' . $mime . ';base64,' . base64_encode($data);
+            }
+        }
+    ?>
     <table class="hero">
         <tr>
             <td class="hero-left">
-                <p class="doc-number">N°. <?= escaparPdf($numeroReceta) ?></p>
-                <p class="doc-date"><?= escaparPdf($fechaReceta) ?></p>
+                <?php if ($logoDataUri): ?>
+                    <img src="<?= $logoDataUri ?>" alt="Logo" class="hero-logo">
+                <?php else: ?>
+                    <div style="width: 100px; height: 80px; background: #f0f0f0; margin: 0 auto;"></div>
+                <?php endif; ?>
             </td>
             <td class="hero-right">
                 <div class="title"><?= escaparPdf($nombreReceta !== '' ? mb_strtoupper($nombreReceta, 'UTF-8') : 'RECETA') ?></div>
@@ -523,18 +228,14 @@ ob_start();
             <td class="panel" style="padding-right: 6mm;">
                 <div class="panel-title">RECETA</div>
                 <div class="panel-name"><?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Sin responsable') ?></div>
-                <p class="panel-line">ID: <?= escaparPdf($numeroReceta) ?></p>
                 <p class="panel-line">Usuario registro: <?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Desconocido') ?></p>
                 <p class="panel-line">Estado: <?= escaparPdf($receta['estado'] ?? 'N/D') ?></p>
-                <p class="panel-line">Tipo de cambio: <?= number_format($tipoCambio, 3) ?></p>
             </td>
             <td class="panel" style="padding-left: 6mm; text-align: right;">
                 <div class="panel-title">EMPRESA</div>
-                <div class="panel-name"><?= escaparPdf($empresaNombre) ?></div>
                 <p class="panel-line"><?= escaparPdf($empresaLinea1) ?></p>
                 <p class="panel-line"><?= escaparPdf($empresaLinea2) ?></p>
                 <p class="panel-line"><?= escaparPdf($empresaLinea3) ?></p>
-                <p class="panel-line">Generado por: <?= escaparPdf($usuarioActual !== '' ? $usuarioActual : 'Sistema') ?></p>
             </td>
         </tr>
     </table>
@@ -588,11 +289,11 @@ ob_start();
             </tr>
         <?php else: ?>
             <tr>
-                <td style="width: 33%; background: #ededed; padding: 5mm 6mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
+                <td style="width: 33%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
                     <strong>Total Producto:</strong> S/ <?= number_format($totalProductoPeru, 2) ?><br>
                     <strong>Total Servicio:</strong> S/ <?= number_format($totalServicioPeru, 2) ?>
                 </td>
-                <td style="width: 33%; background: #ededed; padding: 5mm 6mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
+                <td style="width: 33%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
                     <strong>Total Items:</strong> <?= $totalItems ?><br>
                     <strong>Total S/:</strong> <?= number_format($totalSoles, 2) ?><br>
                     <?php if ($totalDolares > 0): ?>
