@@ -479,9 +479,15 @@ document.addEventListener("DOMContentLoaded", () => {
             // establecer el nombre de la receta en el input (si existe)
             try {
                 if (inputRecetaNombre) {
-                    inputRecetaNombre.value = String(receta?.nombre || "").replace(/^PROY-/, "");
-                    // deshabilitar edición si no está en estado Enviada
-                    inputRecetaNombre.disabled = !isRecetaEditable();
+                    // Limpiar el nombre original: quitar prefijo PROY- / PRO- (insensible a mayúsculas)
+                    // y eliminar sufijos numéricos como -2 o -2-3 al final.
+                    let raw = String(receta?.nombre || "").trim();
+                    raw = raw.replace(/^PROY-?/i, '').replace(/^PRO-?/i, '');
+                    raw = raw.replace(/(?:-\d+)+$/, '');
+                    inputRecetaNombre.value = raw;
+                    // permitir edición del nombre en el modal para que el usuario pueda cambiarlo
+                    inputRecetaNombre.disabled = false;
+                    inputRecetaNombre.readOnly = false;
                 }
             } catch (e) {
                 console.error(e);
@@ -507,49 +513,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Actualizar nombre de receta cuando el usuario cambia el input (blur)
-    if (inputRecetaNombre) {
-        let pending = false;
-        inputRecetaNombre.addEventListener("blur", async () => {
-            if (!receta || pending) return;
-            const nuevo = String(inputRecetaNombre.value || "").trim();
-            const actual = String(receta.nombre || "").replace(/^PROY-/, "").trim();
-            if (nuevo === "" || nuevo === actual) return;
-
-            if (!confirm('¿Actualizar nombre de la receta a "' + nuevo + '"?')) {
-                inputRecetaNombre.value = actual;
-                return;
-            }
-
-            pending = true;
-            try {
-                const form = new FormData();
-                form.append('hash', String(hash || ''));
-                form.append('nombre', nuevo);
-
-                const res = await fetch('controller/upd_nombre_receta.php', {
-                    method: 'POST',
-                    body: form
-                });
-
-                const json = await res.json();
-                if (!res.ok || !json.success) {
-                    throw new Error(json.message || 'No se pudo actualizar el nombre');
-                }
-
-                alertify.success(json.message || 'Nombre actualizado');
-                // recargar la receta para reflejar cambios en UI
-                await cargarReceta(hash);
-            } catch (err) {
-                console.error(err);
-                alertify.error(err.message || 'Error al actualizar nombre');
-                // revertir valor
-                inputRecetaNombre.value = String(receta?.nombre || "").replace(/^PROY-/, "");
-            } finally {
-                pending = false;
-            }
-        });
-    }
+    // El envío/actualización del nombre se realiza al pulsar el botón Guardar; no actualizamos aquí al perder foco.
 
     async function guardarCategoriasRecetaModal() {
         if (!receta?.id) {
@@ -599,23 +563,55 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const formData = new FormData();
-            formData.append("receta_id", String(receta.id));
-            formData.append("items", JSON.stringify(rows));
+                // Si el input de nombre existe y cambió, actualizar nombre primero
+                if (inputRecetaNombre) {
+                    try {
+                        const nuevo = String(inputRecetaNombre.value || "").trim();
+                        const actual = String(receta?.nombre || "").replace(/^PROY-/, "").trim();
+                        if (nuevo !== "" && nuevo !== actual) {
+                            const nameForm = new FormData();
+                            nameForm.append('hash', String(hash || ''));
+                            nameForm.append('nombre', nuevo);
 
-            const res = await fetch("controller/upd_receta_categoria.php", {
-                method: "POST",
-                body: formData,
-            });
+                            const resName = await fetch('controller/upd_nombre_receta.php', {
+                                method: 'POST',
+                                body: nameForm
+                            });
 
-            const json = await res.json();
+                            const jsonName = await resName.json();
+                            if (!resName.ok || !jsonName.success) {
+                                throw new Error(jsonName.message || 'No se pudo actualizar el nombre de la receta');
+                            }
 
-            if (!res.ok || !json.ok) {
-                throw new Error(json.message || "No se pudieron guardar las categorías");
-            }
+                            alertify.success(jsonName.message || 'Nombre actualizado');
+                            // recargar receta para tener datos consistentes antes de guardar categorías
+                            await cargarReceta(hash);
+                        }
+                    } catch (errName) {
+                        console.error(errName);
+                        alertify.error(errName.message || 'Error al actualizar nombre');
+                        if (btn) btn.disabled = false;
+                        return;
+                    }
+                }
 
-            alertify.success(`Se guardaron ${json.guardados || rows.length} categorías`);
-            await cargarCategoriasRecetaModal();
+                const formData = new FormData();
+                formData.append("receta_id", String(receta.id));
+                formData.append("items", JSON.stringify(rows));
+
+                const res = await fetch("controller/upd_receta_categoria.php", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const json = await res.json();
+
+                if (!res.ok || !json.ok) {
+                    throw new Error(json.message || "No se pudieron guardar las categorías");
+                }
+
+                alertify.success(`Se guardaron ${json.guardados || rows.length} categorías`);
+                await cargarCategoriasRecetaModal();
         } catch (error) {
             console.error(error);
             alertify.error(error.message || "Error al guardar categorías");
