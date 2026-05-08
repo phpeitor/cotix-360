@@ -23,7 +23,7 @@ table {
     left: 0;
     right: 0;
     height: 18mm;
-    background: #148fd0;
+    background: #0066cc;
     z-index: 0;
 }
 
@@ -41,15 +41,15 @@ table {
 .corner-top-right {
     top: 0;
     right: 0;
-    border-top: 30mm solid #8ad9c7;
-    border-left: 30mm solid transparent;
+    border-top: 50mm solid #2d9b7f;
+    border-left: 50mm solid transparent;
 }
 
 .corner-bottom-left {
     left: 0;
     bottom: 0;
-    border-bottom: 30mm solid #8ad9c7;
-    border-right: 30mm solid transparent;
+    border-bottom: 50mm solid #2d9b7f;
+    border-right: 50mm solid transparent;
 }
 
 .watermark {
