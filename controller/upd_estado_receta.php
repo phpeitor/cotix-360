@@ -32,6 +32,11 @@ try {
         : 'Anulada';
 
     $receta = new Receta();
+
+    if ($accion === 'aprobar' && !$receta->recetaTieneMargenes((int)$id)) {
+        throw new Exception('No se puede aprobar la receta porque no tiene márgenes registrados');
+    }
+
     $ok = $receta->actualizar_estado((int)$id, $estado,(int)$_SESSION['session_id']);
 
     if (!$ok) {
