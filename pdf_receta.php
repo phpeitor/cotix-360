@@ -31,8 +31,12 @@ function formatearMontoPdf($monto, $simbolo = 'S/') {
 
 function normalizarTextoDetallePdf($texto) {
     if ($texto === null) return '';
-    $text = strip_tags((string)$texto);
+    $text = html_entity_decode(strip_tags((string)$texto), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $text = trim(preg_replace('/\s+/', ' ', $text));
+    if ($text === '' || preg_match('/^[\-\–\—\s]+$/u', $text)) {
+        return '';
+    }
+
     return $text;
 }
 
@@ -137,10 +141,11 @@ if (is_array($categorias) && isset($categorias['rows']) && is_array($categorias[
             $totalMargenPeru += $margenMonto;
         }
     }
-
-    $igvMargenPeru = $totalMargenPeru * 0.18;
-    $totalConIgv = $totalMargenPeru + $igvMargenPeru;
 }
+
+$totalMargenPeruConBase = $totalPeru + $totalMargenPeru;
+$igvMargenPeru = $totalMargenPeruConBase * 0.18;
+$totalConIgv = $totalMargenPeruConBase + $igvMargenPeru;
 
 ob_start();
 ?>
@@ -300,17 +305,17 @@ ob_start();
                     <strong>Total S/:</strong> <?= number_format($totalSoles, 2) ?><br>
                     <?php if ($totalDolares > 0): ?>
                         <strong>Total $:</strong> <?= number_format($totalDolares, 2) ?><br>
-                        <strong>Total Perú:</strong> S/ <?= number_format($totalPeru, 2) ?>
+                        <strong>Total Perú:</strong> <?= number_format($totalPeru, 2) ?>
                     <?php endif; ?>
                 </td>
                 <td style="width: 34%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
-                    <strong>Total Margen S/:</strong> S/ <?= number_format($totalMargenSoles, 2) ?><br>
+                    <strong>Total Margen S/:</strong> <?= number_format($totalMargenSoles, 2) ?><br>
                     <?php if ($totalMargenDolares > 0): ?>
-                        <strong>Total Margen $:</strong> $ <?= number_format($totalMargenDolares, 2) ?><br>
+                        <strong>Total Margen $:</strong> <?= number_format($totalMargenDolares, 2) ?><br>
                     <?php endif; ?>
-                    <strong>Total Margen Perú:</strong> S/ <?= number_format($totalMargenPeru, 2) ?><br>
-                    <strong>IGV 18%:</strong> S/ <?= number_format($igvMargenPeru, 2) ?><br>
-                    <strong>Total + IGV:</strong> S/ <?= number_format($totalConIgv, 2) ?>
+                    <strong>Total Margen Perú:</strong> <?= number_format($totalMargenPeruConBase, 2) ?><br>
+                    <strong>IGV 18%:</strong> <?= number_format($igvMargenPeru, 2) ?><br>
+                    <strong>Total + IGV:</strong> <?= number_format($totalConIgv, 2) ?>
                 </td>
             </tr>
         <?php endif; ?>
