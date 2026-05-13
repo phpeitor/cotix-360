@@ -276,6 +276,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 data-hash="${hashId}">
                     <i class="ti ti-file"></i>
                 </a>
+
+                <a href="controller/export_receta_excel.php?id=${hashId}"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Excel"
+                data-bs-toggle="tooltip"
+                data-bs-title="Excel"
+                class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-excel-receta"
+                data-hash="${hashId}">
+                    <i class="ti ti-file-spreadsheet"></i>
+                </a>
             `;
 
         } else if (estado === "Anulada") {
