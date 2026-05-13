@@ -207,7 +207,7 @@ try {
     $sheet->getStyle('B' . $totalsStart . ':B' . ($totalsStart + 3))->getNumberFormat()->setFormatCode('#,##0.00');
     $sheet->getStyle('E' . $totalsStart . ':E' . ($totalsStart + count($totals) - 1))->getNumberFormat()->setFormatCode('#,##0.00');
 
-    $sheet->getColumnDimension('B')->setWidth(28);
+    $sheet->getColumnDimension('B')->setWidth(33);
     $sheet->getColumnDimension('C')->setWidth(26);
     foreach (['A', 'D', 'E', 'F', 'G', 'H'] as $col) {
         $sheet->getColumnDimension($col)->setAutoSize(true);
