@@ -48,7 +48,11 @@
       "home.php",
       "items_receta.php",
       "add_item_receta.php",
-      "upd_item_receta.php"
+      "upd_item_receta.php",
+      "cotizaciones.php",
+      "form_cotizacion.php",
+      "pdf_cotizacion.php",
+      "calculo.php"
     ]
   }
 }

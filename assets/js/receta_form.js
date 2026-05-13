@@ -686,7 +686,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function formatMoneda(moneda, monto) {
-        return `${getMonedaSimbolo(moneda)} ${formatDecimal(Number(monto) || 0)}`;
+        return `${getMonedaSimbolo(moneda)} ${format2(Number(monto) || 0)}`;
     }
 
     function escapeAttr(value) {
@@ -850,11 +850,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                     <td class="text-end ${isTecnico ? "d-none" : ""}">
                         <span class="text-muted fs-12">${monedaSimbolo}</span>
-                        <h5 class="fs-14 mt-1 fw-normal mb-0">${formatDecimal(precio)}</h5>
+                        <h5 class="fs-14 mt-1 fw-normal mb-0">${format2(precio)}</h5>
                     </td>
                     <td class="text-end ${isTecnico ? "d-none" : ""}">
                         <span class="text-muted fs-12">${monedaSimbolo}</span>
-                        <h5 class="fs-14 mt-1 fw-normal mb-0">${formatDecimal(subtotal)}</h5>
+                        <h5 class="fs-14 mt-1 fw-normal mb-0">${format2(subtotal)}</h5>
                     </td>
                     <td class="text-center">
                         <button type="button" class="btn btn-sm btn-danger btn-delete-item" data-id="${itemId}" ${editable ? "" : "disabled"}>
@@ -1219,7 +1219,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const itemDescripcion = normalizarTextoDetalle(item.descripcion);
             const detalleLinea1 = formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]);
             const monedaSimbolo = String(item.moneda || "").toUpperCase() === "DOLLAR" ? "$" : "S/.";
-            const precioTexto = `${monedaSimbolo} ${formatDecimal(item.precio)}`;
+            const precioTexto = `${monedaSimbolo} ${format2(item.precio)}`;
             const itemPayload = encodeURIComponent(JSON.stringify(item));
 
             return `

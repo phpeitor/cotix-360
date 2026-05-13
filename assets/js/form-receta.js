@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const detalleLinea1 = formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]);
             const detalleLinea2 = [item.marca, item.modelo, item.uni_medida].filter(Boolean).join(" / ");
             const monedaSimbolo = item.moneda === "DOLLAR" ? "$" : "S/.";
-            const precioTexto = `${monedaSimbolo} ${formatDecimal(item.precio)}`;
+            const precioTexto = `${monedaSimbolo} ${format2(item.precio)}`;
             const itemPayload = encodeURIComponent(JSON.stringify({
                 id: item.id,
                 descripcion: item.descripcion,
@@ -410,7 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             </td>
 
-            <td class="${isTecnico ? "d-none" : ""}"><span class="text-muted fs-12">Precio</span><h5 class="fs-14 mt-1 fw-normal">${item.moneda === 'DOLLAR' ? '$' : 'S/.'}${formatDecimal(item.precio)}</h5></td>
+            <td class="${isTecnico ? "d-none" : ""}"><span class="text-muted fs-12">Precio</span><h5 class="fs-14 mt-1 fw-normal">${item.moneda === 'DOLLAR' ? '$' : 'S/.'}${format2(item.precio)}</h5></td>
             
             <td>
                 <a href="javascript:void(0)" class="text-danger btnDeleteItem">
@@ -515,7 +515,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </td>
                 <td>${tr.dataset.tipo || "-"}</td>
                 <td class="text-center">${qty}</td>
-                <td class="text-end ${precioColumnHidden ? "d-none" : ""}">${monedaSimbolo} ${formatDecimal(precio)}</td>
+                <td class="text-end ${precioColumnHidden ? "d-none" : ""}">${monedaSimbolo} ${format2(precio)}</td>
             `;
 
             previewTableBody.appendChild(row);
