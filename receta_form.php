@@ -123,7 +123,12 @@
                                             </div>
 
                                             <div class="col-lg-3 col-6 border-end">
-                                                <p class="text-muted fw-medium fs-12 mb-1"><span class="text-dark">Tipo de Cambio SUNAT (Venta)</span> <span id="tipo_cambio_sunat" class="text-muted">0.000</span></p>
+                                                <p class="text-muted fw-medium fs-12 mb-1">
+                                                    <span class="text-dark">Tipo de Cambio SUNAT (Venta)</span>
+                                                    <span id="tipo_cambio_sunat" class="text-muted">0.000</span>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btnEditTipoCambio" title="Editar tipo de cambio"><i class="ti ti-edit"></i></button>
+                                                    <input type="number" step="0.001" id="tipo_cambio_input" class="form-control form-control-sm d-none" style="width:110px;display:inline-block;margin-left:8px;">
+                                                </p>
                                             </div>
                                             
                                             <div class="col-lg-3 col-12">

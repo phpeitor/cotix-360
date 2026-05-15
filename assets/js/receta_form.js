@@ -11,6 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalDolaresEl = document.getElementById("total_dolares");
     const totalPeruEl = document.getElementById("total_peru");
     const tipoCambioEl = document.getElementById("tipo_cambio_sunat");
+    const btnEditTipoCambio = document.getElementById("btnEditTipoCambio");
+    const tipoCambioInputEl = document.getElementById("tipo_cambio_input");
     const btnReloadPrecios = document.getElementById("btnReloadPrecios");
     const alertPrecioCambioEl = document.getElementById("alertPrecioCambio");
     const infoCategoriaModalEl = document.getElementById("info-categoria-modal");
@@ -89,6 +91,88 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     init();
+
+    function toggleEditTipoCambio(save = false) {
+        if (!tipoCambioEl || !tipoCambioInputEl || !btnEditTipoCambio || !receta) return;
+
+        const editing = !tipoCambioInputEl.classList.contains('d-none');
+
+        if (!editing && !save) {
+            // activar edición
+            tipoCambioEl.classList.add('d-none');
+            tipoCambioInputEl.classList.remove('d-none');
+            tipoCambioInputEl.focus();
+            btnEditTipoCambio.innerHTML = '<i class="ti ti-check"></i>';
+            return;
+        }
+
+        // si estaba en edición y se pide guardar
+        const nuevoValor = parseFloat(String(tipoCambioInputEl.value || '').replace(/,/g, '.'));
+        if (!Number.isFinite(nuevoValor) || nuevoValor <= 0) {
+            alertify.error('Tipo de cambio inválido');
+            tipoCambioInputEl.focus();
+            return;
+        }
+
+        // enviar al servidor
+        btnEditTipoCambio.disabled = true;
+
+        const fd = new FormData();
+        fd.append('receta_id', String(receta.id));
+        fd.append('tipo_cambio', String(nuevoValor));
+
+        fetch('controller/upd_tipo_cambio.php', {
+            method: 'POST',
+            body: fd
+        }).then(res => res.json()).then(json => {
+            if (!json || !json.ok) {
+                throw new Error(json?.message || 'No se pudo actualizar tipo de cambio');
+            }
+
+            receta.tipo_cambio = nuevoValor;
+            renderHeader();
+            calcularTotales();
+            alertify.success('Tipo de cambio actualizado');
+        }).catch(err => {
+            console.error(err);
+            alertify.error(err.message || 'Error al actualizar tipo de cambio');
+        }).finally(() => {
+            btnEditTipoCambio.disabled = false;
+            // restaurar modo view
+            tipoCambioEl.classList.remove('d-none');
+            tipoCambioInputEl.classList.add('d-none');
+            btnEditTipoCambio.innerHTML = '<i class="ti ti-edit"></i>';
+        });
+    }
+
+    if (btnEditTipoCambio) {
+        btnEditTipoCambio.addEventListener('click', (e) => {
+            e.preventDefault();
+            const editing = tipoCambioInputEl && !tipoCambioInputEl.classList.contains('d-none');
+            if (!editing) {
+                toggleEditTipoCambio(false);
+                return;
+            }
+
+            toggleEditTipoCambio(true);
+        });
+
+        if (tipoCambioInputEl) {
+            tipoCambioInputEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    toggleEditTipoCambio(true);
+                }
+
+                if (e.key === 'Escape') {
+                    // cancelar edición
+                    tipoCambioInputEl.classList.add('d-none');
+                    tipoCambioEl.classList.remove('d-none');
+                    btnEditTipoCambio.innerHTML = '<i class="ti ti-edit"></i>';
+                }
+            });
+        }
+    }
 
     function init() {
         if (!hash) {
@@ -175,6 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (fechaEl) fechaEl.textContent = receta.created_at ?? "";
         if (estadoEl) estadoEl.textContent = receta.estado ?? "";
         if (tipoCambioEl) tipoCambioEl.textContent = Number(receta.tipo_cambio || 0).toFixed(3);
+        if (tipoCambioInputEl) tipoCambioInputEl.value = Number(receta.tipo_cambio || 0).toFixed(3);
 
         setEstadoIcon(receta.estado);
     }
