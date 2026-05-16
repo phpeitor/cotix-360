@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const alertCategoriaRecetaEl = document.getElementById("alertCategoriaReceta");
     const recetaCategoriaTableBody = document.getElementById("recetaCategoriaTableBody");
     const btnGuardarRecetaCategoria = document.getElementById("btnGuardarRecetaCategoria");
-    const totalFormulaSolesEl = document.getElementById("totalFormulaSoles");
     const totalFormulaDolaresEl = document.getElementById("totalFormulaDolares");
     const inputRecetaNombre = document.getElementById("inputRecetaNombre");
 
@@ -354,7 +353,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!recetaCategoriaTableBody) return;
 
         const limpiarResumenFormula = () => {
-            if (totalFormulaSolesEl) totalFormulaSolesEl.textContent = "0.00";
             if (totalFormulaDolaresEl) totalFormulaDolaresEl.textContent = "0.00";
         };
 
@@ -459,10 +457,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         totalSoles += totalRow;
                     }
                 });
-
-                if (totalFormulaSolesEl) {
-                    totalFormulaSolesEl.textContent = format2(decimalAdjust("round", totalSoles, "-2"));
-                }
 
                 if (totalFormulaDolaresEl) {
                     totalFormulaDolaresEl.textContent = format2(decimalAdjust("round", totalDolares, "-2"));

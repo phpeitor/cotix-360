@@ -429,13 +429,21 @@ class Receta {
                     a.*, 
                     COALESCE(b.margen, 0) AS margen
                 FROM (
+                    /* =========================================================
+                    1. SERVICIOS
+                    Agrupa por categoria
+                    Concatena sub_cat_1
+                    ========================================================= */
                     SELECT 
                         CONCAT(
-                            rd.sub_cat_1,
+                            rd.categoria,
                             ' (',
                             GROUP_CONCAT(
-                                DISTINCT rd.sub_cat_2 
-                                ORDER BY rd.sub_cat_2 
+                                DISTINCT CONCAT(
+                                    UPPER(LEFT(rd.sub_cat_1, 1)),
+                                    LOWER(SUBSTRING(rd.sub_cat_1, 2))
+                                )
+                                ORDER BY rd.sub_cat_1
                                 SEPARATOR ', '
                             ),
                             ')'
@@ -458,19 +466,77 @@ class Receta {
                             ),
                             2
                         ) AS subtotal,
+
                         'DOLLAR' AS moneda,
                         rd.receta_id
+
                     FROM receta_detalle rd
                     INNER JOIN recetas r
                         ON r.id = rd.receta_id
+
                     WHERE rd.receta_id = :receta_id
+                    AND rd.tipo = 'SERVICIO'
+
+                    GROUP BY 
+                        rd.categoria,
+                        rd.receta_id
+                        
+                    UNION ALL
+
+                    /* =========================================================
+                    2. PRODUCTOS
+                    Agrupa por sub_cat_1
+                    Concatena sub_cat_2
+                    ========================================================= */
+                    SELECT 
+                        CONCAT(
+                            rd.sub_cat_1,
+                            ' (',
+                            GROUP_CONCAT(
+                                DISTINCT rd.sub_cat_2
+                                ORDER BY rd.sub_cat_2
+                                SEPARATOR ', '
+                            ),
+                            ')'
+                        ) AS sub_cat_1,
+
+                        SUM(COALESCE(rd.cantidad, 0)) AS cantidad,
+
+                        ROUND(
+                            SUM(
+                                CASE 
+                                    WHEN rd.moneda = 'SOL' THEN 
+                                        (COALESCE(rd.precio, 0) * COALESCE(rd.cantidad, 0)) 
+                                        / NULLIF(r.tipo_cambio, 0)
+
+                                    WHEN rd.moneda = 'DOLLAR' THEN 
+                                        COALESCE(rd.precio, 0) * COALESCE(rd.cantidad, 0)
+
+                                    ELSE 0
+                                END
+                            ),
+                            2
+                        ) AS subtotal,
+
+                        'DOLLAR' AS moneda,
+                        rd.receta_id
+
+                    FROM receta_detalle rd
+                    INNER JOIN recetas r
+                        ON r.id = rd.receta_id
+
+                    WHERE rd.receta_id = :receta_id
+                    AND rd.tipo = 'PRODUCTO'
+
                     GROUP BY 
                         rd.sub_cat_1,
                         rd.receta_id
+
                 ) AS a
                 LEFT JOIN receta_categoria b
                     ON a.receta_id = b.receta_id
                 AND a.sub_cat_1 = b.sub_cat_1
+
                 WHERE a.receta_id = :receta_id
                 ORDER BY a.sub_cat_1";
         $stmt = $this->conn->prepare($sql);

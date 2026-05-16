@@ -303,8 +303,8 @@
                 </div>
 
                 <div class="modal-footer border-0">
-                    <div class="me-auto d-flex align-items-center gap-3 flex-wrap">
-                        <div class="small text-muted fw-semibold">Total S/: <span id="totalFormulaSoles">0.00</span></div>
+                    <div class="me-auto d-flex align-items-center gap-4 flex-wrap">
+                        
                         <div class="small text-muted fw-semibold">Total $: <span id="totalFormulaDolares">0.00</span></div>
                         <div class="ms-0">
                             <label for="inputRecetaNombre" class="form-label small mb-1">Nombre receta</label>
