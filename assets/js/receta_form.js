@@ -20,9 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const alertCategoriaRecetaEl = document.getElementById("alertCategoriaReceta");
     const recetaCategoriaTableBody = document.getElementById("recetaCategoriaTableBody");
     const btnGuardarRecetaCategoria = document.getElementById("btnGuardarRecetaCategoria");
-    const totalFormulaSolesEl = document.getElementById("totalFormulaSoles");
     const totalFormulaDolaresEl = document.getElementById("totalFormulaDolares");
-    const totalMargenFormulaSolesEl = document.getElementById("totalMargenFormulaSoles");
     const totalMargenFormulaDolaresEl = document.getElementById("totalMargenFormulaDolares");
     const inputRecetaNombre = document.getElementById("inputRecetaNombre");
     const btnEditRecetaNombre = document.getElementById("btnEditRecetaNombre");
@@ -562,16 +560,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 });
 
-                if (totalFormulaSolesEl) {
-                    totalFormulaSolesEl.textContent = format2(decimalAdjust("round", totalSoles, "-2"));
-                }
-
                 if (totalFormulaDolaresEl) {
                     totalFormulaDolaresEl.textContent = format2(decimalAdjust("round", totalDolares, "-2"));
-                }
-
-                if (totalMargenFormulaSolesEl) {
-                    totalMargenFormulaSolesEl.textContent = format2(decimalAdjust("round", totalMargenSoles, "-2"));
                 }
 
                 if (totalMargenFormulaDolaresEl) {
