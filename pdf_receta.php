@@ -78,9 +78,10 @@ $totalItems = 0;
 $totalSoles = 0.0;
 $totalDolares = 0.0;
 $tipoCambio = (float)($receta['tipo_cambio'] ?? 1);
-// Totales por tipo (convertidos a S/.)
-$totalProductoPeru = 0.0;
-$totalServicioPeru = 0.0;
+// Totales convertidos a DÓLARES (a partir de precios mostrados)
+$totalDolaresConvertidos = 0.0;
+$totalProductoDolares = 0.0;
+$totalServicioDolares = 0.0;
 
 foreach ($detalle as &$item) {
     $qty    = (int)$item['cantidad'];
@@ -98,13 +99,16 @@ foreach ($detalle as &$item) {
         $item['simbolo_moneda'] = 'S/';
     }
 
-    // Sumar al total por tipo en soles (convertir dólares usando tipo de cambio)
-    $subtotalPeru = ($moneda === 'DOLLAR') ? ($subtotal * $tipoCambio) : $subtotal;
+    // Calcular subtotal en DÓLARES para la presentación (si está en S/., convertir)
+    $subtotalDolares = ($moneda === 'DOLLAR') ? $subtotal : ($tipoCambio > 0 ? ($subtotal / $tipoCambio) : 0);
+    $totalDolaresConvertidos += $subtotalDolares;
+
+    // Totales por tipo en DÓLARES
     $tipoNormalized = strtoupper(trim((string)($item['tipo'] ?? '')));
     if ($tipoNormalized === 'PRODUCTO') {
-        $totalProductoPeru += $subtotalPeru;
+        $totalProductoDolares += $subtotalDolares;
     } else {
-        $totalServicioPeru += $subtotalPeru;
+        $totalServicioDolares += $subtotalDolares;
     }
 
     $item['precio_formateado'] = $item['simbolo_moneda'] . ' ' . number_format($precio, 2);
@@ -117,8 +121,10 @@ $totalPeru = $totalSoles + ($totalDolares * $tipoCambio);
 $totalMargenSoles = 0.0;
 $totalMargenDolares = 0.0;
 $totalMargenPeru = 0.0;
-$igvMargenPeru = 0.0;
-$totalConIgv = 0.0;
+// Margen total en DÓLARES (convirtiendo S/. a $)
+$totalMargenDolaresAll = 0.0;
+$igvMargenDolares = 0.0;
+$totalConIgvDolares = 0.0;
 
 if (is_array($categorias) && isset($categorias['rows']) && is_array($categorias['rows'])) {
     foreach ($categorias['rows'] as $cat) {
@@ -135,17 +141,18 @@ if (is_array($categorias) && isset($categorias['rows']) && is_array($categorias[
 
         if ($monedaCat === 'DOLLAR') {
             $totalMargenDolares += $margenMonto;
-            $totalMargenPeru += ($margenMonto * $tipoCambio);
+            // margen en dólares directamente
+            $totalMargenDolaresAll += $margenMonto;
         } else {
             $totalMargenSoles += $margenMonto;
-            $totalMargenPeru += $margenMonto;
+            // convertir margen en S/. a dólares
+            $totalMargenDolaresAll += ($tipoCambio > 0 ? ($margenMonto / $tipoCambio) : 0);
         }
     }
 }
 
-$totalMargenPeruConBase = $totalPeru + $totalMargenPeru;
-$igvMargenPeru = $totalMargenPeruConBase * 0.18;
-$totalConIgv = $totalMargenPeruConBase + $igvMargenPeru;
+$igvMargenDolares = $totalMargenDolaresAll * 0.18;
+$totalConIgvDolares = $totalMargenDolaresAll + $igvMargenDolares;
 
 ob_start();
 ?>
@@ -249,7 +256,7 @@ ob_start();
                 <th style="width: <?= $esTecnico ? '88%' : '68%'; ?>;">DESCRIPCIÓN</th>
                 <th style="width: 12%;">CANT.</th>
                 <?php if (!$esTecnico): ?>
-                    <th style="width: 10%;">PRECIO</th>
+                    <th style="width: 10%;">PRECIO $</th>
                 <?php endif; ?>
             </tr>
         </thead>
@@ -264,17 +271,14 @@ ob_start();
                     $subtotalLinea = $precioUnitario * $cantidad;
                     $simboloLinea = strtoupper(trim((string)($i['moneda'] ?? ''))) === 'DOLLAR' ? '$' : 'S/';
                     
-                    // Calcular precio convertido solo si está en soles
-                    $precioConvertido = 0;
-                    $simboloConvertido = '';
+                    // Mostrar precio en DÓLARES: si el item está en soles, convertir usando tipo de cambio; si ya está en dólares usar el valor real
                     $esEnSoles = strtoupper(trim((string)($i['moneda'] ?? ''))) !== 'DOLLAR';
-                    
-                    if ($esEnSoles && $tipoCambio > 0) {
-                        // Item en soles: convertir a dólares
-                        $precioConvertido = $subtotalLinea / $tipoCambio;
-                        $simboloConvertido = '$';
+                    if ($esEnSoles) {
+                        $precioMostrado = $tipoCambio > 0 ? ($subtotalLinea / $tipoCambio) : 0;
+                    } else {
+                        $precioMostrado = $subtotalLinea;
                     }
-                    // Si está en dólares, no se convierte
+                    $simboloMostrado = '$';
                 ?>
                 <tr class="item-row">
                     <td>
@@ -292,7 +296,7 @@ ob_start();
                     </td>
                     <td class="item-qty"><?= (int)$cantidad ?></td>
                     <?php if (!$esTecnico): ?>
-                        <td class="item-price"><?= escaparPdf(formatearMontoPdf($precioConvertido, $simboloConvertido)) ?></td>
+                        <td class="item-price"><?= escaparPdf(formatearMontoPdf($precioMostrado, $simboloMostrado)) ?></td>
                     <?php endif; ?>
                 </tr>
             <?php endforeach; ?>
@@ -308,26 +312,16 @@ ob_start();
             </tr>
         <?php else: ?>
             <tr>
-                <td style="width: 33%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
-                    <strong>Total Producto:</strong> S/ <?= number_format($totalProductoPeru, 2) ?><br>
-                    <strong>Total Servicio:</strong> S/ <?= number_format($totalServicioPeru, 2) ?>
+                <td style="width: 50%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
+                     <strong>Total Items:</strong> <?= $totalItems ?><br>
+                    <strong>Total Producto:</strong> $ <?= number_format($totalProductoDolares, 2) ?><br>
+                    <strong>Total Servicio:</strong> $ <?= number_format($totalServicioDolares, 2) ?>
                 </td>
-                <td style="width: 33%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
-                    <strong>Total Items:</strong> <?= $totalItems ?><br>
-                    <strong>Total S/:</strong> <?= number_format($totalSoles, 2) ?><br>
-                    <?php if ($totalDolares > 0): ?>
-                        <strong>Total $:</strong> <?= number_format($totalDolares, 2) ?><br>
-                        <strong>Total Perú:</strong> <?= number_format($totalPeru, 2) ?>
-                    <?php endif; ?>
-                </td>
-                <td style="width: 34%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
-                    <strong>Total Margen S/:</strong> <?= number_format($totalMargenSoles, 2) ?><br>
-                    <?php if ($totalMargenDolares > 0): ?>
-                        <strong>Total Margen $:</strong> <?= number_format($totalMargenDolares, 2) ?><br>
-                    <?php endif; ?>
-                    <strong>Total Margen Perú:</strong> <?= number_format($totalMargenPeruConBase, 2) ?><br>
-                    <strong>IGV 18%:</strong> <?= number_format($igvMargenPeru, 2) ?><br>
-                    <strong>Total + IGV:</strong> <?= number_format($totalConIgv, 2) ?>
+                <td style="width: 50%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
+                    <strong>Total $:</strong> <?= number_format($totalDolaresConvertidos, 2) ?><br>
+                    <strong>Margen $:</strong> <?= number_format($totalMargenDolaresAll, 2) ?><br>
+                    <strong>IGV 18%:</strong> <?= number_format($igvMargenDolares, 2) ?><br>
+                    <strong>Total + IGV:</strong> <?= number_format($totalConIgvDolares, 2) ?>
                 </td>
             </tr>
         <?php endif; ?>
