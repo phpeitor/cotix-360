@@ -22,6 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnGuardarRecetaCategoria = document.getElementById("btnGuardarRecetaCategoria");
     const totalFormulaSolesEl = document.getElementById("totalFormulaSoles");
     const totalFormulaDolaresEl = document.getElementById("totalFormulaDolares");
+    const totalMargenFormulaSolesEl = document.getElementById("totalMargenFormulaSoles");
+    const totalMargenFormulaDolaresEl = document.getElementById("totalMargenFormulaDolares");
     const inputRecetaNombre = document.getElementById("inputRecetaNombre");
     const btnEditRecetaNombre = document.getElementById("btnEditRecetaNombre");
 
@@ -539,6 +541,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const actualizarResumenFormula = () => {
                 let totalSoles = 0;
                 let totalDolares = 0;
+                let totalMargenSoles = 0;
+                let totalMargenDolares = 0;
 
                 recetaCategoriaTableBody.querySelectorAll(".receta-categoria-row").forEach(row => {
                     const subtotalRow = Number(row.getAttribute("data-subtotal") || 0);
@@ -547,16 +551,31 @@ document.addEventListener("DOMContentLoaded", () => {
                     const margenRow = Number(String(inputRow?.value ?? "0").replace(/,/g, "."));
                     const margenNormalizado = Number.isFinite(margenRow) ? Math.min(100, Math.max(0, margenRow)) : 0;
                     const totalRow = calcularTotalConMargen(subtotalRow, margenNormalizado);
+                    const margenMonto = totalRow - subtotalRow;
 
                     if (monedaRowRaw === "DOLLAR") {
                         totalDolares += totalRow;
+                        totalMargenDolares += margenMonto;
                     } else {
                         totalSoles += totalRow;
+                        totalMargenSoles += margenMonto;
                     }
                 });
 
+                if (totalFormulaSolesEl) {
+                    totalFormulaSolesEl.textContent = format2(decimalAdjust("round", totalSoles, "-2"));
+                }
+
                 if (totalFormulaDolaresEl) {
                     totalFormulaDolaresEl.textContent = format2(decimalAdjust("round", totalDolares, "-2"));
+                }
+
+                if (totalMargenFormulaSolesEl) {
+                    totalMargenFormulaSolesEl.textContent = format2(decimalAdjust("round", totalMargenSoles, "-2"));
+                }
+
+                if (totalMargenFormulaDolaresEl) {
+                    totalMargenFormulaDolaresEl.textContent = format2(decimalAdjust("round", totalMargenDolares, "-2"));
                 }
             };
 

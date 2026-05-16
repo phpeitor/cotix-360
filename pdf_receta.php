@@ -151,8 +151,9 @@ if (is_array($categorias) && isset($categorias['rows']) && is_array($categorias[
     }
 }
 
-$igvMargenDolares = $totalMargenDolaresAll * 0.18;
-$totalConIgvDolares = $totalMargenDolaresAll + $igvMargenDolares;
+$baseTotalDolares = $totalDolaresConvertidos + $totalMargenDolaresAll;
+$igvOverTotal = $baseTotalDolares * 0.18;
+$totalConIgvDolares = $baseTotalDolares + $igvOverTotal;
 
 ob_start();
 ?>
@@ -314,14 +315,14 @@ ob_start();
             <tr>
                 <td style="width: 50%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
                      <strong>Total Items:</strong> <?= $totalItems ?><br>
-                    <strong>Total Producto:</strong> $ <?= number_format($totalProductoDolares, 2) ?><br>
-                    <strong>Total Servicio:</strong> $ <?= number_format($totalServicioDolares, 2) ?>
+                    <strong>Total Producto:</strong> $<?= number_format($totalProductoDolares, 2) ?><br>
+                    <strong>Total Servicio:</strong> $<?= number_format($totalServicioDolares, 2) ?>
                 </td>
                 <td style="width: 50%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
-                    <strong>Total $:</strong> <?= number_format($totalDolaresConvertidos, 2) ?><br>
-                    <strong>Margen $:</strong> <?= number_format($totalMargenDolaresAll, 2) ?><br>
-                    <strong>IGV 18%:</strong> <?= number_format($igvMargenDolares, 2) ?><br>
-                    <strong>Total + IGV:</strong> <?= number_format($totalConIgvDolares, 2) ?>
+                    <strong>Total:</strong> $<?= number_format($totalDolaresConvertidos, 2) ?><br>
+                    <strong>Margen:</strong> $<?= number_format($totalMargenDolaresAll, 2) ?><br>
+                    <strong>IGV 18%:</strong> $<?= number_format($igvOverTotal, 2) ?><br>
+                    <strong>Total + IGV:</strong> $<?= number_format($totalConIgvDolares, 2) ?>
                 </td>
             </tr>
         <?php endif; ?>

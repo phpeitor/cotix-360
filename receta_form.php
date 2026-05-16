@@ -311,8 +311,10 @@
 
                 <div class="modal-footer border-0">
                     <div class="me-auto d-flex align-items-center gap-4 flex-wrap">
-                        
+                        <div class="small text-muted fw-semibold">Total S/: <span id="totalFormulaSoles">0.00</span></div>
                         <div class="small text-muted fw-semibold">Total $: <span id="totalFormulaDolares">0.00</span></div>
+                        <div class="small text-muted fw-semibold">Total Margen S/: <span id="totalMargenFormulaSoles">0.00</span></div>
+                        <div class="small text-muted fw-semibold">Total Margen $: <span id="totalMargenFormulaDolares">0.00</span></div>
                     </div>
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
                     <button type="button" class="btn btn-warning" id="btnGuardarRecetaCategoria">Guardar</button>
