@@ -134,9 +134,12 @@ try {
     }
 
     $totalMargenDolaresAll = 0.0;
+    $margenesCategoriaRows = [];
 
     if (is_array($categorias) && isset($categorias['rows']) && is_array($categorias['rows'])) {
         foreach ($categorias['rows'] as $cat) {
+            $categoriaNombre = normalizarTextoExcel($cat['sub_cat_1'] ?? ($cat['categoria'] ?? 'SIN CATEGORÍA'));
+            $cantidadCat = (float)($cat['cantidad'] ?? 0);
             $subtotalCat = (float)($cat['subtotal'] ?? 0);
             $monedaCat = strtoupper(trim((string)($cat['moneda'] ?? '')));
             $margenPct = (float)($cat['margen'] ?? 0);
@@ -148,6 +151,17 @@ try {
 
             $totalConMargenCat = $margenDecimal > 0 ? ($subtotalCat / (1 - $margenDecimal)) : $subtotalCat;
             $margenMonto = $totalConMargenCat - $subtotalCat;
+
+            $subtotalCatDolar = $monedaCat === 'DOLLAR' ? $subtotalCat : ($tipoCambio > 0 ? ($subtotalCat / $tipoCambio) : 0);
+            $totalConMargenCatDolar = $monedaCat === 'DOLLAR' ? $totalConMargenCat : ($tipoCambio > 0 ? ($totalConMargenCat / $tipoCambio) : 0);
+
+            $margenesCategoriaRows[] = [
+                'categoria' => $categoriaNombre !== '' ? $categoriaNombre : 'SIN CATEGORÍA',
+                'cantidad' => $cantidadCat,
+                'subtotal_dolar' => $subtotalCatDolar,
+                'margen_pct' => $margenPct,
+                'total_formula_dolar' => $totalConMargenCatDolar,
+            ];
 
             if ($monedaCat === 'DOLLAR') {
                 $totalMargenDolaresAll += $margenMonto;
@@ -161,7 +175,62 @@ try {
     $igvOverTotal = $baseTotalDolares * 0.18;
     $totalConIgvDolares = $baseTotalDolares + $igvOverTotal;
 
-    $totalsStart = $row + 2;
+    $margenesStart = $row + 2;
+    $sheet->setCellValue('A' . $margenesStart, 'MÁRGENES POR CATEGORÍA');
+    $sheet->getStyle('A' . $margenesStart)->getFont()->setBold(true);
+
+    $margenesHeaderRow = $margenesStart + 1;
+    $margenesColumns = [
+        'A' => 'Categoría',
+        'B' => 'Cantidad',
+        'C' => 'Subtotal $',
+        'D' => 'Margen %',
+        'E' => 'Total Fórmula $',
+    ];
+
+    foreach ($margenesColumns as $col => $title) {
+        $sheet->setCellValue($col . $margenesHeaderRow, $title);
+    }
+
+    $margenesHeaderStyle = $sheet->getStyle('A' . $margenesHeaderRow . ':E' . $margenesHeaderRow);
+    $margenesHeaderStyle->getFont()->setBold(true);
+    $margenesHeaderStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFDE9D9');
+    $margenesHeaderStyle->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    $margenesHeaderStyle->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+    $margenesDataStart = $margenesHeaderRow + 1;
+    if (!empty($margenesCategoriaRows)) {
+        $margenesRow = $margenesDataStart;
+        foreach ($margenesCategoriaRows as $margenRow) {
+            $sheet->setCellValue('A' . $margenesRow, $margenRow['categoria']);
+            $sheet->setCellValue('B' . $margenesRow, $margenRow['cantidad']);
+            $sheet->setCellValue('C' . $margenesRow, $margenRow['subtotal_dolar']);
+            $sheet->setCellValue('D' . $margenesRow, $margenRow['margen_pct']);
+            $sheet->setCellValue('E' . $margenesRow, $margenRow['total_formula_dolar']);
+            $margenesRow++;
+        }
+        $margenesEndRow = $margenesRow - 1;
+    } else {
+        $sheet->setCellValue('A' . $margenesDataStart, 'Sin categorías para mostrar');
+        $sheet->mergeCells('A' . $margenesDataStart . ':E' . $margenesDataStart);
+        $sheet->getStyle('A' . $margenesDataStart)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $margenesEndRow = $margenesDataStart;
+    }
+
+    $sheet->getStyle('A' . $margenesDataStart . ':E' . $margenesEndRow)
+        ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    $sheet->getStyle('B' . $margenesDataStart . ':E' . $margenesEndRow)
+        ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+    $sheet->getStyle('B' . $margenesDataStart . ':B' . $margenesEndRow)
+        ->getNumberFormat()->setFormatCode('#,##0.00');
+    $sheet->getStyle('C' . $margenesDataStart . ':C' . $margenesEndRow)
+        ->getNumberFormat()->setFormatCode('#,##0.00');
+    $sheet->getStyle('D' . $margenesDataStart . ':D' . $margenesEndRow)
+        ->getNumberFormat()->setFormatCode('0.00');
+    $sheet->getStyle('E' . $margenesDataStart . ':E' . $margenesEndRow)
+        ->getNumberFormat()->setFormatCode('#,##0.00');
+
+    $totalsStart = $margenesEndRow + 2;
     $sheet->setCellValue('A' . $totalsStart, 'TOTALES');
     $sheet->getStyle('A' . $totalsStart)->getFont()->setBold(true);
 
