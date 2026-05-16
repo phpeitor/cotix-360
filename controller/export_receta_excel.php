@@ -80,16 +80,16 @@ try {
     $sheet->setCellValue('A6', 'Tipo de cambio: ' . number_format($tipoCambio, 3));
 
     $headerRow = 9;
-    $columns = ['A' => 'Item', 'B' => 'Descripción', 'C' => 'Detalle', 'D' => 'Tipo', 'E' => 'Cant.', 'F' => 'Moneda', 'G' => 'Precio unitario', 'H' => 'Subtotal'];
+    $columns = ['A' => 'Item', 'B' => 'Descripción', 'C' => 'Detalle', 'D' => 'Tipo', 'E' => 'Cant.', 'F' => 'Precio unitario $', 'G' => 'Subtotal $'];
 
     foreach ($columns as $col => $title) {
         $sheet->setCellValue($col . $headerRow, $title);
     }
 
-    $sheet->getStyle('A1:H6')->getFont()->setBold(true);
+    $sheet->getStyle('A1:G6')->getFont()->setBold(true);
     $sheet->getStyle('A1')->getFont()->setSize(14);
 
-    $headerStyle = $sheet->getStyle('A' . $headerRow . ':H' . $headerRow);
+    $headerStyle = $sheet->getStyle('A' . $headerRow . ':G' . $headerRow);
     $headerStyle->getFont()->setBold(true);
     $headerStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9E2F3');
     $headerStyle->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -97,10 +97,9 @@ try {
 
     $row = $headerRow + 1;
     $totalItems = 0;
-    $totalSoles = 0.0;
-    $totalDolares = 0.0;
-    $totalProductoPeru = 0.0;
-    $totalServicioPeru = 0.0;
+    $totalDolaresConvertidos = 0.0;
+    $totalProductoDolares = 0.0;
+    $totalServicioDolares = 0.0;
 
     foreach ($detalle as $item) {
         $descripcion = normalizarTextoExcel($item['descripcion'] ?? '');
@@ -109,21 +108,17 @@ try {
         $cantidad = (int)($item['cantidad'] ?? 0);
         $precio = (float)($item['precio'] ?? 0);
         $moneda = strtoupper(trim((string)($item['moneda'] ?? '')));
-        $subtotal = $precio * $cantidad;
-        $subtotalPeru = $moneda === 'DOLLAR' ? ($subtotal * $tipoCambio) : $subtotal;
+        $precioDolar = $moneda === 'DOLLAR' ? $precio : ($tipoCambio > 0 ? ($precio / $tipoCambio) : 0);
+        $subtotalDolar = $precioDolar * $cantidad;
 
         $totalItems += $cantidad;
 
-        if ($moneda === 'DOLLAR') {
-            $totalDolares += $subtotal;
-        } else {
-            $totalSoles += $subtotal;
-        }
+        $totalDolaresConvertidos += $subtotalDolar;
 
         if ($tipo === 'PRODUCTO') {
-            $totalProductoPeru += $subtotalPeru;
+            $totalProductoDolares += $subtotalDolar;
         } else {
-            $totalServicioPeru += $subtotalPeru;
+            $totalServicioDolares += $subtotalDolar;
         }
 
         $sheet->setCellValue('A' . $row, (string)($item['nombre'] ?? 'SIN NOMBRE'));
@@ -131,19 +126,14 @@ try {
         $sheet->setCellValue('C' . $row, $rutaDetalle);
         $sheet->setCellValue('D' . $row, $tipo);
         $sheet->setCellValue('E' . $row, $cantidad);
-        $sheet->setCellValue('F' . $row, $moneda === 'DOLLAR' ? '$' : 'S/.');
-        $sheet->setCellValue('G' . $row, $precio);
-        $sheet->setCellValue('H' . $row, $subtotal);
+        $sheet->setCellValue('F' . $row, $precioDolar);
+        $sheet->setCellValue('G' . $row, $subtotalDolar);
 
-        $sheet->getStyle('E' . $row . ':H' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('E' . $row . ':G' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $row++;
     }
 
-    $totalPeru = $totalSoles + ($totalDolares * $tipoCambio);
-
-    $totalMargenSoles = 0.0;
-    $totalMargenDolares = 0.0;
-    $totalMargenPeru = 0.0;
+    $totalMargenDolaresAll = 0.0;
 
     if (is_array($categorias) && isset($categorias['rows']) && is_array($categorias['rows'])) {
         foreach ($categorias['rows'] as $cat) {
@@ -160,18 +150,16 @@ try {
             $margenMonto = $totalConMargenCat - $subtotalCat;
 
             if ($monedaCat === 'DOLLAR') {
-                $totalMargenDolares += $margenMonto;
-                $totalMargenPeru += ($margenMonto * $tipoCambio);
+                $totalMargenDolaresAll += $margenMonto;
             } else {
-                $totalMargenSoles += $margenMonto;
-                $totalMargenPeru += $margenMonto;
+                $totalMargenDolaresAll += ($tipoCambio > 0 ? ($margenMonto / $tipoCambio) : 0);
             }
         }
     }
 
-    $totalMargenPeruConBase = $totalPeru + $totalMargenPeru;
-    $igvMargenPeru = $totalMargenPeruConBase * 0.18;
-    $totalConIgv = $totalMargenPeruConBase + $igvMargenPeru;
+    $baseTotalDolares = $totalDolaresConvertidos + $totalMargenDolaresAll;
+    $igvOverTotal = $baseTotalDolares * 0.18;
+    $totalConIgvDolares = $baseTotalDolares + $igvOverTotal;
 
     $totalsStart = $row + 2;
     $sheet->setCellValue('A' . $totalsStart, 'TOTALES');
@@ -179,16 +167,12 @@ try {
 
     $totals = [
         ['A', 'Total Items', $totalItems],
-        ['A', 'Total S/', $totalSoles],
-        ['A', 'Total $', $totalDolares],
-        ['A', 'Total Perú', $totalPeru],
-        ['D', 'Total Producto', $totalProductoPeru],
-        ['D', 'Total Servicio', $totalServicioPeru],
-        ['D', 'Total Margen S/', $totalMargenSoles],
-        ['D', 'Total Margen $', $totalMargenDolares],
-        ['D', 'Total Margen Perú', $totalMargenPeruConBase],
-        ['D', 'IGV 18%', $igvMargenPeru],
-        ['D', 'Total + IGV', $totalConIgv],
+        ['A', 'Total Producto $', $totalProductoDolares],
+        ['A', 'Total Servicio $', $totalServicioDolares],
+        ['D', 'Total $', $totalDolaresConvertidos],
+        ['D', 'Margen $', $totalMargenDolaresAll],
+        ['D', 'IGV 18% (sobre Total$ + Margen$)', $igvOverTotal],
+        ['D', 'Total + IGV', $totalConIgvDolares],
     ];
 
     foreach ($totals as $index => [$col, $label, $value]) {
@@ -197,19 +181,19 @@ try {
         $sheet->setCellValue(chr(ord($col) + 1) . $targetRow, $value);
     }
 
-    $sheet->getStyle('A' . $totalsStart . ':H' . ($totalsStart + count($totals) - 1))->getFont()->setBold(true);
+    $sheet->getStyle('A' . $totalsStart . ':G' . ($totalsStart + count($totals) - 1))->getFont()->setBold(true);
 
-    $sheet->getStyle('G' . ($headerRow + 1) . ':H' . ($row - 1))
+    $sheet->getStyle('F' . ($headerRow + 1) . ':G' . ($row - 1))
         ->getNumberFormat()
         ->setFormatCode('#,##0.00');
     $sheet->getStyle('B' . ($headerRow + 1) . ':C' . ($row - 1))->getAlignment()->setWrapText(true);
 
-    $sheet->getStyle('B' . $totalsStart . ':B' . ($totalsStart + 3))->getNumberFormat()->setFormatCode('#,##0.00');
+    $sheet->getStyle('B' . ($totalsStart + 1) . ':B' . ($totalsStart + 2))->getNumberFormat()->setFormatCode('#,##0.00');
     $sheet->getStyle('E' . $totalsStart . ':E' . ($totalsStart + count($totals) - 1))->getNumberFormat()->setFormatCode('#,##0.00');
 
     $sheet->getColumnDimension('B')->setWidth(33);
     $sheet->getColumnDimension('C')->setWidth(26);
-    foreach (['A', 'D', 'E', 'F', 'G', 'H'] as $col) {
+    foreach (['A', 'D', 'E', 'F', 'G'] as $col) {
         $sheet->getColumnDimension($col)->setAutoSize(true);
     }
 
