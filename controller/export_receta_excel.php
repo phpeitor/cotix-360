@@ -153,14 +153,14 @@ try {
             $margenMonto = $totalConMargenCat - $subtotalCat;
 
             $subtotalCatDolar = $monedaCat === 'DOLLAR' ? $subtotalCat : ($tipoCambio > 0 ? ($subtotalCat / $tipoCambio) : 0);
-            $totalConMargenCatDolar = $monedaCat === 'DOLLAR' ? $totalConMargenCat : ($tipoCambio > 0 ? ($totalConMargenCat / $tipoCambio) : 0);
+            $margenMontoDolar = $monedaCat === 'DOLLAR' ? $margenMonto : ($tipoCambio > 0 ? ($margenMonto / $tipoCambio) : 0);
 
             $margenesCategoriaRows[] = [
                 'categoria' => $categoriaNombre !== '' ? $categoriaNombre : 'SIN CATEGORÍA',
                 'cantidad' => $cantidadCat,
                 'subtotal_dolar' => $subtotalCatDolar,
                 'margen_pct' => $margenPct,
-                'total_formula_dolar' => $totalConMargenCatDolar,
+                'total_margen_dolar' => $margenMontoDolar,
             ];
 
             if ($monedaCat === 'DOLLAR') {
@@ -185,7 +185,7 @@ try {
         'B' => 'Cantidad',
         'C' => 'Subtotal $',
         'D' => 'Margen %',
-        'E' => 'Total Fórmula $',
+        'E' => 'Margen $',
     ];
 
     foreach ($margenesColumns as $col => $title) {
@@ -206,7 +206,7 @@ try {
             $sheet->setCellValue('B' . $margenesRow, $margenRow['cantidad']);
             $sheet->setCellValue('C' . $margenesRow, $margenRow['subtotal_dolar']);
             $sheet->setCellValue('D' . $margenesRow, $margenRow['margen_pct']);
-            $sheet->setCellValue('E' . $margenesRow, $margenRow['total_formula_dolar']);
+            $sheet->setCellValue('E' . $margenesRow, $margenRow['total_margen_dolar']);
             $margenesRow++;
         }
         $margenesEndRow = $margenesRow - 1;
