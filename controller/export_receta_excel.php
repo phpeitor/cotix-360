@@ -268,7 +268,17 @@ try {
 
     $sheet->freezePane('A' . ($headerRow + 1));
 
-    $filename = 'receta_' . md5((string)($receta['id'] ?? '0')) . '.xlsx';
+    $nombreArchivoBase = normalizarTextoExcel($receta['nombre'] ?? '');
+    if ($nombreArchivoBase === '') {
+        $nombreArchivoBase = 'receta_' . (string)($receta['id'] ?? '0');
+    }
+    $nombreArchivoBase = preg_replace('/[^A-Za-z0-9]+/', '_', $nombreArchivoBase);
+    $nombreArchivoBase = trim((string)$nombreArchivoBase, '_');
+    if ($nombreArchivoBase === '') {
+        $nombreArchivoBase = 'receta';
+    }
+
+    $filename = $nombreArchivoBase . '.xlsx';
 
     header('Content-Disposition: attachment; filename="' . $filename . '"');
 

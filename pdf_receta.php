@@ -348,4 +348,13 @@ $pdf = new Dompdf();
 $pdf->loadHtml($html);
 $pdf->setPaper('A4', 'portrait');
 $pdf->render();
-$pdf->stream("receta_" . md5($receta['id']) . ".pdf", ["Attachment" => false]);
+$nombreArchivoBase = normalizarTextoDetallePdf($receta['nombre'] ?? '');
+if ($nombreArchivoBase === '') {
+    $nombreArchivoBase = 'receta_' . (string)($receta['id'] ?? '0');
+}
+$nombreArchivoBase = preg_replace('/[^A-Za-z0-9]+/', '_', $nombreArchivoBase);
+$nombreArchivoBase = trim((string)$nombreArchivoBase, '_');
+if ($nombreArchivoBase === '') {
+    $nombreArchivoBase = 'receta';
+}
+$pdf->stream($nombreArchivoBase . '.pdf', ["Attachment" => false]);
