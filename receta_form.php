@@ -61,7 +61,14 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
-                                <h4 class="header-title mb-0">Receta #<span id="receta_id"></span></h4>
+                                <div>
+                                    <h4 class="header-title mb-0">Receta #<span id="receta_id"></span></h4>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <p class="text-muted fs-14 mb-0" id="receta_nombre_display"></p>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnEditRecetaNombre" title="Editar nombre"><i class="ti ti-edit"></i></button>
+                                    </div>
+                                    <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none" style="max-width:400px;" placeholder="Nombre de la receta">
+                                </div>
 
                                 <div class="row g-3">
                                     <div class="col-lg-4">
@@ -306,10 +313,6 @@
                     <div class="me-auto d-flex align-items-center gap-4 flex-wrap">
                         
                         <div class="small text-muted fw-semibold">Total $: <span id="totalFormulaDolares">0.00</span></div>
-                        <div class="ms-0">
-                            <label for="inputRecetaNombre" class="form-label small mb-1">Nombre receta</label>
-                            <input type="text" id="inputRecetaNombre" class="form-control form-control-sm" style="min-width:240px;" placeholder="Nombre de la receta">
-                        </div>
                     </div>
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
                     <button type="button" class="btn btn-warning" id="btnGuardarRecetaCategoria">Guardar</button>

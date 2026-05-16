@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const recetaForm = document.querySelector("form.form-receta");
 
     const recetaIdEl = document.getElementById("receta_id");
+    const recetaNombreDisplayEl = document.getElementById("receta_nombre_display");
     const usuarioEl = document.getElementById("usuario");
     const fechaEl = document.getElementById("fecha");
     const estadoEl = document.getElementById("estado");
@@ -19,8 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const alertCategoriaRecetaEl = document.getElementById("alertCategoriaReceta");
     const recetaCategoriaTableBody = document.getElementById("recetaCategoriaTableBody");
     const btnGuardarRecetaCategoria = document.getElementById("btnGuardarRecetaCategoria");
+    const totalFormulaSolesEl = document.getElementById("totalFormulaSoles");
     const totalFormulaDolaresEl = document.getElementById("totalFormulaDolares");
     const inputRecetaNombre = document.getElementById("inputRecetaNombre");
+    const btnEditRecetaNombre = document.getElementById("btnEditRecetaNombre");
 
     const baseSelect = document.getElementById("filterBase");
     const categoriaSelect = document.getElementById("categoria");
@@ -144,6 +147,88 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function toggleEditRecetaNombre(save = false) {
+        if (!recetaNombreDisplayEl || !inputRecetaNombre || !btnEditRecetaNombre || !receta) return;
+
+        const editing = !inputRecetaNombre.classList.contains('d-none');
+
+        if (!editing && !save) {
+            // activar edición
+            recetaNombreDisplayEl.classList.add('d-none');
+            inputRecetaNombre.classList.remove('d-none');
+            inputRecetaNombre.focus();
+            inputRecetaNombre.select();
+            btnEditRecetaNombre.innerHTML = '<i class="ti ti-check"></i>';
+            return;
+        }
+
+        // si estaba en edición y se pide guardar
+        const nuevoNombre = String(inputRecetaNombre.value || '').trim();
+        if (!nuevoNombre) {
+            alertify.error('El nombre no puede estar vacío');
+            inputRecetaNombre.focus();
+            return;
+        }
+
+        // enviar al servidor
+        btnEditRecetaNombre.disabled = true;
+
+        const fd = new FormData();
+        fd.append('hash', String(hash || ''));
+        fd.append('nombre', nuevoNombre);
+
+        fetch('controller/upd_nombre_receta.php', {
+            method: 'POST',
+            body: fd
+        }).then(res => res.json()).then(json => {
+            if (!json || !json.success) {
+                throw new Error(json?.message || 'No se pudo actualizar nombre');
+            }
+
+            receta.nombre = nuevoNombre;
+            renderHeader();
+            alertify.success('Nombre actualizado');
+        }).catch(err => {
+            console.error(err);
+            alertify.error(err.message || 'Error al actualizar nombre');
+        }).finally(() => {
+            btnEditRecetaNombre.disabled = false;
+            // restaurar modo view
+            recetaNombreDisplayEl.classList.remove('d-none');
+            inputRecetaNombre.classList.add('d-none');
+            btnEditRecetaNombre.innerHTML = '<i class="ti ti-edit"></i>';
+        });
+    }
+
+    if (btnEditRecetaNombre) {
+        btnEditRecetaNombre.addEventListener('click', (e) => {
+            e.preventDefault();
+            const editing = inputRecetaNombre && !inputRecetaNombre.classList.contains('d-none');
+            if (!editing) {
+                toggleEditRecetaNombre(false);
+                return;
+            }
+
+            toggleEditRecetaNombre(true);
+        });
+
+        if (inputRecetaNombre) {
+            inputRecetaNombre.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    toggleEditRecetaNombre(true);
+                }
+
+                if (e.key === 'Escape') {
+                    // cancelar edición
+                    inputRecetaNombre.classList.add('d-none');
+                    recetaNombreDisplayEl.classList.remove('d-none');
+                    btnEditRecetaNombre.innerHTML = '<i class="ti ti-edit"></i>';
+                }
+            });
+        }
+    }
+
     if (btnEditTipoCambio) {
         btnEditTipoCambio.addEventListener('click', (e) => {
             e.preventDefault();
@@ -254,11 +339,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!receta) return;
 
         if (recetaIdEl) recetaIdEl.textContent = receta.id ?? "";
+        if (recetaNombreDisplayEl) {
+            let raw = String(receta?.nombre || "").trim();
+            raw = raw.replace(/^PROY-?/i, '').replace(/^PRO-?/i, '');
+            raw = raw.replace(/(?:-\d+)+$/, '');
+            recetaNombreDisplayEl.textContent = raw || "(Sin nombre)";
+        }
         if (usuarioEl) usuarioEl.textContent = receta.usuario ?? "";
         if (fechaEl) fechaEl.textContent = receta.created_at ?? "";
         if (estadoEl) estadoEl.textContent = receta.estado ?? "";
         if (tipoCambioEl) tipoCambioEl.textContent = Number(receta.tipo_cambio || 0).toFixed(3);
         if (tipoCambioInputEl) tipoCambioInputEl.value = Number(receta.tipo_cambio || 0).toFixed(3);
+        if (inputRecetaNombre) {
+            let raw = String(receta?.nombre || "").trim();
+            raw = raw.replace(/^PROY-?/i, '').replace(/^PRO-?/i, '');
+            raw = raw.replace(/(?:-\d+)+$/, '');
+            inputRecetaNombre.value = raw;
+        }
 
         setEstadoIcon(receta.estado);
     }
@@ -555,21 +652,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             renderCategoriasRecetaModal(Array.isArray(data.rows) ? data.rows : [], data.source || "detalle");
-            // establecer el nombre de la receta en el input (si existe)
-            try {
-                if (inputRecetaNombre) {
-                    // Limpiar el nombre original: quitar prefijo PROY- / PRO- (insensible a mayúsculas)
-                    // y eliminar sufijos numéricos como -2 o -2-3 al final.
-                    let raw = String(receta?.nombre || "").trim();
-                    raw = raw.replace(/^PROY-?/i, '').replace(/^PRO-?/i, '');
-                    raw = raw.replace(/(?:-\d+)+$/, '');
-                    inputRecetaNombre.value = raw;
-                    // permitir edición del nombre en el modal para que el usuario pueda cambiarlo
-                    inputRecetaNombre.disabled = false;
-                    inputRecetaNombre.readOnly = false;
-                }
-            } catch (e) {
-                console.error(e);
+            // el nombre ahora se sincroniza desde renderHeader, así que solo nos aseguramos de que el input tenga el valor correcto
+            if (inputRecetaNombre) {
+                let raw = String(receta?.nombre || "").trim();
+                raw = raw.replace(/^PROY-?/i, '').replace(/^PRO-?/i, '');
+                raw = raw.replace(/(?:-\d+)+$/, '');
+                inputRecetaNombre.value = raw;
             }
         } catch (error) {
             console.error(error);
