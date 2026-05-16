@@ -246,10 +246,10 @@ ob_start();
     <table class="section-table">
         <thead>
             <tr class="section-head">
-                <th style="width: <?= $esTecnico ? '88%' : '78%'; ?>;">DESCRIPCIÓN</th>
+                <th style="width: <?= $esTecnico ? '88%' : '68%'; ?>;">DESCRIPCIÓN</th>
                 <th style="width: 12%;">CANT.</th>
                 <?php if (!$esTecnico): ?>
-                    <th style="width: 12%;">PRECIO</th>
+                    <th style="width: 10%;">PRECIO</th>
                 <?php endif; ?>
             </tr>
         </thead>
@@ -263,6 +263,18 @@ ob_start();
                     $precioUnitario = (float)($i['precio'] ?? 0);
                     $subtotalLinea = $precioUnitario * $cantidad;
                     $simboloLinea = strtoupper(trim((string)($i['moneda'] ?? ''))) === 'DOLLAR' ? '$' : 'S/';
+                    
+                    // Calcular precio convertido solo si está en soles
+                    $precioConvertido = 0;
+                    $simboloConvertido = '';
+                    $esEnSoles = strtoupper(trim((string)($i['moneda'] ?? ''))) !== 'DOLLAR';
+                    
+                    if ($esEnSoles && $tipoCambio > 0) {
+                        // Item en soles: convertir a dólares
+                        $precioConvertido = $subtotalLinea / $tipoCambio;
+                        $simboloConvertido = '$';
+                    }
+                    // Si está en dólares, no se convierte
                 ?>
                 <tr class="item-row">
                     <td>
@@ -280,7 +292,7 @@ ob_start();
                     </td>
                     <td class="item-qty"><?= (int)$cantidad ?></td>
                     <?php if (!$esTecnico): ?>
-                        <td class="item-price"><?= escaparPdf(formatearMontoPdf($subtotalLinea, $simboloLinea)) ?></td>
+                        <td class="item-price"><?= escaparPdf(formatearMontoPdf($precioConvertido, $simboloConvertido)) ?></td>
                     <?php endif; ?>
                 </tr>
             <?php endforeach; ?>
