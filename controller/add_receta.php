@@ -3,7 +3,9 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../model/receta.php';
 
 try {
-    session_start();
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
 
     if (!isset($_SESSION['session_id']) || (int)$_SESSION['session_id'] <= 0) {
         echo json_encode([

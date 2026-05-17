@@ -1,6 +1,11 @@
 <?php
-  require_once __DIR__ . "/controller/check_session.php";
+require_once __DIR__ . '/../config/bootstrap.php';
+require_once ROOT . '/controller/check_session.php';
 ?>
+<!-- DEBUG: ROOT=<?php echo defined('ROOT') ? ROOT : 'UNDEF'; ?> -->
+<!-- DEBUG: SCRIPT_NAME=<?php echo $_SERVER['SCRIPT_NAME'] ?? ''; ?> -->
+<!-- DEBUG: PHP_SELF=<?php echo $_SERVER['PHP_SELF'] ?? ''; ?> -->
+<!-- DEBUG: SESSION_PRESENT=<?php echo isset($_SESSION) && isset($_SESSION['session_usuario']) ? 'YES' : 'NO'; ?> -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,9 +25,9 @@
 
 <body>
     <div class="wrapper">
-            <?php include __DIR__ . '/layout/menu.php'; ?>
+            <?php include ROOT . '/layout/menu.php'; ?>
         <header class="app-topbar">
-            <?php include __DIR__ . '/layout/navbar.php'; ?>
+            <?php include ROOT . '/layout/navbar.php'; ?>
         </header>
 
         <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
@@ -76,7 +81,7 @@
                             </div>
                         </div>
                     </div>
-                </div> 
+                </div>
 
                 <div class="row">
                     <div class="col">
@@ -304,10 +309,10 @@
 
             </div> <!-- container -->
 
-            <?php include __DIR__ . '/layout/footer.html'; ?>
+            <?php include ROOT . '/layout/footer.html'; ?>
         </div>
     </div>
-    <?php include __DIR__ . '/layout/theme.html'; ?>
+    <?php include ROOT . '/layout/theme.html'; ?>
 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>

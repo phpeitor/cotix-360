@@ -1,0 +1,13 @@
+# Habilita reescritura para servir vistas desde /views
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /cotix/
+
+    # Si el archivo o directorio solicitar existe en la raíz, servirlo
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Reescribe peticiones a archivos .php en la raíz hacia views/<file>.php
+    RewriteRule ^([^/]+\.php)$ views/$1 [L]
+</IfModule>

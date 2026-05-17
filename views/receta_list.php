@@ -1,5 +1,6 @@
 <?php
-  require_once __DIR__ . "/controller/check_session.php";
+require_once __DIR__ . '/../config/bootstrap.php';
+require_once ROOT . '/controller/check_session.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,9 +22,9 @@
 
 <body>
     <div class="wrapper">
-           <?php include __DIR__ . '/layout/menu.php'; ?>
+            <?php include ROOT . '/layout/menu.php'; ?>
         <header class="app-topbar">
-           <?php include __DIR__ . '/layout/navbar.php'; ?>
+            <?php include ROOT . '/layout/navbar.php'; ?>
         </header>
 
         <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
@@ -45,14 +46,14 @@
 
                  <div class="page-title-head d-flex align-items-sm-center flex-sm-row flex-column gap-2">
                     <div class="flex-grow-1">
-                        <h4 class="fs-18 text-uppercase fw-bold mb-0">Cotizaciones</h4>
+                        <h4 class="fs-18 text-uppercase fw-bold mb-0">Recetas</h4>
                     </div>
 
                     <div class="text-end">
                         <ol class="breadcrumb m-0 py-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Cotix 360</a></li>
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Tables</a></li>
-                            <li class="breadcrumb-item active">Cotizaciones</li>
+                            <li class="breadcrumb-item active">Recetas</li>
                         </ol>
                     </div>
                 </div>
@@ -100,7 +101,8 @@
                 </div>
             </div>
 
-            <?php include __DIR__ . '/layout/footer.html'; ?>
+            <?php include ROOT . '/layout/footer.html'; ?>
+
         </div>
     </div>
     
@@ -178,14 +180,35 @@
                 </div>
             </div>
         </div>
+    </div>
+    <?php include ROOT . '/layout/theme.html'; ?>
+
+    <div id="success-alert-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content modal-filled bg-success">
+                <div class="modal-body p-4">
+                    <div class="text-center">
+                        <i class="ti ti-check h1"></i>
+                        <h4 class="mt-2">CotixPDF!</h4>
+                        <p class="mt-3">Congratulations! 🎉 Para continuar debe de ingresar un nombre a la receta.</p>
+                        <input type="text" id="input-nombre-receta" class="form-control mt-2" placeholder="Nombre de la receta" maxlength="50" />
+                        <div class="d-flex justify-content-center gap-2 mt-2">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-secondary" id="btn-guardar-nombre-receta">Continuar</button>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-    <?php include __DIR__ . '/layout/theme.html'; ?>
 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
-    <script src="./assets/js/table-gridjs-cotizacion.js"></script>
+    <script src="./assets/js/table-gridjs-receta.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
+
+
 </html>

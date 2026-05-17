@@ -1,16 +1,15 @@
 <?php
-session_start();
+// Registro inmediato para verificar ejecución del script
+@file_put_contents(__DIR__ . '/../tmp/pdf_cotizacion.log', date('c') . " | entry views/pdf_cotizacion.php\n", FILE_APPEND);
+require_once __DIR__ . '/../config/bootstrap.php';
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    @session_start();
+}
 use Dompdf\Dompdf;
-require_once __DIR__ . "/vendor/autoload.php";
-require_once __DIR__ . "/model/cotizacion.php";
-require_once __DIR__ . "/model/item.php";
-require_once __DIR__ . "/model/calc_cotizacion.php";
-
-//header("Content-Type: application/pdf");
-/*ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-*/
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once ROOT . '/model/cotizacion.php';
+require_once ROOT . '/model/item.php';
+require_once ROOT . '/model/calc_cotizacion.php';
 
 $hash = $_GET['id'] ?? null;
 if (!$hash) {
@@ -277,11 +276,51 @@ ob_start();
 </html>
 
 <?php
+// finalize HTML
 $html = ob_get_clean();
+
+// Evitar que avisos/errores se impriman en el flujo del PDF
+@ini_set('display_errors', '0');
+@ini_set('display_startup_errors', '0');
+
+// Asegurar carpeta tmp existe para logs
+if (!is_dir(ROOT . '/tmp')) {
+    @mkdir(ROOT . '/tmp', 0755, true);
+}
+
+// Verificar que la clase Dompdf exista antes de instanciar
+if (!class_exists('\Dompdf\Dompdf')) {
+    $logFile = ROOT . '/tmp/pdf_cotizacion.log';
+    $msg = date('c') . " | Dompdf class not found. Composer autoload may be missing or dompdf not installed.\n";
+    @file_put_contents($logFile, $msg, FILE_APPEND);
+    if (!headers_sent()) {
+        http_response_code(500);
+        header('Content-Type: text/plain; charset=utf-8');
+    }
+    echo "Error interno: Dompdf no está disponible. Revisa tmp/pdf_cotizacion.log";
+    exit;
+}
 //echo $html;
 //exit;
-$pdf = new Dompdf();
-$pdf->loadHtml($html);
-$pdf->setPaper('A4', 'portrait');
-$pdf->render();
-$pdf->stream("cotizacion_" . md5($cotizacion['id']) . ".pdf", ["Attachment" => false]);
+try {
+    $pdf = new Dompdf();
+    $pdf->loadHtml($html);
+    $pdf->setPaper('A4', 'portrait');
+    $pdf->render();
+    $pdf->stream("cotizacion_" . md5($cotizacion['id']) . ".pdf", ["Attachment" => false]);
+} catch (\Throwable $e) {
+    $logDir = ROOT . '/tmp';
+    if (!is_dir($logDir)) {
+        @mkdir($logDir, 0755, true);
+    }
+    $logFile = $logDir . '/pdf_cotizacion.log';
+    $msg = date('c') . " | Exception generating PDF: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n\n";
+    @file_put_contents($logFile, $msg, FILE_APPEND);
+
+    if (!headers_sent()) {
+        http_response_code(500);
+        header('Content-Type: text/plain; charset=utf-8');
+    }
+    echo "Error interno al generar PDF. Revisa el log: tmp/pdf_cotizacion.log";
+    exit;
+}

@@ -1,5 +1,6 @@
 <?php
-  require_once __DIR__ . "/controller/check_session.php";
+require_once __DIR__ . '/../config/bootstrap.php';
+require_once ROOT . '/controller/check_session.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,24 +22,10 @@
 
 <body>
     <div class="wrapper">
-            <?php include __DIR__ . '/layout/menu.php'; ?>
+            <?php include ROOT . '/layout/menu.php'; ?>
         <header class="app-topbar">
-           <?php include __DIR__ . '/layout/navbar.php'; ?>
+           <?php include ROOT . '/layout/navbar.php'; ?>
         </header>
-
-        <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content bg-transparent">
-                    <div class="card mb-0 shadow-none">
-                        <div class="px-3 py-2 d-flex flex-row align-items-center" id="top-search">
-                            <i class="ti ti-search fs-22"></i>
-                            <input type="search" class="form-control border-0" id="search-modal-input" placeholder="Search for actions, people,">
-                            <button type="button" class="btn p-0" data-bs-dismiss="modal" aria-label="Close">[esc]</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div class="page-content">
             <div class="page-container">
@@ -141,10 +128,10 @@
                 </div>
             </div>
 
-            <?php include __DIR__ . '/layout/footer.html'; ?>
+            <?php include ROOT . '/layout/footer.html'; ?>
         </div>
     </div>
-    <?php include __DIR__ . '/layout/theme.html'; ?>
+    <?php include ROOT . '/layout/theme.html'; ?>
 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.0"></script>
@@ -152,4 +139,6 @@
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
+
+
 </html>

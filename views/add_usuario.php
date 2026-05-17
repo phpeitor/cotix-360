@@ -1,5 +1,6 @@
 <?php
-  require_once __DIR__ . "/controller/check_session.php";
+require_once __DIR__ . '/../config/bootstrap.php';
+require_once ROOT . '/controller/check_session.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,24 +22,10 @@
 
 <body>
     <div class="wrapper">
-            <?php include __DIR__ . '/layout/menu.php'; ?>
+           <?php include ROOT . '/layout/menu.php'; ?>
         <header class="app-topbar">
-           <?php include __DIR__ . '/layout/navbar.php'; ?>
+           <?php include ROOT . '/layout/navbar.php'; ?>
         </header>
-
-        <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content bg-transparent">
-                    <div class="card mb-0 shadow-none">
-                        <div class="px-3 py-2 d-flex flex-row align-items-center" id="top-search">
-                            <i class="ti ti-search fs-22"></i>
-                            <input type="search" class="form-control border-0" id="search-modal-input" placeholder="Search for actions, people,">
-                            <button type="button" class="btn p-0" data-bs-dismiss="modal" aria-label="Close">[esc]</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div class="page-content">
             <div class="page-container">
@@ -61,12 +48,12 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
-                                <h4 class="header-title mb-0">Modificar Usuario </h4>
+                                <h4 class="header-title mb-0">Registrar Usuario</h4>
                                 <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='usuarios.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                             </div>
 
                             <div class="card-body">
-                                <form class="needs-validation form-upd-user" novalidate="">
+                                <form class="needs-validation form-add-user" novalidate="">
                                     <div class="row">
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label" for="documento">Documento</label>
@@ -100,6 +87,7 @@
                                                 Please select an option.
                                             </div>
                                         </div>
+
                                     </div>
 
                                     <div class="row">
@@ -109,13 +97,13 @@
                                             <div class="invalid-feedback">Please provide a valid email.</div>
                                         </div>
 
-                                        <div class="col-md-3 mb-3">
+                                        <div class="col-md-4 mb-3">
                                             <label class="form-label" for="telefono">Teléfono</label>
                                             <input type="number" class="form-control" data-toggle="input-mask" data-mask-format="999999999" inputmode="number" min="99999999" id="telefono" name="telefono" placeholder="123456789" required="">
                                             <div class="invalid-feedback">Please provide a valid phone.</div>
                                         </div>
 
-                                        <div class="col-md-3 mb-3">
+                                        <div class="col-md-4 mb-3">
                                             <label class="form-label d-block">Sexo</label>
                                             <input type="radio" class="form-check-input" id="sexo1" name="sexo" required value="1">
                                             <label for="sexo1" class="ms-1">Masculino</label>
@@ -125,14 +113,17 @@
                                                 Please select an option.
                                             </div>
                                         </div>
-
-                                        <div class="col-md-2 mb-3">
-                                            <label class="form-label d-block">Estado</label>
-                                            <input type="checkbox" id="switch3" name="estado" data-switch="success" />
-                                            <label for="switch3" data-on-label="Yes" data-off-label="No"></label></h4>
-                                        </div>
                                     </div>
 
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="invalidCheck" required="">
+                                            <label class="form-check-label form-label" for="invalidCheck">
+                                                Agree to terms and conditions
+                                            </label>
+                                            <div class="invalid-feedback">You must agree before submitting.</div>
+                                        </div>
+                                    </div>
                                     <button class="btn btn-primary" type="submit">Enviar</button>
                                 </form>
                             </div>
@@ -141,10 +132,10 @@
                 </div>
             </div>
 
-            <?php include __DIR__ . '/layout/footer.html'; ?>
+            <?php include ROOT . '/layout/footer.html'; ?>
         </div>
     </div>
-    <?php include __DIR__ . '/layout/theme.html'; ?>
+    <?php include ROOT . '/layout/theme.html'; ?>
 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.0"></script>
@@ -152,4 +143,5 @@
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
+
 </html>

@@ -1,5 +1,6 @@
 <?php
-  require_once __DIR__ . "/controller/check_session.php";
+require_once __DIR__ . '/../config/bootstrap.php';
+require_once ROOT . '/controller/check_session.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,9 +23,9 @@
 
 <body>
     <div class="wrapper">
-            <?php include __DIR__ . '/layout/menu.php'; ?>
+            <?php include ROOT . '/layout/menu.php'; ?>
         <header class="app-topbar">
-            <?php include __DIR__ . '/layout/navbar.php'; ?>
+            <?php include ROOT . '/layout/navbar.php'; ?>
         </header>
 
         <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
@@ -45,14 +46,14 @@
             <div class="page-container">
                  <div class="page-title-head d-flex align-items-sm-center flex-sm-row flex-column gap-2">
                     <div class="flex-grow-1">
-                        <h4 class="fs-18 text-uppercase fw-bold mb-0">Templates</h4>
+                        <h4 class="fs-18 text-uppercase fw-bold mb-0">Recetas</h4>
                     </div>
 
                     <div class="text-end">
                         <ol class="breadcrumb m-0 py-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Cotix 360</a></li>
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Template</a></li>
-                            <li class="breadcrumb-item active">Plantilla Receta</li>
+                            <li class="breadcrumb-item active"> Recetas</li>
                         </ol>
                     </div>
                 </div>
@@ -61,17 +62,62 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
-                                <h4 class="header-title mb-0">Plantilla de Receta</h4>
+                                <div>
+                                    <h4 class="header-title mb-0">Receta #<span id="receta_id"></span></h4>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <p class="text-muted fs-14 mb-0" id="receta_nombre_display"></p>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>" id="btnEditRecetaNombre" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar nombre"><i class="ti ti-edit"></i></button>
+                                    </div>
+                                    <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none" style="max-width:400px;" placeholder="Nombre de la receta">
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-lg-4">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-lg bg-light d-flex align-items-center justify-content-center rounded">
+                                                <iconify-icon icon="solar:shield-user-bold" class="fs-28 text-primary"></iconify-icon>
+                                            </div>
+
+                                            <div>
+                                                <p class="text-dark fw-medium fs-12 mb-0"><span id="usuario"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-lg bg-light d-flex align-items-center justify-content-center rounded">
+                                                <iconify-icon icon="solar:calendar-date-broken" class="fs-28 text-primary"></iconify-icon>
+                                            </div>
+
+                                            <div>
+                                                <p class="text-dark fw-medium fs-12 mb-0"><span id="fecha"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-lg bg-light d-flex align-items-center justify-content-center rounded">
+                                                <iconify-icon icon="solar:refresh-square-bold" class="fs-28 text-primary"></iconify-icon>
+                                            </div>
+
+                                            <div>
+                                                <p class="text-dark fw-medium fs-12 mb-0">
+                                                    <span id="estado"></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="d-flex align-items-center gap-2">
-                                    <button type="button" class="btn btn-outline-info me-2" id="btnPreviewReceta" data-bs-toggle="modal" data-bs-target="#previewRecetaModal">
-                                        <i class="ti ti-eye me-1" data-bs-toggle="tooltip" data-bs-title="Vista previa" data-bs-placement="top"></i> Preview
-                                    </button>
-                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal"><i class="ti ti-search fs-18" data-bs-toggle="tooltip" data-bs-title="Buscar" data-bs-placement="bottom"></i></button>
-                                    <button type="button" class="btn btn-dark btn-icon"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
+                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-categoria-modal" data-bs-title="Márgen" data-bs-placement="bottom" <?= (int)$_SESSION['session_cargo'] === 4 ? 'disabled aria-disabled="true" title="No disponible para este cargo"' : '' ?>><i class="ti ti-box fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom"><i class="ti ti-search fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='receta_list.php'" data-bs-title="Volver" data-bs-placement="bottom"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                                 </div>
                             </div>
                             <form class="needs-validation form-receta" novalidate="" data-user-cargo="<?= (int)$_SESSION['session_cargo'] ?>">
                                 <div class="card-body p-0">
+                                    <div id="alertPrecioCambio" class="alert alert-warning m-2 d-none" role="alert"></div>
                                     <div class="bg-success bg-opacity-10 py-1 text-center">
                                         <p class="m-0"><b id="total_item">0</b> item(s) agregados</p>
                                     </div>
@@ -85,12 +131,12 @@
                                             </div>
 
                                             <div class="col-lg-3 col-6 border-end">
-                                                <p class="text-muted fw-medium fs-12 mb-1"><span class="text-dark">Tipo de Cambio SUNAT (Venta)</span> <span id="tipo_cambio_sunat_fecha" class="text-muted"></span></p>
-                                                <div class="input-step border bg-body-secondary p-1 rounded-pill d-inline-flex overflow-visible">
-                                                    <button type="button" id="tcMinus" class="tc-minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
-                                                    <input type="number" id="tipo_cambio_sunat" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="1.000" min="0" step="0.001" />
-                                                    <button type="button" id="tcPlus" class="tc-plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
-                                                </div>
+                                                <p class="text-muted fw-medium fs-12 mb-1">
+                                                    <span class="text-dark">Tipo de Cambio SUNAT (Venta)</span>
+                                                    <span id="tipo_cambio_sunat" class="text-muted">0.000</span>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btnEditTipoCambio" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar tipo de cambio"><i class="ti ti-edit"></i></button>
+                                                    <input type="number" step="0.001" id="tipo_cambio_input" class="form-control form-control-sm d-none" style="width:110px;display:inline-block;margin-left:8px;">
+                                                </p>
                                             </div>
                                             
                                             <div class="col-lg-3 col-12">
@@ -101,6 +147,17 @@
                                     </div>
                                     <div class="table-responsive">
                                         <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Item</th>
+                                                    <th>Detalle</th>
+                                                    <th>Tipo</th>
+                                                    <th class="text-center">Cant.</th>
+                                                    <th class="text-end <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>">Precio</th>
+                                                    <th class="text-end <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>">Total</th>
+                                                    <th class="text-center">Acción</th>
+                                                </tr>
+                                            </thead>
                                             <tbody>
                                                 
                                             </tbody>
@@ -128,13 +185,15 @@
                                                 </li>
                                             </ul>
                                         </div>
-
                                         <div class="col-sm-auto mt-3 mt-sm-0">
+                                            <button type="button" class="btn btn-warning btn-icon me-1" id="btnReloadPrecios" data-bs-toggle="tooltip" data-bs-title="Sincronizar precios actualizados">
+                                                <i class="ti ti-refresh"></i>
+                                            </button>
                                             <button type="submit" class="btn btn-success btn-icon">
-                                                <i class="ti ti-send"></i>
+                                                <i class="ti ti-device-floppy"></i>
                                             </button>
                                         </div>
-                                    </div> 
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -146,7 +205,6 @@
         </div>
     </div>
 
-    <!-- Info Header Modal -->
     <div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
         <div class="modal-dialog" style="max-width: 840px;">
             <div class="modal-content">
@@ -213,55 +271,65 @@
                                 </table>
                             </div>
                         </div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div><!--modal -->
-
-    <div class="modal fade preview-modal" id="previewRecetaModal" tabindex="-1" aria-labelledby="previewRecetaModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-xl">
-            <div class="modal-content">
-                <div class="modal-header border-0 pb-0">
-                    <div>
-                        <h4 class="modal-title mb-1" id="previewRecetaModalLabel">Vista previa de receta</h4>
-                        <p class="text-muted mb-0 fs-13">Detalle completo de todos los items sin paginación.</p>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="preview-summary">
-                        <span class="badge bg-light text-dark">Items: <span id="previewTotalItems">0</span></span>
-                        <span class="badge bg-light text-dark">S/.: <span id="previewTotalSoles">0.00</span></span>
-                        <span class="badge bg-light text-dark">$: <span id="previewTotalDolares">0.00</span></span>
-                        <span class="badge bg-light text-dark">PE: <span id="previewTotalPE">0.00</span></span>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover align-middle mb-0 preview-table">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Item</th>
-                                    <th>Detalle</th>
-                                    <th>Tipo</th>
-                                    <th class="text-center">Cant.</th>
-                                    <th class="text-end <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>">Precio</th>
-                                </tr>
-                            </thead>
-                            <tbody id="previewRecetaTableBody"></tbody>
-                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <?php include __DIR__ . '/layout/theme.html'; ?>
+
+    <div id="info-categoria-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-categoria-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen-lg-down" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-bg-warning border-0">
+                    <h4 class="modal-title" id="info-categoria-modalLabel">
+                        Márgenes por categoría
+                    </h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="alertCategoriaReceta" class="alert alert-info d-none" role="alert"></div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Categoría</th>
+                                    <th class="text-end">Cantidad</th>
+                                    <th class="text-end">Subtotal</th>
+                                    <th class="text-end">Margen %</th>
+                                    <th class="text-end">Total Fórmula</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recetaCategoriaTableBody">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">Abre el modal para cargar las categorías.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0">
+                    <div class="me-auto d-flex align-items-center gap-4 flex-wrap">
+                        <div class="small text-muted fw-semibold">Total + Margen $: <span id="totalFormulaDolares">0.00</span></div>
+                        <div class="small text-muted fw-semibold">Margen $: <span id="totalMargenFormulaDolares">0.00</span></div>
+                    </div>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-warning" id="btnGuardarRecetaCategoria">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <?php include ROOT . '/layout/theme.html'; ?>
 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js"></script>
-    <script src="./assets/js/form-receta.js"></script>
+    <script src="./assets/js/receta_form.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
 </html>
+

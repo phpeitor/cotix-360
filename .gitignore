@@ -1,2 +1,6 @@
 .env
 /vendor
+/tmp
+/logs
+/backup
+/scripts

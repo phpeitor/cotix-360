@@ -7,7 +7,9 @@ header('Connection: keep-alive');
 header('X-Accel-Buffering: no');
 
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
 }
 
 @ini_set('output_buffering', 'off');

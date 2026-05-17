@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/../model/usuario.php';
 require_once __DIR__ . '/../config/bootstrap.php';
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
 if (isset($_SESSION['session_id'])) {
     $obj = new Usuario();

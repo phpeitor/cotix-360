@@ -198,6 +198,14 @@ cotix/
 ## Roadmap sugerido
 
 - Añadir pruebas automatizadas para cálculos financieros.
+
+## Nuevas funcionalidades (16-may-2026)
+
+- **Ocultar botón Excel para técnicos (cargo = 4):** en el listado de recetas el botón `Excel` ya no se muestra para usuarios con `cargo === 4`. Implementación: [assets/js/table-gridjs-receta.js](assets/js/table-gridjs-receta.js#L259).
+- **Tooltips en botones de edición:** se añadieron tooltips Bootstrap a los botones de editar nombre y editar tipo de cambio en la vista de receta para mejorar la usabilidad. Vea [receta_form.php](receta_form.php#L68) y [receta_form.php](receta_form.php#L136).
+- **Flujo de PDF con nombre de receta:** al generar el PDF, si la receta no tiene nombre y el usuario no es técnico, se solicita el nombre mediante un modal antes de abrir el PDF. Para técnicos (cargo = 4) el PDF se abre directamente. Lógica en [assets/js/table-gridjs-receta.js](assets/js/table-gridjs-receta.js#L377).
+
+Si quieres que estas reglas se apliquen en otras pantallas (por ejemplo, otros listados con export), puedo propagar la comprobación de `CARGO`.
 - Publicar script SQL oficial de inicialización.
 - Definir licencia formal del proyecto.
 

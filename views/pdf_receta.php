@@ -1,9 +1,12 @@
 <?php
-session_start();
+require_once __DIR__ . '/../config/bootstrap.php';
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    @session_start();
+}
 use Dompdf\Dompdf;
-require_once __DIR__ . "/vendor/autoload.php";
-require_once __DIR__ . "/model/receta.php";
-require_once __DIR__ . "/model/item.php";
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once ROOT . '/model/receta.php';
+require_once ROOT . '/model/item.php';
 
 // Helpers para formateo y seguridad en el PDF
 function escaparPdf($value) {
@@ -165,7 +168,7 @@ ob_start();
     <title>Receta PDF</title>
 <?php
     // Cargar archivo CSS externo para Dompdf
-    $cssPath = __DIR__ . '/assets/css/pdf_receta.css';
+    $cssPath = ROOT . '/assets/css/pdf_receta.css';
     $cssContent = '';
     if (file_exists($cssPath) && is_readable($cssPath)) {
         $cssContent = file_get_contents($cssPath);
@@ -210,7 +213,7 @@ ob_start();
 
 <div class="page">
     <?php
-        $logoPath = __DIR__ . '/assets/images/mg-indusol-logo.svg';
+        $logoPath = ROOT . '/assets/images/mg-indusol-logo.svg';
         $logoDataUri = '';
         if (file_exists($logoPath) && is_readable($logoPath)) {
             $mime = 'image/svg+xml';

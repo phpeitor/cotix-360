@@ -1,6 +1,7 @@
 <?php
-  require_once __DIR__ . "/controller/check_session.php";
-  require_once __DIR__ . "/model/item.php";
+require_once __DIR__ . '/../config/bootstrap.php';
+require_once ROOT . '/controller/check_session.php';
+require_once ROOT . '/model/item.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,9 +23,9 @@
 
 <body>
     <div class="wrapper">
-            <?php include __DIR__ . '/layout/menu.php'; ?>
+            <?php include ROOT . '/layout/menu.php'; ?>
         <header class="app-topbar">
-            <?php include __DIR__ . '/layout/navbar.php'; ?>
+            <?php include ROOT . '/layout/navbar.php'; ?>
         </header>
 
         <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
@@ -178,10 +179,10 @@
             <!-- End page-container-->                                  
             </div>
 
-            <?php include __DIR__ . '/layout/footer.html'; ?>
+            <?php include ROOT . '/layout/footer.html'; ?>
         </div>
     </div>
-    <?php include __DIR__ . '/layout/theme.html'; ?>
+    <?php include ROOT . '/layout/theme.html'; ?>
 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
@@ -190,4 +191,6 @@
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
+
+
 </html>
