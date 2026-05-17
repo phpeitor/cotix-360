@@ -256,6 +256,8 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         if (estado === "Aprobada") {
+            const mostrarExcel = !(typeof CARGO !== 'undefined' && Number(CARGO) === 4);
+
             botones += `
                 <button class="btn btn-soft-danger btn-icon btn-sm rounded-circle btn-estado isadmin"
                         data-id="${id}"
@@ -275,8 +277,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 class="btn btn-soft-warning btn-icon btn-sm rounded-circle btn-pdf-receta"
                 data-hash="${hashId}">
                     <i class="ti ti-file"></i>
-                </a>
+                </a>`
 
+            if (mostrarExcel) {
+                botones += `
                 <a href="controller/export_receta_excel.php?id=${hashId}"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -288,6 +292,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     <i class="ti ti-file-spreadsheet"></i>
                 </a>
             `;
+                botones = botones.replace(/\s*<a href="controller\/export_receta_excel\.php\?id=\$\{hashId\}"[\s\S]*?<\/a>\s*/,
+                    "");
+            }
 
         } else if (estado === "Anulada") {
             botones += `

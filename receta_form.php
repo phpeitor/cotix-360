@@ -65,7 +65,7 @@
                                     <h4 class="header-title mb-0">Receta #<span id="receta_id"></span></h4>
                                     <div class="d-flex align-items-center gap-2">
                                         <p class="text-muted fs-14 mb-0" id="receta_nombre_display"></p>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnEditRecetaNombre" title="Editar nombre"><i class="ti ti-edit"></i></button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>" id="btnEditRecetaNombre" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar nombre"><i class="ti ti-edit"></i></button>
                                     </div>
                                     <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none" style="max-width:400px;" placeholder="Nombre de la receta">
                                 </div>
@@ -133,7 +133,7 @@
                                                 <p class="text-muted fw-medium fs-12 mb-1">
                                                     <span class="text-dark">Tipo de Cambio SUNAT (Venta)</span>
                                                     <span id="tipo_cambio_sunat" class="text-muted">0.000</span>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btnEditTipoCambio" title="Editar tipo de cambio"><i class="ti ti-edit"></i></button>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btnEditTipoCambio" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar tipo de cambio"><i class="ti ti-edit"></i></button>
                                                     <input type="number" step="0.001" id="tipo_cambio_input" class="form-control form-control-sm d-none" style="width:110px;display:inline-block;margin-left:8px;">
                                                 </p>
                                             </div>
