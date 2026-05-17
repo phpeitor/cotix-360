@@ -5,6 +5,7 @@
 /logs/
 /backup/
 /node_modules/
+/scripts/
 /.vscode/
 /.idea/
 /uploads/
