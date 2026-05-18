@@ -16006,7 +16006,7 @@ const au = "Login Machine",
 				alignment: ei.Alignment.Center
 			}),
 			...rt
-		}), [B, Mt] = hl.useState(""), [Ht, Nt] = hl.useState(""), [Ct, at] = hl.useState(0), [Y, vt] = hl.useState(Hd), [_showReq, _setShowReq] = hl.useState(!1), it = hl.useRef(null), ne = hl.useRef(!1), ce = hl.useRef(!1), ot = ei.useStateMachineInput(I, au, "isChecking"), yt = ei.useStateMachineInput(I, au, "numLook"), S = ei.useStateMachineInput(I, au, "trigSuccess"), Pt = ei.useStateMachineInput(I, au, "trigFail"), re = ei.useStateMachineInput(I, au, "isHandsUp");
+		}), [B, Mt] = hl.useState(""), [Ht, Nt] = hl.useState(""), [Ct, at] = hl.useState(0), [Y, vt] = hl.useState(Hd), [_showReq, _setShowReq] = hl.useState(!1), [isChecking, setIsChecking] = hl.useState(!1), it = hl.useRef(null), ne = hl.useRef(!1), ce = hl.useRef(!1), ot = ei.useStateMachineInput(I, au, "isChecking"), yt = ei.useStateMachineInput(I, au, "numLook"), S = ei.useStateMachineInput(I, au, "trigSuccess"), Pt = ei.useStateMachineInput(I, au, "trigFail"), re = ei.useStateMachineInput(I, au, "isHandsUp");
 		hl.useEffect(() => {
 			it?.current && !Ct && at(it.current.offsetWidth / 100)
 		}, [it]);
@@ -16026,12 +16026,12 @@ const au = "Login Machine",
 		}, [S]);
 		const xt = Dt => {
 				const It = Dt.target.value;
-				Mt(It), ot && (ot.value || (ot.value = !0));
+				Mt(It), setIsChecking(!0), ot && (ot.value || (ot.value = !0));
 				const ae = It.length;
 				yt && (yt.value = ae * Ct)
 			},
 			Yt = () => {
-				ot && (ot.value = !0), yt && yt.value !== B.length * Ct && (yt.value = B.length * Ct)
+				setIsChecking(!0), ot && (ot.value = !0), yt && yt.value !== B.length * Ct && (yt.value = B.length * Ct)
 			};
 			const xm = (Dt, It = !1) => {
 				if (Dt && typeof Dt.fire == "function") {
@@ -16060,10 +16060,10 @@ const au = "Login Machine",
 				}
 				_setShowReq(!1);
 
-				if (ot && ot.value) return;
+				if (isChecking) return;
 				
 				vt("Checking...");
-				ot && (ot.value = !0);
+				setIsChecking(!0), ot && (ot.value = !0);
 				re && (re.value = !1);
 
 				const formData = new FormData();
@@ -16093,6 +16093,7 @@ const au = "Login Machine",
 					} else {
 						xm(Pt, !0);
 						alertify.error(data.message || "❌ Usuario o contraseña incorrectos");
+						setIsChecking(!1);
 						ot && (ot.value = !1);
 						vt(Hd);
 					}
@@ -16101,6 +16102,7 @@ const au = "Login Machine",
 					xm(Pt, !0);
 					alertify.error("❌ Error al conectar con el servidor");
 					console.error(err);
+					setIsChecking(!1);
 					setTimeout(() => {
 						ot && (ot.value = !1);
 					}, 350);
@@ -16127,10 +16129,13 @@ const au = "Login Machine",
 								className: "form-username" + (_showReq && !B.trim() ? " input-error" : ""),
 								name: "username",
 								placeholder: "Username",
+								maxLength: 35,
 								onFocus: Yt,
 								value: B,
 								onChange: xt,
-								onBlur: () => ot && (ot.value = !1),
+								onBlur: () => {
+									setIsChecking(!1), ot && (ot.value = !1)
+								},
 								ref: it
 							})
 						}), Rn.jsx("label", {
@@ -16147,7 +16152,7 @@ const au = "Login Machine",
 							})
 						}), Rn.jsx("button", {
 							className: "login-btn",
-							disabled: !!(ot && ot.value),
+								disabled: isChecking,
 							children: Y
 						})]
 					})
