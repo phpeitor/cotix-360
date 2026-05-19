@@ -77,6 +77,14 @@ document.addEventListener("DOMContentLoaded", function () {
 		====================== */
 
 		const lineData = resp.data.line;
+
+		// If there's no line data for revenue, hide the whole card (same behavior as other charts)
+		if (!Array.isArray(lineData) || lineData.length === 0) {
+			const host = document.querySelector("#revenue-chart");
+			const wrapper = host ? host.closest('.col-xxl-8') : null;
+			if (wrapper) wrapper.style.display = 'none';
+			return;
+		}
 		const months = [...new Set(lineData.map(i => i.periodo))]
 		.sort();
 

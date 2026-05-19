@@ -2,10 +2,6 @@
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once ROOT . '/controller/check_session.php';
 ?>
-<!-- DEBUG: ROOT=<?php echo defined('ROOT') ? ROOT : 'UNDEF'; ?> -->
-<!-- DEBUG: SCRIPT_NAME=<?php echo $_SERVER['SCRIPT_NAME'] ?? ''; ?> -->
-<!-- DEBUG: PHP_SELF=<?php echo $_SERVER['PHP_SELF'] ?? ''; ?> -->
-<!-- DEBUG: SESSION_PRESENT=<?php echo isset($_SESSION) && isset($_SESSION['session_usuario']) ? 'YES' : 'NO'; ?> -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -89,7 +85,7 @@ require_once ROOT . '/controller/check_session.php';
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Usuarios">Total Usuarios</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Usuarios"> Usuarios</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
@@ -100,7 +96,7 @@ require_once ROOT . '/controller/check_session.php';
                                         </div>
                                         <p class="mb-0 text-muted">
                                             <span class="text-danger me-2"><i class="ti ti-caret-down-filled"></i> 9.19%</span>
-                                            <span class="text-nowrap">Since last month</span>
+                                            <span class="text-nowrap"></span>
                                         </p>
                                     </div>
                                 </div>
@@ -109,7 +105,7 @@ require_once ROOT . '/controller/check_session.php';
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Cotizaciones">Total Cotizaciones</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Cotizaciones"> Cotizaciones</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
@@ -120,7 +116,7 @@ require_once ROOT . '/controller/check_session.php';
                                         </div>
                                         <p class="mb-0 text-muted">
                                             <span class="text-success me-2"><i class="ti ti-caret-up-filled"></i> 26.87%</span>
-                                            <span class="text-nowrap">Since last month</span>
+                                            <span class="text-nowrap"></span>
                                         </p>
                                     </div>
                                 </div>
@@ -129,7 +125,7 @@ require_once ROOT . '/controller/check_session.php';
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Items">Total Items</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Items"> Items</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
@@ -140,7 +136,7 @@ require_once ROOT . '/controller/check_session.php';
                                         </div>
                                         <p class="mb-0 text-muted">
                                             <span class="text-success me-2"><i class="ti ti-caret-up-filled"></i> 3.51%</span>
-                                            <span class="text-nowrap">Since last month</span>
+                                            <span class="text-nowrap"></span>
                                         </p>
                                     </div>
                                 </div>
@@ -149,7 +145,7 @@ require_once ROOT . '/controller/check_session.php';
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Excels">Total Excels</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Excels"> Excels</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
@@ -160,7 +156,7 @@ require_once ROOT . '/controller/check_session.php';
                                         </div>
                                         <p class="mb-0 text-muted">
                                             <span class="text-danger me-2"><i class="ti ti-caret-down-filled"></i> 1.05%</span>
-                                            <span class="text-nowrap">Since last month</span>
+                                            <span class="text-nowrap"></span>
                                         </p>
                                     </div>
                                 </div>
@@ -169,7 +165,7 @@ require_once ROOT . '/controller/check_session.php';
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Recetas">Total Recetas</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Recetas"> Recetas</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
@@ -185,7 +181,7 @@ require_once ROOT . '/controller/check_session.php';
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Items">Total Items Receta</h5>
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Items"> Items Receta</h5>
                                         <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
                                             <div class="user-img fs-42 flex-shrink-0">
                                                 <span class="avatar-title text-bg-primary rounded-circle fs-22">
