@@ -52,7 +52,7 @@ $bases = $selects->select_bases();
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
                                 <h4 class="header-title mb-0">Plantilla de Cálculo</h4>
-                                <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='items.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
+                                <button type="button" class="btn btn-dark btn-icon js-navigate" data-href="items.php"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                             </div>
                             <form id="formCotizacion" class="needs-validation form-calculo" novalidate="">
                                 <div class="card-body">

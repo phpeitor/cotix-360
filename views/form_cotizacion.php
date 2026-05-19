@@ -102,7 +102,7 @@ require_once ROOT . '/model/item.php';
                                     </div>
                                 </div>
 
-                                <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='cotizaciones.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
+                                <button type="button" class="btn btn-dark btn-icon js-navigate" data-href="cotizaciones.php"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                             </div>
                             <form id="formCotizacion" class="needs-validation form-calculo" novalidate="">
                                 <div class="card-body p-0">

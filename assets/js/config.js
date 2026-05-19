@@ -153,5 +153,16 @@
 		})
 		.catch(err => console.error('Permisos:', err));
 
-    });
+		// Delegated handler for navigation buttons (avoid inline onclick in views)
+		document.addEventListener('click', function(e){
+			try {
+				var btn = e.target.closest && e.target.closest('.js-navigate');
+				if (btn) {
+					e.preventDefault();
+					var href = btn.getAttribute('data-href');
+					if (href) window.location.href = href;
+				}
+			} catch (err) { /* ignore */ }
+		});
+	});
 }();

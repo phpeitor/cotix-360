@@ -56,7 +56,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
                                 <h4 class="header-title mb-0">Modificar Item </h4>
-                                <button type="button" class="btn btn-dark btn-icon" onclick="window.location.href='items_receta.php'"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
+                                <button type="button" class="btn btn-dark btn-icon js-navigate" data-href="items_receta.php"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                             </div>
 
                             <div class="card-body">

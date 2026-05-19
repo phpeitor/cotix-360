@@ -63,7 +63,7 @@ require_once ROOT . '/controller/check_session.php';
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
                                 <h4 class="header-title mb-0">Base Users</h4>
-                                <button type="button" class="btn btn-primary mb-0" onclick="window.location.href='add_usuario.php'">Registrar</button>
+                                <button type="button" class="btn btn-primary mb-0 js-navigate" data-href="add_usuario.php">Registrar</button>
                             </div>
 
                             <div class="card-body">
