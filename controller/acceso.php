@@ -17,6 +17,30 @@ try {
         throw new Exception('Debe ingresar usuario y password.');
     }
 
+    // Inicializar estructura de intentos en la sesión
+    if (!isset($_SESSION['login_attempts'])) {
+        $_SESSION['login_attempts'] = [];
+    }
+
+    $now = time();
+    if (!isset($_SESSION['login_attempts'][$usuario])) {
+        $_SESSION['login_attempts'][$usuario] = ['count' => 0];
+    }
+
+    $userAttempts = &$_SESSION['login_attempts'][$usuario];
+
+    // Verificar si el usuario está temporalmente bloqueado
+    if (!empty($userAttempts['blocked_until']) && $now < (int)$userAttempts['blocked_until']) {
+        $remain = (int)$userAttempts['blocked_until'] - $now;
+        $minutes = ceil($remain / 60);
+        echo json_encode([
+            'ok' => false,
+            'message' => "🚫 Bloqueado por intentos fallidos. Intente nuevamente en {$minutes} minuto(s).",
+            'blocked_seconds' => $remain
+        ]);
+        exit;
+    }
+
     $password = md5($password);
     $obj = new Usuario();
     $data = $obj->acceso_user([
@@ -31,6 +55,11 @@ try {
                 'message' => 'Usuario desactivado contactar con el administrador del sistema 📵🙅‍♂️'
             ]);
             exit;
+        }
+
+        // Login exitoso: limpiar contador de intentos
+        if (isset($_SESSION['login_attempts'][$usuario])) {
+            unset($_SESSION['login_attempts'][$usuario]);
         }
 
         $_SESSION['session_usuario'] = $data['USUARIO'];
@@ -77,7 +106,23 @@ try {
         
         echo json_encode(['ok' => true]);
     } else {
-        echo json_encode(['ok' => false, 'message' => '🚫 Usuario o password incorrectos']);
+        // Intento fallido: incrementar contador y bloquear si alcanza 3 intentos
+        $userAttempts['count'] = (int)($userAttempts['count'] ?? 0) + 1;
+        $userAttempts['last'] = $now;
+
+        if ($userAttempts['count'] >= 3) {
+            // bloquear 5 minutos
+            $userAttempts['blocked_until'] = $now + 300; // 300s = 5min
+            $userAttempts['count'] = 0; // resetear contador tras bloqueo
+            echo json_encode([
+                'ok' => false,
+                'message' => '🚫 Usuario o password incorrectos. Se han agotado los intentos. Bloqueado 5 minutos.',
+                'blocked_seconds' => 300
+            ]);
+        } else {
+            $left = 3 - $userAttempts['count'];
+            echo json_encode(['ok' => false, 'message' => '🚫 Usuario o password incorrectos. Intentos restantes: ' . $left]);
+        }
     }
 } catch (Throwable $e) {
     http_response_code(500);

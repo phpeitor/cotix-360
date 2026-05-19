@@ -16093,9 +16093,49 @@ const au = "Login Machine",
 					} else {
 						xm(Pt, !0);
 						alertify.error(data.message || "❌ Usuario o contraseña incorrectos");
-						setIsChecking(!1);
-						ot && (ot.value = !1);
-						vt(Hd);
+
+						// Si el servidor indica bloqueo temporal, mantener el botón deshabilitado
+						if (data.blocked_seconds && Number(data.blocked_seconds) > 0) {
+							const secs = Number(data.blocked_seconds);
+							// Limpiar cualquier contador anterior
+							try {
+								if (window.__login_block_interval) {
+									clearInterval(window.__login_block_interval);
+									window.__login_block_interval = null;
+								}
+							} catch (e) {}
+
+							// Asegurar que el estado de checking se mantiene y el botón queda deshabilitado
+							setIsChecking(!0);
+							ot && (ot.value = !0);
+
+							// Iniciar contador regresivo mostrado en el botón (mm:ss)
+							let remaining = secs;
+							const fmt = s => {
+								const mm = Math.floor(s / 60).toString().padStart(2, '0');
+								const ss = (s % 60).toString().padStart(2, '0');
+								return `${mm}:${ss}`;
+							};
+
+							vt(`Bloqueado ${fmt(remaining)}`);
+
+							window.__login_block_interval = setInterval(() => {
+								remaining -= 1;
+								if (remaining <= 0) {
+									clearInterval(window.__login_block_interval);
+									window.__login_block_interval = null;
+									setIsChecking(!1);
+									ot && (ot.value = !1);
+									vt(Hd);
+								} else {
+									vt(`Bloqueado ${fmt(remaining)}`);
+								}
+							}, 1000);
+						} else {
+							setIsChecking(!1);
+							ot && (ot.value = !1);
+							vt(Hd);
+						}
 					}
 
 				} catch (err) {
@@ -16129,7 +16169,7 @@ const au = "Login Machine",
 								className: "form-username" + (_showReq && !B.trim() ? " input-error" : ""),
 								name: "username",
 								placeholder: "Username",
-								maxLength: 35,
+								maxLength: 33,
 								onFocus: Yt,
 								value: B,
 								onChange: xt,
