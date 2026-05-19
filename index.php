@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/config/bootstrap.php';
 if (isset($_SESSION['session_usuario'])) {
     header("Location: home.php");
     exit();
@@ -17,6 +18,16 @@ if (isset($_SESSION['session_usuario'])) {
     <link rel="stylesheet" href="./assets/css/login-validation.css">    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
+    <?php
+    // Inyectar la clave de site de reCAPTCHA (definir RECAPTCHA_SITE_KEY en .env)
+    $recapSite = $_ENV['RECAPTCHA_SITE_KEY'] ?? '';
+    if ($recapSite) {
+      echo "<script src=\"https://www.google.com/recaptcha/api.js?render={$recapSite}\"></script>\n";
+      echo "<script>window.RECAPTCHA_SITE_KEY = '{$recapSite}';</script>\n";
+    } else {
+      echo "<script>window.RECAPTCHA_SITE_KEY = '';</script>\n";
+    }
+    ?>
   </head>
   <body>
     <video autoplay loop muted playsinline id="background-video">
@@ -25,5 +36,21 @@ if (isset($_SESSION['session_usuario'])) {
     </video>
     <div id="root"></div>
   <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
+  <script>
+    // Mover notificaciones para no tapar el badge de reCAPTCHA
+    (function(){
+      try {
+        if (typeof alertify !== 'undefined' && alertify && typeof alertify.set === 'function') {
+          alertify.set('notifier','position','top-right');
+        } else {
+          window.addEventListener('load', function(){
+            if (window.alertify && typeof alertify.set === 'function') {
+              alertify.set('notifier','position','top-right');
+            }
+          });
+        }
+      } catch (e) { console.warn('Could not set alertify position', e); }
+    })();
+  </script>
   </body>
 </html>

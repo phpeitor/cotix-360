@@ -22,6 +22,50 @@ try {
         $_SESSION['login_attempts'] = [];
     }
 
+    // Determinar IP remota tempranamente (opcionalmente enviada a Google)
+    $ip = $_SERVER['REMOTE_ADDR'] ?? null;
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+    }
+
+    // Verificar reCAPTCHA v3 si se envió token
+    $recaptchaToken = $_POST['g-recaptcha-response'] ?? '';
+    $recaptchaSecret = $_ENV['RECAPTCHA_SECRET'] ?? '';
+    if ($recaptchaSecret && $recaptchaToken) {
+        $chRec = curl_init();
+        curl_setopt_array($chRec, [
+            CURLOPT_URL => 'https://www.google.com/recaptcha/api/siteverify',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => http_build_query([
+                'secret' => $recaptchaSecret,
+                'response' => $recaptchaToken,
+                'remoteip' => $ip
+            ]),
+            CURLOPT_TIMEOUT => 5,
+            CURLOPT_CONNECTTIMEOUT => 3
+        ]);
+
+        $recResp = curl_exec($chRec);
+        if (!curl_errno($chRec)) {
+            $recData = json_decode($recResp, true);
+            $recSuccess = $recData['success'] ?? false;
+            $recScore = isset($recData['score']) ? (float)$recData['score'] : null;
+            // Puedes ajustar el umbral de score según tu tolerancia (ej. 0.5)
+            $scoreThreshold = 0.5;
+            if (!$recSuccess || ($recScore !== null && $recScore < $scoreThreshold)) {
+                echo json_encode([
+                    'ok' => false,
+                    'message' => '🚫 reCAPTCHA: verificación fallida. Intente nuevamente.',
+                    'recaptcha' => $recData
+                ]);
+                curl_close($chRec);
+                exit;
+            }
+        }
+        curl_close($chRec);
+    }
+
     $now = time();
     if (!isset($_SESSION['login_attempts'][$usuario])) {
         $_SESSION['login_attempts'][$usuario] = ['count' => 0];

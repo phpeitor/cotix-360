@@ -16070,6 +16070,23 @@ const au = "Login Machine",
 				formData.append("usuario", usuario);
 				formData.append("password", password);
 
+				// Integración reCAPTCHA v3: solicitar token y agregarlo al formData
+				try {
+					const siteKey = window.RECAPTCHA_SITE_KEY || '';
+					if (siteKey && window.grecaptcha) {
+						await new Promise(resolve => grecaptcha.ready(resolve));
+						try {
+							const token = await grecaptcha.execute(siteKey, { action: 'login' });
+							if (token) formData.append('g-recaptcha-response', token);
+						} catch (e) {
+							// Si falla obtener token, continuar sin token
+							console.warn('reCAPTCHA execute failed', e);
+						}
+					}
+				} catch (e) {
+					console.warn('reCAPTCHA not available', e);
+				}
+
 				try {
 					const res = await fetch("controller/acceso.php", {
 						method: "POST",

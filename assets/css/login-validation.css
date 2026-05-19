@@ -11,3 +11,5 @@
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+.grecaptcha-badge { visibility: visible !important; opacity: 1 !important; display: block !important; bottom: 12px !important; right: 12px !important; z-index: 9999 !important; }
