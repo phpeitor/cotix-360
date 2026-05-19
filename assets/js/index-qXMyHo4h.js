@@ -23,6 +23,48 @@
 		fetch(Mt.href, Ht)
 	}
 })();
+// Init reCAPTCHA loader and alertify positioning without inline scripts in views
+(function(){
+	try {
+		const root = document.getElementById('root');
+		const siteKey = root && root.dataset ? (root.dataset.recaptchaSiteKey || '') : '';
+		console.debug('reCAPTCHA: siteKey from DOM', siteKey);
+		if (siteKey) {
+			window.RECAPTCHA_SITE_KEY = siteKey;
+			const scr = document.createElement('script');
+			scr.src = 'https://www.google.com/recaptcha/api.js?render=' + encodeURIComponent(siteKey);
+			scr.async = true;
+			scr.defer = true;
+			scr.onload = function(){
+				console.debug('reCAPTCHA script loaded');
+				window.__recaptcha_loaded = true;
+			};
+			scr.onerror = function(e){
+				console.error('reCAPTCHA script failed to load', e);
+				window.__recaptcha_loaded = false;
+			};
+			document.head.appendChild(scr);
+			console.debug('reCAPTCHA script appended to head');
+		} else {
+			window.RECAPTCHA_SITE_KEY = '';
+			console.debug('reCAPTCHA: no site key present');
+		}
+	} catch (e) {
+		console.warn('reCAPTCHA init failed', e);
+		window.RECAPTCHA_SITE_KEY = window.RECAPTCHA_SITE_KEY || '';
+	}
+
+	const setAlertifyPosition = () => {
+		try {
+			if (window.alertify && typeof alertify.set === 'function') {
+				alertify.set('notifier','position','top-right');
+			}
+		} catch (e) { /* ignore */ }
+	};
+
+	if (document.readyState === 'complete') setAlertifyPosition();
+	else window.addEventListener('load', setAlertifyPosition);
+})();
 var yf = {
 		exports: {}
 	},
