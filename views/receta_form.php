@@ -201,7 +201,7 @@ require_once ROOT . '/controller/check_session.php';
                 </div>
             <!-- End page-container-->                                  
             </div>
-            <?php include __DIR__ . '/layout/footer.html'; ?>
+            <?php include ROOT . '/layout/footer.html'; ?>
         </div>
     </div>
 
