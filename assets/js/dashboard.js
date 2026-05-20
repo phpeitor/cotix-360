@@ -153,59 +153,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         }
 
-        /* =====================================================
-        HEADER NOTIFICATIONS
-        ===================================================== */
-        const headerContainer = document.getElementById("dashboard-header-notifications");
-
-        if (headerContainer && Array.isArray(json.data.header)) {
-
-            headerContainer.innerHTML = "";
-
-            json.data.header.forEach((h, index) => {
-
-                const avatar = Math.floor(Math.random() * 10) + 1;
-                const notifId = `notification-${index + 1}`;
-                const usuario = String(h.usuario).toLowerCase();
-                const doc = h.doc;
-                const fecha = h.ultima_fecha;
-                const isLogin = doc.length >= 32;
-
-                headerContainer.insertAdjacentHTML("beforeend", `
-                    <div class="dropdown-item notification-item py-2 text-wrap ${isLogin ? 'active' : ''}" id="${notifId}">
-                        <span class="d-flex align-items-center">
-                            <span class="me-3 position-relative flex-shrink-0">
-                                <img src="./assets/images/users/avatar-${avatar}.jpg"
-                                    class="avatar-md rounded-circle" alt="" />
-                                <span class="position-absolute rounded-pill bg-${isLogin ? 'danger' : 'secondary'} notification-badge">
-                                    <i class="ti ${isLogin ? 'ti-message-circle' : 'ti-plus'}"></i>
-                                </span>
-                            </span>
-
-                            <span class="flex-grow-1 text-muted">
-                                ${
-                                    isLogin
-                                    ? `<span class="fw-medium text-body">${usuario}</span> inició sesión con
-                                    <span class="fw-medium text-body"> ${String(doc).substring(0, 12)+'*******'}</span>`
-                                    : `<span class="fw-medium text-body">${usuario}</span> you in
-                                    <span class="fw-medium text-body">${doc}</span>`
-                                }
-                                <br />
-                                <span class="fs-12">${fecha}</span>
-                            </span>
-
-                            <span class="notification-item-close">
-                                <button type="button"
-                                        class="btn btn-ghost-danger rounded-circle btn-sm btn-icon"
-                                        data-dismissible="#${notifId}">
-                                    <i class="ti ti-x fs-16"></i>
-                                </button>
-                            </span>
-                        </span>
-                    </div>
-                `);
-            });
-        }
+        // HEADER NOTIFICATIONS: moved to a small dedicated script (header-notifications.js)
+        // This file keeps the dashboard rendering focused and safe to include on any view.
 
     } catch (err) {
         console.error("❌ Dashboard error:", err);

@@ -77,7 +77,8 @@ class Dashboard {
                 SELECT
                 b.usuario,
                 MD5(b.doc) AS doc,
-                MAX(a.fecha) AS ultima_fecha
+                MAX(a.fecha) AS ultima_fecha,
+                'usurio' as tipo
                 FROM login a
                 LEFT JOIN personal b ON a.id_user = b.idpersonal
                 WHERE a.tipo = 'IN'
@@ -90,7 +91,8 @@ class Dashboard {
                 SELECT
                 t.usuario,
                 t.estado AS doc,
-                t.created_at AS ultima_fecha
+                t.created_at AS ultima_fecha,
+                'cotización' as tipo
                 FROM (
                     SELECT
                         b.usuario,
@@ -98,12 +100,32 @@ class Dashboard {
                         a.created_at
                     FROM cotizaciones a
                     LEFT JOIN personal b ON a.usuario_id = b.IDPERSONAL
-                    WHERE a.estado = 'Aprobada'
-                    AND a.created_at >= CURDATE()
+                    WHERE  a.created_at >= CURDATE()
                     AND a.created_at < CURDATE() + INTERVAL 1 DAY
                     ORDER BY a.created_at DESC
                     LIMIT 5
-                ) t;
+                ) t
+
+                UNION ALL
+
+                SELECT
+                t2.usuario,
+                t2.estado AS doc,
+                t2.created_at AS ultima_fecha,
+                'receta' as tipo
+                FROM (
+                    SELECT
+                        b.usuario,
+                        a.estado,
+                        a.created_at
+                    FROM recetas a
+                    LEFT JOIN personal b ON a.usuario_id = b.IDPERSONAL
+                    WHERE  a.created_at >= CURDATE()
+                    AND a.created_at < CURDATE() + INTERVAL 1 DAY
+                    ORDER BY a.created_at DESC
+                    LIMIT 5
+                ) t2
+                order by ultima_fecha desc
         ";
 
         $stmt = $this->conn->prepare($sql);
