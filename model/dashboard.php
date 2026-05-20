@@ -78,7 +78,7 @@ class Dashboard {
                 b.usuario,
                 MD5(b.doc) AS doc,
                 MAX(a.fecha) AS ultima_fecha,
-                'usurio' as tipo
+                'usuario' as tipo
                 FROM login a
                 LEFT JOIN personal b ON a.id_user = b.idpersonal
                 WHERE a.tipo = 'IN'

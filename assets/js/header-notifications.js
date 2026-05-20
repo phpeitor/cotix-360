@@ -10,13 +10,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         headerContainer.innerHTML = '';
 
+        const badgeClass = (estado) => {
+            if (!estado) return 'badge-soft-secondary';
+            switch (String(estado).toLowerCase()) {
+                case 'aprobada': return 'badge-soft-success';
+                case 'anulada': return 'badge-soft-danger';
+                case 'enviada': return 'badge-soft-info';
+                default: return 'badge-soft-secondary';
+            }
+        };
+
         json.data.header.forEach((h, index) => {
             const avatar = Math.floor(Math.random() * 10) + 1;
             const notifId = `notification-${index + 1}`;
             const usuario = String(h.usuario).toLowerCase();
             const doc = h.doc;
             const fecha = h.ultima_fecha;
-            const tipo = String(h.tipo || '').toUpperCase();
+            const tipo = String(h.tipo || '').toLowerCase();
             const isLogin = doc && String(doc).length >= 32;
 
             headerContainer.insertAdjacentHTML('beforeend', `
@@ -34,8 +44,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 isLogin
                                 ? `<span class="fw-medium text-body">${usuario}</span> inició sesión
                                    <span class="fw-medium text-body"> ${String(doc).substring(0, 12)+'*******'}</span>`
-                                          : `<span class="fw-medium text-body">${usuario}</span> - <span class="fw-medium text-body">${tipo} </span>
-                                              <span class="fw-medium text-body text-truncate">[${doc}]</span>`
+                                          : `<span class="fw-medium text-body">${usuario}</span> - <span class="fw-medium text-body">${tipo}</span>
+                                              <span class="badge ${badgeClass(doc)} px-1 py-1 ms-0">${doc}</span>`
                             }
                             <br />
                             <span class="fs-12">${fecha}</span>
