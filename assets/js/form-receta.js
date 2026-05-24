@@ -3,6 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const categoriaSelect = document.getElementById("categoria");
     const subCat1Select = document.getElementById("subCat1");
     const subCat2Select = document.getElementById("subCat2");
+    const marcaSelect = document.getElementById("filterMarca");
+    const modeloSelect = document.getElementById("filterModelo");
+    const productoFiltersWrap = document.getElementById("productoFiltersWrap");
     const tbody = document.querySelector("table.table tbody");
     const itemsTableBody = document.getElementById("recetaItemsTableBody");
     const itemsResultCount = document.getElementById("itemsResultCount");
@@ -225,12 +228,92 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getFiltrosReceta() {
-        return {
+        const filtros = {
             tipo: baseSelect?.value || "",
             categoria: categoriaSelect?.value || "",
             sub_cat_1: subCat1Select?.value || "",
             sub_cat_2: subCat2Select?.value || ""
         };
+
+        if (isTipoProducto()) {
+            filtros.marca = marcaSelect?.value || "";
+            filtros.modelo = modeloSelect?.value || "";
+        }
+
+        return filtros;
+    }
+
+    function isTipoProducto() {
+        return String(baseSelect?.value || "").trim().toUpperCase() === "PRODUCTO";
+    }
+
+    function mostrarFiltrosProducto(mostrar) {
+        if (!productoFiltersWrap || !marcaSelect || !modeloSelect) return;
+
+        productoFiltersWrap.classList.toggle("d-none", !mostrar);
+        marcaSelect.disabled = !mostrar;
+        modeloSelect.disabled = !mostrar;
+
+        if (!mostrar) {
+            resetNativeSelect(marcaSelect, "-- Seleccione --");
+            resetNativeSelect(modeloSelect, "-- Seleccione --");
+        }
+    }
+
+    function resetFiltrosProducto() {
+        resetNativeSelect(marcaSelect, "-- Seleccione --");
+        resetNativeSelect(modeloSelect, "-- Seleccione --");
+        mostrarFiltrosProducto(false);
+    }
+
+    async function cargarMarcasReceta() {
+        const { tipo, categoria } = getFiltrosReceta();
+
+        if (!isTipoProducto()) {
+            resetFiltrosProducto();
+            return;
+        }
+
+        try {
+            mostrarFiltrosProducto(!!categoria);
+            resetNativeSelect(marcaSelect, "-- Seleccione --");
+            resetNativeSelect(modeloSelect, "-- Seleccione --");
+
+            if (!tipo || !categoria) {
+                return;
+            }
+
+            const marcas = await cargarRecetaOpciones({ nivel: "marcas", tipo, categoria });
+            setNativeSelectOptions(marcaSelect, marcas, "-- Seleccione --", "marca");
+            resetNativeSelect(modeloSelect, "-- Seleccione --");
+        } catch (error) {
+            console.error(error);
+            alertify.error("Error al cargar marcas");
+        }
+    }
+
+    async function cargarModelosReceta() {
+        const { tipo, categoria, marca } = getFiltrosReceta();
+
+        if (!isTipoProducto()) {
+            resetFiltrosProducto();
+            return;
+        }
+
+        try {
+            mostrarFiltrosProducto(true);
+            resetNativeSelect(modeloSelect, "-- Seleccione --");
+
+            if (!tipo || !categoria || !marca) {
+                return;
+            }
+
+            const modelos = await cargarRecetaOpciones({ nivel: "modelos", tipo, categoria, marca });
+            setNativeSelectOptions(modeloSelect, modelos, "-- Seleccione --", "modelo");
+        } catch (error) {
+            console.error(error);
+            alertify.error("Error al cargar modelos");
+        }
     }
 
     async function cargarBasesReceta() {
@@ -240,6 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
             resetNativeSelect(categoriaSelect, "-- Seleccione --");
             resetNativeSelect(subCat1Select, "-- Seleccione --");
             resetNativeSelect(subCat2Select, "-- Seleccione --");
+            resetFiltrosProducto();
             renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
         } catch (error) {
             console.error(error);
@@ -253,15 +337,19 @@ document.addEventListener("DOMContentLoaded", () => {
         resetNativeSelect(categoriaSelect, "-- Seleccione --");
         resetNativeSelect(subCat1Select, "-- Seleccione --");
         resetNativeSelect(subCat2Select, "-- Seleccione --");
+        resetFiltrosProducto();
         renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
 
         if (!tipo) return;
+
+        mostrarFiltrosProducto(isTipoProducto());
 
         try {
             const categorias = await cargarRecetaOpciones({ nivel: "categorias", tipo });
             setNativeSelectOptions(categoriaSelect, categorias, "-- Seleccione --", "categoria");
             resetNativeSelect(subCat1Select, "-- Seleccione --");
             resetNativeSelect(subCat2Select, "-- Seleccione --");
+            resetFiltrosProducto();
             renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
         } catch (error) {
             console.error(error);
@@ -276,13 +364,21 @@ document.addEventListener("DOMContentLoaded", () => {
         resetNativeSelect(subCat2Select, "-- Seleccione --");
         renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
 
-        if (!tipo || !categoria) return;
+        if (!tipo || !categoria) {
+            if (isTipoProducto()) {
+                resetFiltrosProducto();
+            }
+            return;
+        }
 
         try {
             const subCategorias1 = await cargarRecetaOpciones({ nivel: "subcat1", tipo, categoria });
             setNativeSelectOptions(subCat1Select, subCategorias1, "-- Seleccione --", "sub_cat_1");
             resetNativeSelect(subCat2Select, "-- Seleccione --");
-            renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
+            if (isTipoProducto()) {
+                mostrarFiltrosProducto(true);
+                await cargarMarcasReceta();
+            }
         } catch (error) {
             console.error(error);
             alertify.error("Error al cargar sub categoría 1");
@@ -300,6 +396,9 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const subCategorias2 = await cargarRecetaOpciones({ nivel: "subcat2", tipo, categoria, sub_cat_1 });
             setNativeSelectOptions(subCat2Select, subCategorias2, "-- Seleccione --", "sub_cat_2");
+            if (isTipoProducto()) {
+                mostrarFiltrosProducto(true);
+            }
             renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
         } catch (error) {
             console.error(error);
@@ -307,13 +406,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    async function onMarcaChange() {
+        if (!isTipoProducto()) return;
+
+        resetNativeSelect(modeloSelect, "-- Seleccione --");
+        renderItemsTable([], "Selecciona Marca y Modelo para cargar los items.");
+
+        await cargarModelosReceta();
+    }
+
+    async function onModeloChange() {
+        await cargarItemsReceta();
+    }
+
     async function cargarItemsReceta() {
         const filtros = getFiltrosReceta();
 
         renderItemsTable([], "Cargando items...");
 
-        if (!filtros.tipo || !filtros.categoria || !filtros.sub_cat_1 || !filtros.sub_cat_2) {
-            renderItemsTable([], "Selecciona todos los filtros para ver los items.");
+        const requiereProducto = String(filtros.tipo || "").toUpperCase() === "PRODUCTO";
+        const faltanBase = !filtros.tipo || !filtros.categoria || (!requiereProducto && (!filtros.sub_cat_1 || !filtros.sub_cat_2));
+        const faltanProducto = requiereProducto && (!filtros.marca || !filtros.modelo);
+
+        if (faltanBase || faltanProducto) {
+            renderItemsTable([], requiereProducto ? "Selecciona Marca y Modelo para ver los items." : "Selecciona todos los filtros para ver los items.");
             return;
         }
 
@@ -331,6 +447,8 @@ document.addEventListener("DOMContentLoaded", () => {
     categoriaSelect?.addEventListener("change", cargarSubCategorias1Receta);
     subCat1Select?.addEventListener("change", cargarSubCategorias2Receta);
     subCat2Select?.addEventListener("change", cargarItemsReceta);
+    marcaSelect?.addEventListener("change", onMarcaChange);
+    modeloSelect?.addEventListener("change", onModeloChange);
 
     cargarBasesReceta();
 

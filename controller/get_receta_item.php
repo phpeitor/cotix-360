@@ -10,6 +10,8 @@ try {
     $categoria = $_GET['categoria'] ?? null;
     $subCat1 = $_GET['sub_cat_1'] ?? null;
     $subCat2 = $_GET['sub_cat_2'] ?? null;
+    $marca = $_GET['marca'] ?? null;
+    $modelo = $_GET['modelo'] ?? null;
 
     switch ($nivel) {
         case 'bases':
@@ -24,8 +26,14 @@ try {
         case 'subcat2':
             $data = $item->obtenerRecetaSubCategorias2($tipo, $categoria, $subCat1);
             break;
+        case 'marcas':
+            $data = $item->obtenerRecetaMarcas($tipo, $categoria, $subCat1, $subCat2);
+            break;
+        case 'modelos':
+            $data = $item->obtenerRecetaModelos($tipo, $categoria, $subCat1, $subCat2, $marca);
+            break;
         default:
-            $data = $item->obtenerItemsRecetaFiltrados($tipo, $categoria, $subCat1, $subCat2);
+            $data = $item->obtenerItemsRecetaFiltrados($tipo, $categoria, $subCat1, $subCat2, $marca, $modelo);
             break;
     }
 

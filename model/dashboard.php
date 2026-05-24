@@ -135,6 +135,10 @@ class Dashboard {
 
     public function headerNotifications(int $limit = 10): array
     {
+        $cutoff = (new DateTimeImmutable('now', new DateTimeZone('America/Lima')))
+            ->sub(new DateInterval('PT5H'))
+            ->format('Y-m-d H:i:s');
+
         $sql = "
             SELECT
                 id,
@@ -148,11 +152,13 @@ class Dashboard {
                 created_at
             FROM header_notifications
             WHERE estado = 1
+              AND created_at >= :cutoff
             ORDER BY created_at DESC, id DESC
             LIMIT :limit
         ";
 
         $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':cutoff', $cutoff);
         $stmt->bindValue(':limit', max(1, $limit), PDO::PARAM_INT);
         $stmt->execute();
 
@@ -161,15 +167,21 @@ class Dashboard {
 
     public function headerNotificationsSignature(): array
     {
+        $cutoff = (new DateTimeImmutable('now', new DateTimeZone('America/Lima')))
+            ->sub(new DateInterval('PT24H'))
+            ->format('Y-m-d H:i:s');
+
         $sql = "
             SELECT
                 COUNT(*) AS total,
                 COALESCE(MAX(id), 0) AS max_id
             FROM header_notifications
             WHERE estado = 1
+              AND created_at >= :cutoff
         ";
 
         $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':cutoff', $cutoff);
         $stmt->execute();
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];

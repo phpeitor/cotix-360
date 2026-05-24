@@ -334,7 +334,44 @@ class Item {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerItemsRecetaFiltrados(?string $tipo = null, ?string $categoria = null, ?string $subCat1 = null, ?string $subCat2 = null): array {
+    public function obtenerRecetaMarcas(?string $tipo = null, ?string $categoria = null, ?string $subCat1 = null, ?string $subCat2 = null): array {
+        $sql = "SELECT DISTINCT marca
+                FROM receta_items
+                WHERE marca IS NOT NULL
+                AND TRIM(marca) <> ''";
+        $params = [];
+
+        $this->agregarFiltroReceta($sql, $params, 'tipo', $tipo);
+        $this->agregarFiltroReceta($sql, $params, 'categoria', $categoria);
+        $this->agregarFiltroReceta($sql, $params, 'sub_cat_1', $subCat1);
+        $this->agregarFiltroReceta($sql, $params, 'sub_cat_2', $subCat2);
+        $sql .= " ORDER BY marca";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerRecetaModelos(?string $tipo = null, ?string $categoria = null, ?string $subCat1 = null, ?string $subCat2 = null, ?string $marca = null): array {
+        $sql = "SELECT DISTINCT modelo
+                FROM receta_items
+                WHERE modelo IS NOT NULL
+                AND TRIM(modelo) <> ''";
+        $params = [];
+
+        $this->agregarFiltroReceta($sql, $params, 'tipo', $tipo);
+        $this->agregarFiltroReceta($sql, $params, 'categoria', $categoria);
+        $this->agregarFiltroReceta($sql, $params, 'sub_cat_1', $subCat1);
+        $this->agregarFiltroReceta($sql, $params, 'sub_cat_2', $subCat2);
+        $this->agregarFiltroReceta($sql, $params, 'marca', $marca);
+        $sql .= " ORDER BY modelo";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerItemsRecetaFiltrados(?string $tipo = null, ?string $categoria = null, ?string $subCat1 = null, ?string $subCat2 = null, ?string $marca = null, ?string $modelo = null): array {
         $sql = "SELECT 
                     id,
                     nombre,
@@ -357,6 +394,8 @@ class Item {
         $this->agregarFiltroReceta($sql, $params, 'categoria', $categoria);
         $this->agregarFiltroReceta($sql, $params, 'sub_cat_1', $subCat1);
         $this->agregarFiltroReceta($sql, $params, 'sub_cat_2', $subCat2);
+        $this->agregarFiltroReceta($sql, $params, 'marca', $marca);
+        $this->agregarFiltroReceta($sql, $params, 'modelo', $modelo);
 
         $sql .= " ORDER BY nombre, modelo, id";
 
@@ -366,7 +405,7 @@ class Item {
     }
 
     public function obtenerItemsReceta(string $tipo): ?array {
-        return $this->obtenerItemsRecetaFiltrados($tipo, null, null, null);
+        return $this->obtenerItemsRecetaFiltrados($tipo, null, null, null, null, null);
     }
 
     public function obtenerFlete(): ?array {

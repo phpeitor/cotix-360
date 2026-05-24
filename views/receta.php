@@ -188,6 +188,22 @@ require_once ROOT . '/controller/check_session.php';
                             </select>
                         </div>
 
+                        <div class="col-12">
+                            <div id="productoFiltersWrap" class="row d-none">
+                                <div class="col-md-6 mb-1">
+                                    <select id="filterMarca" class="form-select" disabled>
+                                        <option value="">-- Seleccione Marca --</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-1">
+                                    <select id="filterModelo" class="form-select" disabled>
+                                        <option value="">-- Seleccione Modelo --</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="col-12 mb-3">
                             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
                                 <div>
