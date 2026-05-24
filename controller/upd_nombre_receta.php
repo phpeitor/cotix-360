@@ -50,7 +50,7 @@ try {
     }
 
     $id = (int)$row['id'];
-    $prefixed = sprintf('PROY-%s-%d', $nombre, $id);
+    $prefixed = sprintf('%s-%d', $nombre, $id);
 
     $ok = $receta->actualizarNombrePorHash($hash, $prefixed, $usuarioUpd);
 

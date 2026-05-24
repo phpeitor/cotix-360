@@ -66,7 +66,7 @@ require_once ROOT . '/controller/check_session.php';
                                     <h4 class="header-title mb-0">Receta #<span id="receta_id"></span></h4>
                                     <div class="d-flex align-items-center gap-2">
                                         <p class="text-muted fs-14 mb-0" id="receta_nombre_display"></p>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>" id="btnEditRecetaNombre" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar nombre"><i class="ti ti-edit"></i></button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnEditRecetaNombre" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar nombre"><i class="ti ti-edit"></i></button>
                                     </div>
                                     <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none" style="max-width:400px;" placeholder="Nombre de la receta">
                                 </div>
