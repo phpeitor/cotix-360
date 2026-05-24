@@ -100,12 +100,48 @@ document.addEventListener("DOMContentLoaded", () => {
     function resetNativeSelect(selectEl, placeholder, disabled = true) {
         if (!selectEl) return;
 
-        selectEl.innerHTML = `<option value="">${placeholder}</option>`;
         selectEl.disabled = disabled;
+
+        if (selectEl.choicesInstance) {
+            selectEl.choicesInstance.clearChoices();
+            selectEl.choicesInstance.setChoices([
+                { value: "", label: placeholder, disabled: true, selected: true }
+            ], "value", "label", true);
+            if (disabled) {
+                selectEl.choicesInstance.disable();
+            } else {
+                selectEl.choicesInstance.enable();
+            }
+            return;
+        }
+
+        selectEl.innerHTML = `<option value="">${placeholder}</option>`;
     }
 
     function setNativeSelectOptions(selectEl, rows, placeholder, valueKey) {
         if (!selectEl) return;
+
+        const options = rows
+            .map(row => row?.[valueKey])
+            .filter(value => value !== null && value !== undefined && String(value).trim() !== "")
+            .map(value => ({ value, label: value }));
+
+        if (selectEl.choicesInstance) {
+            selectEl.disabled = options.length === 0;
+            selectEl.choicesInstance.clearChoices();
+            selectEl.choicesInstance.setChoices(
+                [{ value: "", label: placeholder, disabled: true, selected: true }, ...options],
+                "value",
+                "label",
+                true
+            );
+            if (options.length === 0) {
+                selectEl.choicesInstance.disable();
+            } else {
+                selectEl.choicesInstance.enable();
+            }
+            return;
+        }
 
         selectEl.innerHTML = `<option value="">${placeholder}</option>`;
 
@@ -145,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const itemNombre = item.nombre || "-";
             const itemDescripcion = normalizarTextoDetalle(item.descripcion);
             const detalleLinea1 = formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]);
-            const detalleLinea2 = [item.marca, item.modelo, item.uni_medida].filter(Boolean).join(" / ");
+            const detalleLinea2 = formatearRutaDetalle([item.marca, item.modelo, item.uni_medida]);
             const monedaSimbolo = item.moneda === "DOLLAR" ? "$" : "S/.";
             const precioTexto = `${monedaSimbolo} ${format2(item.precio)}`;
             const itemPayload = encodeURIComponent(JSON.stringify({
@@ -169,6 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="item-title">${itemNombre}</div>
                         ${itemDescripcion ? `<div class="item-subtitle">${itemDescripcion}</div>` : ""}
                         <div class="item-title">${detalleLinea1 || "-"}</div>
+                        <div class="item-subtitle">${detalleLinea2 || "-"}</div>
                     </td>
                     <td class="text-center align-middle receta-qty-cell"></td>
                     <td class="text-end ${precioColumnHidden ? "d-none" : ""}">${precioTexto}</td>
@@ -254,15 +291,23 @@ document.addEventListener("DOMContentLoaded", () => {
         marcaSelect.disabled = !mostrar;
         modeloSelect.disabled = !mostrar;
 
+        if (marcaSelect.choicesInstance) {
+            mostrar ? marcaSelect.choicesInstance.enable() : marcaSelect.choicesInstance.disable();
+        }
+
+        if (modeloSelect.choicesInstance) {
+            mostrar ? modeloSelect.choicesInstance.enable() : modeloSelect.choicesInstance.disable();
+        }
+
         if (!mostrar) {
-            resetNativeSelect(marcaSelect, "-- Seleccione --");
-            resetNativeSelect(modeloSelect, "-- Seleccione --");
+            resetNativeSelect(marcaSelect, "-- Seleccione Marca --");
+            resetNativeSelect(modeloSelect, "-- Seleccione Modelo --");
         }
     }
 
     function resetFiltrosProducto() {
-        resetNativeSelect(marcaSelect, "-- Seleccione --");
-        resetNativeSelect(modeloSelect, "-- Seleccione --");
+        resetNativeSelect(marcaSelect, "-- Seleccione Marca --");
+        resetNativeSelect(modeloSelect, "-- Seleccione Modelo --");
         mostrarFiltrosProducto(false);
     }
 
@@ -276,16 +321,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             mostrarFiltrosProducto(!!categoria);
-            resetNativeSelect(marcaSelect, "-- Seleccione --");
-            resetNativeSelect(modeloSelect, "-- Seleccione --");
+            resetNativeSelect(marcaSelect, "-- Seleccione Marca --");
+            resetNativeSelect(modeloSelect, "-- Seleccione Modelo --");
 
             if (!tipo || !categoria) {
                 return;
             }
 
             const marcas = await cargarRecetaOpciones({ nivel: "marcas", tipo, categoria });
-            setNativeSelectOptions(marcaSelect, marcas, "-- Seleccione --", "marca");
-            resetNativeSelect(modeloSelect, "-- Seleccione --");
+            setNativeSelectOptions(marcaSelect, marcas, "-- Seleccione Marca --", "marca");
+            resetNativeSelect(modeloSelect, "-- Seleccione Modelo --");
         } catch (error) {
             console.error(error);
             alertify.error("Error al cargar marcas");
@@ -302,14 +347,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             mostrarFiltrosProducto(true);
-            resetNativeSelect(modeloSelect, "-- Seleccione --");
+            resetNativeSelect(modeloSelect, "-- Seleccione Modelo --");
 
             if (!tipo || !categoria || !marca) {
                 return;
             }
 
             const modelos = await cargarRecetaOpciones({ nivel: "modelos", tipo, categoria, marca });
-            setNativeSelectOptions(modeloSelect, modelos, "-- Seleccione --", "modelo");
+            setNativeSelectOptions(modeloSelect, modelos, "-- Seleccione Modelo --", "modelo");
         } catch (error) {
             console.error(error);
             alertify.error("Error al cargar modelos");
@@ -337,19 +382,24 @@ document.addEventListener("DOMContentLoaded", () => {
         resetNativeSelect(categoriaSelect, "-- Seleccione --");
         resetNativeSelect(subCat1Select, "-- Seleccione --");
         resetNativeSelect(subCat2Select, "-- Seleccione --");
-        resetFiltrosProducto();
+        if (!isTipoProducto()) {
+            resetFiltrosProducto();
+        }
         renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
 
         if (!tipo) return;
-
-        mostrarFiltrosProducto(isTipoProducto());
 
         try {
             const categorias = await cargarRecetaOpciones({ nivel: "categorias", tipo });
             setNativeSelectOptions(categoriaSelect, categorias, "-- Seleccione --", "categoria");
             resetNativeSelect(subCat1Select, "-- Seleccione --");
             resetNativeSelect(subCat2Select, "-- Seleccione --");
-            resetFiltrosProducto();
+            if (isTipoProducto()) {
+                mostrarFiltrosProducto(true);
+                await cargarMarcasReceta();
+            } else {
+                resetFiltrosProducto();
+            }
             renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
         } catch (error) {
             console.error(error);
@@ -365,20 +415,21 @@ document.addEventListener("DOMContentLoaded", () => {
         renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
 
         if (!tipo || !categoria) {
-            if (isTipoProducto()) {
+            if (!isTipoProducto()) {
                 resetFiltrosProducto();
             }
             return;
         }
 
         try {
-            const subCategorias1 = await cargarRecetaOpciones({ nivel: "subcat1", tipo, categoria });
-            setNativeSelectOptions(subCat1Select, subCategorias1, "-- Seleccione --", "sub_cat_1");
-            resetNativeSelect(subCat2Select, "-- Seleccione --");
             if (isTipoProducto()) {
                 mostrarFiltrosProducto(true);
                 await cargarMarcasReceta();
             }
+
+            const subCategorias1 = await cargarRecetaOpciones({ nivel: "subcat1", tipo, categoria });
+            setNativeSelectOptions(subCat1Select, subCategorias1, "-- Seleccione --", "sub_cat_1");
+            resetNativeSelect(subCat2Select, "-- Seleccione --");
         } catch (error) {
             console.error(error);
             alertify.error("Error al cargar sub categoría 1");
@@ -396,9 +447,6 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const subCategorias2 = await cargarRecetaOpciones({ nivel: "subcat2", tipo, categoria, sub_cat_1 });
             setNativeSelectOptions(subCat2Select, subCategorias2, "-- Seleccione --", "sub_cat_2");
-            if (isTipoProducto()) {
-                mostrarFiltrosProducto(true);
-            }
             renderItemsTable([], "Selecciona Base, Categoria y Sub Categorias para cargar los items.");
         } catch (error) {
             console.error(error);
@@ -425,12 +473,20 @@ document.addEventListener("DOMContentLoaded", () => {
         renderItemsTable([], "Cargando items...");
 
         const requiereProducto = String(filtros.tipo || "").toUpperCase() === "PRODUCTO";
-        const faltanBase = !filtros.tipo || !filtros.categoria || (!requiereProducto && (!filtros.sub_cat_1 || !filtros.sub_cat_2));
-        const faltanProducto = requiereProducto && (!filtros.marca || !filtros.modelo);
+        if (requiereProducto) {
+            const puedePorSubcats = filtros.categoria && filtros.sub_cat_1 && filtros.sub_cat_2;
+            const puedePorMarca = filtros.marca && filtros.modelo;
 
-        if (faltanBase || faltanProducto) {
-            renderItemsTable([], requiereProducto ? "Selecciona Marca y Modelo para ver los items." : "Selecciona todos los filtros para ver los items.");
-            return;
+            if (!filtros.tipo || (!puedePorSubcats && !puedePorMarca)) {
+                renderItemsTable([], "Selecciona Categoría + Sub Categorías o Marca y Modelo para ver los items.");
+                return;
+            }
+        } else {
+            const faltanBase = !filtros.tipo || !filtros.categoria || !filtros.sub_cat_1 || !filtros.sub_cat_2;
+            if (faltanBase) {
+                renderItemsTable([], "Selecciona todos los filtros para ver los items.");
+                return;
+            }
         }
 
         try {
@@ -619,17 +675,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const itemNombre = tr.dataset.nombre || "";
             const itemDescripcion = normalizarTextoDetalle(tr.dataset.descripcion);
             const detalleLinea1 = formatearRutaDetalle([tr.dataset.categoria, tr.dataset.subcat1, tr.dataset.subcat2]);
-            const detalleLinea2 = [tr.dataset.marca, tr.dataset.modelo, tr.dataset.unimedida].filter(Boolean).join(" / ");
+            const detalleLinea2 = formatearRutaDetalle([tr.dataset.marca, tr.dataset.modelo, tr.dataset.unimedida]);
 
             const row = document.createElement("tr");
             row.innerHTML = `
                 <td>
                     <div class="item-title">${itemNombre}</div>
                     ${itemDescripcion ? `<div class="item-subtitle">${itemDescripcion}</div>` : ""}
+                    <div class="item-subtitle">${detalleLinea2 || "-"}</div>
                 </td>
                 <td>
                     <div class="item-title">${detalleLinea1 || "-"}</div>
-                    <div class="item-subtitle">${detalleLinea2 || "-"}</div>
                 </td>
                 <td>${tr.dataset.tipo || "-"}</td>
                 <td class="text-center">${qty}</td>

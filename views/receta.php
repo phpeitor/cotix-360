@@ -191,13 +191,13 @@ require_once ROOT . '/controller/check_session.php';
                         <div class="col-12">
                             <div id="productoFiltersWrap" class="row d-none">
                                 <div class="col-md-6 mb-1">
-                                    <select id="filterMarca" class="form-select" disabled>
+                                    <select id="filterMarca" class="form-select" disabled data-choices data-search-enabled="true" data-search-placeholder-value="Buscar marca...">
                                         <option value="">-- Seleccione Marca --</option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-6 mb-1">
-                                    <select id="filterModelo" class="form-select" disabled>
+                                    <select id="filterModelo" class="form-select" disabled data-choices data-search-enabled="true" data-search-placeholder-value="Buscar modelo...">
                                         <option value="">-- Seleccione Modelo --</option>
                                     </select>
                                 </div>
