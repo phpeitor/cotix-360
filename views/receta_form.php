@@ -112,6 +112,7 @@ require_once ROOT . '/controller/check_session.php';
                                 <div class="d-flex align-items-center gap-2">
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-categoria-modal" data-bs-title="Márgen" data-bs-placement="bottom" <?= (int)$_SESSION['session_cargo'] === 4 ? 'disabled aria-disabled="true" title="No disponible para este cargo"' : '' ?>><i class="ti ti-box fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom"><i class="ti ti-search fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon" id="btnObservacion" data-bs-toggle="tooltip" data-bs-title="Observación" data-bs-placement="bottom"><i class="ti ti-message-circle fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon js-navigate" data-href="receta_list.php" data-bs-title="Volver" data-bs-placement="bottom"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                                 </div>
                             </div>
@@ -195,6 +196,28 @@ require_once ROOT . '/controller/check_session.php';
                                         </div>
                                     </div>
                                 </div>
+                                        <!-- Observación Modal -->
+                                        <div id="observacionModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="observacionModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="observacionModalLabel">Observación de la receta</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="mb-2">
+                                                            <label class="form-label">Observación (máx. 300 caracteres)</label>
+                                                            <textarea id="observacionText" class="form-control" rows="4" maxlength="300" placeholder="Escribe una observación..."></textarea>
+                                                        </div>
+                                                        <div class="text-muted fs-12">Máximo 300 caracteres.</div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                                                        <button type="button" class="btn btn-primary" id="btnSaveObservacion">Guardar</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                             </form>
                         </div>
                     </div>

@@ -338,6 +338,30 @@ class Receta {
         return $stmt->rowCount() > 0;
     }
 
+    public function actualizarObservacionPorHash(string $hash, string $observacion, ?int $usuarioUpd = null): bool
+    {
+        $sql = "UPDATE recetas
+                SET observacion = :observacion,
+                    updated_at = :updated_at,
+                    usuario_upd = :usuario_upd
+                WHERE MD5(id) = :hash";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':observacion', trim((string)$observacion));
+        $stmt->bindValue(':updated_at', $this->nowLima);
+
+        if ($usuarioUpd !== null && $usuarioUpd > 0) {
+            $stmt->bindValue(':usuario_upd', $usuarioUpd, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':usuario_upd', null, PDO::PARAM_NULL);
+        }
+
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    }
+
     public function eliminarDetalle(int $recetaId): bool
     {
         $sql = "DELETE FROM receta_detalle WHERE receta_id = :receta_id";

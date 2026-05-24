@@ -17,6 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnReloadPrecios = document.getElementById("btnReloadPrecios");
     const alertPrecioCambioEl = document.getElementById("alertPrecioCambio");
     const infoCategoriaModalEl = document.getElementById("info-categoria-modal");
+    const btnObservacion = document.getElementById("btnObservacion");
+    const observacionModalEl = document.getElementById("observacionModal");
+    const observacionText = document.getElementById("observacionText");
+    const btnSaveObservacion = document.getElementById("btnSaveObservacion");
     const alertCategoriaRecetaEl = document.getElementById("alertCategoriaReceta");
     const recetaCategoriaTableBody = document.getElementById("recetaCategoriaTableBody");
     const btnGuardarRecetaCategoria = document.getElementById("btnGuardarRecetaCategoria");
@@ -283,6 +287,54 @@ document.addEventListener("DOMContentLoaded", () => {
         btnReloadPrecios?.addEventListener("click", sincronizarPrecios);
         btnGuardarRecetaCategoria?.addEventListener("click", guardarCategoriasRecetaModal);
         infoCategoriaModalEl?.addEventListener("show.bs.modal", cargarCategoriasRecetaModal);
+        btnObservacion?.addEventListener("click", () => {
+            if (!observacionModalEl) return;
+            // populate textarea with existing observation
+            if (observacionText) {
+                observacionText.value = String(receta?.observacion || "");
+            }
+            const modal = new bootstrap.Modal(observacionModalEl);
+            modal.show();
+        });
+
+        btnSaveObservacion?.addEventListener("click", async () => {
+            if (!observacionText) return;
+            const value = String(observacionText.value || "").trim();
+            if (value.length > 300) {
+                alertify.error("Observación demasiado larga (máx 300)");
+                return;
+            }
+
+            btnSaveObservacion.disabled = true;
+            try {
+                const fd = new FormData();
+                fd.append('hash', String(hash || ''));
+                fd.append('observacion', value);
+
+                const res = await fetch('controller/upd_receta_observacion.php', {
+                    method: 'POST',
+                    body: fd
+                });
+
+                const json = await res.json();
+                if (!res.ok || !json.success) {
+                    throw new Error(json.message || 'No se pudo actualizar observación');
+                }
+
+                // update local receta and UI
+                receta = receta || {};
+                receta.observacion = value;
+                alertify.success(json.message || 'Observación guardada');
+                // hide modal
+                const modalEl = bootstrap.Modal.getInstance(observacionModalEl) || new bootstrap.Modal(observacionModalEl);
+                modalEl.hide();
+            } catch (err) {
+                console.error(err);
+                alertify.error(err.message || 'Error al guardar observación');
+            } finally {
+                btnSaveObservacion.disabled = false;
+            }
+        });
 
         cargarBasesReceta();
 
