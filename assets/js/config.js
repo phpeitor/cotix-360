@@ -141,8 +141,11 @@
 
 			/* ===============================
 			* 4. ISADMIN 
+			* Mostrar elementos marcados como `isadmin` si el usuario es admin
+			* o si su cargo es 3 (supervisor). Antes se ocultaban para todos
+			* los no-admin y esto impedía que cargos=3 los vieran.
 			* =============================== */
-			if (!esAdmin) {
+			if (!esAdmin && Number(cargo) !== 3) {
 				document
 					.querySelectorAll('td.isadmin, div.isadmin, h5.isadmin')
 					.forEach(el => {
