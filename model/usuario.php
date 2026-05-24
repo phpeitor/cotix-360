@@ -146,6 +146,17 @@ class Usuario {
         return $data ?: null;
     }
 
+    public function existe_usuario(string $usuario): bool {
+        $sql = "SELECT 1
+                FROM personal
+                WHERE USUARIO = :USUARIO
+                LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':USUARIO', $usuario);
+        $stmt->execute();
+        return (bool)$stmt->fetchColumn();
+    }
+
     public function valida_documento(string $documento): ?array
     {
         $sql = "SELECT IDPERSONAL

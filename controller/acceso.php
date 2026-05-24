@@ -22,6 +22,15 @@ try {
         $_SESSION['login_attempts'] = [];
     }
 
+    $obj = new Usuario();
+    if (!$obj->existe_usuario($usuario)) {
+        echo json_encode([
+            'ok' => false,
+            'message' => '🚫 Usuario no registrado.'
+        ]);
+        exit;
+    }
+
     // Determinar IP remota tempranamente (opcionalmente enviada a Google)
     $ip = $_SERVER['REMOTE_ADDR'] ?? null;
     if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
@@ -86,7 +95,6 @@ try {
     }
 
     $password = md5($password);
-    $obj = new Usuario();
     $data = $obj->acceso_user([
         'usuario' => $usuario,
         'password' => $password

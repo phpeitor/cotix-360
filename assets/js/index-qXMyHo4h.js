@@ -16097,7 +16097,6 @@ const au = "Login Machine",
 
 				if (!usuario || !password) {
 					_setShowReq(!0);
-					alertify.warning("⚠️ Ingrese usuario y contraseña");
 					return;
 				}
 				_setShowReq(!1);
