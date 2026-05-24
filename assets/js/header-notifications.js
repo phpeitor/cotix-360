@@ -1,31 +1,4 @@
-(function () {
-    const storageCountKey = 'cotix.headerNotifications.count';
-    const storageItemsKey = 'cotix.headerNotifications.items';
-
-    function readStoredCount() {
-        const parsed = Number(sessionStorage.getItem(storageCountKey) || 0);
-        return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-    }
-
-    function writeStoredCount(value) {
-        sessionStorage.setItem(storageCountKey, String(Math.max(0, Number(value) || 0)));
-    }
-
-    function readStoredItems() {
-        try {
-            const raw = sessionStorage.getItem(storageItemsKey);
-            const items = raw ? JSON.parse(raw) : [];
-            return Array.isArray(items) ? items : [];
-        } catch (err) {
-            console.error('header-notifications storage error:', err);
-            return [];
-        }
-    }
-
-    function writeStoredItems(items) {
-        sessionStorage.setItem(storageItemsKey, JSON.stringify(Array.isArray(items) ? items : []));
-    }
-
+(() => {
     function escapeHtml(value) {
         return String(value ?? '')
             .replace(/&/g, '&amp;')
@@ -58,21 +31,12 @@
         badgeEl.className = 'noti-icon-badge d-none';
     }
 
-    function renderBadgeFromStorage(badgeEl) {
-        const count = readStoredCount();
-        if (count > 0) {
-            ensureBadgeVisible(badgeEl, count);
-        } else {
-            hideBadge(badgeEl);
-        }
-    }
-
     function notificationHtml(item) {
-        const id = escapeHtml(item.id || `notification-${Date.now()}`);
+        const id = escapeHtml(item.id || item.domId || `notification-${Date.now()}`);
         const usuario = escapeHtml(item.usuario || 'Sistema');
         const titulo = escapeHtml(item.titulo || 'Nuevo item registrado');
         const detalle = escapeHtml(item.detalle || 'Se registró un item de receta');
-        const fecha = escapeHtml(item.fecha || '');
+        const fecha = escapeHtml(item.fecha || item.created_at || '');
         const icon = escapeHtml(item.icon || 'ti-plus');
         const tone = escapeHtml(item.tone || 'secondary');
 
@@ -111,124 +75,128 @@
         headerContainer.insertAdjacentHTML('afterbegin', html);
     }
 
-    function queueNotification(detail) {
-        const currentItems = readStoredItems();
-        const nextCount = readStoredCount() + 1;
-        const item = {
-            id: `notification-item-${Date.now()}`,
-            usuario: detail?.usuario || String(window.PERMISOS_STATE?.nombre || '').trim() || 'Sistema',
-            titulo: detail?.titulo || 'Nuevo item registrado',
-            detalle: detail?.detalle || 'Se registró un item de receta',
-            fecha: detail?.fecha || new Date().toLocaleString('es-PE'),
-            icon: detail?.icon || 'ti-package',
-            tone: detail?.tone || 'success'
+    function createNotificationEntry(item, prefix) {
+        const rawId = String(item.id || '');
+        const finalId = rawId.startsWith('notification-') ? rawId : `${prefix}-${rawId}`;
+        const key = String(item.key || rawId || finalId);
+
+        return {
+            id: finalId,
+            key,
+            usuario: item.usuario,
+            titulo: item.titulo,
+            detalle: item.detalle,
+            fecha: item.fecha || item.created_at,
+            icon: item.icon,
+            tone: item.tone
         };
-
-        currentItems.unshift(item);
-        writeStoredItems(currentItems.slice(0, 10));
-        writeStoredCount(nextCount);
-
-        const headerContainer = document.getElementById('dashboard-header-notifications');
-        const badgeEl = document.querySelector('.noti-icon-badge');
-
-        if (headerContainer) {
-            headerContainer.insertAdjacentHTML('afterbegin', notificationHtml(item));
-        }
-
-        ensureBadgeVisible(badgeEl, nextCount);
     }
 
-    window.cotixQueueHeaderNotification = window.cotixQueueHeaderNotification || queueNotification;
+    function renderNotifications(headerContainer, badgeEl, items) {
+        const seen = new Set();
+        headerContainer.innerHTML = '';
 
-    window.addEventListener('cotix:header-notification', (event) => {
-        queueNotification(event?.detail || {});
-    });
+        (Array.isArray(items) ? items : []).forEach(item => {
+            const key = String(item.key || item.id || '');
+            if (!key || seen.has(key)) {
+                return;
+            }
+
+            seen.add(key);
+            headerContainer.insertAdjacentHTML('beforeend', notificationHtml(item));
+        });
+
+        const count = seen.size;
+        if (count > 0) {
+            ensureBadgeVisible(badgeEl, count);
+        } else {
+            hideBadge(badgeEl);
+        }
+
+        return seen;
+    }
 
     document.addEventListener('DOMContentLoaded', async () => {
         try {
             const headerContainer = document.getElementById('dashboard-header-notifications');
             const badgeEl = document.querySelector('.noti-icon-badge');
-
-            renderBadgeFromStorage(badgeEl);
-
             if (!headerContainer) return;
-
-            try {
-                const flashRes = await fetch('controller/header_notifications.php');
-                const flashJson = await flashRes.json();
-
-                if (flashJson.ok && Array.isArray(flashJson.notifications) && flashJson.notifications.length) {
-                    const storedItems = readStoredItems();
-                    const merged = [...flashJson.notifications, ...storedItems];
-                    writeStoredItems(merged.slice(0, 10));
-                    writeStoredCount(readStoredCount() + flashJson.notifications.length);
-
-                    prependQueuedNotifications(headerContainer, flashJson.notifications);
-                    renderBadgeFromStorage(badgeEl);
-                }
-            } catch (flashErr) {
-                console.error('header-notifications flash error:', flashErr);
-            }
-
-            const res = await fetch('controller/dashboard.php');
-            const json = await res.json();
-
-            if (json.error || !json.data || !Array.isArray(json.data.header)) return;
 
             headerContainer.innerHTML = '';
 
-            const badgeClass = (estado) => {
-                if (!estado) return 'badge-soft-secondary';
-                switch (String(estado).toLowerCase()) {
-                    case 'aprobada': return 'badge-soft-success';
-                    case 'anulada': return 'badge-soft-danger';
-                    case 'enviada': return 'badge-soft-info';
-                    default: return 'badge-soft-secondary';
-                }
-            };
+            const [dashboardRes, notificationsRes] = await Promise.all([
+                fetch('controller/dashboard.php'),
+                fetch('controller/header_notifications.php')
+            ]);
 
-            json.data.header.forEach((h, index) => {
-                const avatar = Math.floor(Math.random() * 10) + 1;
-                const notifId = `notification-${index + 1}`;
-                const usuario = String(h.usuario).toLowerCase();
-                const doc = h.doc;
-                const fecha = h.ultima_fecha;
-                const tipo = String(h.tipo || '').toLowerCase();
-                const isLogin = doc && String(doc).length >= 32;
+            const dashboardJson = await dashboardRes.json();
+            const notificationsJson = await notificationsRes.json();
 
-                headerContainer.insertAdjacentHTML('beforeend', `
-                    <div class="dropdown-item notification-item py-2 text-wrap ${isLogin ? 'active' : ''}" id="${notifId}">
-                        <span class="d-flex align-items-center">
-                            <span class="me-3 position-relative flex-shrink-0">
-                                <img src="./assets/images/users/avatar-${avatar}.jpg" class="avatar-md rounded-circle" alt="" />
-                                <span class="position-absolute rounded-pill bg-${isLogin ? 'danger' : 'secondary'} notification-badge">
-                                    <i class="ti ${isLogin ? 'ti-message-circle' : 'ti-plus'}"></i>
-                                </span>
-                            </span>
+            const dashboardItems = Array.isArray(dashboardJson?.data?.header) ? dashboardJson.data.header.map((item, index) => createNotificationEntry({
+                id: `dashboard-${index + 1}`,
+                key: `dashboard-${index + 1}`,
+                usuario: String(item.usuario || '').toLowerCase(),
+                titulo: String(item.tipo || 'Actividad').toLowerCase(),
+                detalle: item.doc && String(item.doc).length >= 32
+                    ? `inició sesión ${String(item.doc).substring(0, 12)}*******`
+                    : String(item.doc || ''),
+                fecha: item.ultima_fecha,
+                icon: item.doc && String(item.doc).length >= 32 ? 'ti-message-circle' : 'ti-plus',
+                tone: item.doc && String(item.doc).length >= 32 ? 'danger' : 'secondary'
+            }, 'notification-dashboard')) : [];
 
-                            <span class="flex-grow-1 text-muted">
-                                ${
-                                    isLogin
-                                    ? `<span class="fw-medium text-body">${usuario}</span> inició sesión
-                                       <span class="fw-medium text-body"> ${String(doc).substring(0, 12) + '*******'}</span>`
-                                    : `<span class="fw-medium text-body">${usuario}</span> - <span class="fw-medium text-body">${tipo}</span>
-                                        <span class="badge ${badgeClass(doc)} px-1 py-1 ms-0">${doc}</span>`
-                                }
-                                <br />
-                                <span class="fs-12">${fecha}</span>
-                            </span>
+            const persistedItems = Array.isArray(notificationsJson?.notifications) ? notificationsJson.notifications.map(item => createNotificationEntry({
+                id: `db-${item.id}`,
+                key: `db-${item.id}`,
+                usuario: item.usuario,
+                titulo: item.titulo,
+                detalle: item.detalle,
+                fecha: item.created_at,
+                icon: item.icon,
+                tone: item.tone
+            }, 'notification-db')) : [];
 
-                            <span class="notification-item-close">
-                                <button type="button" class="btn btn-ghost-danger rounded-circle btn-sm btn-icon" data-dismissible="#${notifId}">
-                                    <i class="ti ti-x fs-16"></i>
-                                </button>
-                            </span>
-                        </span>
-                    </div>
-                `);
-            });
+            const allItems = [...persistedItems, ...dashboardItems];
 
-            prependQueuedNotifications(headerContainer, readStoredItems());
+            const seenIds = renderNotifications(headerContainer, badgeEl, allItems);
+
+            if (typeof window.EventSource !== 'undefined') {
+                const stream = new EventSource('controller/stream_header_notifications.php');
+
+                stream.addEventListener('header_notifications', event => {
+                    try {
+                        const payload = JSON.parse(event.data || '{}');
+                        const items = Array.isArray(payload.notifications) ? payload.notifications : [];
+
+                        items.forEach(item => {
+                            const rendered = createNotificationEntry({
+                                id: `db-${item.id}`,
+                                key: `db-${item.id}`,
+                                usuario: item.usuario,
+                                titulo: item.titulo,
+                                detalle: item.detalle,
+                                fecha: item.created_at,
+                                icon: item.icon,
+                                tone: item.tone
+                            }, 'notification-live');
+
+                            if (!rendered.key || seenIds.has(rendered.key)) {
+                                return;
+                            }
+
+                            seenIds.add(rendered.key);
+                            headerContainer.insertAdjacentHTML('afterbegin', notificationHtml(rendered));
+                            ensureBadgeVisible(badgeEl, seenIds.size);
+                        });
+                    } catch (err) {
+                        console.error('header-notifications stream parse error:', err);
+                    }
+                });
+
+                stream.addEventListener('error', () => {
+                    // SSE reconecta solo.
+                });
+            }
         } catch (err) {
             console.error('header-notifications error:', err);
         }

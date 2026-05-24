@@ -133,6 +133,53 @@ class Dashboard {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function headerNotifications(int $limit = 10): array
+    {
+        $sql = "
+            SELECT
+                id,
+                tipo,
+                lower(usuario) as usuario,
+                titulo,
+                detalle,
+                icon,
+                tone,
+                meta_json,
+                created_at
+            FROM header_notifications
+            WHERE estado = 1
+            ORDER BY created_at DESC, id DESC
+            LIMIT :limit
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':limit', max(1, $limit), PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function headerNotificationsSignature(): array
+    {
+        $sql = "
+            SELECT
+                COUNT(*) AS total,
+                COALESCE(MAX(id), 0) AS max_id
+            FROM header_notifications
+            WHERE estado = 1
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        return [
+            'total' => (int)($row['total'] ?? 0),
+            'max_id' => (int)($row['max_id'] ?? 0),
+        ];
+    }
+
     public function graf_donut(): array
     {
         $sql = "

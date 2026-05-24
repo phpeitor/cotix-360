@@ -1,13 +1,10 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../model/dashboard.php';
 
 try {
-    $notifications = $_SESSION['header_notifications'] ?? [];
-    $_SESSION['header_notifications'] = [];
+    $dashboard = new Dashboard();
+    $notifications = $dashboard->headerNotifications(10);
 
     echo json_encode([
         'ok' => true,

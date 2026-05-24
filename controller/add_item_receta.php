@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../model/item.php';
+require_once __DIR__ . '/../database/conexion.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -43,23 +44,38 @@ try {
         'tipo' => $_POST['tipo'] ?? '',
     ]);
 
-    $notification = [
-        'usuario' => (string)($_SESSION['session_nombre'] ?? 'Sistema'),
-        'titulo' => 'Nuevo item de receta',
-        'detalle' => trim(implode(' | ', array_filter([
-            (string)($_POST['tipo'] ?? ''),
-            (string)($_POST['categoria'] ?? ''),
-            (string)($_POST['sub_cat_1'] ?? ''),
-            (string)($_POST['sub_cat_2'] ?? '')
-        ], static fn ($value) => $value !== ''))),
-        'fecha' => (new DateTimeImmutable('now', new DateTimeZone('America/Lima')))->format('Y-m-d H:i:s'),
-        'icon' => 'ti-package',
-        'tone' => 'success',
-    ];
+    $conexion = new Conexion();
+    $pdo = $conexion->conectar();
+    $nowLima = (new DateTimeImmutable('now', new DateTimeZone('America/Lima')))->format('Y-m-d H:i:s');
+    $detalle = trim(implode(' | ', array_filter([
+        (string)($_POST['tipo'] ?? ''),
+        (string)($_POST['sub_cat_2'] ?? '')
+    ], static fn ($value) => $value !== '')));
 
-    $_SESSION['header_notifications'] = $_SESSION['header_notifications'] ?? [];
-    array_unshift($_SESSION['header_notifications'], $notification);
-    $_SESSION['header_notifications'] = array_slice($_SESSION['header_notifications'], 0, 10);
+    $stmtNotif = $pdo->prepare(
+        "INSERT INTO header_notifications (
+            tipo, usuario_id, usuario, titulo, detalle, icon, tone, meta_json, estado, created_at
+        ) VALUES (
+            :tipo, :usuario_id, :usuario, :titulo, :detalle, :icon, :tone, :meta_json, 1, :created_at
+        )"
+    );
+    $stmtNotif->bindValue(':tipo', 'item_receta');
+    $stmtNotif->bindValue(':usuario_id', (int)($_SESSION['session_id'] ?? 0), PDO::PARAM_INT);
+    $stmtNotif->bindValue(':usuario', (string)($_SESSION['session_usuario'] ?? $_SESSION['session_nombre'] ?? 'Sistema'));
+    $stmtNotif->bindValue(':titulo', 'Nuevo item de receta');
+    $stmtNotif->bindValue(':detalle', $detalle);
+    $stmtNotif->bindValue(':icon', 'ti-package');
+    $stmtNotif->bindValue(':tone', 'success');
+    $stmtNotif->bindValue(':meta_json', json_encode([
+        'item_id' => $itemId,
+        'nombre' => (string)($_POST['nombre'] ?? ''),
+        'tipo' => (string)($_POST['tipo'] ?? ''),
+        'categoria' => (string)($_POST['categoria'] ?? ''),
+        'sub_cat_1' => (string)($_POST['sub_cat_1'] ?? ''),
+        'sub_cat_2' => (string)($_POST['sub_cat_2'] ?? '')
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    $stmtNotif->bindValue(':created_at', $nowLima);
+    $stmtNotif->execute();
 
     echo json_encode([
         'ok' => true,
