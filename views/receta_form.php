@@ -112,7 +112,7 @@ require_once ROOT . '/controller/check_session.php';
                                 <div class="d-flex align-items-center gap-2">
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-categoria-modal" data-bs-title="Márgen" data-bs-placement="bottom" <?= (int)$_SESSION['session_cargo'] === 4 ? 'disabled aria-disabled="true" title="No disponible para este cargo"' : '' ?>><i class="ti ti-box fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom"><i class="ti ti-search fs-18"></i></button>
-                                    <button type="button" class="btn btn-dark btn-icon" id="btnObservacion" data-bs-toggle="tooltip" data-bs-title="Observación" data-bs-placement="bottom"><i class="ti ti-message-circle fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon" id="btnObservacion" data-bs-toggle="tooltip" data-bs-title="Observación" data-bs-placement="bottom" <?= (int)$_SESSION['session_cargo'] === 4 ? 'disabled aria-disabled="true" title="No disponible para este cargo"' : '' ?>><i class="ti ti-message-circle fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon js-navigate" data-href="receta_list.php" data-bs-title="Volver" data-bs-placement="bottom"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                                 </div>
                             </div>
