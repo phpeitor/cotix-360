@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const filterSubCategoria1 = document.getElementById("filterSubCategoria1");
     const filterSubCategoria2 = document.getElementById("filterSubCategoria2");
     const btnBuscar = document.getElementById("btn_buscar");
+        const btnExportExcel = document.getElementById("btnExportExcel");
+        const btnExportExcelSpinner = document.getElementById("btnExportExcelSpinner");
+        const btnExportExcelIcon = document.getElementById("btnExportExcelIcon");
     const tableEl = document.getElementById("table-gridjs");
     const alertPrecioCambio = document.getElementById("alertPrecioCambio");
     const userCargo = Number(tableEl?.dataset?.userCargo || 0);
@@ -79,6 +82,21 @@ document.addEventListener("DOMContentLoaded", () => {
         return data;
     }
 
+        function setExportLoading(loading) {
+            if (!btnExportExcel) return;
+
+            btnExportExcel.disabled = loading;
+            btnExportExcel.classList.toggle("opacity-75", loading);
+            btnExportExcel.classList.toggle("cursor-not-allowed", loading);
+
+            if (btnExportExcelSpinner) {
+                btnExportExcelSpinner.classList.toggle("d-none", !loading);
+            }
+
+            if (btnExportExcelIcon) {
+                btnExportExcelIcon.classList.toggle("d-none", loading);
+            }
+        }
     async function cargarCategoriasDependientes() {
         const tipo = filterTipo?.value || "";
 
@@ -293,6 +311,43 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         cargarTabla();
     });
+
+        btnExportExcel?.addEventListener("click", async (event) => {
+            event.preventDefault();
+
+            if (btnExportExcel.disabled) {
+                return;
+            }
+
+            setExportLoading(true);
+
+            try {
+                const res = await fetch("controller/export_items_receta_excel.php", {
+                    method: "GET"
+                });
+
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(text || "No se pudo generar el Excel");
+                }
+
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `items_receta_${new Date().toISOString().slice(0,19).replace(/[:T]/g, "")}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                alertify.success("Excel generado correctamente");
+            } catch (error) {
+                console.error(error);
+                alertify.error(error.message || "Error al exportar Excel");
+            } finally {
+                setExportLoading(false);
+            }
+        });
 
     function conectarStreamPrecioCero() {
         if (isTecnico || typeof window.EventSource === "undefined") {
