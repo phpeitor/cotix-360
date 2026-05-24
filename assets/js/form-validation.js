@@ -125,6 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         const formData = new FormData(form);
+        const isAddItemReceta = form.classList.contains("form-add-item-receta") && !form.classList.contains("form-upd-item-receta");
 
         if (!actionUrl) {
           alertify.error("No se pudo determinar la acción del formulario");

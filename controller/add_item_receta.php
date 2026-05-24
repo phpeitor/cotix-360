@@ -43,6 +43,24 @@ try {
         'tipo' => $_POST['tipo'] ?? '',
     ]);
 
+    $notification = [
+        'usuario' => (string)($_SESSION['session_nombre'] ?? 'Sistema'),
+        'titulo' => 'Nuevo item de receta',
+        'detalle' => trim(implode(' | ', array_filter([
+            (string)($_POST['tipo'] ?? ''),
+            (string)($_POST['categoria'] ?? ''),
+            (string)($_POST['sub_cat_1'] ?? ''),
+            (string)($_POST['sub_cat_2'] ?? '')
+        ], static fn ($value) => $value !== ''))),
+        'fecha' => (new DateTimeImmutable('now', new DateTimeZone('America/Lima')))->format('Y-m-d H:i:s'),
+        'icon' => 'ti-package',
+        'tone' => 'success',
+    ];
+
+    $_SESSION['header_notifications'] = $_SESSION['header_notifications'] ?? [];
+    array_unshift($_SESSION['header_notifications'], $notification);
+    $_SESSION['header_notifications'] = array_slice($_SESSION['header_notifications'], 0, 10);
+
     echo json_encode([
         'ok' => true,
         'id' => $itemId

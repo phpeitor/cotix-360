@@ -163,9 +163,9 @@
 
         <div class="topbar-item">
             <div class="dropdown">
-                <button class="topbar-link btn btn-outline-primary btn-icon dropdown-toggle drop-arrow-none" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" data-bs-auto-close="outside" aria-haspopup="false" aria-expanded="false">
+                <button class="topbar-link btn btn-outline-primary btn-icon dropdown-toggle drop-arrow-none position-relative" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" data-bs-auto-close="outside" aria-haspopup="false" aria-expanded="false">
                     <i class="ti ti-bell animate-ring fs-22"></i>
-                    <span class="noti-icon-badge"></span>
+                    <span class="noti-icon-badge d-none"></span>
                 </button>
 
                 <div class="dropdown-menu p-0 dropdown-menu-end dropdown-menu-lg" style="min-height: 300px;">
