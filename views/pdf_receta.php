@@ -317,18 +317,18 @@ ob_start();
     <table style="width: 100%; margin-top: 5mm;">
         <?php if ($esTecnico): ?>
             <tr>
-                <td style="background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f;">
+                <td style="background: transparent; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f;">
                     <strong>Total Items:</strong> <?= $totalItems ?>
                 </td>
             </tr>
         <?php else: ?>
             <tr>
-                <td style="width: 50%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
+                <td style="width: 50%; background: transparent; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
                     <strong>Total Items:</strong> <?= $totalItems ?><br>
                     <strong>Costo Total Producto:</strong> $<?= number_format($totalProductoDolares, 2) ?><br>
                     <strong>Costo Total Servicio:</strong> $<?= number_format($totalServicioDolares, 2) ?>
                 </td>
-                <td style="width: 50%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
+                <td style="width: 50%; background: transparent; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
                     <strong>Costo Total:</strong> $<?= number_format($totalDolaresConvertidos, 2) ?><br>
                     <strong>Margen:</strong> $<?= number_format($totalMargenDolaresAll, 2) ?><br>
                     <strong>SubTotal:</strong> $<?= number_format($baseTotalDolares, 2) ?><br>
