@@ -522,7 +522,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!rows.length) {
             recetaCategoriaTableBody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">No hay categorías para mostrar.</td>
+                    <td colspan="6" class="text-center text-muted py-4">No hay categorías para mostrar.</td>
                 </tr>
             `;
             limpiarResumenFormula();
@@ -551,6 +551,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const cantidad = Number(row.cantidad) || 0;
             const margen = Math.min(100, Math.max(0, Number(row.margen) || 0));
             const totalConMargen = calcularTotalConMargen(subtotal, margen);
+            const markup = subtotal > 0 ? (totalConMargen / subtotal) : 0;
             // Evitar mostrar duplicados como "X (X)" — si el contenido dentro
             // del paréntesis es igual al texto base, mostrar solo el base.
             const rawSubCat = String(row.sub_cat_1 || "-").trim();
@@ -582,6 +583,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     </td>
                     <td class="text-end fw-semibold total-margen-cell">${monedaSimbolo} ${format2(decimalAdjust("round", totalConMargen, "-2"))}</td>
+                    <td class="text-end fw-semibold markup-cell">${format2(decimalAdjust("round", markup, "-2"))}</td>
                 </tr>
             `;
         }).join("");
@@ -589,6 +591,7 @@ document.addEventListener("DOMContentLoaded", () => {
         recetaCategoriaTableBody.querySelectorAll(".receta-categoria-row").forEach((tr, idx) => {
             const input = tr.querySelector(".input-margen-categoria");
             const totalCell = tr.querySelector(".total-margen-cell");
+            const markupCell = tr.querySelector(".markup-cell");
             const monedaRow = String(tr.getAttribute("data-moneda") || "").toUpperCase();
             const monedaSimboloRow = monedaRow === "DOLLAR" ? "$" : "S/.";
             if (!input) return;
@@ -633,7 +636,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 const margenRow = Number(String(input.value ?? "0").replace(/,/g, "."));
                 const margenNormalizado = Number.isFinite(margenRow) ? Math.min(100, Math.max(0, margenRow)) : 0;
                 const total = calcularTotalConMargen(subtotalRow, margenNormalizado);
+                const markup = subtotalRow > 0 ? (total / subtotalRow) : 0;
                 totalCell.textContent = `${monedaSimboloRow} ${format2(decimalAdjust("round", total, "-2"))}`;
+                if (markupCell) {
+                    markupCell.textContent = format2(decimalAdjust("round", markup, "-2"));
+                }
                 actualizarResumenFormula();
             };
 
@@ -704,7 +711,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (recetaCategoriaTableBody) {
             recetaCategoriaTableBody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">Cargando categorías...</td>
+                    <td colspan="6" class="text-center text-muted py-4">Cargando categorías...</td>
                 </tr>
             `;
         }
@@ -737,7 +744,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (recetaCategoriaTableBody) {
                 recetaCategoriaTableBody.innerHTML = `
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-4">No se pudieron cargar las categorías.</td>
+                        <td colspan="6" class="text-center text-muted py-4">No se pudieron cargar las categorías.</td>
                     </tr>
                 `;
             }
@@ -796,38 +803,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-                // Si el input de nombre existe y cambió, actualizar nombre primero
-                if (inputRecetaNombre) {
-                    try {
-                        const nuevo = String(inputRecetaNombre.value || "").trim();
-                        const actual = String(receta?.nombre || "").replace(/^PROY-/, "").trim();
-                        if (nuevo !== "" && nuevo !== actual) {
-                            const nameForm = new FormData();
-                            nameForm.append('hash', String(hash || ''));
-                            nameForm.append('nombre', nuevo);
-
-                            const resName = await fetch('controller/upd_nombre_receta.php', {
-                                method: 'POST',
-                                body: nameForm
-                            });
-
-                            const jsonName = await resName.json();
-                            if (!resName.ok || !jsonName.success) {
-                                throw new Error(jsonName.message || 'No se pudo actualizar el nombre de la receta');
-                            }
-
-                            alertify.success(jsonName.message || 'Nombre actualizado');
-                            // recargar receta para tener datos consistentes antes de guardar categorías
-                            await cargarReceta(hash);
-                        }
-                    } catch (errName) {
-                        console.error(errName);
-                        alertify.error(errName.message || 'Error al actualizar nombre');
-                        if (btn) btn.disabled = false;
-                        return;
-                    }
-                }
-
                 const formData = new FormData();
                 formData.append("receta_id", String(receta.id));
                 formData.append("items", JSON.stringify(rows));

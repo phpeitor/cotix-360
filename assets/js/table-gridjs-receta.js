@@ -58,6 +58,12 @@ document.addEventListener("DOMContentLoaded", () => {
             { id: "id", name: "ID", width: "70px" },
             { id: "usuario", name: "Usuario", width: "80px" },
             {
+                id: "nombre",
+                name: "Receta",
+                width: "220px",
+                formatter: (cell) => gridjs.html(`<span>${String(cell ?? "-")}</span>`)
+            },
+            {
                 id: "estado",
                 name: "Estado",
                 width: "100px",
@@ -220,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!items) return "";
 
         const arr = items.split("|").map(i => i.trim());
-        const total = Number(row?.cells?.[4]?.data ?? arr.length);
+        const total = Number(row?.cells?.[5]?.data ?? arr.length);
 
         if (total === 1) {
             return gridjs.html(`<span>${arr[0]}</span>`);
@@ -242,7 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderAcciones(_, row) {
         const id = row.cells[0].data;
-        const estado = row.cells[2].data;
+        const estado = row.cells[3].data;
         const hashId = md5(String(id));
 
         let botones = `

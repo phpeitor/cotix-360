@@ -146,6 +146,7 @@ class Receta {
             SELECT
                 c.id,
                 p.usuario,
+                c.nombre,
                 c.estado,
                 c.created_at,
                 c.updated_at,
@@ -160,7 +161,7 @@ class Receta {
             LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
             WHERE $where
             GROUP BY
-                c.id, p.usuario, c.estado, c.created_at, c.updated_at
+                c.id, p.usuario, c.nombre, c.estado, c.created_at, c.updated_at
             ORDER BY c.id DESC
         ";
 

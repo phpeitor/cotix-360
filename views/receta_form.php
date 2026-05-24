@@ -338,11 +338,12 @@ require_once ROOT . '/controller/check_session.php';
                                     <th class="text-end">Subtotal</th>
                                     <th class="text-end">Margen %</th>
                                     <th class="text-end">Total Fórmula</th>
+                                    <th class="text-end">Markup</th>
                                 </tr>
                             </thead>
                             <tbody id="recetaCategoriaTableBody">
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted py-4">Abre el modal para cargar las categorías.</td>
+                                    <td colspan="6" class="text-center text-muted py-4">Abre el modal para cargar las categorías.</td>
                                 </tr>
                             </tbody>
                         </table>

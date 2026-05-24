@@ -32,6 +32,10 @@ function formatearMontoPdf($monto, $simbolo = 'S/') {
     return $simbolo . ' ' . number_format($monto, 2);
 }
 
+function decimalAjustPdf($value, int $decimals = 2): float {
+    return round((float)$value, $decimals, PHP_ROUND_HALF_UP);
+}
+
 function normalizarTextoDetallePdf($texto) {
     if ($texto === null) return '';
     $text = html_entity_decode(strip_tags((string)$texto), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -104,6 +108,7 @@ foreach ($detalle as &$item) {
 
     // Calcular subtotal en DÓLARES para la presentación (si está en S/., convertir)
     $subtotalDolares = ($moneda === 'DOLLAR') ? $subtotal : ($tipoCambio > 0 ? ($subtotal / $tipoCambio) : 0);
+    $subtotalDolares = decimalAjustPdf($subtotalDolares, 2);
     $totalDolaresConvertidos += $subtotalDolares;
 
     // Totales por tipo en DÓLARES
@@ -149,14 +154,16 @@ if (is_array($categorias) && isset($categorias['rows']) && is_array($categorias[
         } else {
             $totalMargenSoles += $margenMonto;
             // convertir margen en S/. a dólares
-            $totalMargenDolaresAll += ($tipoCambio > 0 ? ($margenMonto / $tipoCambio) : 0);
+            $totalMargenDolaresAll += decimalAjustPdf(($tipoCambio > 0 ? ($margenMonto / $tipoCambio) : 0), 2);
         }
     }
 }
 
-$baseTotalDolares = $totalDolaresConvertidos + $totalMargenDolaresAll;
-$igvOverTotal = $baseTotalDolares * 0.18;
-$totalConIgvDolares = $baseTotalDolares + $igvOverTotal;
+$totalDolaresConvertidos = decimalAjustPdf($totalDolaresConvertidos, 2);
+$totalMargenDolaresAll = decimalAjustPdf($totalMargenDolaresAll, 2);
+$baseTotalDolares = decimalAjustPdf($totalDolaresConvertidos + $totalMargenDolaresAll, 2);
+$igvOverTotal = decimalAjustPdf($baseTotalDolares * 0.18, 2);
+$totalConIgvDolares = decimalAjustPdf($baseTotalDolares + $igvOverTotal, 2);
 
 ob_start();
 ?>
@@ -317,13 +324,14 @@ ob_start();
         <?php else: ?>
             <tr>
                 <td style="width: 50%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
-                     <strong>Total Items:</strong> <?= $totalItems ?><br>
-                    <strong>Total Producto:</strong> $<?= number_format($totalProductoDolares, 2) ?><br>
-                    <strong>Total Servicio:</strong> $<?= number_format($totalServicioDolares, 2) ?>
+                    <strong>Total Items:</strong> <?= $totalItems ?><br>
+                    <strong>Costo Total Producto:</strong> $<?= number_format($totalProductoDolares, 2) ?><br>
+                    <strong>Costo Total Servicio:</strong> $<?= number_format($totalServicioDolares, 2) ?>
                 </td>
                 <td style="width: 50%; background: #ededed; padding: 3mm 4mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
-                    <strong>Total:</strong> $<?= number_format($totalDolaresConvertidos, 2) ?><br>
+                    <strong>Costo Total:</strong> $<?= number_format($totalDolaresConvertidos, 2) ?><br>
                     <strong>Margen:</strong> $<?= number_format($totalMargenDolaresAll, 2) ?><br>
+                    <strong>SubTotal:</strong> $<?= number_format($baseTotalDolares, 2) ?><br>
                     <strong>IGV 18%:</strong> $<?= number_format($igvOverTotal, 2) ?><br>
                     <strong>Total + IGV:</strong> $<?= number_format($totalConIgvDolares, 2) ?>
                 </td>
