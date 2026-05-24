@@ -1,12 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
     const filterTipo = document.getElementById("filterTipo");
     const filterCategoria = document.getElementById("filterCategoria");
+    const productoFiltersWrap = document.getElementById("productoFiltersWrap");
+    const filterMarca = document.getElementById("filterMarca");
+    const filterModelo = document.getElementById("filterModelo");
     const filterSubCategoria1 = document.getElementById("filterSubCategoria1");
     const filterSubCategoria2 = document.getElementById("filterSubCategoria2");
     const btnBuscar = document.getElementById("btn_buscar");
-        const btnExportExcel = document.getElementById("btnExportExcel");
-        const btnExportExcelSpinner = document.getElementById("btnExportExcelSpinner");
-        const btnExportExcelIcon = document.getElementById("btnExportExcelIcon");
+    const btnExportExcel = document.getElementById("btnExportExcel");
+    const btnExportExcelSpinner = document.getElementById("btnExportExcelSpinner");
+    const btnExportExcelIcon = document.getElementById("btnExportExcelIcon");
     const tableEl = document.getElementById("table-gridjs");
     const alertPrecioCambio = document.getElementById("alertPrecioCambio");
     const userCargo = Number(tableEl?.dataset?.userCargo || 0);
@@ -26,11 +29,95 @@ document.addEventListener("DOMContentLoaded", () => {
         subCat2: collectOptions(filterSubCategoria2)
     };
 
+    function isTipoProducto() {
+        return String(filterTipo?.value || "").trim().toUpperCase() === "PRODUCTO";
+    }
+
+    function resetNativeSelect(selectEl, placeholder, disabled = true) {
+        if (!selectEl) return;
+
+        selectEl.disabled = disabled;
+
+        if (selectEl.choicesInstance) {
+            selectEl.choicesInstance.clearChoices();
+            selectEl.choicesInstance.setChoices([
+                { value: "", label: placeholder, disabled: true, selected: true }
+            ], "value", "label", true);
+            if (disabled) {
+                selectEl.choicesInstance.disable();
+            } else {
+                selectEl.choicesInstance.enable();
+            }
+            return;
+        }
+
+        selectEl.innerHTML = `<option value="">${placeholder}</option>`;
+    }
+
+    function setNativeSelectOptions(selectEl, rows, placeholder, valueKey) {
+        if (!selectEl) return;
+
+        const options = rows
+            .map(row => row?.[valueKey])
+            .filter(value => value !== null && value !== undefined && String(value).trim() !== "")
+            .map(value => ({ value, label: value }));
+
+        if (selectEl.choicesInstance) {
+            selectEl.disabled = options.length === 0;
+            selectEl.choicesInstance.clearChoices();
+            selectEl.choicesInstance.setChoices(
+                [{ value: "", label: placeholder, disabled: true, selected: true }, ...options],
+                "value",
+                "label",
+                true
+            );
+            if (options.length === 0) {
+                selectEl.choicesInstance.disable();
+            } else {
+                selectEl.choicesInstance.enable();
+            }
+            return;
+        }
+
+        selectEl.innerHTML = `<option value="">${placeholder}</option>`;
+
+        rows.forEach(row => {
+            const value = row?.[valueKey];
+            if (value === null || value === undefined || String(value).trim() === "") {
+                return;
+            }
+
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            selectEl.appendChild(option);
+        });
+
+        selectEl.disabled = rows.length === 0;
+    }
+
     function setOptions(selectEl, values, placeholder = "-- Todas --") {
         if (!selectEl) return;
 
         const selectedBefore = selectEl.value;
         const uniqueValues = [...new Set(values.map(v => String(v).trim()).filter(Boolean))];
+
+        if (selectEl.choicesInstance) {
+            selectEl.disabled = uniqueValues.length === 0;
+            selectEl.choicesInstance.clearChoices();
+            selectEl.choicesInstance.setChoices(
+                [{ value: "", label: placeholder, disabled: true, selected: true }, ...uniqueValues.map(value => ({ value, label: value }))],
+                "value",
+                "label",
+                true
+            );
+            if (uniqueValues.length === 0) {
+                selectEl.choicesInstance.disable();
+            } else {
+                selectEl.choicesInstance.enable();
+            }
+            return;
+        }
 
         selectEl.innerHTML = `<option value="">${placeholder}</option>`;
 
@@ -104,6 +191,9 @@ document.addEventListener("DOMContentLoaded", () => {
             setOptions(filterCategoria, initialState.categoria, "-- Todos --");
             setOptions(filterSubCategoria1, initialState.subCat1, "-- Todas --");
             setOptions(filterSubCategoria2, initialState.subCat2, "-- Todas --");
+            resetNativeSelect(filterMarca, "-- Todas --");
+            resetNativeSelect(filterModelo, "-- Todas --");
+            if (productoFiltersWrap) productoFiltersWrap.classList.add("d-none");
             return;
         }
 
@@ -115,6 +205,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const subcat2 = await fetchRecetaOpciones({ nivel: "subcat2", tipo });
         setOptions(filterSubCategoria2, extractValues(subcat2, "sub_cat_2"), "-- Todas --");
+
+        if (!isTipoProducto()) {
+            resetNativeSelect(filterMarca, "-- Todas --");
+            resetNativeSelect(filterModelo, "-- Todas --");
+            if (productoFiltersWrap) productoFiltersWrap.classList.add("d-none");
+        }
     }
 
     async function cargarSubCategorias1Dependientes() {
@@ -124,7 +220,24 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!tipo) {
             setOptions(filterSubCategoria1, initialState.subCat1, "-- Todas --");
             setOptions(filterSubCategoria2, initialState.subCat2, "-- Todas --");
+            resetNativeSelect(filterMarca, "-- Todas --");
+            resetNativeSelect(filterModelo, "-- Todas --");
             return;
+        }
+
+        if (isTipoProducto()) {
+            if (productoFiltersWrap) productoFiltersWrap.classList.remove("d-none");
+            resetNativeSelect(filterMarca, "-- Todas --");
+            resetNativeSelect(filterModelo, "-- Todas --");
+
+            if (categoria) {
+                const marcas = await fetchRecetaOpciones({ nivel: "marcas", tipo, categoria });
+                setNativeSelectOptions(filterMarca, marcas, "-- Todas --", "marca");
+            }
+        } else if (productoFiltersWrap) {
+            productoFiltersWrap.classList.add("d-none");
+            resetNativeSelect(filterMarca, "-- Todas --");
+            resetNativeSelect(filterModelo, "-- Todas --");
         }
 
         const subcat1 = await fetchRecetaOpciones({ nivel: "subcat1", tipo, categoria });
@@ -141,6 +254,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!tipo) {
             setOptions(filterSubCategoria2, initialState.subCat2, "-- Todas --");
+            resetNativeSelect(filterMarca, "-- Todas --");
+            resetNativeSelect(filterModelo, "-- Todas --");
             return;
         }
 
@@ -149,12 +264,70 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getFiltros() {
-        return {
+        const filtros = {
             tipo: filterTipo?.value || "",
             categoria: filterCategoria?.value || "",
             sub_cat_1: filterSubCategoria1?.value || "",
             sub_cat_2: filterSubCategoria2?.value || ""
         };
+
+        if (isTipoProducto()) {
+            filtros.marca = filterMarca?.value || "";
+            filtros.modelo = filterModelo?.value || "";
+        }
+
+        return filtros;
+    }
+
+    async function cargarMarcasDependientes() {
+        const tipo = filterTipo?.value || "";
+        const categoria = filterCategoria?.value || "";
+
+        if (!isTipoProducto()) {
+            resetNativeSelect(filterMarca, "-- Todas --");
+            resetNativeSelect(filterModelo, "-- Todas --");
+            if (productoFiltersWrap) productoFiltersWrap.classList.add("d-none");
+            return;
+        }
+
+        if (productoFiltersWrap) productoFiltersWrap.classList.toggle("d-none", !categoria);
+        resetNativeSelect(filterMarca, "-- Todas --");
+        resetNativeSelect(filterModelo, "-- Todas --");
+
+        if (!tipo || !categoria) {
+            return;
+        }
+
+        const marcas = await fetchRecetaOpciones({ nivel: "marcas", tipo, categoria });
+        setNativeSelectOptions(filterMarca, marcas, "-- Todas --", "marca");
+    }
+
+    async function cargarModelosDependientes() {
+        const tipo = filterTipo?.value || "";
+        const categoria = filterCategoria?.value || "";
+        const marca = filterMarca?.value || "";
+
+        if (!isTipoProducto()) {
+            resetNativeSelect(filterModelo, "-- Todas --");
+            return;
+        }
+
+        resetNativeSelect(filterModelo, "-- Todas --");
+
+        if (!tipo || !categoria || !marca) {
+            return;
+        }
+
+        const modelos = await fetchRecetaOpciones({ nivel: "modelos", tipo, categoria, marca });
+        setNativeSelectOptions(filterModelo, modelos, "-- Todas --", "modelo");
+    }
+
+    async function onMarcaChange() {
+        await cargarModelosDependientes();
+    }
+
+    async function onModeloChange() {
+        await cargarTabla();
     }
 
     const grid = new gridjs.Grid({
@@ -292,6 +465,9 @@ document.addEventListener("DOMContentLoaded", () => {
     filterCategoria?.addEventListener("change", async () => {
         try {
             await cargarSubCategorias1Dependientes();
+            if (isTipoProducto()) {
+                await cargarMarcasDependientes();
+            }
         } catch (error) {
             console.error(error);
             alertify.error("Error al filtrar sub categorías 1");
@@ -304,6 +480,24 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error(error);
             alertify.error("Error al filtrar sub categorías 2");
+        }
+    });
+
+    filterMarca?.addEventListener("change", async () => {
+        try {
+            await onMarcaChange();
+        } catch (error) {
+            console.error(error);
+            alertify.error("Error al filtrar modelos");
+        }
+    });
+
+    filterModelo?.addEventListener("change", async () => {
+        try {
+            await onModeloChange();
+        } catch (error) {
+            console.error(error);
+            alertify.error("Error al filtrar items");
         }
     });
 

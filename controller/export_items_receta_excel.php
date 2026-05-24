@@ -99,7 +99,11 @@ try {
     $sheet->getStyle('A' . ($headerRow + 1) . ':M' . $endRow)
         ->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
 
-    foreach (range('A', 'M') as $col) {
+    $sheet->getColumnDimension('A')->setWidth(5);
+    $sheet->getColumnDimension('B')->setWidth(24);
+    $sheet->getColumnDimension('C')->setWidth(28);
+
+    foreach (['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'] as $col) {
         $sheet->getColumnDimension($col)->setAutoSize(true);
     }
 

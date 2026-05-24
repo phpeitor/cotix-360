@@ -125,6 +125,26 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
+
+                                    <div class="col-12">
+                                        <div id="productoFiltersWrap" class="row d-none">
+                                            <div class="col-md-6 mt-3">
+                                                <label class="form-label">Marca</label>
+                                                <select id="filterMarca" class="form-select" disabled data-choices data-search-enabled="true" data-search-placeholder-value="Buscar marca...">
+                                                    <option value="">-- Todas --</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-6 mt-3">
+                                                <label class="form-label">Modelo</label>
+                                                <select id="filterModelo" class="form-select" disabled data-choices data-search-enabled="true" data-search-placeholder-value="Buscar modelo...">
+                                                    <option value="">-- Todas --</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    
                                 </div>
 
                                 <div id="table-gridjs" data-user-cargo="<?= (int)$_SESSION['session_cargo'] ?>"></div>
