@@ -583,7 +583,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     </td>
                     <td class="text-end fw-semibold total-margen-cell">${monedaSimbolo} ${format2(decimalAdjust("round", totalConMargen, "-2"))}</td>
-                    <td class="text-end fw-semibold markup-cell">${format2(decimalAdjust("round", markup, "-2"))}</td>
+                    <td class="text-end fw-semibold markup-cell">${Number(decimalAdjust("round", markup, "-4")).toFixed(4)}</td>
                 </tr>
             `;
         }).join("");
@@ -639,7 +639,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const markup = subtotalRow > 0 ? (total / subtotalRow) : 0;
                 totalCell.textContent = `${monedaSimboloRow} ${format2(decimalAdjust("round", total, "-2"))}`;
                 if (markupCell) {
-                    markupCell.textContent = format2(decimalAdjust("round", markup, "-2"));
+                    markupCell.textContent = Number(decimalAdjust("round", markup, "-4")).toFixed(4);
                 }
                 actualizarResumenFormula();
             };

@@ -333,7 +333,7 @@ ob_start();
                     <strong>Margen:</strong> $<?= number_format($totalMargenDolaresAll, 2) ?><br>
                     <strong>SubTotal:</strong> $<?= number_format($baseTotalDolares, 2) ?><br>
                     <strong>IGV 18%:</strong> $<?= number_format($igvOverTotal, 2) ?><br>
-                    <strong>Total + IGV:</strong> $<?= number_format($totalConIgvDolares, 2) ?>
+                    <strong>Subtotal + IGV:</strong> $<?= number_format($totalConIgvDolares, 2) ?>
                 </td>
             </tr>
         <?php endif; ?>
