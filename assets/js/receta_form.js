@@ -99,6 +99,16 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/'/g, "&#39;");
     }
 
+    function normalizarClaveCambio(valor) {
+        return String(valor ?? "").trim().toLowerCase();
+    }
+
+    function getClaveCambioPrecio(item) {
+        return [item?.nombre, item?.categoria, item?.sub_cat_1, item?.sub_cat_2, item?.descripcion]
+            .map(normalizarClaveCambio)
+            .join("|");
+    }
+
     init();
 
     function toggleEditTipoCambio(save = false) {
@@ -370,7 +380,7 @@ document.addEventListener("DOMContentLoaded", () => {
             receta = data.receta;
             detalle = Array.isArray(data.detalle) ? data.detalle : [];
             const cambiosPrecio = Array.isArray(data.cambios_precio) ? data.cambios_precio : [];
-            cambiosPrecioByItem = new Map(cambiosPrecio.map(item => [Number(item.item_id), item]));
+            cambiosPrecioByItem = new Map(cambiosPrecio.map(item => [getClaveCambioPrecio(item), item]));
             cambiosStreamSignature = getCambiosPrecioSignature(cambiosPrecio);
             currentPage = 1;
 
@@ -472,13 +482,13 @@ document.addEventListener("DOMContentLoaded", () => {
     function getCambiosPrecioSignature(cambios) {
         const normalized = (Array.isArray(cambios) ? cambios : [])
             .map(item => ({
-                item_id: Number(item.item_id || 0),
+                clave: getClaveCambioPrecio(item),
                 precio_receta: Number(item.precio_receta || 0),
                 moneda_receta: String(item.moneda_receta || ""),
                 precio_actual: Number(item.precio_actual || 0),
                 moneda_actual: String(item.moneda_actual || "")
             }))
-            .sort((a, b) => a.item_id - b.item_id);
+            .sort((a, b) => a.clave.localeCompare(b.clave));
 
         return JSON.stringify(normalized);
     }
@@ -851,7 +861,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 cambiosStreamSignature = nextSignature;
-                cambiosPrecioByItem = new Map(cambios.map(item => [Number(item.item_id), item]));
+                cambiosPrecioByItem = new Map(cambios.map(item => [getClaveCambioPrecio(item), item]));
 
                 if (receta && typeof payload.estado === "string") {
                     receta.estado = payload.estado;
@@ -1080,6 +1090,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         tbody.innerHTML = rows.map(item => {
             const editable = isRecetaEditable();
+            const itemId = Number(item.item_id) || Number(item.id) || 0;
             const cantidad = Number(item.cantidad) || 0;
             const precio = Number(item.precio) || 0;
             const subtotal = getSubtotal(item);
@@ -1087,8 +1098,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const itemDescripcion = normalizarTextoDetalle(item.descripcion);
             const detalleLinea1 = formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]);
             const detalleLinea2 = [item.marca, item.modelo, item.uni_medida].filter(Boolean).join(" / ");
-            const itemId = Number(item.item_id) || Number(item.id) || 0;
-            const cambioPrecio = cambiosPrecioByItem.get(itemId);
+            const claveCambio = getClaveCambioPrecio(item);
+            const cambioPrecio = cambiosPrecioByItem.get(claveCambio);
             const tooltipCambioPrecio = cambioPrecio
                 ? escapeAttr(`Precio actualizado: ${formatMoneda(cambioPrecio.moneda_receta, cambioPrecio.precio_receta)} -> ${formatMoneda(cambioPrecio.moneda_actual, cambioPrecio.precio_actual)}`)
                 : "";

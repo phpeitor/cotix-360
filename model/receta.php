@@ -374,20 +374,28 @@ class Receta {
     public function obtenerCambiosPrecio(int $recetaId): array
     {
         $sql = "SELECT
-                    d.item_id,
                     d.nombre,
+                                                                                d.categoria,
+                                                                                d.sub_cat_1,
+                                                                                d.sub_cat_2,
+                                                                                d.descripcion,
                     d.precio AS precio_receta,
                     d.moneda AS moneda_receta,
                     r.precio AS precio_actual,
                     r.moneda AS moneda_actual
                 FROM receta_detalle d
-                INNER JOIN receta_items r ON r.id = d.item_id
+                                INNER JOIN receta_items r ON
+                                        LOWER(TRIM(COALESCE(r.nombre, ''))) = LOWER(TRIM(COALESCE(d.nombre, '')))
+                                        AND LOWER(TRIM(COALESCE(r.categoria, ''))) = LOWER(TRIM(COALESCE(d.categoria, '')))
+                                        AND LOWER(TRIM(COALESCE(r.sub_cat_1, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')))
+                                                                                AND LOWER(TRIM(COALESCE(r.sub_cat_2, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')))
+                                                                                AND LOWER(TRIM(COALESCE(r.descripcion, ''))) = LOWER(TRIM(COALESCE(d.descripcion, '')))
                 WHERE d.receta_id = :receta_id
                   AND (
                     ROUND(COALESCE(d.precio, 0), 4) <> ROUND(COALESCE(r.precio, 0), 4)
                     OR COALESCE(d.moneda, '') <> COALESCE(r.moneda, '')
                   )
-                ORDER BY d.item_id";
+                                ORDER BY d.nombre, d.categoria, d.sub_cat_1, d.sub_cat_2";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
         $stmt->execute();
@@ -404,7 +412,11 @@ class Receta {
                                 CRC32(
                                     CONCAT_WS(
                                         '|',
-                                        d.item_id,
+                                        d.nombre,
+                                        d.categoria,
+                                        d.sub_cat_1,
+                                        d.sub_cat_2,
+                                        d.descripcion,
                                         ROUND(COALESCE(d.precio, 0), 4),
                                         COALESCE(d.moneda, ''),
                                         ROUND(COALESCE(r.precio, 0), 4),
@@ -415,8 +427,13 @@ class Receta {
                         ),
                         0
                     ) AS checksum
-                FROM receta_detalle d
-                INNER JOIN receta_items r ON r.id = d.item_id
+                                FROM receta_detalle d
+                                INNER JOIN receta_items r ON
+                                        LOWER(TRIM(COALESCE(r.nombre, ''))) = LOWER(TRIM(COALESCE(d.nombre, '')))
+                                        AND LOWER(TRIM(COALESCE(r.categoria, ''))) = LOWER(TRIM(COALESCE(d.categoria, '')))
+                                        AND LOWER(TRIM(COALESCE(r.sub_cat_1, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')))
+                                        AND LOWER(TRIM(COALESCE(r.sub_cat_2, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')))
+                                        AND LOWER(TRIM(COALESCE(r.descripcion, ''))) = LOWER(TRIM(COALESCE(d.descripcion, '')))
                 WHERE d.receta_id = :receta_id
                   AND (
                     ROUND(COALESCE(d.precio, 0), 4) <> ROUND(COALESCE(r.precio, 0), 4)
@@ -438,7 +455,12 @@ class Receta {
     public function sincronizarPreciosDetalle(int $recetaId): int
     {
         $sql = "UPDATE receta_detalle d
-                INNER JOIN receta_items r ON r.id = d.item_id
+                                INNER JOIN receta_items r ON
+                                        LOWER(TRIM(COALESCE(r.nombre, ''))) = LOWER(TRIM(COALESCE(d.nombre, '')))
+                                        AND LOWER(TRIM(COALESCE(r.categoria, ''))) = LOWER(TRIM(COALESCE(d.categoria, '')))
+                                        AND LOWER(TRIM(COALESCE(r.sub_cat_1, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')))
+                                                                                AND LOWER(TRIM(COALESCE(r.sub_cat_2, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')))
+                                                                                AND LOWER(TRIM(COALESCE(r.descripcion, ''))) = LOWER(TRIM(COALESCE(d.descripcion, '')))
                 SET d.precio = r.precio,
                     d.moneda = r.moneda
                 WHERE d.receta_id = :receta_id
