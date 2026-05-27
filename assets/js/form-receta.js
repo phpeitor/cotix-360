@@ -364,7 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            mostrarFiltrosProducto(!!sub_cat_2);
+                mostrarFiltrosProducto(!!sub_cat_2);
             resetNativeSelect(marcaSelect, "-- Seleccione Marca --");
             resetNativeSelect(modeloSelect, "-- Seleccione Modelo --");
 
@@ -390,7 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            mostrarFiltrosProducto(true);
+                mostrarFiltrosProducto(true);
             resetNativeSelect(modeloSelect, "-- Seleccione Modelo --");
 
             if (!tipo || !categoria || !sub_cat_1 || !sub_cat_2 || !marca) {
