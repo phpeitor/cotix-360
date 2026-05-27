@@ -29,6 +29,19 @@ try {
     }
 
     $item = new Item();
+
+    $modelo = trim((string)($_POST['modelo'] ?? ''));
+    if ($modelo !== '') {
+        $existe = $item->valida_modelo($modelo);
+        if ($existe) {
+            echo json_encode([
+                'ok' => false,
+                'message' => 'El codigo ya se encuentra registrado'
+            ]);
+            exit;
+        }
+    }
+
     $itemId = $item->guardarItemReceta([
         'categoria' => $_POST['categoria'] ?? '',
         'sub_cat_1' => $_POST['sub_cat_1'] ?? '',
@@ -49,7 +62,8 @@ try {
     $nowLima = (new DateTimeImmutable('now', new DateTimeZone('America/Lima')))->format('Y-m-d H:i:s');
     $detalle = trim(implode(' | ', array_filter([
         (string)($_POST['tipo'] ?? ''),
-        (string)($_POST['sub_cat_2'] ?? '')
+        (string)($_POST['sub_cat_2'] ?? ''),
+        $modelo !== '' ? $modelo : ''
     ], static fn ($value) => $value !== '')));
 
     $stmtNotif = $pdo->prepare(
@@ -72,7 +86,8 @@ try {
         'tipo' => (string)($_POST['tipo'] ?? ''),
         'categoria' => (string)($_POST['categoria'] ?? ''),
         'sub_cat_1' => (string)($_POST['sub_cat_1'] ?? ''),
-        'sub_cat_2' => (string)($_POST['sub_cat_2'] ?? '')
+        'sub_cat_2' => (string)($_POST['sub_cat_2'] ?? ''),
+        'modelo' => $modelo
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     $stmtNotif->bindValue(':created_at', $nowLima);
     $stmtNotif->execute();

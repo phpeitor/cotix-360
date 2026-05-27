@@ -10,6 +10,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const params = new URLSearchParams(window.location.search);
   const hash = params.get("hash");
+  const modeloItemRecetaInput = document.querySelector("form.form-add-item-receta #modelo");
+
+  function setModeloDuplicadoState(isDuplicado) {
+    if (!modeloItemRecetaInput) {
+      return;
+    }
+
+    modeloItemRecetaInput.classList.toggle("is-invalid", isDuplicado);
+    modeloItemRecetaInput.classList.toggle("border-danger", isDuplicado);
+  }
+
+  if (modeloItemRecetaInput) {
+    modeloItemRecetaInput.addEventListener("input", () => {
+      setModeloDuplicadoState(false);
+    });
+  }
 
 
   /* =====================================================
@@ -143,9 +159,16 @@ document.addEventListener("DOMContentLoaded", () => {
           : { ok: false, message: await res.text() };
 
         if (json.ok) {
+          setModeloDuplicadoState(false);
           form.reset();
           window.location.href = redirectUrl;
         } else {
+          const mensajeDuplicado = String(json.message || "");
+          if (isAddItemReceta && mensajeDuplicado.toLowerCase().includes("codigo ya se encuentra registrado")) {
+            setModeloDuplicadoState(true);
+          } else {
+            setModeloDuplicadoState(false);
+          }
           alertify.error("Alerta: " + (json.message || "No se pudo guardar."));
         }
 

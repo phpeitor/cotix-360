@@ -496,13 +496,26 @@ class Item {
     public function valida_modelo_upd(string $modelo, string $hash): ?array
     {
         $sql = "SELECT id
-                FROM item
+                FROM receta_items
                 WHERE modelo = :modelo
                 AND MD5(id) <> :hash
                 LIMIT 1";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':modelo', $modelo);
         $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $data ?: null;
+    }
+
+    public function valida_modelo(string $modelo): ?array
+    {
+        $sql = "SELECT id
+                FROM receta_items
+                WHERE modelo = :modelo
+                LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':modelo', $modelo);
         $stmt->execute();
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
         return $data ?: null;
