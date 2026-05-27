@@ -109,6 +109,29 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("|");
     }
 
+    function formatFechaCambioTooltip(valor) {
+        const raw = String(valor ?? "").trim();
+        if (!raw) {
+            return "-";
+        }
+
+        const normalizado = raw.replace(" ", "T");
+        const fecha = new Date(normalizado);
+        if (Number.isNaN(fecha.getTime())) {
+            return raw;
+        }
+
+        return new Intl.DateTimeFormat("es-PE", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+        }).format(fecha);
+    }
+
     init();
 
     function toggleEditTipoCambio(save = false) {
@@ -1101,7 +1124,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const claveCambio = getClaveCambioPrecio(item);
             const cambioPrecio = cambiosPrecioByItem.get(claveCambio);
             const tooltipCambioPrecio = cambioPrecio
-                ? escapeAttr(`Precio actualizado: ${formatMoneda(cambioPrecio.moneda_receta, cambioPrecio.precio_receta)} -> ${formatMoneda(cambioPrecio.moneda_actual, cambioPrecio.precio_actual)}`)
+                ? escapeAttr(`Precio actualizado\n Anterior: ${formatMoneda(cambioPrecio.moneda_receta, cambioPrecio.precio_receta)} - ${formatFechaCambioTooltip(cambioPrecio.fecha_anterior)}\n Actual: ${formatMoneda(cambioPrecio.moneda_actual, cambioPrecio.precio_actual)} - ${formatFechaCambioTooltip(cambioPrecio.fecha_cambio)}`)
                 : "";
 
             return `
@@ -1115,7 +1138,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             </div>
                             <div>
                                 <span class="text-muted fs-12">${item.nombre || ""}
-                                    ${cambioPrecio ? `<span class="ms-1" data-bs-toggle="tooltip" data-bs-title="${tooltipCambioPrecio}"><i class="ti ti-alert-circle text-warning fs-16"></i></span>` : ""}
+                                    ${cambioPrecio ? `<span class="ms-1" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-precio-cambio" data-bs-title="${tooltipCambioPrecio}"><i class="ti ti-alert-circle text-warning fs-16"></i></span>` : ""}
                                 </span><br>
                                 <h5 class="fs-14 mt-1 item-description">${itemDescripcion}</h5>
                             </div>

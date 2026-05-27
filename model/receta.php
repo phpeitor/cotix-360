@@ -379,8 +379,10 @@ class Receta {
                                                                                 d.sub_cat_1,
                                                                                 d.sub_cat_2,
                                                                                 d.descripcion,
+                    d.created_at AS fecha_anterior,
                     d.precio AS precio_receta,
                     d.moneda AS moneda_receta,
+                    r.created_at AS fecha_cambio,
                     r.precio AS precio_actual,
                     r.moneda AS moneda_actual
                 FROM receta_detalle d

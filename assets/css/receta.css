@@ -92,3 +92,10 @@
     line-height: 1.35;
     margin-bottom: 0;
 }
+
+.tooltip.tooltip-precio-cambio .tooltip-inner {
+    font-size: 12px;
+    line-height: 1.25;
+    max-width: 340px;
+    white-space: pre-line;
+}
