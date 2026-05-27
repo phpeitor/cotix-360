@@ -923,6 +923,45 @@ document.addEventListener("DOMContentLoaded", () => {
         return Math.min(100, Math.max(1, parsed));
     }
 
+    function esTeclaNumericaPermitida(e) {
+        const teclasPermitidas = [
+            "Backspace",
+            "Delete",
+            "Tab",
+            "Escape",
+            "Enter",
+            "ArrowLeft",
+            "ArrowRight",
+            "ArrowUp",
+            "ArrowDown",
+            "Home",
+            "End"
+        ];
+
+        if (teclasPermitidas.includes(e.key)) return true;
+        if ((e.ctrlKey || e.metaKey) && ["a", "c", "v", "x"].includes(String(e.key).toLowerCase())) return true;
+        return /^[0-9]$/.test(e.key);
+    }
+
+    function restringirSoloNumeros(input) {
+        input.addEventListener("keydown", (e) => {
+            if (!esTeclaNumericaPermitida(e)) {
+                e.preventDefault();
+            }
+        });
+
+        input.addEventListener("input", () => {
+            const soloDigitos = String(input.value ?? "").replace(/\D/g, "");
+            if (input.value !== soloDigitos) {
+                input.value = soloDigitos;
+            }
+        });
+
+        input.addEventListener("blur", () => {
+            input.value = String(clampCantidad(input.value));
+        });
+    }
+
     function getResumenTotales() {
         let totalItems = 0;
         let totalSoles = 0;
@@ -978,6 +1017,39 @@ document.addEventListener("DOMContentLoaded", () => {
         calcularTotales();
     }
 
+    function actualizarSubtotalFila(itemId, cantidad) {
+        if (!tbody) return;
+
+        const row = tbody.querySelector(`tr[data-item-id="${CSS.escape(String(itemId))}"]`);
+        if (!row) return;
+
+        const item = detalle.find(x => Number(x.item_id) === Number(itemId));
+        if (!item) return;
+
+        const subtotal = getSubtotal({ ...item, cantidad });
+        const subtotalEl = row.querySelector(".item-subtotal-value");
+        if (subtotalEl) {
+            subtotalEl.textContent = format2(subtotal);
+        }
+
+        row.dataset.cantidad = String(cantidad);
+    }
+
+    function actualizarCantidadDesdeInput(itemId, value) {
+        if (!isRecetaEditable()) {
+            alertify.error("Solo se puede modificar recetas con estado Enviada");
+            return;
+        }
+
+        const idx = detalle.findIndex(x => Number(x.item_id) === Number(itemId));
+        if (idx < 0) return;
+
+        const nueva = clampCantidad(value);
+        detalle[idx].cantidad = nueva;
+        actualizarSubtotalFila(itemId, nueva);
+        calcularTotales();
+    }
+
     function eliminarItem(itemId) {
         if (!isRecetaEditable()) {
             alertify.error("Solo se puede modificar recetas con estado Enviada");
@@ -1022,7 +1094,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 : "";
 
             return `
-                <tr data-item-id="${itemId}" class="${cambioPrecio ? "table-warning" : ""}">
+                <tr data-item-id="${itemId}" data-cantidad="${cantidad}" class="${cambioPrecio ? "table-warning" : ""}">
                     <td>
                         <div class="d-flex align-items-center">
                             <div class="avatar-md flex-shrink-0 me-2">
@@ -1052,7 +1124,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td class="text-center">
                         <div class="input-step border bg-body-secondary px-1 py-0 rounded-pill d-inline-flex align-items-center overflow-visible" style="height:30px;">
                             <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center btn-qty-minus" style="width:22px;min-width:22px;height:22px;" data-id="${itemId}" ${editable ? "" : "disabled"}>-</button>
-                            <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100 fw-semibold" style="width:30px;font-size:12px;" value="${cantidad}" readonly>
+                            <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100 fw-semibold btn-qty-input" style="width:30px;font-size:12px;" value="${cantidad}" min="1" max="100" step="1" inputmode="numeric" pattern="[0-9]*" data-id="${itemId}" ${editable ? "" : "disabled"}>
                             <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center btn-qty-plus" style="width:22px;min-width:22px;height:22px;" data-id="${itemId}" ${editable ? "" : "disabled"}>+</button>
                         </div>
                     </td>
@@ -1062,7 +1134,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                     <td class="text-end ${isTecnico ? "d-none" : ""}">
                         <span class="text-muted fs-12">${monedaSimbolo}</span>
-                        <h5 class="fs-14 mt-1 fw-normal mb-0">${format2(subtotal)}</h5>
+                        <h5 class="fs-14 mt-1 fw-normal mb-0 item-subtotal-value">${format2(subtotal)}</h5>
                     </td>
                     <td class="text-center">
                         <button type="button" class="btn btn-sm btn-danger btn-delete-item" data-id="${itemId}" ${editable ? "" : "disabled"}>
@@ -1079,6 +1151,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         tbody.querySelectorAll(".btn-qty-minus").forEach(btn => {
             btn.addEventListener("click", () => actualizarCantidad(btn.dataset.id, -1));
+        });
+
+        tbody.querySelectorAll(".btn-qty-input").forEach(input => {
+            restringirSoloNumeros(input);
+            input.addEventListener("input", () => actualizarCantidadDesdeInput(input.dataset.id, input.value));
+            input.addEventListener("change", () => actualizarCantidadDesdeInput(input.dataset.id, input.value));
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    actualizarCantidadDesdeInput(input.dataset.id, input.value);
+                }
+            });
         });
 
         tbody.querySelectorAll(".btn-delete-item").forEach(btn => {

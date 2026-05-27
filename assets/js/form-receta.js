@@ -76,12 +76,51 @@ document.addEventListener("DOMContentLoaded", () => {
         return Math.min(100, Math.max(1, parsed));
     }
 
+    function esTeclaNumericaPermitida(e) {
+        const teclasPermitidas = [
+            "Backspace",
+            "Delete",
+            "Tab",
+            "Escape",
+            "Enter",
+            "ArrowLeft",
+            "ArrowRight",
+            "ArrowUp",
+            "ArrowDown",
+            "Home",
+            "End"
+        ];
+
+        if (teclasPermitidas.includes(e.key)) return true;
+        if ((e.ctrlKey || e.metaKey) && ["a", "c", "v", "x"].includes(String(e.key).toLowerCase())) return true;
+        return /^[0-9]$/.test(e.key);
+    }
+
+    function restringirSoloNumeros(input) {
+        input.addEventListener("keydown", (e) => {
+            if (!esTeclaNumericaPermitida(e)) {
+                e.preventDefault();
+            }
+        });
+
+        input.addEventListener("input", () => {
+            const soloDigitos = String(input.value ?? "").replace(/\D/g, "");
+            if (input.value !== soloDigitos) {
+                input.value = soloDigitos;
+            }
+        });
+
+        input.addEventListener("blur", () => {
+            input.value = String(clampCantidad(input.value));
+        });
+    }
+
     function createQtyStep(initialValue = 1) {
         const wrapper = document.createElement("div");
         wrapper.className = "input-step border bg-body-secondary p-1 rounded-pill d-inline-flex overflow-visible receta-qty-step";
         wrapper.innerHTML = `
             <button type="button" class="qty-minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
-            <input type="number" class="qty-input text-dark text-center border-0 bg-body-secondary rounded h-100" value="${clampCantidad(initialValue)}" min="1" max="100" readonly />
+            <input type="number" class="qty-input text-dark text-center border-0 bg-body-secondary rounded h-100" value="${clampCantidad(initialValue)}" min="1" max="100" step="1" inputmode="numeric" pattern="[0-9]*" />
             <button type="button" class="qty-plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
         `;
 
@@ -92,6 +131,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         wrapper.querySelector(".qty-plus").addEventListener("click", () => {
             input.value = String(clampCantidad(parseInt(input.value, 10) + 1));
+        });
+
+        restringirSoloNumeros(input);
+        input.addEventListener("change", () => {
+            input.value = String(clampCantidad(input.value));
         });
 
         return { wrapper, input };
@@ -579,7 +623,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="text-muted fs-12">Cantidad</span> <br>
                 <div data-touchspin class="input-step border bg-body-secondary p-1 mt-1 rounded-pill d-inline-flex overflow-visible">
                     <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
-                    <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="${qtyNormalizada}" min="0" max="100" readonly />
+                    <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="${qtyNormalizada}" min="0" max="100" />
                     <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
                 </div>
             </td>
