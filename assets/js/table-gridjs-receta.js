@@ -227,17 +227,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const arr = items.split("|").map(i => i.trim());
         const total = Number(row?.cells?.[5]?.data ?? arr.length);
+        const recipeId = String(row?.cells?.[0]?.data ?? "").trim();
 
         if (total === 1) {
             return gridjs.html(`<span>${arr[0]}</span>`);
         }
 
-        const list = arr.map(i => `<li>${i}</li>`).join("");
+        const maxVisible = 4;
+        const visibleItems = arr.slice(0, maxVisible);
+        const hiddenItems = arr.slice(maxVisible);
+        const list = visibleItems.map(i => `<li>${i}</li>`).join("");
+        const hiddenList = hiddenItems.map(i => `<li>${i}</li>`).join("");
+        const collapseId = `receta-items-${recipeId || Math.random().toString(36).slice(2, 10)}`;
+        const hiddenCount = Math.max(0, total - maxVisible);
 
         let itemsHtml = `
-            <div>
-                <ul class="mb-1 ps-3">${list}</ul>
-                <small class="text-muted fw-semibold">
+            <div class="receta-items-preview">
+                <ul class="mb-1 ps-3 receta-items-visible">${list}</ul>`;
+
+        if (hiddenItems.length) {
+            itemsHtml += `
+                <div id="${collapseId}" class="receta-items-hidden collapse">
+                    <ul class="mb-1 ps-3">${hiddenList}</ul>
+                </div>
+                <button type="button"
+                        class="btn btn-link p-0 receta-items-toggle"
+                        data-receta-items-toggle="${collapseId}"
+                        data-hidden-count="${hiddenCount}"
+                        aria-expanded="false">
+                    Ver más (+${hiddenCount})
+                </button>`;
+        }
+
+        itemsHtml += `
+                <small class="text-muted fw-semibold d-block mt-1">
                     Total items: ${total}
                 </small>`;
         
@@ -245,6 +268,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return gridjs.html(itemsHtml);
     }
+
+    document.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-receta-items-toggle]");
+        if (!btn) return;
+
+        const targetId = String(btn.dataset.recetaItemsToggle || "").trim();
+        if (!targetId) return;
+
+        const target = document.getElementById(targetId);
+        if (!target) return;
+
+        const expanded = target.classList.toggle("show");
+        btn.setAttribute("aria-expanded", expanded ? "true" : "false");
+        const hiddenCount = Number(btn.dataset.hiddenCount || 0);
+        btn.textContent = expanded ? "Ver menos" : `Ver más (+${hiddenCount})`;
+    });
 
     function renderAcciones(_, row) {
         const id = row.cells[0].data;

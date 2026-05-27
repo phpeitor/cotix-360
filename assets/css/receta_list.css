@@ -1,0 +1,44 @@
+.receta-items-preview {
+    min-width: 0;
+}
+
+.receta-items-visible,
+.receta-items-hidden ul {
+    margin-bottom: 0;
+}
+
+.receta-items-hidden {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+}
+
+.receta-items-hidden.show {
+    max-height: 220px;
+    overflow: auto;
+    padding-right: 4px;
+}
+
+.receta-items-toggle {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f766e;
+    text-decoration: none;
+}
+
+.receta-items-toggle:hover {
+    text-decoration: underline;
+}
+
+.receta-items-hidden::-webkit-scrollbar {
+    width: 8px;
+}
+
+.receta-items-hidden::-webkit-scrollbar-thumb {
+    background: rgba(15, 23, 42, 0.22);
+    border-radius: 999px;
+}
+
+.receta-items-hidden::-webkit-scrollbar-track {
+    background: transparent;
+}
