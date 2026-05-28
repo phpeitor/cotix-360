@@ -339,13 +339,22 @@ ob_start();
         <?php endif; ?>
     </table>
     
+    <?php if (trim((string)($receta['observacion'] ?? '')) !== ''): ?>
+        <div style="margin-top: 6mm; margin-bottom: 6mm;">
+            <div style="padding: 2mm 0; min-height: 12mm;">
+                <div style="font-weight: 700; margin-bottom: 2mm;">Observación</div>
+                <div style="font-size: 11px; line-height: 1.2;"><?= nl2br(escaparPdf($receta['observacion'])) ?></div>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <div style="margin-bottom: 30mm;"></div>
 </div>
 
 <div class="pdf-footer">
     <strong>Tipo de Cambio SUNAT:</strong> <?= number_format($tipoCambio, 3) ?> |
     <strong>Generado por:</strong> <?= htmlspecialchars($_SESSION['session_usuario'] ?? $receta['usu_upd'] ?? $receta['usuario'] ?? 'Desconocido') ?> |
-    <strong>Fec. Impresión:</strong> <?= date('Y-m-d H:i:s') ?>
+    <strong>Fec. Impresión:</strong> <?= (new DateTime('now', new DateTimeZone('America/Lima')))->format('Y-m-d H:i:s') ?> (PET)
 </div>
 </body>
 </html>
