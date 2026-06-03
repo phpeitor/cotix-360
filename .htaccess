@@ -3,11 +3,19 @@
     RewriteEngine On
     RewriteBase /cotix/
 
-    # Si el archivo o directorio solicitar existe en la raíz, servirlo
+    # Documento 404 personalizado
+    ErrorDocument 404 /404.html
+    ErrorDocument 403 /403.html
+
+    # Sirve archivos y directorios reales sin tocar.
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
-    # Reescribe peticiones a archivos .php en la raíz hacia views/<file>.php
+    # Canoniza accesos directos a /views/*.php hacia la raíz.
+    RewriteRule ^views/([^/]+\.php)$ $1 [R=302,L]
+
+    # Compatibilidad: si alguien pide /archivo.php y no existe en la raíz,
+    # servimos la vista movida dentro de /views.
     RewriteRule ^([^/]+\.php)$ views/$1 [L]
 </IfModule>
