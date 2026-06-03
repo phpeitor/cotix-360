@@ -136,6 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function toggleEditTipoCambio(save = false) {
         if (!tipoCambioEl || !tipoCambioInputEl || !btnEditTipoCambio || !receta) return;
+        if (!isTipoCambioEditable()) return;
 
         const editing = !tipoCambioInputEl.classList.contains('d-none');
 
@@ -475,30 +476,39 @@ document.addEventListener("DOMContentLoaded", () => {
         return String(receta?.estado || "").toLowerCase() === "enviada";
     }
 
+    function isTipoCambioEditable() {
+        return ["enviada", "aprobada"].includes(String(receta?.estado || "").toLowerCase());
+    }
+
     function aplicarBloqueoPorEstado() {
         const editable = isRecetaEditable();
+        const tipoCambioEditable = isTipoCambioEditable();
+        const estado = String(receta?.estado || "").toLowerCase();
+        const isAnulada = estado === "anulada";
         const btnGuardar = recetaForm?.querySelector("[type='submit']");
         const btnBuscar = document.querySelector("[data-bs-target='#info-header-modal']");
+        const setButtonLock = (button, locked, title) => {
+            if (!button) return;
 
-        if (btnGuardar) {
-            btnGuardar.disabled = !editable;
-            btnGuardar.classList.toggle("opacity-50", !editable);
-            btnGuardar.classList.toggle("cursor-not-allowed", !editable);
-            btnGuardar.title = editable ? "" : "Solo editable cuando el estado es Enviada";
-        }
+            button.disabled = locked;
+            button.classList.toggle("opacity-50", locked);
+            button.classList.toggle("cursor-not-allowed", locked);
+            button.title = locked ? title : "";
+        };
 
-        if (btnReloadPrecios) {
-            btnReloadPrecios.disabled = !editable;
-            btnReloadPrecios.classList.toggle("opacity-50", !editable);
-            btnReloadPrecios.classList.toggle("cursor-not-allowed", !editable);
-            btnReloadPrecios.title = editable ? "" : "Solo disponible cuando el estado es Enviada";
-        }
+        [
+            [btnGuardar, !editable, "Solo editable cuando el estado es Enviada"],
+            [btnReloadPrecios, !editable, "Solo disponible cuando el estado es Enviada"],
+            [btnBuscar, !editable, "Solo disponible cuando el estado es Enviada"],
+            [btnEditTipoCambio, !tipoCambioEditable, "Solo editable cuando el estado es Enviada o Aprobada"],
+        ].forEach(([button, locked, title]) => setButtonLock(button, locked, title));
 
-        if (btnBuscar) {
-            btnBuscar.disabled = !editable;
-            btnBuscar.classList.toggle("opacity-50", !editable);
-            btnBuscar.classList.toggle("cursor-not-allowed", !editable);
-            btnBuscar.title = editable ? "" : "Solo disponible cuando el estado es Enviada";
+        if (btnInfoCategoriaModal) {
+            const bloquearCategoria = isTecnico || isAnulada;
+            btnInfoCategoriaModal.setAttribute("aria-disabled", bloquearCategoria ? "true" : "false");
+            setButtonLock(btnInfoCategoriaModal, bloquearCategoria, isTecnico
+                ? "No disponible para este cargo"
+                : "No disponible cuando el estado es Anulada");
         }
     }
 

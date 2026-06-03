@@ -43,8 +43,9 @@ try {
         throw new Exception('Receta no encontrada');
     }
 
-    if (strcasecmp((string)($rowReceta['estado'] ?? ''), 'Enviada') !== 0) {
-        throw new Exception('Solo se puede modificar recetas con estado Enviada');
+    $estado = strtolower((string)($rowReceta['estado'] ?? ''));
+    if (!in_array($estado, ['enviada', 'aprobada'], true)) {
+        throw new Exception('Solo se puede modificar recetas con estado Enviada o Aprobada');
     }
 
     $receta->begin();
