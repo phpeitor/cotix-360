@@ -134,7 +134,7 @@ require_once ROOT . '/controller/check_session.php';
                                             <div class="col-lg-3 col-6 border-end">
                                                 <p class="text-muted fw-medium fs-12 mb-1">
                                                     <span class="text-dark">Tipo de Cambio SUNAT (Venta)</span>
-                                                    <span id="tipo_cambio_sunat" class="external-event fc-event bg-danger-subtle text-danger">0.000</span>
+                                                    <span id="tipo_cambio_sunat" class="external-event fc-event bg-info-subtle text-info tipo-cambio-pulse">0.000</span>
                                                     <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btnEditTipoCambio" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar tipo de cambio"><i class="ti ti-edit"></i></button>
                                                     <input type="number" step="0.001" id="tipo_cambio_input" class="form-control form-control-sm d-none" style="width:110px;display:inline-block;margin-left:8px;">
                                                 </p>
