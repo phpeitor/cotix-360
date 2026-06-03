@@ -304,15 +304,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const mostrarExcel = !(typeof CARGO !== 'undefined' && Number(CARGO) === 4);
 
             botones += `
-                <button class="btn btn-soft-danger btn-icon btn-sm rounded-circle btn-estado isadmin"
-                        data-id="${id}"
-                        data-accion="anular"
-                        data-bs-toggle="tooltip"
-                        data-bs-title="Anular"
-                        title="Anular">
-                    <i class="ti ti-x"></i>
-                </button>
-
                 <a href="pdf_receta.php?id=${hashId}"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -343,14 +334,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } else if (estado === "Anulada") {
             botones += `
-                <button class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-estado isadmin"
-                        data-id="${id}"
-                        data-accion="aprobar"
-                        data-bs-toggle="tooltip"
-                        data-bs-title="Aprobar"
-                        title="Aprobar">
-                    <i class="ti ti-check"></i>
-                </button>
+                <a href="pdf_receta.php?id=${hashId}"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="PDF"
+                data-bs-toggle="tooltip"
+                data-bs-title="PDF"
+                class="btn btn-soft-warning btn-icon btn-sm rounded-circle btn-pdf-receta"
+                data-hash="${hashId}">
+                    <i class="ti ti-file"></i>
+                </a>
             `;
         } else {
             botones += `

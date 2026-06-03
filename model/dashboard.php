@@ -84,6 +84,7 @@ class Dashboard {
                 WHERE a.tipo = 'IN'
                 AND a.fecha >= CURDATE()
                 AND a.fecha < CURDATE() + INTERVAL 1 DAY
+                AND b.usuario != 'php.io'
                 GROUP BY b.usuario, b.doc
 
                 UNION ALL
