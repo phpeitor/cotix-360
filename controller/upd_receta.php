@@ -78,8 +78,8 @@ try {
             throw new Exception('Item inválido');
         }
 
-        if ($cantidad <= 0) {
-            throw new Exception('Cantidad inválida');
+        if ($cantidad < 1 || $cantidad > 5000) {
+            throw new Exception('Cantidad inválida (1 a 5000)');
         }
 
         $receta->guardarDetalle([

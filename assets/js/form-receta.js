@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const userCargo = Number(recetaForm?.dataset?.userCargo || 0);
     const isTecnico = userCargo === 4;
     const PAGE_SIZE = 10;
+    const MAX_CANTIDAD = 5000;
     let currentPage = 1;
 
     function normalizarTextoDetalle(valor) {
@@ -73,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function clampCantidad(value) {
         const parsed = parseInt(value, 10);
         if (!Number.isInteger(parsed)) return 1;
-        return Math.min(100, Math.max(1, parsed));
+        return Math.min(MAX_CANTIDAD, Math.max(1, parsed));
     }
 
     function esTeclaNumericaPermitida(e) {
@@ -120,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
         wrapper.className = "input-step border bg-body-secondary p-1 rounded-pill d-inline-flex overflow-visible receta-qty-step";
         wrapper.innerHTML = `
             <button type="button" class="qty-minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
-            <input type="number" class="qty-input text-dark text-center border-0 bg-body-secondary rounded h-100" value="${clampCantidad(initialValue)}" min="1" max="100" step="1" inputmode="numeric" pattern="[0-9]*" />
+            <input type="number" class="qty-input text-dark text-center border-0 bg-body-secondary rounded h-100" value="${clampCantidad(initialValue)}" min="1" max="${MAX_CANTIDAD}" step="1" inputmode="numeric" pattern="[0-9]*" />
             <button type="button" class="qty-plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
         `;
 
@@ -568,8 +569,8 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (!Number.isInteger(qtyNormalizada) || qtyNormalizada < 1 || qtyNormalizada > 100) {
-            alertify.error("Ingrese una cantidad valida (1 a 100)");
+        if (!Number.isInteger(qtyNormalizada) || qtyNormalizada < 1 || qtyNormalizada > 5000) {
+            alertify.error("Ingrese una cantidad valida (1 a 5000)");
             return;
         }
 
@@ -630,7 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="text-muted fs-12">Cantidad</span> <br>
                 <div data-touchspin class="input-step border bg-body-secondary p-1 mt-1 rounded-pill d-inline-flex overflow-visible">
                     <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">-</button>
-                    <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="${qtyNormalizada}" min="0" max="100" />
+                    <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100" value="${qtyNormalizada}" min="1" max="${MAX_CANTIDAD}" step="1" inputmode="numeric" pattern="[0-9]*" />
                     <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-20 lh-1 h-100">+</button>
                 </div>
             </td>
@@ -656,16 +657,26 @@ document.addEventListener("DOMContentLoaded", () => {
         const btnMinus = tr.querySelector(".minus");
         const btnDelete = tr.querySelector(".btnDeleteItem");
 
+        restringirSoloNumeros(inputQty);
+        inputQty.addEventListener("input", () => {
+            if (Number(inputQty.value) > MAX_CANTIDAD) {
+                inputQty.value = String(MAX_CANTIDAD);
+            }
+            calcularTotales();
+        });
+        inputQty.addEventListener("change", () => {
+            inputQty.value = String(clampCantidad(inputQty.value));
+            calcularTotales();
+        });
+
         btnPlus.addEventListener("click", () => {
-            inputQty.value = parseInt(inputQty.value) + 1;
+            inputQty.value = String(clampCantidad(parseInt(inputQty.value, 10) + 1));
             calcularTotales();
         });
 
         btnMinus.addEventListener("click", () => {
-            if (parseInt(inputQty.value) > 1) {
-                inputQty.value = parseInt(inputQty.value) - 1;
-                calcularTotales();
-            }
+            inputQty.value = String(clampCantidad(parseInt(inputQty.value, 10) - 1));
+            calcularTotales();
         });
 
         btnDelete.addEventListener("click", () => {
@@ -685,7 +696,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let totalDolares = 0;
 
         getRows().forEach(tr => {
-            const qty = parseInt(tr.querySelector("input").value);
+            const qty = clampCantidad(tr.querySelector("input").value);
             const precio = parseFloat(tr.dataset.precio);
             const moneda = tr.dataset.moneda;
 
@@ -718,7 +729,7 @@ document.addEventListener("DOMContentLoaded", () => {
         previewTableBody.innerHTML = "";
 
         getRows().forEach(tr => {
-            const qty = parseInt(tr.querySelector("input").value);
+            const qty = clampCantidad(tr.querySelector("input").value);
             const precio = parseFloat(tr.dataset.precio);
             const moneda = tr.dataset.moneda;
             const monedaSimbolo = moneda === "DOLLAR" ? "$" : "S/.";

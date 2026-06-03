@@ -56,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const PAGE_SIZE = 10;
+    const MAX_CANTIDAD = 5000;
     let currentPage = 1;
     let receta = null;
     let detalle = [];
@@ -621,7 +622,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td class="text-center">
                         <div class="input-step border bg-body-secondary p-1 rounded-pill d-inline-flex align-items-center overflow-visible" style="min-width:140px;">
                             <button type="button" class="btn-margen-minus bg-light text-dark border-0 rounded-circle fs-18 lh-1" data-bs-title="Disminuir margen" data-bs-placement="top" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">−</button>
-                            <input type="number" class="input-margen-categoria text-dark text-center border-0 bg-body-secondary rounded" value="${margen.toFixed(2)}" min="0" max="100" step="0.01" style="width:70px;height:26px;font-size:14px;">
+                            <input type="number" class="input-margen-categoria text-dark text-center border-0 bg-body-secondary rounded" value="${margen.toFixed(2)}" min="0" max="5000" step="0.01" style="width:70px;height:26px;font-size:14px;">
                             <button type="button" class="btn-margen-plus bg-light text-dark border-0 rounded-circle fs-18 lh-1" data-bs-title="Aumentar margen" data-bs-placement="top" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">+</button>
                         </div>
                     </td>
@@ -963,7 +964,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function clampCantidad(value) {
         const parsed = parseInt(value, 10);
         if (!Number.isInteger(parsed)) return 1;
-        return Math.min(100, Math.max(1, parsed));
+        return Math.min(MAX_CANTIDAD, Math.max(1, parsed));
     }
 
     function esTeclaNumericaPermitida(e) {
@@ -1168,7 +1169,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td class="text-center">
                         <div class="input-step border bg-body-secondary px-1 py-0 rounded-pill d-inline-flex align-items-center overflow-visible" style="height:30px;">
                             <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center btn-qty-minus" style="width:22px;min-width:22px;height:22px;" data-id="${itemId}" ${editable ? "" : "disabled"}>-</button>
-                            <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100 fw-semibold btn-qty-input" style="width:30px;font-size:12px;" value="${cantidad}" min="1" max="100" step="1" inputmode="numeric" pattern="[0-9]*" data-id="${itemId}" ${editable ? "" : "disabled"}>
+                            <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100 fw-semibold btn-qty-input" style="width:46px;font-size:12px;" value="${cantidad}" min="1" max="${MAX_CANTIDAD}" step="1" inputmode="numeric" pattern="[0-9]*" data-id="${itemId}" ${editable ? "" : "disabled"}>
                             <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center btn-qty-plus" style="width:22px;min-width:22px;height:22px;" data-id="${itemId}" ${editable ? "" : "disabled"}>+</button>
                         </div>
                     </td>
@@ -1199,11 +1200,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         tbody.querySelectorAll(".btn-qty-input").forEach(input => {
             restringirSoloNumeros(input);
-            input.addEventListener("input", () => actualizarCantidadDesdeInput(input.dataset.id, input.value));
-            input.addEventListener("change", () => actualizarCantidadDesdeInput(input.dataset.id, input.value));
+            input.addEventListener("input", () => {
+                if (Number(input.value) > MAX_CANTIDAD) {
+                    input.value = String(MAX_CANTIDAD);
+                }
+                actualizarCantidadDesdeInput(input.dataset.id, input.value);
+            });
+            input.addEventListener("change", () => {
+                input.value = String(clampCantidad(input.value));
+                actualizarCantidadDesdeInput(input.dataset.id, input.value);
+            });
             input.addEventListener("keydown", (e) => {
                 if (e.key === "Enter") {
                     e.preventDefault();
+                    input.value = String(clampCantidad(input.value));
                     actualizarCantidadDesdeInput(input.dataset.id, input.value);
                 }
             });
@@ -1763,7 +1773,7 @@ document.addEventListener("DOMContentLoaded", () => {
             qtyCell.innerHTML = `
                 <div data-touchspin class="input-step border bg-body-secondary px-1 py-0 mt-1 rounded-pill d-inline-flex align-items-center overflow-visible" style="height:28px;">
                     <button type="button" class="qty-minus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:20px;min-width:20px;height:20px;">-</button>
-                    <input type="number" class="qty-input text-dark text-center border-0 bg-body-secondary rounded h-100 fw-semibold" style="width:30px;font-size:12px;" value="1" min="1" max="100" readonly>
+                    <input type="number" class="qty-input text-dark text-center border-0 bg-body-secondary rounded h-100 fw-semibold" style="width:46px;font-size:12px;" value="1" min="1" max="${MAX_CANTIDAD}" step="1" inputmode="numeric" pattern="[0-9]*">
                     <button type="button" class="qty-plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:20px;min-width:20px;height:20px;">+</button>
                 </div>
             `;
