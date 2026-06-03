@@ -1,0 +1,138 @@
+@import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,900");
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  background-color: #09334f;
+  position: relative;
+}
+
+#yetiSVG {
+  width: 600px;
+  height: 470px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+#lightSVG {
+  width: 600px;
+  height: 470px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  z-index: 3;
+}
+
+#bearCanvas {
+  width: 260px;
+  height: 205px;
+  position: absolute;
+  top: -18px;
+  left: 96px;
+  z-index: 1;
+  transform: rotate(-8deg);
+  transform-origin: center bottom;
+}
+
+.bear-diagonal-cover {
+  position: absolute;
+  top: 145px;
+  left: 80px;
+  width: 660px;
+  height: 390px;
+  z-index: 2;
+  pointer-events: none;
+  background: #09334F;
+  clip-path: polygon(0 12%, 100% 100%, 0 100%);
+}
+
+#yeti,
+#flashlightFront {
+  visibility: hidden;
+}
+
+#fingersBackL,
+#fingersBackR,
+#fingersFrontL,
+#fingersFrontR,
+#light {
+  visibility: hidden;
+}
+
+.hlFur {
+  fill: #fff;
+}
+
+.hlSkin {
+  fill: #ddf1fa;
+}
+
+/* stroke utility classes for SVG outlines */
+.outline-stroke,
+.small-stroke,
+.lettersFront,
+.lettersSide {
+  stroke: #265D85;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+}
+
+.small-stroke {
+  stroke-width: 1.8;
+}
+
+.content {
+  padding: 5rem 3rem 0 25rem;
+  position: relative;
+  z-index: 10;
+  font-family: "Source Sans Pro", sans-serif;
+  color: #FFF;
+}
+
+.content h3 {
+  margin: 0 0 0.8rem;
+  font-size: 2.625rem;
+  font-weight: 900;
+  line-height: 120%;
+}
+
+.content p {
+  font-size: 1.25rem;
+  font-weight: normal;
+  line-height: 150%;
+  color: #d1e2ed;
+}
+
+.content p span {
+  text-decoration: line-through;
+}
+
+/* Button for returning to index */
+.content .btn-list {
+  margin-top: 1.5rem;
+}
+
+.btn-404 {
+  background-color: #67B1E0;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.125rem;
+  padding: 0.9rem 1.4rem;
+  border-radius: 0.6rem;
+  border: none;
+  box-shadow: 0 8px 22px rgba(103,177,224,0.18);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+
+.btn-404:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.98);
+}

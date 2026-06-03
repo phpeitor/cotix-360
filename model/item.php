@@ -591,7 +591,8 @@ class Item {
                     uni_medida = :uni_medida,
                     precio = :precio,
                     moneda = :moneda,
-                    estado = :estado    
+                    estado = :estado,
+                    updated_at = :updated_at   
                 WHERE MD5(id) = :hash";
         $stmt = $this->conn->prepare($sql);
 
@@ -602,6 +603,7 @@ class Item {
         $stmt->bindValue(':precio', $data['precio']);
         $stmt->bindValue(':moneda', $data['moneda']);
         $stmt->bindValue(':estado', (int)$data['estado'], PDO::PARAM_INT);
+        $stmt->bindValue(':updated_at', $data['updated_at']);
         $stmt->bindValue(':hash', $hash);
         $stmt->execute();
         return $stmt->rowCount() > 0;

@@ -26,14 +26,17 @@ try {
 
     $hash = $_POST['hash'];
 
+    $timezone = new DateTimeZone('America/Lima');
+
     $data = [
         'descripcion'       => $_POST['descripcion'] ?? '',
         'modelo'            => $_POST['modelo'] ?? '',
         'marca'             => $_POST['marca'] ?? '',
         'uni_medida'        => $_POST['uni_medida'] ?? '',
-        'precio'   => $_POST['precio'] ?? '',
+        'precio'            => $_POST['precio'] ?? '',
         'moneda'            => $_POST['moneda'] ?? '',
         'estado'            => isset($_POST['estado']) ? 1 : 0,
+        'updated_at'        => (new DateTime('now', $timezone))->format('Y-m-d H:i:s')
     ];
 
     $item = new Item();

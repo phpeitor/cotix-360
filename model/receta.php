@@ -375,23 +375,24 @@ class Receta {
     {
         $sql = "SELECT
                     d.nombre,
-                                                                                d.categoria,
-                                                                                d.sub_cat_1,
-                                                                                d.sub_cat_2,
-                                                                                d.descripcion,
-                    d.created_at AS fecha_anterior,
+                    d.categoria,
+                    d.sub_cat_1,
+                    d.sub_cat_2,
+                    d.descripcion,
+                    r1.created_at AS fecha_anterior,
                     d.precio AS precio_receta,
                     d.moneda AS moneda_receta,
-                    r.created_at AS fecha_cambio,
+                    r.updated_at AS fecha_cambio,
                     r.precio AS precio_actual,
                     r.moneda AS moneda_actual
                 FROM receta_detalle d
-                                INNER JOIN receta_items r ON
-                                        LOWER(TRIM(COALESCE(r.nombre, ''))) = LOWER(TRIM(COALESCE(d.nombre, '')))
-                                        AND LOWER(TRIM(COALESCE(r.categoria, ''))) = LOWER(TRIM(COALESCE(d.categoria, '')))
-                                        AND LOWER(TRIM(COALESCE(r.sub_cat_1, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')))
-                                                                                AND LOWER(TRIM(COALESCE(r.sub_cat_2, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')))
-                                                                                AND LOWER(TRIM(COALESCE(r.descripcion, ''))) = LOWER(TRIM(COALESCE(d.descripcion, '')))
+                INNER JOIN recetas r1 ON r1.id = d.receta_id
+                INNER JOIN receta_items r ON
+                LOWER(TRIM(COALESCE(r.nombre, ''))) = LOWER(TRIM(COALESCE(d.nombre, '')))
+                AND LOWER(TRIM(COALESCE(r.categoria, ''))) = LOWER(TRIM(COALESCE(d.categoria, '')))
+                AND LOWER(TRIM(COALESCE(r.sub_cat_1, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')))
+                AND LOWER(TRIM(COALESCE(r.sub_cat_2, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')))
+                AND LOWER(TRIM(COALESCE(r.descripcion, ''))) = LOWER(TRIM(COALESCE(d.descripcion, '')))
                 WHERE d.receta_id = :receta_id
                   AND (
                     ROUND(COALESCE(d.precio, 0), 4) <> ROUND(COALESCE(r.precio, 0), 4)
