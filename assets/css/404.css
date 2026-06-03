@@ -31,26 +31,55 @@ html {
 }
 
 #bearCanvas {
-  width: 260px;
-  height: 205px;
+  height: 248px;
   position: absolute;
-  top: -18px;
-  left: 96px;
+  top: -38px;
+  left: 67px;
   z-index: 1;
-  transform: rotate(-8deg);
+  transform: rotate(-28deg);
   transform-origin: center bottom;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 248'%3E%3Cpath fill='black' d='M0 0 H260 V230 C226 215 202 219 178 233 C146 247 113 244 84 228 C55 210 29 209 0 225 Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 248'%3E%3Cpath fill='black' d='M0 0 H260 V230 C226 215 202 219 178 233 C146 247 113 244 84 228 C55 210 29 209 0 225 Z'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size:_size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:   mask-size:
+
 }
 
 .bear-diagonal-cover {
   position: absolute;
-  top: 145px;
-  left: 80px;
-  width: 660px;
-  height: 390px;
+  top: 142px;
+  left: 50px;
+  width: 305px;
+  height: 70px;
   z-index: 2;
   pointer-events: none;
-  background: #09334F;
-  clip-path: polygon(0 12%, 100% 100%, 0 100%);
+  overflow: visible;
+  transform: rotate(-8deg);
+  transform-origin: left center;
+}
+
+.bear-diagonal-cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 305 70'%3E%3Cpath d='M0 36 C31 21 61 23 91 39 C124 56 155 57 190 37 C229 15 265 25 305 47 L305 70 L0 70 Z' fill='%2309334F'/%3E%3Cpath d='M0 36 C31 21 61 23 91 39 C124 56 155 57 190 37 C229 15 265 25 305 47' fill='none' stroke='%23001726' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M20 55 C51 45 80 49 107 61 C138 75 169 68 200 51 C233 32 266 39 296 58' fill='none' stroke='%23001726' stroke-width='3' stroke-linecap='round' opacity='.55'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.bear-diagonal-cover::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: -44px;
+  width: 128px;
+  height: 72px;
+  border-left: 4px solid #001726;
+  border-bottom: 4px solid #001726;
+  border-radius: 0 0 0 78px;
+  transform: rotate(18deg);
+  opacity: .9;
 }
 
 #yeti,

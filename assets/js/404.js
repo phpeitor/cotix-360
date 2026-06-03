@@ -1,6 +1,13 @@
 gsap.registerPlugin(MorphSVGPlugin);
 
 const bearCanvas = document.getElementById('bearCanvas');
+const BEAR_STATE_MACHINE = 'State Machine 1';
+let bearStateMachineName = BEAR_STATE_MACHINE;
+const bearTriggers = {
+  lightOn: null,
+  lightOff: null,
+};
+let bearSpeakingInput = null;
 
 if (bearCanvas && window.rive) {
   let bearRive;
@@ -9,12 +16,64 @@ if (bearCanvas && window.rive) {
     src: './assets/resources/bear-transparent.riv',
     canvas: bearCanvas,
     autoplay: true,
+    stateMachines: [BEAR_STATE_MACHINE],
     layout: new rive.Layout({
       fit: rive.Fit.Contain,
       alignment: rive.Alignment.Center,
     }),
-    onLoad: () => bearRive.resizeDrawingSurfaceToCanvas(),
+    onLoad: () => {
+      bearRive.resizeDrawingSurfaceToCanvas();
+      setBearTriggers(bearRive);
+    },
   });
+}
+
+function setBearTriggers(bearRive) {
+  if (!bearRive || typeof bearRive.stateMachineInputs !== 'function') return;
+
+  const stateMachines = getBearStateMachineNames(bearRive);
+  const inputs = stateMachines.reduce((foundInputs, stateMachineName) => {
+    if (foundInputs.length) return foundInputs;
+
+    const stateInputs = bearRive.stateMachineInputs(stateMachineName) || [];
+    if (stateInputs.length) {
+      bearStateMachineName = stateMachineName;
+    }
+
+    return stateInputs;
+  }, []);
+
+  bearTriggers.lightOn = findBearInput(inputs, ['success', 'fire-success']);
+  bearTriggers.lightOff = findBearInput(inputs, ['fail', 'fire-fail']);
+  bearSpeakingInput = inputs.find(input => String(input.name || '').toLowerCase() === 'speaking') || null;
+
+  if (bearSpeakingInput && 'value' in bearSpeakingInput) {
+    bearSpeakingInput.value = false;
+  }
+}
+
+function getBearStateMachineNames(bearRive) {
+  const names = typeof bearRive.stateMachineNames === 'function'
+    ? bearRive.stateMachineNames()
+    : bearRive.stateMachineNames;
+
+  return Array.isArray(names) && names.length ? names : [bearStateMachineName];
+}
+
+function normalizeBearInputName(name) {
+  return String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function findBearInput(inputs, names) {
+  const normalizedNames = names.map(normalizeBearInputName);
+  return inputs.find(input => normalizedNames.includes(normalizeBearInputName(input.name))) || null;
+}
+
+function fireBearTrigger(name) {
+  const trigger = bearTriggers[name];
+  if (trigger && typeof trigger.fire === 'function') {
+    trigger.fire();
+  }
 }
 
 let yetiTL, chatterTL,
@@ -85,6 +144,7 @@ yetiTL
   .to(['#armL', '#flashlightFront'], { duration: 0.075, x: 0 }, 11.875);
 
 function goDark() {
+  fireBearTrigger('lightOff');
   gsap.set('#light', { visibility: "hidden" });
   gsap.set('.lettersSide', { fill: lettersSideDark, stroke: lettersStrokeDark });
   gsap.set('.lettersFront', { fill: lettersFrontDark, stroke: lettersStrokeDark });
@@ -94,6 +154,7 @@ function goDark() {
 }
 
 function goLight() {
+  fireBearTrigger('lightOn');
   gsap.set('#light', { visibility: "visible" });
   gsap.set('.lettersSide', { fill: lettersSideLight, stroke: lettersStrokeLight });
   gsap.set('.lettersFront', { fill: lettersFrontLight, stroke: lettersStrokeLight });
