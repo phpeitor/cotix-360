@@ -194,6 +194,38 @@ require_once ROOT . '/controller/check_session.php';
                                 </div>
                             </div><!-- end col -->
 
+                            <div class="col">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Productos Receta"> Productos Receta</h5>
+                                        <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
+                                            <div class="user-img fs-42 flex-shrink-0">
+                                                <span class="avatar-title text-bg-primary rounded-circle fs-22">
+                                                    <iconify-icon icon="solar:box-bold-duotone"></iconify-icon>
+                                                </span>
+                                            </div>
+                                            <h3 id="total_receta_producto" class="mb-0 fw-bold">0</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- end col -->
+
+                            <div class="col">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="text-muted fs-13 text-uppercase" title="Total Servicios Receta"> Servicios Receta</h5>
+                                        <div class="d-flex align-items-center justify-content-center gap-2 my-2 py-1">
+                                            <div class="user-img fs-42 flex-shrink-0">
+                                                <span class="avatar-title text-bg-primary rounded-circle fs-22">
+                                                    <iconify-icon icon="solar:settings-bold-duotone"></iconify-icon>
+                                                </span>
+                                            </div>
+                                            <h3 id="total_receta_servicio" class="mb-0 fw-bold">0</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- end col -->
+
                         </div><!-- end row -->
 
                         <div class="row">
@@ -261,6 +293,30 @@ require_once ROOT . '/controller/check_session.php';
                                     </div>
                                 </div> <!-- end card-->
                             </div> <!-- end col-->
+
+                            <div class="col-xxl-8">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h4 class="header-title">Overview Recetas</h4>
+                                        <div class="dropdown">
+                                            <a href="#" class="dropdown-toggle drop-arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="ti ti-dots-vertical"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-end">
+                                                <a href="javascript:void(0);" class="dropdown-item">Export Report</a>
+                                                <a href="javascript:void(0);" class="dropdown-item">Profit</a>
+                                                <a href="javascript:void(0);" class="dropdown-item">Action</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card-body pt-0">
+                                        <div dir="ltr">
+                                            <div id="receta-chart" class="apex-charts"></div>
+                                        </div>
+                                    </div>
+                                </div> <!-- end card-->
+                            </div> <!-- end col-->
                         </div> <!-- end row-->
 
                     </div> <!-- end col-->
@@ -279,6 +335,21 @@ require_once ROOT . '/controller/check_session.php';
 
                                 <div class="mt-3 text-center">
                                     <a href="cotizaciones.php" class="text-decoration-underline fw-semibold ms-auto link-offset-2 link-dark">View All</a>
+                                </div>
+                            </div>
+
+                            <div class="card-body p-0 border-top border-dashed">
+                                <div class="px-3 pt-3 d-flex mb-3 justify-content-between align-items-center">
+                                    <h4 class="header-title mb-0">Recent Recetas:</h4>
+                                    <div>
+                                        <a href="receta.php" class="btn btn-sm btn-primary rounded-circle btn-icon"><i class="ti ti-plus"></i></a>
+                                    </div>
+                                </div>
+
+                                <div class="px-3" id="dashboard-recetas"></div>
+
+                                <div class="mt-3 mb-3 text-center">
+                                    <a href="receta_list.php" class="text-decoration-underline fw-semibold ms-auto link-offset-2 link-dark">View All</a>
                                 </div>
                             </div>
 

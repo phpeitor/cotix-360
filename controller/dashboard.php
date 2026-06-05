@@ -5,6 +5,7 @@ require_once __DIR__ . '/../model/dashboard.php';
 try {
     $dashboard = new Dashboard();
     $cotizaciones = $dashboard->table_cotizacion();
+    $recetas      = $dashboard->table_receta();
     $items        = $dashboard->items();
     $contadores   = $dashboard->contadores();
     $header       = $dashboard->header();
@@ -13,6 +14,7 @@ try {
         'error' => false,
         'data'  => [
             'cotizaciones' => $cotizaciones,
+            'recetas'      => $recetas,
             'items'        => $items,
             'contadores'   => $contadores,
             'header'       => $header

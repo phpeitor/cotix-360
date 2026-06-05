@@ -1,6 +1,7 @@
 gsap.registerPlugin(MorphSVGPlugin);
 
 const bearCanvas = document.getElementById('bearCanvas');
+const btnGoHome = document.getElementById('btnGoHome');
 const BEAR_STATE_MACHINE = 'State Machine 1';
 let bearStateMachineName = BEAR_STATE_MACHINE;
 const bearTriggers = {
@@ -12,20 +13,65 @@ let bearSpeakingInput = null;
 if (bearCanvas && window.rive) {
   let bearRive;
 
-  bearRive = new rive.Rive({
-    src: './assets/resources/bear-transparent.riv',
-    canvas: bearCanvas,
-    autoplay: true,
-    stateMachines: [BEAR_STATE_MACHINE],
-    layout: new rive.Layout({
-      fit: rive.Fit.Contain,
-      alignment: rive.Alignment.Center,
-    }),
-    onLoad: () => {
-      bearRive.resizeDrawingSurfaceToCanvas();
-      setBearTriggers(bearRive);
-    },
+  findBearResource().then((src) => {
+    if (!src) return;
+
+    bearRive = new rive.Rive({
+      src,
+      canvas: bearCanvas,
+      autoplay: true,
+      stateMachines: [BEAR_STATE_MACHINE],
+      layout: new rive.Layout({
+        fit: rive.Fit.Contain,
+        alignment: rive.Alignment.Center,
+      }),
+      onLoad: () => {
+        bearRive.resizeDrawingSurfaceToCanvas();
+        setBearTriggers(bearRive);
+      },
+    });
   });
+}
+
+if (btnGoHome) {
+  btnGoHome.addEventListener('click', goHome);
+}
+
+async function goHome() {
+  const paths = ['index.php', '../index.php', '../../index.php'];
+
+  for (const path of paths) {
+    try {
+      const response = await fetch(path, { method: 'HEAD', cache: 'no-store' });
+      if (response.ok) {
+        window.location.href = path;
+        return;
+      }
+    } catch (error) {
+      // Probar la siguiente ruta disponible.
+    }
+  }
+
+  window.location.href = '../../index.php';
+}
+
+async function findBearResource() {
+  const paths = [
+    './assets/resources/bear-transparent.riv',
+    '../assets/resources/bear-transparent.riv',
+    '../../assets/resources/bear-transparent.riv',
+  ];
+
+  for (const path of paths) {
+    try {
+      const response = await fetch(path, { method: 'HEAD', cache: 'no-store' });
+      if (response.ok) return path;
+    } catch (error) {
+      // Probar la siguiente ruta disponible.
+    }
+  }
+
+  return null;
 }
 
 function setBearTriggers(bearRive) {

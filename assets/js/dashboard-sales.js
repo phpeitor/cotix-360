@@ -76,18 +76,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		REVENUE CHART (LINE / BAR)
 		====================== */
 
-		const lineData = resp.data.line;
-
-		// If there's no line data for revenue, hide the whole card (same behavior as other charts)
-		if (!Array.isArray(lineData) || lineData.length === 0) {
-			const host = document.querySelector("#revenue-chart");
-			const wrapper = host ? host.closest('.col-xxl-8') : null;
-			if (wrapper) wrapper.style.display = 'none';
-			return;
-		}
-		const months = [...new Set(lineData.map(i => i.periodo))]
-		.sort();
-
 		const MONTHS_ES = {
 			"01": "Ene",
 			"02": "Feb",
@@ -103,30 +91,36 @@ document.addEventListener("DOMContentLoaded", function () {
 			"12": "Dic"
 		};
 
-		const monthLabels = months.map(periodo => {
-			const [year, month] = periodo.split("-");
-			return `${MONTHS_ES[month]}-${year}`;
-		});
+		const renderOverviewChart = (selector, lineData) => {
+			const chartHost = document.querySelector(selector);
+			const wrapper = chartHost ? chartHost.closest('.col-xxl-8') : null;
 
-		const states = [...new Set(lineData.map(i => i.estado))];
-		const revenueSeries = states.map(state => ({
-			name: state,
-			type: "bar",
-			data: months.map(month => {
-				const found = lineData.find(
-				i => i.estado === state && i.periodo === month
-				);
-				return found ? Number(found.ctd) : 0;
-			})
-		}));
+			if (!chartHost || !Array.isArray(lineData) || lineData.length === 0) {
+				if (wrapper) wrapper.style.display = 'none';
+				return;
+			}
 
-		const revenueColors = states.map(
-			s => STATUS_COLORS[s] || "#999999"
-		);
+			const months = [...new Set(lineData.map(i => i.periodo))].sort();
+			const monthLabels = months.map(periodo => {
+				const [year, month] = periodo.split("-");
+				return `${MONTHS_ES[month]}-${year}`;
+			});
 
-		const revenueChart = new ApexCharts(
-		document.querySelector("#revenue-chart"),
-			{
+			const states = [...new Set(lineData.map(i => i.estado))];
+			const series = states.map(state => ({
+				name: state,
+				type: "bar",
+				data: months.map(month => {
+					const found = lineData.find(
+						i => i.estado === state && i.periodo === month
+					);
+					return found ? Number(found.ctd) : 0;
+				})
+			}));
+
+			const colors = states.map(s => STATUS_COLORS[s] || "#999999");
+
+			const chart = new ApexCharts(chartHost, {
 				chart: {
 					height: 300,
 					type: "line",
@@ -154,9 +148,9 @@ document.addEventListener("DOMContentLoaded", function () {
 					min: 0,
 					forceNiceScale: true
 				},
-					colors: revenueColors,
-					series: revenueSeries,
-					legend: {
+				colors,
+				series,
+				legend: {
 					show: true,
 					position: "top"
 				},
@@ -165,8 +159,12 @@ document.addEventListener("DOMContentLoaded", function () {
 						formatter: val => val
 					}
 				}
-			}
-		);
-		revenueChart.render();
+			});
+
+			chart.render();
+		};
+
+		renderOverviewChart("#revenue-chart", resp.data.line);
+		renderOverviewChart("#receta-chart", resp.data.line_receta);
 	});
 });

@@ -64,6 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let cambiosStreamSignature = "";
     let cambiosEventSource = null;
     let streamHabilitado = true;
+    let sincronizandoPrecios = false;
+    const btnReloadPreciosContent = btnReloadPrecios?.innerHTML || '<i class="ti ti-refresh"></i>';
     const hash = getQueryParam("id");
 
     function normalizarTextoDetalle(valor) {
@@ -499,7 +501,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         [
             [btnGuardar, !editable, "Solo editable cuando el estado es Enviada"],
-            [btnReloadPrecios, !editable, "Solo disponible cuando el estado es Enviada"],
+            [btnReloadPrecios, !editable || sincronizandoPrecios, sincronizandoPrecios ? "Sincronizando precios..." : "Solo disponible cuando el estado es Enviada"],
             [btnBuscar, !editable, "Solo disponible cuando el estado es Enviada"],
             [btnEditTipoCambio, !tipoCambioEditable, "Solo editable cuando el estado es Enviada o Aprobada"],
         ].forEach(([button, locked, title]) => setButtonLock(button, locked, title));
@@ -1372,11 +1374,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function sincronizarPrecios() {
         if (!hash) return;
+        if (sincronizandoPrecios) return;
 
         if (!isRecetaEditable()) {
             alertify.error("Solo se puede recargar precios en recetas con estado Enviada");
             return;
         }
+
+        sincronizandoPrecios = true;
+        if (btnReloadPrecios) {
+            btnReloadPrecios.disabled = true;
+            btnReloadPrecios.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            btnReloadPrecios.setAttribute("aria-label", "Sincronizando precios");
+        }
+        aplicarBloqueoPorEstado();
 
         try {
             const fd = new FormData();
@@ -1402,6 +1413,13 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error(error);
             alertify.error(error.message || "Error al recargar precios");
+        } finally {
+            sincronizandoPrecios = false;
+            if (btnReloadPrecios) {
+                btnReloadPrecios.innerHTML = btnReloadPreciosContent;
+                btnReloadPrecios.setAttribute("aria-label", "Sincronizar precios actualizados");
+            }
+            aplicarBloqueoPorEstado();
         }
     }
 

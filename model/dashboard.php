@@ -12,7 +12,7 @@ class Dashboard {
         $this->nowLima = (new DateTimeImmutable('now', $tz))->format('Y-m-d H:i:s');
     }
 
-   public function table_cotizacion(): array
+    public function table_cotizacion(): array
     {
         $sql = "
             SELECT
@@ -34,6 +34,36 @@ class Dashboard {
                 c.id, p.usuario, c.estado, c.created_at, c.updated_at
             ORDER BY c.id DESC
             limit 3
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function table_receta(): array
+    {
+        $sql = "
+            SELECT
+                c.id,
+                p.usuario,
+                c.nombre,
+                c.estado,
+                c.created_at,
+                c.updated_at,
+                COALESCE(SUM(rd.cantidad), 0) AS total_items,
+                GROUP_CONCAT(
+                    CONCAT(rd.nombre, ' x ', COALESCE(rd.cantidad, 0))
+                    ORDER BY rd.nombre
+                    SEPARATOR ' | '
+                ) AS items
+            FROM recetas c
+            LEFT JOIN receta_detalle rd ON rd.receta_id = c.id
+            LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
+            GROUP BY
+                c.id, p.usuario, c.nombre, c.estado, c.created_at, c.updated_at
+            ORDER BY c.id DESC
+            LIMIT 3
         ";
 
         $stmt = $this->conn->prepare($sql);
@@ -63,7 +93,9 @@ class Dashboard {
             (SELECT COUNT(*) FROM cotizaciones) AS cotizaciones,
             (SELECT COUNT(*) FROM carga) AS carga,
             (SELECT COUNT(*) FROM recetas) AS recetas,
-            (SELECT COUNT(*) FROM receta_items WHERE estado = 1) AS receta_items;
+            (SELECT COUNT(*) FROM receta_items WHERE estado = 1) AS receta_items,
+            (SELECT COUNT(*) FROM receta_items WHERE estado = 1 AND UPPER(TRIM(tipo)) = 'PRODUCTO') AS receta_productos,
+            (SELECT COUNT(*) FROM receta_items WHERE estado = 1 AND UPPER(TRIM(tipo)) = 'SERVICIO') AS receta_servicios;
         ";
 
         $stmt = $this->conn->prepare($sql);
@@ -228,6 +260,28 @@ class Dashboard {
             DATE_FORMAT(created_at, '%Y-%m') AS periodo,
             COUNT(*) AS ctd
             FROM cotizaciones
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+            GROUP BY
+            estado,
+            DATE_FORMAT(created_at, '%Y-%m'),
+            DATE_FORMAT(created_at, '%M')
+            ORDER BY
+            DATE_FORMAT(created_at, '%Y-%m') ASC;
+        ";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function graf_line_receta(): array
+    {
+        $sql = "
+            SELECT
+            estado,
+            DATE_FORMAT(created_at, '%M') AS mes,
+            DATE_FORMAT(created_at, '%Y-%m') AS periodo,
+            COUNT(*) AS ctd
+            FROM recetas
             WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
             GROUP BY
             estado,

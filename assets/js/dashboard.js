@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
 
     const cotizacionesContainer = document.getElementById("dashboard-cotizaciones");
+    const recetasContainer      = document.getElementById("dashboard-recetas");
     const itemsContainer        = document.getElementById("dashboard-items");
     const contUser = document.getElementById("total_user");
     const contItem = document.getElementById("total_item");
@@ -8,6 +9,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const contCarga = document.getElementById("total_carga");
     const contItemReceta = document.getElementById("total_item_receta");
     const contReceta = document.getElementById("total_receta");
+    const contRecetaProducto = document.getElementById("total_receta_producto");
+    const contRecetaServicio = document.getElementById("total_receta_servicio");
 
     const dateInput = document.getElementById("filterDate");
 
@@ -56,6 +59,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             contCarga.textContent = formatInt(contadores.carga ?? 0);
             contReceta.textContent = formatInt(contadores.recetas ?? 0);
             contItemReceta.textContent = formatInt(contadores.receta_items ?? 0);
+            contRecetaProducto.textContent = formatInt(contadores.receta_productos ?? 0);
+            contRecetaServicio.textContent = formatInt(contadores.receta_servicios ?? 0);
         }
 
         /* =====================================================
@@ -115,6 +120,63 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         /* =====================================================
+           RECETAS
+        ===================================================== */
+        if (recetasContainer && Array.isArray(json.data.recetas)) {
+
+            const recetas = json.data.recetas
+                .sort((a, b) => b.id - a.id)
+                .slice(0, 3);
+
+            const logos = [1, 2, 3];
+            let logoIndex = 0;
+
+            const badgeByEstado = (estado) => {
+                switch (estado) {
+                    case "Aprobada": return "badge-soft-success";
+                    case "Anulada":  return "badge-soft-danger";
+                    case "Enviada":  return "badge-soft-info";
+                    default:         return "badge-soft-secondary";
+                }
+            };
+
+            recetasContainer.innerHTML = "";
+            recetas.forEach((receta) => {
+                const logo = logos[logoIndex % logos.length];
+                logoIndex++;
+
+                const link = ES_ADMIN
+                    ? `receta_form.php?id=${md5(String(receta.id))}`
+                    : "#";
+
+                recetasContainer.insertAdjacentHTML("beforeend", `
+                    <div class="d-flex align-items-start gap-2 position-relative mb-2">
+                        <div class="avatar-md flex-shrink-0">
+                            <img src="assets/images/brands/${logo}.svg" height="22">
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <h5 class="fs-13 my-1">
+                                <a href="${link}" class="stretched-link link-reset ${!ES_ADMIN ? 'disabled-link' : ''}"
+                                    ${!ES_ADMIN ? 'onclick="return false;"' : ''}>
+                                   Receta #${receta.id} [${String(receta.usuario || '').toLowerCase()}]
+                                </a>
+                            </h5>
+                            <span class="text-muted fs-11 d-block mb-1">${receta.nombre || 'Sin nombre'}</span>
+                            ${renderItemsString(receta.items, 3)}
+                        </div>
+
+                        <div class="ms-auto">
+                            <span class="badge ${badgeByEstado(receta.estado)} px-1 py-1">
+                                ${receta.estado}
+                            </span>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
+        /* =====================================================
            TIMELINE ITEMS 
         ===================================================== */
         if (itemsContainer && Array.isArray(json.data.items)) {
@@ -163,18 +225,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     /* =====================================================
        Helpers
     ===================================================== */
-    function renderItemsString(itemsString) {
+    function renderItemsString(itemsString, limit = null) {
         if (!itemsString) return '';
 
-        const items = itemsString
+        let items = itemsString
             .split('|')
             .map(i => i.trim())
             .filter(Boolean);
+
+        const totalItems = items.length;
+
+        if (limit && totalItems > limit) {
+            items = items.slice(0, limit);
+        }
 
         if (items.length >= 2) {
             return `
                 <ul class="text-muted fs-10 ps-3 mb-0">
                     ${items.map(i => `<li>${i}</li>`).join("")}
+                    ${limit && totalItems > limit ? `<li>+${totalItems - limit} más</li>` : ""}
                 </ul>
             `;
         }

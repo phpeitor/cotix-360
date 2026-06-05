@@ -1,4 +1,4 @@
-@page { margin: 18mm 15mm 16mm 15mm; }
+@page { margin: 16mm 13mm 15mm 13mm; }
 
 body {
     font-family: DejaVu Sans, sans-serif;
@@ -69,8 +69,8 @@ table {
 .watermark.anulada { color: rgba(220, 53, 69, 0.15); }
 
 .hero {
-    margin-top: 18mm;
-    padding-top: 8mm;
+    margin-top: 16mm;
+    padding-top: 6mm;
 }
 
 .hero td {
@@ -85,7 +85,7 @@ table {
 .hero-logo {
     width: 100px;
     height: auto;
-    margin-bottom: 2mm;
+    margin-bottom: 1mm;
 }
 
 .project-box {
@@ -131,7 +131,7 @@ table {
 }
 
 .panels {
-    margin-top: 5mm;
+    margin-top: 3mm;
 }
 
 .panel {
@@ -144,24 +144,24 @@ table {
     font-weight: bold;
     color: #3d3d3d;
     letter-spacing: 0.5px;
-    margin: 0 0 1mm 0;
+    margin: 0 0 0.6mm 0;
 }
 
 .panel-name {
     font-size: 13px;
     color: #046c5b;
     letter-spacing: 1px;
-    margin: 0 0 0.8mm 0;
+    margin: 0 0 0.4mm 0;
 }
 
 .panel-line {
-    margin: 0 0 0.6mm 0;
+    margin: 0 0 0.3mm 0;
     font-size: 10.5px;
     letter-spacing: 0.4px;
 }
 
 .section-table {
-    margin-top: 6mm;
+    margin-top: 4mm;
 }
 
 .section-head th {
@@ -169,27 +169,27 @@ table {
     color: #fff;
     font-size: 13px;
     letter-spacing: 1px;
-    padding: 2.5mm 3mm;
+    padding: 1.8mm 2.4mm;
     border: none;
 }
 
 .item-row td {
     border-bottom: 0.35mm solid #4f4f4f;
-    padding: 2mm 2mm 2.5mm 2mm;
+    padding: 1mm 2mm 1.2mm 2mm;
     vertical-align: top;
 }
 
 .item-description {
     font-size: 11px;
     letter-spacing: 0.3px;
-    margin-bottom: 0.6mm;
+    margin-bottom: 0.3mm;
 }
 
 .item-subline {
     color: #4f4f4f;
     font-size: 9.5px;
-    line-height: 1.35;
-    margin-bottom: 0.4mm;
+    line-height: 1.15;
+    margin-bottom: 0.2mm;
 }
 
 .item-meta {
