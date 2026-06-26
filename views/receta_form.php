@@ -16,7 +16,7 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/receta.css?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/receta.css?v=1.1" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -132,9 +132,9 @@ require_once ROOT . '/controller/check_session.php';
                                             </div>
 
                                             <div class="col-lg-3 col-6 border-end">
-                                                <p class="text-muted fw-medium fs-12 mb-1">
-                                                    <span class="text-dark">Tipo de Cambio SUNAT (Venta)</span>
-                                                    <span id="tipo_cambio_sunat" class="external-event fc-event bg-info-subtle text-info tipo-cambio-pulse">0.000</span>
+                                                <p class="tipo-cambio-highlight text-muted fw-medium fs-12 mb-1">
+                                                    <span class="tipo-cambio-label">Tipo de Cambio SUNAT (Venta)</span>
+                                                    <span id="tipo_cambio_sunat" class="external-event fc-event bg-warning-subtle text-warning-emphasis tipo-cambio-pulse">0.000</span>
                                                     <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btnEditTipoCambio" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar tipo de cambio"><i class="ti ti-edit"></i></button>
                                                     <input type="number" step="0.001" id="tipo_cambio_input" class="form-control form-control-sm d-none" style="width:110px;display:inline-block;margin-left:8px;">
                                                 </p>
