@@ -115,6 +115,10 @@
     font-weight: 700;
 }
 
+.precio-tooltip {
+    cursor: help;
+}
+
 .tipo-cambio-pulse {
     animation: tipo-cambio-pulse 1.8s ease-in-out infinite;
     border: 1px solid rgba(var(--bs-warning-rgb), .7);

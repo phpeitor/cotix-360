@@ -1136,6 +1136,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const detalleLinea2 = [item.marca, item.modelo, item.uni_medida].filter(Boolean).join(" / ");
             const claveCambio = getClaveCambioPrecio(item);
             const cambioPrecio = cambiosPrecioByItem.get(claveCambio);
+            const precioUpdatedAt = item.precio_updated_at || item.updated_at || "";
+            const tooltipPrecio = escapeAttr(`Última actualización: ${formatFechaCambioTooltip(precioUpdatedAt)}`);
             const tooltipCambioPrecio = cambioPrecio
                 ? escapeAttr(`Precio actualizado\n Anterior: ${formatMoneda(cambioPrecio.moneda_receta, cambioPrecio.precio_receta)} - ${formatFechaCambioTooltip(cambioPrecio.fecha_anterior)}\n Actual: ${formatMoneda(cambioPrecio.moneda_actual, cambioPrecio.precio_actual)} - ${formatFechaCambioTooltip(cambioPrecio.fecha_cambio)}`)
                 : "";
@@ -1175,7 +1177,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center btn-qty-plus" style="width:22px;min-width:22px;height:22px;" data-id="${itemId}" ${editable ? "" : "disabled"}>+</button>
                         </div>
                     </td>
-                    <td class="text-end ${isTecnico ? "d-none" : ""}">
+                    <td class="text-end precio-tooltip ${isTecnico ? "d-none" : ""}" data-bs-toggle="tooltip" data-bs-title="${tooltipPrecio}">
                         <span class="text-muted fs-12">${monedaSimbolo}</span>
                         <h5 class="fs-14 mt-1 fw-normal mb-0">${format2(precio)}</h5>
                     </td>

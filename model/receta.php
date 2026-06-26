@@ -260,9 +260,10 @@ class Receta {
     }
 
     public function obtenerDetallePorHash(string $hash): array {
-        $sql = "SELECT a.*,b.orden
+        $sql = "SELECT a.*, b.orden, r.updated_at AS precio_updated_at
                 FROM receta_detalle a
-                left join vw_receta_items_orden b on a.tipo=b.tipo and a.sub_cat_1=b.sub_cat_1
+                LEFT JOIN vw_receta_items_orden b on a.tipo=b.tipo and a.sub_cat_1=b.sub_cat_1
+                LEFT JOIN receta_items r on r.id = a.item_id
                 WHERE MD5(receta_id) = :hash
                 order by tipo asc, orden asc, sub_cat_2 asc";
         $stmt = $this->conn->prepare($sql);
