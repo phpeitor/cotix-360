@@ -1773,7 +1773,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const itemDescripcion = normalizarTextoDetalle(item.descripcion);
             const detalleLinea1 = formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]);
             const monedaSimbolo = String(item.moneda || "").toUpperCase() === "DOLLAR" ? "$" : "S/.";
-            const precioTexto = `${monedaSimbolo} ${format2(item.precio)}`;
+            const precio = Number(item.precio) || 0;
+            const precioTexto = precio <= 0
+                ? `<span class="badge bg-danger precio-cero-label">PRECIO 0</span>`
+                : `${monedaSimbolo} ${format2(precio)}`;
             const itemPayload = encodeURIComponent(JSON.stringify(item));
 
             const detalleLinea2 = formatearRutaDetalle([item.marca, item.modelo, item.uni_medida]);
@@ -1849,6 +1852,13 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        const precio = Number(item.precio) || 0;
+        if (precio <= 0) {
+            const nombre = String(item.nombre || item.descripcion || "item").trim();
+            alertify.warning(`No se puede agregar ${nombre}: el precio debe ser mayor a 0.`);
+            return;
+        }
+
         const existente = detalle.some(x => Number(x.item_id) === itemId);
         if (existente) {
             alertify.error("Este item ya fue agregado");
@@ -1865,7 +1875,7 @@ document.addEventListener("DOMContentLoaded", () => {
             nombre: item.nombre || "",
             descripcion: item.descripcion || "",
             uni_medida: item.uni_medida || "",
-            precio: Number(item.precio) || 0,
+            precio,
             moneda: item.moneda || "SOL",
             tipo: item.tipo || "",
             cantidad: clampCantidad(qtyInicial)

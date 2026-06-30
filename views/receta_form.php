@@ -19,6 +19,26 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/receta.css?v=1.1" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
+    <style>
+        .precio-cero-label {
+            animation: precioCeroPulse 1s ease-in-out infinite;
+            border-radius: 999px;
+            display: inline-flex;
+            font-weight: 700;
+            padding: 0.15rem 0.45rem;
+        }
+
+        @keyframes precioCeroPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(250, 92, 124, 0.55);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(250, 92, 124, 0);
+                transform: scale(1.04);
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -368,7 +388,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js"></script>
-    <script src="./assets/js/receta_form.js?v=1.3"></script>
+    <script src="./assets/js/receta_form.js?v=1.5"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
