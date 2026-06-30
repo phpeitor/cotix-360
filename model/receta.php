@@ -270,6 +270,7 @@ class Receta {
         $nombreCopia = $nombreOriginal !== '' ? 'COPIA - ' . $nombreOriginal : '';
 
         $sqlCabecera = "INSERT INTO recetas (
+                            id_receta_duplicada,
                             usuario_id,
                             nombre,
                             observacion,
@@ -279,6 +280,7 @@ class Receta {
                             usuario_upd,
                             tipo_cambio
                         ) SELECT
+                            :receta_id_origen,
                             :usuario_id,
                             :nombre,
                             observacion,
@@ -291,6 +293,7 @@ class Receta {
                         WHERE id = :receta_id";
 
         $stmtCabecera = $this->conn->prepare($sqlCabecera);
+        $stmtCabecera->bindValue(':receta_id_origen', $recetaId, PDO::PARAM_INT);
         $stmtCabecera->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
         $stmtCabecera->bindValue(':nombre', $nombreCopia);
         $stmtCabecera->bindValue(':created_at', $this->nowLima);
@@ -491,7 +494,7 @@ class Receta {
                     d.sub_cat_1,
                     d.sub_cat_2,
                     d.descripcion,
-                    r1.created_at AS fecha_anterior,
+                    COALESCE(r_original.created_at, r1.created_at) AS fecha_anterior,
                     d.precio AS precio_receta,
                     d.moneda AS moneda_receta,
                     r.updated_at AS fecha_cambio,
@@ -499,6 +502,7 @@ class Receta {
                     r.moneda AS moneda_actual
                 FROM receta_detalle d
                 INNER JOIN recetas r1 ON r1.id = d.receta_id
+                LEFT JOIN recetas r_original ON r_original.id = r1.id_receta_duplicada
                 INNER JOIN receta_items r ON
                 LOWER(TRIM(COALESCE(r.nombre, ''))) = LOWER(TRIM(COALESCE(d.nombre, '')))
                 AND LOWER(TRIM(COALESCE(r.categoria, ''))) = LOWER(TRIM(COALESCE(d.categoria, '')))
