@@ -1774,8 +1774,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const detalleLinea1 = formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]);
             const monedaSimbolo = String(item.moneda || "").toUpperCase() === "DOLLAR" ? "$" : "S/.";
             const precio = Number(item.precio) || 0;
+            const itemId = Number(item.id) || Number(item.item_id) || 0;
+            const editUrl = itemId > 0 && typeof md5 === "function"
+                ? `upd_item_receta.php?hash=${md5(String(itemId))}`
+                : "";
             const precioTexto = precio <= 0
-                ? `<span class="badge bg-danger precio-cero-label">PRECIO 0</span>`
+                ? `
+                    <span class="badge bg-danger precio-cero-label">${monedaSimbolo} ${format2(precio)}</span>
+                    ${editUrl ? `<a href="${editUrl}" class="btn btn-sm btn-outline-danger btn-icon ms-1" data-bs-toggle="tooltip" data-bs-title="Editar item"><i class="ti ti-pencil"></i></a>` : ""}
+                `
                 : `${monedaSimbolo} ${format2(precio)}`;
             const itemPayload = encodeURIComponent(JSON.stringify(item));
 
