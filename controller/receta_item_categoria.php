@@ -52,11 +52,24 @@ try {
 
     $data = recetaCategoriaPayload();
     if ($data['tipo'] === '' || $data['categoria'] === '') {
-        echo json_encode(['ok' => false, 'message' => 'Tipo y categoría son obligatorios']);
+        echo json_encode(['ok' => false, 'message' => 'Todos los campos son obligatorios']);
+        exit;
+    }
+
+    if ($data['sub_cat_1'] === '' || $data['sub_cat_2'] === '') {
+        echo json_encode(['ok' => false, 'message' => 'Todos los campos son obligatorios']);
         exit;
     }
 
     if ($action === 'create') {
+        $data['estado'] = 1;
+
+        if ($item->existeRecetaCategoria($data)) {
+            http_response_code(409);
+            echo json_encode(['ok' => false, 'message' => 'Ya existe una categoría con la misma combinación']);
+            exit;
+        }
+
         $id = $item->guardarRecetaCategoria($data);
         echo json_encode(['ok' => true, 'id' => $id, 'message' => 'Categoría registrada correctamente']);
         exit;
@@ -66,6 +79,12 @@ try {
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
             echo json_encode(['ok' => false, 'message' => 'ID no válido']);
+            exit;
+        }
+
+        if ($item->existeRecetaCategoria($data, $id)) {
+            http_response_code(409);
+            echo json_encode(['ok' => false, 'message' => 'Ya existe una categoría con la misma combinación']);
             exit;
         }
 

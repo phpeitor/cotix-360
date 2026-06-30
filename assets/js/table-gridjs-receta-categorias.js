@@ -4,6 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalEl = document.getElementById("categoriaModal");
     const modalTitle = document.getElementById("categoriaModalTitle");
     const form = document.getElementById("categoriaForm");
+    const estadoWrap = document.getElementById("estadoWrap");
+    const estadoSwitch = document.getElementById("estadoSwitch");
     const modal = new bootstrap.Modal(modalEl);
 
     const endpoint = "controller/receta_item_categoria.php";
@@ -23,8 +25,31 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("categoria").value = row?.categoria || "";
         document.getElementById("sub_cat_1").value = row?.sub_cat_1 || "";
         document.getElementById("sub_cat_2").value = row?.sub_cat_2 || "";
-        document.getElementById("estado").value = String(row?.estado ?? 1);
+        estadoWrap?.classList.toggle("d-none", !row);
+        if (estadoSwitch) {
+            estadoSwitch.checked = String(row?.estado ?? 1) === "1";
+        }
         modalTitle.textContent = row ? "Modificar Categoría" : "Nueva Categoría";
+    }
+
+    function normalize(value) {
+        return String(value || "").trim().toUpperCase();
+    }
+
+    function hasDuplicate(formData) {
+        const id = normalize(formData.get("id"));
+        const tipo = normalize(formData.get("tipo"));
+        const categoria = normalize(formData.get("categoria"));
+        const subCat1 = normalize(formData.get("sub_cat_1"));
+        const subCat2 = normalize(formData.get("sub_cat_2"));
+
+        return currentRows.some(row => {
+            return normalize(row.id) !== id
+                && normalize(row.tipo) === tipo
+                && normalize(row.categoria) === categoria
+                && normalize(row.sub_cat_1) === subCat1
+                && normalize(row.sub_cat_2) === subCat2;
+        });
     }
 
     const grid = new gridjs.Grid({
@@ -106,7 +131,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const id = document.getElementById("categoriaId").value;
-        const params = new URLSearchParams(new FormData(form));
+        const formData = new FormData(form);
+
+        if (hasDuplicate(formData)) {
+            alertify.error("Ya existe una categoría con la misma combinación");
+            return;
+        }
+
+        const params = new URLSearchParams(formData);
         params.append("action", id ? "update" : "create");
 
         try {

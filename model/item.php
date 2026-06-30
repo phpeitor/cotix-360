@@ -340,6 +340,34 @@ class Item {
         return (int)$this->conn->lastInsertId();
     }
 
+    public function existeRecetaCategoria(array $data, int $excludeId = 0): bool {
+        $sql = "SELECT id
+                FROM receta_item_categorias
+                WHERE UPPER(TRIM(tipo)) = UPPER(TRIM(:tipo))
+                  AND UPPER(TRIM(categoria)) = UPPER(TRIM(:categoria))
+                  AND UPPER(TRIM(sub_cat_1)) = UPPER(TRIM(:sub_cat_1))
+                  AND UPPER(TRIM(sub_cat_2)) = UPPER(TRIM(:sub_cat_2))";
+
+        if ($excludeId > 0) {
+            $sql .= " AND id <> :exclude_id";
+        }
+
+        $sql .= " LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':tipo', $this->v($data['tipo'] ?? ''));
+        $stmt->bindValue(':categoria', $this->v($data['categoria'] ?? ''));
+        $stmt->bindValue(':sub_cat_1', $this->v($data['sub_cat_1'] ?? ''));
+        $stmt->bindValue(':sub_cat_2', $this->v($data['sub_cat_2'] ?? ''));
+
+        if ($excludeId > 0) {
+            $stmt->bindValue(':exclude_id', $excludeId, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        return (bool)$stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function actualizarRecetaCategoria(int $id, array $data): bool {
         $sql = "UPDATE receta_item_categorias
                 SET tipo = :tipo,

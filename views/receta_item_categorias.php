@@ -15,6 +15,33 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
+    <style>
+        #table-gridjs .gridjs-sort {
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+            color: #8a929d;
+            display: inline-flex;
+            height: 16px;
+            margin-left: 6px;
+            padding: 0;
+            width: 16px;
+        }
+
+        #table-gridjs .gridjs-sort::before {
+            content: "⇅";
+            font-size: 12px;
+            line-height: 16px;
+        }
+
+        #table-gridjs .gridjs-sort-asc::before {
+            content: "↑";
+        }
+
+        #table-gridjs .gridjs-sort-desc::before {
+            content: "↓";
+        }
+    </style>
 </head>
 <body>
     <div class="wrapper">
@@ -72,8 +99,12 @@ require_once ROOT . '/controller/check_session.php';
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label" for="tipo">Tipo</label>
-                                <input type="text" class="form-control" id="tipo" name="tipo" maxlength="50" required placeholder="PRODUCTO">
-                                <div class="invalid-feedback">Ingrese el tipo.</div>
+                                <select id="tipo" name="tipo" class="form-select" required>
+                                    <option value="">-- Seleccione --</option>
+                                    <option value="PRODUCTO">PRODUCTO</option>
+                                    <option value="SERVICIO">SERVICIO</option>
+                                </select>
+                                <div class="invalid-feedback">Seleccione el tipo.</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label" for="categoria">Categoría</label>
@@ -82,18 +113,19 @@ require_once ROOT . '/controller/check_session.php';
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label" for="sub_cat_1">Sub Categoría 1</label>
-                                <input type="text" class="form-control" id="sub_cat_1" name="sub_cat_1" maxlength="150">
+                                <input type="text" class="form-control" id="sub_cat_1" name="sub_cat_1" maxlength="150" required>
+                                <div class="invalid-feedback">Ingrese la sub categoría 1.</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label" for="sub_cat_2">Sub Categoría 2</label>
-                                <input type="text" class="form-control" id="sub_cat_2" name="sub_cat_2" maxlength="150">
+                                <input type="text" class="form-control" id="sub_cat_2" name="sub_cat_2" maxlength="150" required>
+                                <div class="invalid-feedback">Ingrese la sub categoría 2.</div>
                             </div>
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label" for="estado">Estado</label>
-                                <select id="estado" name="estado" class="form-select">
-                                    <option value="1">Activo</option>
-                                    <option value="0">Suspendido</option>
-                                </select>
+                            <div class="col-md-4 mb-2 d-none" id="estadoWrap">
+                                <label class="form-label d-block">Estado</label>
+                                <input type="hidden" name="estado" value="0">
+                                <input type="checkbox" id="estadoSwitch" name="estado" value="1" data-switch="success" />
+                                <label for="estadoSwitch" data-on-label="Sí" data-off-label="No"></label>
                             </div>
                         </div>
                     </div>
