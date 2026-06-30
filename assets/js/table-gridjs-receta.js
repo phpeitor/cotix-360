@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             {
                 name: "Opciones",
-                width: "140px",
+                width: "170px",
                 sort: false,
                 formatter: renderAcciones
             }
@@ -298,6 +298,15 @@ document.addEventListener("DOMContentLoaded", () => {
             >
                 <i class="ti ti-eye"></i>
             </a>
+
+            <button type="button"
+                    class="btn btn-soft-secondary btn-icon btn-sm rounded-circle btn-duplicar-receta"
+                    data-id="${id}"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="Duplicar"
+                    title="Duplicar">
+                <i class="ti ti-copy"></i>
+            </button>
         `;
 
         if (estado === "Aprobada") {
@@ -389,6 +398,47 @@ document.addEventListener("DOMContentLoaded", () => {
             () => actualizarEstado(id, accion),
             () => {}
         );
+    });
+
+    document.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".btn-duplicar-receta");
+        if (!btn) return;
+
+        const id = btn.dataset.id;
+        if (!id) return;
+
+        const confirmed = await new Promise(resolve => {
+            alertify.confirm(
+                "Duplicar receta",
+                "¿Deseas duplicar esta receta?",
+                () => resolve(true),
+                () => resolve(false)
+            );
+        });
+
+        if (!confirmed) return;
+
+        try {
+            btn.disabled = true;
+            const res = await fetch("controller/duplicar_receta.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ id })
+            });
+            const json = await res.json();
+
+            if (!res.ok || !json.ok) {
+                alertify.error(json.message || "No se pudo duplicar la receta");
+                return;
+            }
+
+            alertify.success(json.message || "Receta duplicada correctamente");
+            grid.forceRender();
+        } catch (error) {
+            alertify.error("Error de conexión al duplicar receta");
+        } finally {
+            btn.disabled = false;
+        }
     });
 
     document.addEventListener("click", async (e) => {

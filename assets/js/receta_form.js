@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalSolesEl = document.getElementById("total_soles");
     const totalDolaresEl = document.getElementById("total_dolares");
     const totalPeruEl = document.getElementById("total_peru");
+    const totalPeruDolaresEl = document.getElementById("total_peru_dolares");
     const tipoCambioEl = document.getElementById("tipo_cambio_sunat");
     const btnEditTipoCambio = document.getElementById("btnEditTipoCambio");
     const tipoCambioInputEl = document.getElementById("tipo_cambio_input");
@@ -1029,17 +1030,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const tipoCambio = Number(receta?.tipo_cambio) || 1;
         const totalPE = totalSoles + (totalDolares * tipoCambio);
+        const totalPEDolares = tipoCambio > 0 ? totalPE / tipoCambio : 0;
 
-        return { totalItems, totalSoles, totalDolares, totalPE };
+        return { totalItems, totalSoles, totalDolares, totalPE, totalPEDolares };
     }
 
     function calcularTotales() {
-        const { totalItems, totalSoles, totalDolares, totalPE } = getResumenTotales();
+        const { totalItems, totalSoles, totalDolares, totalPE, totalPEDolares } = getResumenTotales();
 
         if (totalItemEl) totalItemEl.textContent = totalItems;
         if (totalSolesEl) totalSolesEl.textContent = format2(decimalAdjust("round", totalSoles, "-2"));
         if (totalDolaresEl) totalDolaresEl.textContent = format2(decimalAdjust("round", totalDolares, "-2"));
         if (totalPeruEl) totalPeruEl.textContent = format2(decimalAdjust("round", totalPE, "-2"));
+        if (totalPeruDolaresEl) totalPeruDolaresEl.textContent = format2(decimalAdjust("round", totalPEDolares, "-2"));
     }
 
     function getVisibleRows() {
@@ -1224,7 +1227,15 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         tbody.querySelectorAll(".btn-delete-item").forEach(btn => {
-            btn.addEventListener("click", () => eliminarItem(btn.dataset.id));
+            btn.addEventListener("click", () => {
+                const itemId = btn.dataset.id;
+                alertify.confirm(
+                    "Confirmar eliminación",
+                    "¿Seguro que deseas eliminar este item de la receta?",
+                    () => eliminarItem(itemId),
+                    () => {}
+                );
+            });
         });
 
         initTooltips(tbody);

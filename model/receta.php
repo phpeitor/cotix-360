@@ -259,6 +259,117 @@ class Receta {
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
+    public function duplicarReceta(int $recetaId, int $usuarioId): int
+    {
+        $original = $this->obtenerPorId($recetaId);
+        if (!$original) {
+            throw new RuntimeException('Receta no encontrada');
+        }
+
+        $nombreOriginal = trim((string)($original['nombre'] ?? ''));
+        $nombreCopia = $nombreOriginal !== '' ? 'COPIA - ' . $nombreOriginal : '';
+
+        $sqlCabecera = "INSERT INTO recetas (
+                            usuario_id,
+                            nombre,
+                            observacion,
+                            estado,
+                            created_at,
+                            updated_at,
+                            usuario_upd,
+                            tipo_cambio
+                        ) SELECT
+                            :usuario_id,
+                            :nombre,
+                            observacion,
+                            'Enviada',
+                            :created_at,
+                            :updated_at,
+                            :usuario_upd,
+                            tipo_cambio
+                        FROM recetas
+                        WHERE id = :receta_id";
+
+        $stmtCabecera = $this->conn->prepare($sqlCabecera);
+        $stmtCabecera->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+        $stmtCabecera->bindValue(':nombre', $nombreCopia);
+        $stmtCabecera->bindValue(':created_at', $this->nowLima);
+        $stmtCabecera->bindValue(':updated_at', $this->nowLima);
+        $stmtCabecera->bindValue(':usuario_upd', $usuarioId, PDO::PARAM_INT);
+        $stmtCabecera->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmtCabecera->execute();
+
+        $nuevoId = (int)$this->conn->lastInsertId();
+        if ($nuevoId <= 0) {
+            throw new RuntimeException('No se pudo crear la copia de la receta');
+        }
+
+        $sqlDetalle = "INSERT INTO receta_detalle (
+                            receta_id,
+                            item_id,
+                            categoria,
+                            sub_cat_1,
+                            sub_cat_2,
+                            marca,
+                            modelo,
+                            nombre,
+                            descripcion,
+                            uni_medida,
+                            precio,
+                            moneda,
+                            tipo,
+                            created_at,
+                            cantidad
+                        ) SELECT
+                            :nuevo_id,
+                            item_id,
+                            categoria,
+                            sub_cat_1,
+                            sub_cat_2,
+                            marca,
+                            modelo,
+                            nombre,
+                            descripcion,
+                            uni_medida,
+                            precio,
+                            moneda,
+                            tipo,
+                            :created_at,
+                            cantidad
+                        FROM receta_detalle
+                        WHERE receta_id = :receta_id";
+
+        $stmtDetalle = $this->conn->prepare($sqlDetalle);
+        $stmtDetalle->bindValue(':nuevo_id', $nuevoId, PDO::PARAM_INT);
+        $stmtDetalle->bindValue(':created_at', $this->nowLima);
+        $stmtDetalle->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmtDetalle->execute();
+
+        $sqlCategorias = "INSERT INTO receta_categoria (
+                              receta_id,
+                              sub_cat_1,
+                              subtotal,
+                              cantidad,
+                              margen,
+                              moneda
+                          ) SELECT
+                              :nuevo_id,
+                              sub_cat_1,
+                              subtotal,
+                              cantidad,
+                              margen,
+                              moneda
+                          FROM receta_categoria
+                          WHERE receta_id = :receta_id";
+
+        $stmtCategorias = $this->conn->prepare($sqlCategorias);
+        $stmtCategorias->bindValue(':nuevo_id', $nuevoId, PDO::PARAM_INT);
+        $stmtCategorias->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmtCategorias->execute();
+
+        return $nuevoId;
+    }
+
     public function obtenerDetallePorHash(string $hash): array {
         $sql = "SELECT a.*, b.orden, r.updated_at AS precio_updated_at
                 FROM receta_detalle a

@@ -142,6 +142,7 @@ require_once ROOT . '/controller/check_session.php';
                                             
                                             <div class="col-lg-3 col-12">
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total PE S/.</span> <span id="total_peru">0.00</span></p>
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-minimalistic-outline" class="text-success"></iconify-icon> <span class="text-dark">Total PE $</span> <span id="total_peru_dolares">0.00</span></p>
                                             </div>
 
                                         </div>
@@ -367,7 +368,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js"></script>
-    <script src="./assets/js/receta_form.js?v=1.2"></script>
+    <script src="./assets/js/receta_form.js?v=1.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
