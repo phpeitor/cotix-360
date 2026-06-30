@@ -72,6 +72,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
                                 <h4 class="header-title mb-0">Base Items</h4>
                                 <div class="d-flex align-items-center gap-2">
+                                    <a href="receta_item_categorias.php" class="btn btn-sm rounded-pill btn-outline-primary"><i class="ti ti-category fs-18"></i> Categorías</a>
                                     <a href="add_item_receta.php" id="btn_registrar" class="btn btn-sm rounded-pill btn-success"><i class="ti ti-plus fs-22"></i></a>
                                     <button type="button" id="btnExportExcel" class="btn btn-sm rounded-pill btn-outline-success d-inline-flex align-items-center gap-2">
                                         <span class="spinner-border spinner-border-sm d-none" id="btnExportExcelSpinner" role="status" aria-hidden="true"></span>

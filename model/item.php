@@ -256,9 +256,10 @@ class Item {
 
     public function obtenerRecetaTipos(): array {
         $sql = "SELECT DISTINCT tipo
-                FROM receta_items
+                FROM receta_item_categorias
                 WHERE tipo IS NOT NULL
                 AND TRIM(tipo) <> ''
+                AND estado = 1
                 ORDER BY tipo";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
@@ -267,9 +268,10 @@ class Item {
 
     public function obtenerRecetaCategorias(?string $tipo = null): array {
         $sql = "SELECT DISTINCT categoria
-                FROM receta_items
+                FROM receta_item_categorias
                 WHERE categoria IS NOT NULL
-                AND TRIM(categoria) <> ''";
+                AND TRIM(categoria) <> ''
+                AND estado = 1";
         $params = [];
 
         $this->agregarFiltroReceta($sql, $params, 'tipo', $tipo);
@@ -282,9 +284,10 @@ class Item {
 
     public function obtenerRecetaSubCategorias1(?string $tipo = null, ?string $categoria = null): array {
         $sql = "SELECT DISTINCT sub_cat_1
-                FROM receta_items
+                FROM receta_item_categorias
                 WHERE sub_cat_1 IS NOT NULL
-                AND TRIM(sub_cat_1) <> ''";
+                AND TRIM(sub_cat_1) <> ''
+                AND estado = 1";
         $params = [];
 
         $this->agregarFiltroReceta($sql, $params, 'tipo', $tipo);
@@ -298,9 +301,10 @@ class Item {
 
     public function obtenerRecetaSubCategorias2(?string $tipo = null, ?string $categoria = null, ?string $subCat1 = null): array {
         $sql = "SELECT DISTINCT sub_cat_2
-                FROM receta_items
+                FROM receta_item_categorias
                 WHERE sub_cat_2 IS NOT NULL
-                AND TRIM(sub_cat_2) <> ''";
+                AND TRIM(sub_cat_2) <> ''
+                AND estado = 1";
         $params = [];
 
         $this->agregarFiltroReceta($sql, $params, 'tipo', $tipo);
@@ -311,6 +315,61 @@ class Item {
         $stmt = $this->conn->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerRecetaCategoriasGestion(): array {
+        $sql = "SELECT id, tipo, categoria, sub_cat_1, sub_cat_2, estado, created_at, updated_at
+                FROM receta_item_categorias
+                ORDER BY tipo, categoria, sub_cat_1, sub_cat_2, id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function guardarRecetaCategoria(array $data): int {
+        $sql = "INSERT INTO receta_item_categorias (tipo, categoria, sub_cat_1, sub_cat_2, estado, created_at)
+                VALUES (:tipo, :categoria, :sub_cat_1, :sub_cat_2, :estado, :created_at)";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':tipo', $this->v($data['tipo'] ?? ''));
+        $stmt->bindValue(':categoria', $this->v($data['categoria'] ?? ''));
+        $stmt->bindValue(':sub_cat_1', $this->v($data['sub_cat_1'] ?? ''));
+        $stmt->bindValue(':sub_cat_2', $this->v($data['sub_cat_2'] ?? ''));
+        $stmt->bindValue(':estado', (int)($data['estado'] ?? 1), PDO::PARAM_INT);
+        $stmt->bindValue(':created_at', $this->nowLima);
+        $stmt->execute();
+        return (int)$this->conn->lastInsertId();
+    }
+
+    public function actualizarRecetaCategoria(int $id, array $data): bool {
+        $sql = "UPDATE receta_item_categorias
+                SET tipo = :tipo,
+                    categoria = :categoria,
+                    sub_cat_1 = :sub_cat_1,
+                    sub_cat_2 = :sub_cat_2,
+                    estado = :estado,
+                    updated_at = :updated_at
+                WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':tipo', $this->v($data['tipo'] ?? ''));
+        $stmt->bindValue(':categoria', $this->v($data['categoria'] ?? ''));
+        $stmt->bindValue(':sub_cat_1', $this->v($data['sub_cat_1'] ?? ''));
+        $stmt->bindValue(':sub_cat_2', $this->v($data['sub_cat_2'] ?? ''));
+        $stmt->bindValue(':estado', (int)($data['estado'] ?? 1), PDO::PARAM_INT);
+        $stmt->bindValue(':updated_at', $this->nowLima);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
+    }
+
+    public function bajaRecetaCategoria(int $id): bool {
+        $sql = "UPDATE receta_item_categorias
+                SET estado = 0, updated_at = :updated_at
+                WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':updated_at', $this->nowLima);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
     }
 
     public function obtenerItems(int $id): ?array {
