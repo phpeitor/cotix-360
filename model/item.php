@@ -672,7 +672,12 @@ class Item {
 
     public function actualizarItemRecetaPorHash(string $hash, array $data): bool {
         $sql = "UPDATE receta_items 
-                SET marca = :marca,
+                SET categoria = :categoria,
+                    sub_cat_1 = :sub_cat_1,
+                    sub_cat_2 = :sub_cat_2,
+                    tipo = :tipo,
+                    nombre = :nombre,
+                    marca = :marca,
                     modelo = :modelo,
                     descripcion = :descripcion,
                     uni_medida = :uni_medida,
@@ -683,6 +688,11 @@ class Item {
                 WHERE MD5(id) = :hash";
         $stmt = $this->conn->prepare($sql);
 
+        $stmt->bindValue(':categoria', $data['categoria']);
+        $stmt->bindValue(':sub_cat_1', $data['sub_cat_1']);
+        $stmt->bindValue(':sub_cat_2', $data['sub_cat_2']);
+        $stmt->bindValue(':tipo', $data['tipo']);
+        $stmt->bindValue(':nombre', $data['nombre']);
         $stmt->bindValue(':marca', $data['marca']);
         $stmt->bindValue(':modelo', $data['modelo']);
         $stmt->bindValue(':descripcion', $data['descripcion']);

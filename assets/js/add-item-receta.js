@@ -20,9 +20,13 @@ document.addEventListener("DOMContentLoaded", () => {
             .filter(Boolean);
     }
 
-    function setOptions(selectEl, values, placeholder = "-- Seleccione --") {
-        const selectedBefore = selectEl.value;
+    function setOptions(selectEl, values, placeholder = "-- Seleccione --", selectedValue = null) {
+        const selectedBefore = selectedValue === null ? selectEl.value : String(selectedValue || "").trim();
         const uniqueValues = [...new Set(values.map(v => String(v || "").trim()).filter(Boolean))];
+
+        if (selectedValue !== null && selectedBefore && !uniqueValues.includes(selectedBefore)) {
+            uniqueValues.push(selectedBefore);
+        }
 
         selectEl.innerHTML = `<option value="">${placeholder}</option>`;
 
@@ -114,6 +118,33 @@ document.addEventListener("DOMContentLoaded", () => {
         const subcat2 = await fetchRecetaOpciones({ nivel: "subcat2", tipo, categoria, sub_cat_1 });
         setOptions(subCat2Select, extractValues(subcat2, "sub_cat_2"), "-- Seleccione --");
     }
+
+    async function setRecetaSelection(values) {
+        const tipo = String(values?.tipo || "").trim();
+        const categoria = String(values?.categoria || "").trim();
+        const subCat1 = String(values?.sub_cat_1 || "").trim();
+        const subCat2 = String(values?.sub_cat_2 || "").trim();
+
+        tipoSelect.value = tipo;
+
+        if (!tipo) {
+            resetToInitial();
+            return;
+        }
+
+        const categorias = await fetchRecetaOpciones({ nivel: "categorias", tipo });
+        setOptions(categoriaSelect, extractValues(categorias, "categoria"), "-- Seleccione --", categoria);
+
+        const subcat1 = await fetchRecetaOpciones({ nivel: "subcat1", tipo, categoria });
+        setOptions(subCat1Select, extractValues(subcat1, "sub_cat_1"), "-- Seleccione --", subCat1);
+
+        const subcat2 = await fetchRecetaOpciones({ nivel: "subcat2", tipo, categoria, sub_cat_1: subCat1 });
+        setOptions(subCat2Select, extractValues(subcat2, "sub_cat_2"), "-- Seleccione --", subCat2);
+    }
+
+    window.recetaItemSelects = {
+        setSelection: setRecetaSelection
+    };
 
     tipoSelect.addEventListener("change", async () => {
         try {

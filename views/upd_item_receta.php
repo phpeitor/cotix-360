@@ -65,7 +65,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label">Tipo</label>
-                                            <select id="filterTipo" name="tipo" class="form-select" required disabled>
+                                            <select id="filterTipo" name="tipo" class="form-select" required>
                                                 <option value="">-- Todas --</option>
                                                 <?php foreach ($tipos as $b): ?>
                                                     <option value="<?= $b['tipo'] ?>"><?= $b['tipo'] ?></option>
@@ -75,7 +75,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label">Categoría</label>
-                                            <select id="filterCategoria" name="categoria" class="form-select" required disabled>
+                                            <select id="filterCategoria" name="categoria" class="form-select" required >
                                                 <option value="">-- Todos --</option>
                                                 <?php foreach ($categorias as $b): ?>
                                                     <option value="<?= $b['categoria'] ?>"><?= $b['categoria'] ?></option>
@@ -85,7 +85,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label">Sub Categoría 1</label>
-                                            <select id="filterSubCategoria1" name="sub_cat_1" class="form-select" required disabled>
+                                            <select id="filterSubCategoria1" name="sub_cat_1" class="form-select" required>
                                                 <option value="">-- Todas --</option>
                                                 <?php foreach ($sub_cat_1 as $b): ?>
                                                     <option value="<?= $b['sub_cat_1'] ?>"><?= $b['sub_cat_1'] ?></option>
@@ -95,7 +95,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label">Sub Categoría 2</label>
-                                            <select id="filterSubCategoria2" name="sub_cat_2" class="form-select" required disabled>
+                                            <select id="filterSubCategoria2" name="sub_cat_2" class="form-select" required>
                                                 <option value="">-- Todas --</option>
                                                 <?php foreach ($sub_cat_2 as $b): ?>
                                                     <option value="<?= $b['sub_cat_2'] ?>"><?= $b['sub_cat_2'] ?></option>
@@ -105,7 +105,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
 
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label" for="nombre">Nombre</label>
-                                            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Item Name" required="" disabled maxlength="200">
+                                            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Item Name" required="" maxlength="200">
                                             <div class="invalid-feedback">Please provide a nombre.</div>
                                         </div>
 
@@ -175,8 +175,8 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.0"></script>
-    <script src="./assets/js/add-item-receta.js?v=1.0"></script>
-    <script src="./assets/js/form-validation.js?v=1.0"></script>
+    <script src="./assets/js/add-item-receta.js?v=1.2"></script>
+    <script src="./assets/js/form-validation.js?v=1.2"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

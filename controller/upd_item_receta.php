@@ -29,6 +29,11 @@ try {
     $timezone = new DateTimeZone('America/Lima');
 
     $data = [
+        'categoria'         => $_POST['categoria'] ?? '',
+        'sub_cat_1'         => $_POST['sub_cat_1'] ?? '',
+        'sub_cat_2'         => $_POST['sub_cat_2'] ?? '',
+        'tipo'              => $_POST['tipo'] ?? '',
+        'nombre'            => $_POST['nombre'] ?? '',
         'descripcion'       => $_POST['descripcion'] ?? '',
         'modelo'            => $_POST['modelo'] ?? '',
         'marca'             => $_POST['marca'] ?? '',

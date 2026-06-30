@@ -261,10 +261,19 @@ async function cargarItemReceta(hash) {
     const subCat1El = document.querySelector('#filterSubCategoria1');
     const subCat2El = document.querySelector('#filterSubCategoria2');
 
-    if (tipoEl) tipoEl.value = i.tipo ?? '';
-    if (categoriaEl) categoriaEl.value = i.categoria ?? '';
-    if (subCat1El) subCat1El.value = i.sub_cat_1 ?? '';
-    if (subCat2El) subCat2El.value = i.sub_cat_2 ?? '';
+    if (window.recetaItemSelects?.setSelection) {
+      await window.recetaItemSelects.setSelection({
+        tipo: i.tipo ?? '',
+        categoria: i.categoria ?? '',
+        sub_cat_1: i.sub_cat_1 ?? '',
+        sub_cat_2: i.sub_cat_2 ?? ''
+      });
+    } else {
+      if (tipoEl) tipoEl.value = i.tipo ?? '';
+      if (categoriaEl) categoriaEl.value = i.categoria ?? '';
+      if (subCat1El) subCat1El.value = i.sub_cat_1 ?? '';
+      if (subCat2El) subCat2El.value = i.sub_cat_2 ?? '';
+    }
 
     document.querySelector('#nombre').value = i.nombre ?? '';
     document.querySelector('#descripcion').value = i.descripcion ?? '';
