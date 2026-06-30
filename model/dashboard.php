@@ -195,7 +195,25 @@ class Dashboard {
         $stmt->bindValue(':limit', max(1, $limit), PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        foreach ($rows as &$row) {
+            if (($row['tipo'] ?? '') !== 'item_receta') {
+                continue;
+            }
+
+            $meta = json_decode((string)($row['meta_json'] ?? ''), true);
+            if (!is_array($meta) || empty($meta['item_id'])) {
+                continue;
+            }
+
+            $meta['item_hash'] = md5((string)$meta['item_id']);
+            $row['meta_json'] = json_encode($meta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
+
+        unset($row);
+
+        return $rows;
     }
 
     public function headerNotificationsSignature(): array

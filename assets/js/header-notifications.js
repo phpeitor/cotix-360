@@ -12,6 +12,36 @@
         return count > 99 ? '99+' : String(count);
     }
 
+    function parseMeta(meta) {
+        if (!meta) return {};
+        if (typeof meta === 'object') return meta;
+
+        try {
+            return JSON.parse(meta);
+        } catch (_) {
+            return {};
+        }
+    }
+
+    function notificationUrl(item) {
+        const meta = parseMeta(item.meta_json || item.meta);
+        const tipo = String(item.tipo || '').trim();
+
+        if (tipo !== 'item_receta') {
+            return '';
+        }
+
+        if (meta.item_hash) {
+            return `upd_item_receta.php?hash=${encodeURIComponent(String(meta.item_hash))}`;
+        }
+
+        if (meta.item_id && typeof md5 === 'function') {
+            return `upd_item_receta.php?hash=${md5(String(meta.item_id))}`;
+        }
+
+        return '';
+    }
+
     function ensureBadgeVisible(badgeEl, count) {
         if (!badgeEl) return;
 
@@ -39,9 +69,11 @@
         const fecha = escapeHtml(item.fecha || item.created_at || '');
         const icon = escapeHtml(item.icon || 'ti-plus');
         const tone = escapeHtml(item.tone || 'secondary');
+        const url = notificationUrl(item);
+        const attrs = url ? ` role="button" data-href="${escapeHtml(url)}" style="cursor:pointer;"` : '';
 
         return `
-            <div class="dropdown-item notification-item py-2 text-wrap active" id="${id}">
+            <div class="dropdown-item notification-item py-2 text-wrap active" id="${id}"${attrs}>
                 <span class="d-flex align-items-center">
                     <span class="me-3 position-relative flex-shrink-0">
                         <img src="./assets/images/users/avatar-1.jpg" class="avatar-md rounded-circle" alt="" />
@@ -88,7 +120,9 @@
             detalle: item.detalle,
             fecha: item.fecha || item.created_at,
             icon: item.icon,
-            tone: item.tone
+            tone: item.tone,
+            tipo: item.tipo,
+            meta_json: item.meta_json
         };
     }
 
@@ -153,7 +187,9 @@
                 detalle: item.detalle,
                 fecha: item.created_at,
                 icon: item.icon,
-                tone: item.tone
+                tone: item.tone,
+                tipo: item.tipo,
+                meta_json: item.meta_json
             }, 'notification-db')) : [];
 
             const allItems = [...persistedItems, ...dashboardItems];
@@ -177,7 +213,9 @@
                                 detalle: item.detalle,
                                 fecha: item.created_at,
                                 icon: item.icon,
-                                tone: item.tone
+                                tone: item.tone,
+                                tipo: item.tipo,
+                                meta_json: item.meta_json
                             }, 'notification-live');
 
                             if (!rendered.key || seenIds.has(rendered.key)) {
@@ -197,6 +235,17 @@
                     // SSE reconecta solo.
                 });
             }
+
+            document.addEventListener('click', event => {
+                if (event.target.closest('.notification-item-close')) {
+                    return;
+                }
+
+                const item = event.target.closest('.notification-item[data-href]');
+                if (!item) return;
+
+                window.location.href = item.dataset.href;
+            });
         } catch (err) {
             console.error('header-notifications error:', err);
         }
