@@ -70,6 +70,47 @@ class Receta {
         return (int)$this->conn->lastInsertId();
     }
 
+    public function guardarCliente(array $data): bool
+    {
+        $sql = "INSERT INTO receta_cliente (
+                    id_receta,
+                    razon_social_empresa,
+                    direccion,
+                    ruc,
+                    nombre_completo,
+                    correo,
+                    celular,
+                    motivo,
+                    created_at,
+                    updated_at
+                ) VALUES (
+                    :id_receta,
+                    :razon_social_empresa,
+                    :direccion,
+                    :ruc,
+                    :nombre_completo,
+                    :correo,
+                    :celular,
+                    :motivo,
+                    :created_at,
+                    :updated_at
+                )";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id_receta', (int)($data['receta_id'] ?? 0), PDO::PARAM_INT);
+        $stmt->bindValue(':razon_social_empresa', (string)($data['razon_social_empresa'] ?? ''));
+        $stmt->bindValue(':direccion', (string)($data['direccion'] ?? ''));
+        $stmt->bindValue(':ruc', (string)($data['ruc'] ?? ''));
+        $stmt->bindValue(':nombre_completo', (string)($data['nombre_completo'] ?? ''));
+        $stmt->bindValue(':correo', (string)($data['correo'] ?? ''));
+        $stmt->bindValue(':celular', (string)($data['celular'] ?? ''));
+        $stmt->bindValue(':motivo', (string)($data['motivo'] ?? ''));
+        $stmt->bindValue(':created_at', $this->nowLima);
+        $stmt->bindValue(':updated_at', $this->nowLima);
+
+        return $stmt->execute();
+    }
+
     public function guardarDetalle(array $data): bool
     {
         $sql = "INSERT INTO receta_detalle (

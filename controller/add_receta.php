@@ -39,6 +39,26 @@ try {
         throw new Exception('Tipo de cambio inválido');
     }
 
+    $razonSocialEmpresa = trim((string)($_POST['razon_social_empresa'] ?? ''));
+    $direccionCliente = trim((string)($_POST['direccion_cliente'] ?? ''));
+    $rucCliente = trim((string)($_POST['ruc_cliente'] ?? ''));
+    $nombreCompletoContacto = trim((string)($_POST['nombre_completo_contacto'] ?? ''));
+    $correoContacto = trim((string)($_POST['correo_contacto'] ?? ''));
+    $celularContacto = trim((string)($_POST['celular_contacto'] ?? ''));
+    $motivoSolicitud = trim((string)($_POST['motivo_solicitud'] ?? ''));
+
+    if ($razonSocialEmpresa === '' || $direccionCliente === '' || $rucCliente === '' || $nombreCompletoContacto === '' || $correoContacto === '' || $celularContacto === '' || $motivoSolicitud === '') {
+        throw new Exception('Completa los datos del cliente antes de guardar la receta');
+    }
+
+    if (!preg_match('/^[0-9]{11}$/', $rucCliente)) {
+        throw new Exception('El RUC debe contener 11 dígitos');
+    }
+
+    if (!filter_var($correoContacto, FILTER_VALIDATE_EMAIL)) {
+        throw new Exception('El correo del contacto no es válido');
+    }
+
     $receta = new Receta();
     $receta->begin();
 
@@ -47,6 +67,17 @@ try {
         'estado' => 'Enviada',
         'usuario_upd' => null,
         'tipo_cambio' => $tipoCambio,
+    ]);
+
+    $receta->guardarCliente([
+        'receta_id' => $recetaId,
+        'razon_social_empresa' => $razonSocialEmpresa,
+        'direccion' => $direccionCliente,
+        'ruc' => $rucCliente,
+        'nombre_completo' => $nombreCompletoContacto,
+        'correo' => $correoContacto,
+        'celular' => $celularContacto,
+        'motivo' => $motivoSolicitud,
     ]);
 
     foreach ($items as $item) {

@@ -893,7 +893,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const formData = new FormData();
+            const formData = new FormData(recetaForm);
             formData.append("items", JSON.stringify(items));
             formData.append("tipo_cambio", String(getTipoCambioActual()));
 

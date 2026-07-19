@@ -73,6 +73,50 @@ require_once ROOT . '/controller/check_session.php';
                             </div>
                             <form class="needs-validation form-receta" novalidate="" data-user-cargo="<?= (int)$_SESSION['session_cargo'] ?>">
                                 <div class="card-body p-0">
+                                    <div class="p-3 border-bottom bg-body-tertiary">
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                            <h5 class="mb-0">Datos del cliente</h5>
+                                            <span class="text-muted fs-12">Completa esta información antes de guardar la receta.</span>
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-lg-6">
+                                                <label class="form-label" for="razon_social_empresa">Nombre (Razón Social de la Empresa)</label>
+                                                <input type="text" class="form-control" id="razon_social_empresa" name="razon_social_empresa" maxlength="200" required>
+                                                <div class="invalid-feedback">Ingresa la razón social de la empresa.</div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <label class="form-label" for="direccion_cliente">Dirección</label>
+                                                <input type="text" class="form-control" id="direccion_cliente" name="direccion_cliente" maxlength="250" required>
+                                                <div class="invalid-feedback">Ingresa la dirección del cliente.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6">
+                                                <label class="form-label" for="ruc_cliente">RUC</label>
+                                                <input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente" maxlength="11" minlength="11" pattern="[0-9]{11}" inputmode="numeric" required>
+                                                <div class="invalid-feedback">Ingresa un RUC válido de 11 dígitos.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6">
+                                                <label class="form-label" for="nombre_completo_contacto">Nombre completo</label>
+                                                <input type="text" class="form-control" id="nombre_completo_contacto" name="nombre_completo_contacto" maxlength="200" required>
+                                                <div class="invalid-feedback">Ingresa el nombre completo de la persona de contacto.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6">
+                                                <label class="form-label" for="correo_contacto">Correo</label>
+                                                <input type="email" class="form-control" id="correo_contacto" name="correo_contacto" maxlength="150" required>
+                                                <div class="invalid-feedback">Ingresa un correo válido.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6">
+                                                <label class="form-label" for="celular_contacto">Celular</label>
+                                                <input type="text" class="form-control" id="celular_contacto" name="celular_contacto" maxlength="20" inputmode="numeric" required>
+                                                <div class="invalid-feedback">Ingresa el celular de contacto.</div>
+                                            </div>
+                                            <div class="col-lg-8 col-md-12">
+                                                <label class="form-label" for="motivo_solicitud">Motivo (nombre de la solicitud)</label>
+                                                <input type="text" class="form-control" id="motivo_solicitud" name="motivo_solicitud" maxlength="200" required>
+                                                <div class="invalid-feedback">Ingresa el motivo o nombre de la solicitud.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="bg-success bg-opacity-10 py-1 text-center">
                                         <p class="m-0"><b id="total_item">0</b> item(s) agregados</p>
                                     </div>
