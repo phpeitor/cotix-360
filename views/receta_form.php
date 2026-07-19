@@ -64,7 +64,7 @@ require_once ROOT . '/controller/check_session.php';
 
         <div class="page-content">
             <div class="page-container">
-                 <div class="page-title-head d-flex align-items-sm-center flex-sm-row flex-column gap-2">
+                <div class="page-title-head d-flex align-items-sm-center flex-sm-row flex-column gap-2">
                     <div class="flex-grow-1">
                         <h4 class="fs-18 text-uppercase fw-bold mb-0">Recetas</h4>
                     </div>
@@ -396,37 +396,38 @@ require_once ROOT . '/controller/check_session.php';
                     <div class="row g-3">
                         <div class="col-lg-6">
                             <label class="form-label">Nombre (Razón Social de la Empresa)</label>
-                            <input type="text" class="form-control" id="clienteRazonSocial" readonly>
+                            <input type="text" class="form-control" id="clienteRazonSocial">
                         </div>
                         <div class="col-lg-6">
                             <label class="form-label">RUC</label>
-                            <input type="text" class="form-control" id="clienteRuc" readonly>
+                            <input type="text" class="form-control" id="clienteRuc" maxlength="11" inputmode="numeric">
                         </div>
                         <div class="col-lg-6">
                             <label class="form-label">Nombre completo</label>
-                            <input type="text" class="form-control" id="clienteNombreCompleto" readonly>
+                            <input type="text" class="form-control" id="clienteNombreCompleto">
                         </div>
                         <div class="col-lg-6">
                             <label class="form-label">Correo</label>
-                            <input type="text" class="form-control" id="clienteCorreo" readonly>
+                            <input type="email" class="form-control" id="clienteCorreo">
                         </div>
                         <div class="col-lg-6">
                             <label class="form-label">Celular</label>
-                            <input type="text" class="form-control" id="clienteCelular" readonly>
+                            <input type="text" class="form-control" id="clienteCelular" maxlength="9" minlength="9" pattern="[0-9]{9}" inputmode="numeric">
                         </div>
                         <div class="col-lg-6">
                             <label class="form-label">Motivo</label>
-                            <input type="text" class="form-control" id="clienteMotivo" readonly>
+                            <input type="text" class="form-control" id="clienteMotivo">
                         </div>
                         <div class="col-12">
                             <label class="form-label">Dirección</label>
-                            <textarea class="form-control" id="clienteDireccion" rows="3" readonly></textarea>
+                            <textarea class="form-control" id="clienteDireccion" rows="3"></textarea>
                         </div>
                     </div>
                 </div>
 
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="btnGuardarCliente">Guardar cliente</button>
                 </div>
             </div>
         </div>

@@ -94,7 +94,15 @@ class Receta {
                     :motivo,
                     :created_at,
                     :updated_at
-                )";
+                ) ON DUPLICATE KEY UPDATE
+                    razon_social_empresa = VALUES(razon_social_empresa),
+                    direccion = VALUES(direccion),
+                    ruc = VALUES(ruc),
+                    nombre_completo = VALUES(nombre_completo),
+                    correo = VALUES(correo),
+                    celular = VALUES(celular),
+                    motivo = VALUES(motivo),
+                    updated_at = VALUES(updated_at)";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':id_receta', (int)($data['receta_id'] ?? 0), PDO::PARAM_INT);

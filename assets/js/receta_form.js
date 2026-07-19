@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputRecetaNombre = document.getElementById("inputRecetaNombre");
     const btnEditRecetaNombre = document.getElementById("btnEditRecetaNombre");
     const clienteModalEl = document.getElementById("cliente-modal");
+    const btnGuardarCliente = document.getElementById("btnGuardarCliente");
     const clienteRazonSocialEl = document.getElementById("clienteRazonSocial");
     const clienteRucEl = document.getElementById("clienteRuc");
     const clienteNombreCompletoEl = document.getElementById("clienteNombreCompleto");
@@ -383,6 +384,68 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        btnGuardarCliente?.addEventListener("click", async () => {
+            if (!receta?.id) {
+                alertify.error("Receta inválida");
+                return;
+            }
+
+            const payload = getClienteModalPayload();
+
+            if (!payload.razon_social_empresa || !payload.direccion || !payload.ruc || !payload.nombre_completo || !payload.correo || !payload.celular || !payload.motivo) {
+                alertify.error("Completa todos los datos del cliente");
+                return;
+            }
+
+            if (!/^[0-9]{11}$/.test(payload.ruc)) {
+                alertify.error("El RUC debe contener 11 dígitos");
+                return;
+            }
+
+            if (!/^[0-9]{9}$/.test(payload.celular)) {
+                alertify.error("El celular debe contener 9 dígitos");
+                return;
+            }
+
+            if (!/^\S+@\S+\.\S+$/.test(payload.correo)) {
+                alertify.error("El correo del cliente no es válido");
+                return;
+            }
+
+            btnGuardarCliente.disabled = true;
+            try {
+                const fd = new FormData();
+                fd.append("receta_id", String(receta.id));
+                fd.append("razon_social_empresa", payload.razon_social_empresa);
+                fd.append("direccion", payload.direccion);
+                fd.append("ruc", payload.ruc);
+                fd.append("nombre_completo", payload.nombre_completo);
+                fd.append("correo", payload.correo);
+                fd.append("celular", payload.celular);
+                fd.append("motivo", payload.motivo);
+
+                const res = await fetch("controller/upd_receta_cliente.php", {
+                    method: "POST",
+                    body: fd
+                });
+
+                const json = await res.json();
+                if (!res.ok || !json.ok) {
+                    throw new Error(json.message || "No se pudo guardar el cliente");
+                }
+
+                cliente = json.cliente || payload;
+                alertify.success("Información del cliente guardada");
+                const modal = bootstrap.Modal.getInstance(clienteModalEl) || new bootstrap.Modal(clienteModalEl);
+                modal.hide();
+            } catch (error) {
+                console.error(error);
+                alertify.error(error.message || "Error al guardar el cliente");
+            } finally {
+                btnGuardarCliente.disabled = false;
+            }
+        });
+
         clienteModalEl?.addEventListener("show.bs.modal", renderClienteModal);
 
         cargarBasesReceta();
@@ -452,6 +515,31 @@ document.addEventListener("DOMContentLoaded", () => {
         if (clienteCelularEl) clienteCelularEl.value = data.celular || "";
         if (clienteMotivoEl) clienteMotivoEl.value = data.motivo || "";
         if (clienteDireccionEl) clienteDireccionEl.value = data.direccion || "";
+    }
+
+    function getClienteModalPayload() {
+        return {
+            razon_social_empresa: String(clienteRazonSocialEl?.value || "").trim(),
+            direccion: String(clienteDireccionEl?.value || "").trim(),
+            ruc: String(clienteRucEl?.value || "").replace(/\D/g, "").trim(),
+            nombre_completo: String(clienteNombreCompletoEl?.value || "").trim(),
+            correo: String(clienteCorreoEl?.value || "").trim(),
+            celular: String(clienteCelularEl?.value || "").replace(/\D/g, "").trim(),
+            motivo: String(clienteMotivoEl?.value || "").trim(),
+        };
+    }
+
+    function clienteCompleto(data = cliente) {
+        const clienteData = data || {};
+        return [
+            clienteData.razon_social_empresa,
+            clienteData.direccion,
+            clienteData.ruc,
+            clienteData.nombre_completo,
+            clienteData.correo,
+            clienteData.celular,
+            clienteData.motivo,
+        ].every(value => String(value ?? "").trim() !== "");
     }
 
     function renderHeader() {
@@ -1352,6 +1440,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!detalle.length) {
             alertify.error("Debe existir al menos un item en la receta");
+            return;
+        }
+
+        if (!clienteCompleto()) {
+            alertify.error("Completa y guarda la información del cliente antes de actualizar la receta");
+            if (clienteModalEl) {
+                const modal = new bootstrap.Modal(clienteModalEl);
+                modal.show();
+            }
             return;
         }
 
