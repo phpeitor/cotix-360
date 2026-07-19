@@ -415,6 +415,22 @@ class Receta {
         return (int)($row['total'] ?? 0) > 0;
     }
 
+    public function recetaTieneProductosPrecioCero(int $recetaId): bool
+    {
+        $sql = "SELECT COUNT(*) AS total
+                FROM receta_detalle
+                WHERE receta_id = :receta_id
+                  AND COALESCE(precio, 0) = 0";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        return (int)($row['total'] ?? 0) > 0;
+    }
+
     public function actualizarCabeceraEdicion(int $id, float $tipoCambio, int $usuarioUpd): bool
     {
         $sql = "UPDATE recetas

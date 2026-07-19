@@ -27,6 +27,19 @@ try {
     $hash = $_POST['hash'];
 
     $timezone = new DateTimeZone('America/Lima');
+    $item = new Item();
+
+    $modelo = trim((string)($_POST['modelo'] ?? ''));
+    if ($modelo !== '') {
+        $existe = $item->valida_modelo_upd($modelo, $hash);
+        if ($existe) {
+            echo json_encode([
+                'ok' => false,
+                'message' => 'El codigo ya se encuentra registrado'
+            ]);
+            exit;
+        }
+    }
 
     $data = [
         'categoria'         => $_POST['categoria'] ?? '',
@@ -43,8 +56,6 @@ try {
         'estado'            => isset($_POST['estado']) ? 1 : 0,
         'updated_at'        => (new DateTime('now', $timezone))->format('Y-m-d H:i:s')
     ];
-
-    $item = new Item();
 
     $ok = $item->actualizarItemRecetaPorHash($hash, $data);
 

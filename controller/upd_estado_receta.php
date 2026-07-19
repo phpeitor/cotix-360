@@ -35,6 +35,10 @@ try {
 
     $receta = new Receta();
 
+    if ($accion === 'aprobar' && $receta->recetaTieneProductosPrecioCero((int)$id)) {
+        throw new Exception('No se puede aprobar la receta porque hay productos con precio 0');
+    }
+
     if ($accion === 'aprobar' && !$receta->recetaTieneMargenes((int)$id)) {
         throw new Exception('No se puede aprobar la receta porque no tiene márgenes registrados');
     }

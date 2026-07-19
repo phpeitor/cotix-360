@@ -680,9 +680,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         btnDelete.addEventListener("click", () => {
-            tr.remove();
-            alertify.error("Item eliminado");
-            calcularTotales();
+            alertify.confirm(
+                "Confirmar eliminación",
+                "¿Seguro que deseas eliminar este item de la receta?",
+                () => {
+                    tr.remove();
+                    alertify.error("Item eliminado");
+                    calcularTotales();
+                },
+                () => {}
+            );
         });
     }
 

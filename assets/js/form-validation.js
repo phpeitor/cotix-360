@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
           window.location.href = redirectUrl;
         } else {
           const mensajeDuplicado = String(json.message || "");
-          if (isAddItemReceta && mensajeDuplicado.toLowerCase().includes("codigo ya se encuentra registrado")) {
+          if ((isAddItemReceta || form.classList.contains("form-upd-item-receta")) && mensajeDuplicado.toLowerCase().includes("codigo ya se encuentra registrado")) {
             setModeloDuplicadoState(true);
           } else {
             setModeloDuplicadoState(false);
