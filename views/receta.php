@@ -106,8 +106,8 @@ require_once ROOT . '/controller/check_session.php';
                                             </div>
                                             <div class="col-lg-4 col-md-6">
                                                 <label class="form-label" for="celular_contacto">Celular</label>
-                                                <input type="text" class="form-control" id="celular_contacto" name="celular_contacto" maxlength="20" inputmode="numeric" required>
-                                                <div class="invalid-feedback">Ingresa el celular de contacto.</div>
+                                                <input type="text" class="form-control" id="celular_contacto" name="celular_contacto" maxlength="9" minlength="9" pattern="[0-9]{9}" inputmode="numeric" required>
+                                                <div class="invalid-feedback">Ingresa un celular válido de 9 dígitos.</div>
                                             </div>
                                             <div class="col-lg-8 col-md-12">
                                                 <label class="form-label" for="motivo_solicitud">Motivo (nombre de la solicitud)</label>

@@ -29,6 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalMargenFormulaDolaresEl = document.getElementById("totalMargenFormulaDolares");
     const inputRecetaNombre = document.getElementById("inputRecetaNombre");
     const btnEditRecetaNombre = document.getElementById("btnEditRecetaNombre");
+    const clienteModalEl = document.getElementById("cliente-modal");
+    const clienteRazonSocialEl = document.getElementById("clienteRazonSocial");
+    const clienteRucEl = document.getElementById("clienteRuc");
+    const clienteNombreCompletoEl = document.getElementById("clienteNombreCompleto");
+    const clienteCorreoEl = document.getElementById("clienteCorreo");
+    const clienteCelularEl = document.getElementById("clienteCelular");
+    const clienteMotivoEl = document.getElementById("clienteMotivo");
+    const clienteDireccionEl = document.getElementById("clienteDireccion");
 
     const baseSelect = document.getElementById("filterBase");
     const categoriaSelect = document.getElementById("categoria");
@@ -66,6 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let cambiosEventSource = null;
     let streamHabilitado = true;
     let sincronizandoPrecios = false;
+    let cliente = null;
     const btnReloadPreciosContent = btnReloadPrecios?.innerHTML || '<i class="ti ti-refresh"></i>';
     const hash = getQueryParam("id");
 
@@ -374,6 +383,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        clienteModalEl?.addEventListener("show.bs.modal", renderClienteModal);
+
         cargarBasesReceta();
 
         window.addEventListener("beforeunload", () => {
@@ -406,6 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             receta = data.receta;
+            cliente = data.cliente || null;
             detalle = Array.isArray(data.detalle) ? data.detalle : [];
             const cambiosPrecio = Array.isArray(data.cambios_precio) ? data.cambios_precio : [];
             cambiosPrecioByItem = new Map(cambiosPrecio.map(item => [getClaveCambioPrecio(item), item]));
@@ -428,6 +440,18 @@ document.addEventListener("DOMContentLoaded", () => {
             alertify.error(error.message || "Error cargando receta");
             renderEmptyState("No se pudo cargar la receta.");
         }
+    }
+
+    function renderClienteModal() {
+        const data = cliente || {};
+
+        if (clienteRazonSocialEl) clienteRazonSocialEl.value = data.razon_social_empresa || "";
+        if (clienteRucEl) clienteRucEl.value = data.ruc || "";
+        if (clienteNombreCompletoEl) clienteNombreCompletoEl.value = data.nombre_completo || "";
+        if (clienteCorreoEl) clienteCorreoEl.value = data.correo || "";
+        if (clienteCelularEl) clienteCelularEl.value = data.celular || "";
+        if (clienteMotivoEl) clienteMotivoEl.value = data.motivo || "";
+        if (clienteDireccionEl) clienteDireccionEl.value = data.direccion || "";
     }
 
     function renderHeader() {

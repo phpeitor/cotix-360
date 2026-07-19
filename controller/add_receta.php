@@ -59,6 +59,10 @@ try {
         throw new Exception('El correo del contacto no es válido');
     }
 
+    if (!preg_match('/^[0-9]{9}$/', $celularContacto)) {
+        throw new Exception('El celular del contacto debe contener 9 dígitos numéricos');
+    }
+
     $receta = new Receta();
     $receta->begin();
 

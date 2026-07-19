@@ -275,11 +275,19 @@ class Receta {
     }
 
     public function obtenerPorHash(string $hash): ?array {
-        $sql = "SELECT c.*,p.usuario, p2.usuario as usu_upd
+        $sql = "SELECT c.*,p.usuario, p2.usuario as usu_upd,
+                       rc.razon_social_empresa AS cliente_razon_social_empresa,
+                       rc.direccion AS cliente_direccion,
+                       rc.ruc AS cliente_ruc,
+                       rc.nombre_completo AS cliente_nombre_completo,
+                       rc.correo AS cliente_correo,
+                       rc.celular AS cliente_celular,
+                       rc.motivo AS cliente_motivo
                 FROM recetas c
                 LEFT JOIN personal p on p.IDPERSONAL=c.usuario_id
                 LEFT JOIN personal p2 on p2.IDPERSONAL=c.usuario_upd
-                WHERE MD5(id) = :hash
+                LEFT JOIN receta_cliente rc ON rc.id_receta = c.id
+                WHERE MD5(c.id) = :hash
                 LIMIT 1";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':hash', $hash);

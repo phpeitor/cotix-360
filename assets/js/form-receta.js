@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const paginationToEl = document.getElementById("pagination_to");
     const paginationWrapper = document.getElementById("pagination_wrapper");
     const paginationList = document.getElementById("pagination_list");
+    const celularContactoInput = document.getElementById("celular_contacto");
     const userCargo = Number(recetaForm?.dataset?.userCargo || 0);
     const isTecnico = userCargo === 4;
     const PAGE_SIZE = 10;
@@ -113,6 +114,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
         input.addEventListener("blur", () => {
             input.value = String(clampCantidad(input.value));
+        });
+    }
+
+    function restringirCelularCliente(input) {
+        if (!input) return;
+
+        input.addEventListener("input", () => {
+            const soloDigitos = String(input.value ?? "").replace(/\D/g, "").slice(0, 9);
+            if (input.value !== soloDigitos) {
+                input.value = soloDigitos;
+            }
+        });
+
+        input.addEventListener("blur", () => {
+            input.value = String(input.value ?? "").replace(/\D/g, "").slice(0, 9);
         });
     }
 
@@ -887,6 +903,15 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        if (celularContactoInput) {
+            const celular = String(celularContactoInput.value || "").replace(/\D/g, "");
+            if (celular.length !== 9) {
+                alertify.error("El celular del cliente debe contener 9 dígitos numéricos");
+                celularContactoInput.focus();
+                return;
+            }
+        }
+
         if (submitBtn) {
             submitBtn.disabled = true;
             submitBtn.classList.add("opacity-50", "cursor-not-allowed");
@@ -931,6 +956,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const res = await fetch("controller/get_tipo_cambio.php");
             const data = await res.json();
 
+
+    restringirCelularCliente(celularContactoInput);
             if (!res.ok || !data.ok) {
                 throw new Error(data.message || "No se pudo obtener tipo de cambio SUNAT");
             }

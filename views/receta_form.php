@@ -131,6 +131,7 @@ require_once ROOT . '/controller/check_session.php';
 
                                 <div class="d-flex align-items-center gap-2">
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-categoria-modal" data-bs-title="Márgen" data-bs-placement="bottom" <?= (int)$_SESSION['session_cargo'] === 4 ? 'disabled aria-disabled="true" title="No disponible para este cargo"' : '' ?>><i class="ti ti-box fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#cliente-modal" data-bs-title="Cliente" data-bs-placement="bottom"><i class="ti ti-user-circle fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom"><i class="ti ti-search fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" id="btnObservacion" data-bs-toggle="tooltip" data-bs-title="Observación" data-bs-placement="bottom"><i class="ti ti-message-circle fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon js-navigate" data-href="receta_list.php" data-bs-title="Volver" data-bs-placement="bottom"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
@@ -378,6 +379,54 @@ require_once ROOT . '/controller/check_session.php';
                     </div>
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
                     <button type="button" class="btn btn-warning" id="btnGuardarRecetaCategoria">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cliente-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="cliente-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-bg-primary border-0">
+                    <h4 class="modal-title" id="cliente-modalLabel">Información del cliente</h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <label class="form-label">Nombre (Razón Social de la Empresa)</label>
+                            <input type="text" class="form-control" id="clienteRazonSocial" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">RUC</label>
+                            <input type="text" class="form-control" id="clienteRuc" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Nombre completo</label>
+                            <input type="text" class="form-control" id="clienteNombreCompleto" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Correo</label>
+                            <input type="text" class="form-control" id="clienteCorreo" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Celular</label>
+                            <input type="text" class="form-control" id="clienteCelular" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Motivo</label>
+                            <input type="text" class="form-control" id="clienteMotivo" readonly>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Dirección</label>
+                            <textarea class="form-control" id="clienteDireccion" rows="3" readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>

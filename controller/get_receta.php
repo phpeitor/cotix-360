@@ -24,10 +24,24 @@ try {
     $detalle = $recetaModel->obtenerDetallePorHash($hash);
     $cambiosPrecio = $recetaModel->obtenerCambiosPrecio((int)$receta['id']);
 
+    $cliente = null;
+    if (trim((string)($receta['cliente_razon_social_empresa'] ?? '')) !== '' || trim((string)($receta['cliente_ruc'] ?? '')) !== '') {
+        $cliente = [
+            'razon_social_empresa' => $receta['cliente_razon_social_empresa'] ?? '',
+            'direccion' => $receta['cliente_direccion'] ?? '',
+            'ruc' => $receta['cliente_ruc'] ?? '',
+            'nombre_completo' => $receta['cliente_nombre_completo'] ?? '',
+            'correo' => $receta['cliente_correo'] ?? '',
+            'celular' => $receta['cliente_celular'] ?? '',
+            'motivo' => $receta['cliente_motivo'] ?? '',
+        ];
+    }
+
     echo json_encode([
         'receta' => $receta,
         'detalle' => $detalle,
-        'cambios_precio' => $cambiosPrecio
+        'cambios_precio' => $cambiosPrecio,
+        'cliente' => $cliente
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 } catch (Throwable $e) {
