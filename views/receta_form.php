@@ -395,12 +395,12 @@ require_once ROOT . '/controller/check_session.php';
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-lg-6">
-                            <label class="form-label">Nombre (Razón Social de la Empresa)</label>
-                            <input type="text" class="form-control" id="clienteRazonSocial">
-                        </div>
-                        <div class="col-lg-6">
                             <label class="form-label">RUC</label>
                             <input type="text" class="form-control" id="clienteRuc" maxlength="11" inputmode="numeric">
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Nombre (Razón Social de la Empresa)</label>
+                            <input type="text" class="form-control" id="clienteRazonSocial">
                         </div>
                         <div class="col-lg-6">
                             <label class="form-label">Nombre completo</label>
@@ -438,7 +438,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js"></script>
-    <script src="./assets/js/receta_form.js?v=1.6"></script>
+    <script src="./assets/js/receta_form.js?v=1.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

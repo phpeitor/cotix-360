@@ -84,6 +84,8 @@ IP_API_URL=https://api.ipify.org
 # Opcional (consulta DNI usada por config/api.php; API_DNI_URL_2 es fallback)
 API_DNI_URL=
 API_DNI_URL_2=
+API_RUC_URL=
+API_RUC_URL_2=
 ```
 
 4. Crear la base de datos y cargar estructura/datos iniciales según tu script SQL interno.

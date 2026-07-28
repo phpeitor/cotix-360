@@ -117,6 +117,45 @@ document.addEventListener("DOMContentLoaded", () => {
         return String(valor ?? "").trim().toLowerCase();
     }
 
+    function configurarConsultaRuc(rucInput, nombreInput, direccionInput) {
+        if (!rucInput || !nombreInput) return;
+
+        let lastRucConsulted = null;
+
+        rucInput.addEventListener("input", async () => {
+            const ruc = String(rucInput.value || "").replace(/\D/g, "").slice(0, 11);
+            if (rucInput.value !== ruc) {
+                rucInput.value = ruc;
+            }
+
+            if (ruc.length < 11) {
+                lastRucConsulted = null;
+                return;
+            }
+
+            if (ruc === lastRucConsulted) return;
+            lastRucConsulted = ruc;
+
+            try {
+                const res = await fetch(`./config/api-ruc.php?ruc=${encodeURIComponent(ruc)}`);
+                const data = await res.json();
+
+                if (!res.ok || !data.ok) {
+                    throw new Error(data.message || "No se pudo consultar el RUC");
+                }
+
+                nombreInput.value = data.nombre || "";
+                if (direccionInput && data.direccion) {
+                    direccionInput.value = data.direccion;
+                }
+            } catch (error) {
+                console.error("Error RUC:", error);
+                lastRucConsulted = null;
+                alertify.error(error.message || "Error al consultar RUC");
+            }
+        });
+    }
+
     function getClaveCambioPrecio(item) {
         return [item?.nombre, item?.categoria, item?.sub_cat_1, item?.sub_cat_2, item?.descripcion]
             .map(normalizarClaveCambio)
@@ -450,6 +489,8 @@ document.addEventListener("DOMContentLoaded", () => {
             await cargarClienteDesdeServidor();
             renderClienteModal();
         });
+
+        configurarConsultaRuc(clienteRucEl, clienteRazonSocialEl, clienteDireccionEl);
 
         cargarBasesReceta();
 

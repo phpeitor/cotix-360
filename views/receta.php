@@ -79,20 +79,20 @@ require_once ROOT . '/controller/check_session.php';
                                             <span class="text-muted fs-12">Completa esta información antes de guardar la receta.</span>
                                         </div>
                                         <div class="row g-3">
-                                            <div class="col-lg-6">
-                                                <label class="form-label" for="razon_social_empresa">Nombre (Razón Social de la Empresa)</label>
-                                                <input type="text" class="form-control" id="razon_social_empresa" name="razon_social_empresa" maxlength="200" required>
-                                                <div class="invalid-feedback">Ingresa la razón social de la empresa.</div>
-                                            </div>
-                                            <div class="col-lg-6">
-                                                <label class="form-label" for="direccion_cliente">Dirección</label>
-                                                <input type="text" class="form-control" id="direccion_cliente" name="direccion_cliente" maxlength="250" required>
-                                                <div class="invalid-feedback">Ingresa la dirección del cliente.</div>
-                                            </div>
                                             <div class="col-lg-4 col-md-6">
                                                 <label class="form-label" for="ruc_cliente">RUC</label>
                                                 <input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente" maxlength="11" minlength="11" pattern="[0-9]{11}" inputmode="numeric" required>
                                                 <div class="invalid-feedback">Ingresa un RUC válido de 11 dígitos.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6">
+                                                <label class="form-label" for="razon_social_empresa">Nombre (Razón Social de la Empresa)</label>
+                                                <input type="text" class="form-control" id="razon_social_empresa" name="razon_social_empresa" maxlength="200" required>
+                                                <div class="invalid-feedback">Ingresa la razón social de la empresa.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6">
+                                                <label class="form-label" for="direccion_cliente">Dirección</label>
+                                                <input type="text" class="form-control" id="direccion_cliente" name="direccion_cliente" maxlength="250" required>
+                                                <div class="invalid-feedback">Ingresa la dirección del cliente.</div>
                                             </div>
                                             <div class="col-lg-4 col-md-6">
                                                 <label class="form-label" for="nombre_completo_contacto">Nombre completo</label>
@@ -109,7 +109,7 @@ require_once ROOT . '/controller/check_session.php';
                                                 <input type="text" class="form-control" id="celular_contacto" name="celular_contacto" maxlength="9" minlength="9" pattern="[0-9]{9}" inputmode="numeric" required>
                                                 <div class="invalid-feedback">Ingresa un celular válido de 9 dígitos.</div>
                                             </div>
-                                            <div class="col-lg-8 col-md-12">
+                                            <div class="col-lg-12 col-md-12">
                                                 <label class="form-label" for="motivo_solicitud">Motivo (nombre de la solicitud)</label>
                                                 <input type="text" class="form-control" id="motivo_solicitud" name="motivo_solicitud" maxlength="200" required>
                                                 <div class="invalid-feedback">Ingresa el motivo o nombre de la solicitud.</div>
@@ -321,7 +321,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js"></script>
-    <script src="./assets/js/form-receta.js?v=1.1"></script>
+    <script src="./assets/js/form-receta.js?v=1.2"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

@@ -31,6 +31,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const paginationToEl = document.getElementById("pagination_to");
     const paginationWrapper = document.getElementById("pagination_wrapper");
     const paginationList = document.getElementById("pagination_list");
+    const rucClienteInput = document.getElementById("ruc_cliente");
+    const razonSocialEmpresaInput = document.getElementById("razon_social_empresa");
+    const direccionClienteInput = document.getElementById("direccion_cliente");
     const celularContactoInput = document.getElementById("celular_contacto");
     const userCargo = Number(recetaForm?.dataset?.userCargo || 0);
     const isTecnico = userCargo === 4;
@@ -129,6 +132,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
         input.addEventListener("blur", () => {
             input.value = String(input.value ?? "").replace(/\D/g, "").slice(0, 9);
+        });
+    }
+
+    function configurarConsultaRuc(rucInput, nombreInput, direccionInput) {
+        if (!rucInput || !nombreInput) return;
+
+        let lastRucConsulted = null;
+
+        rucInput.addEventListener("input", async () => {
+            const ruc = String(rucInput.value || "").replace(/\D/g, "").slice(0, 11);
+            if (rucInput.value !== ruc) {
+                rucInput.value = ruc;
+            }
+
+            if (ruc.length < 11) {
+                lastRucConsulted = null;
+                return;
+            }
+
+            if (ruc === lastRucConsulted) return;
+            lastRucConsulted = ruc;
+
+            try {
+                const res = await fetch(`./config/api-ruc.php?ruc=${encodeURIComponent(ruc)}`);
+                const data = await res.json();
+
+                if (!res.ok || !data.ok) {
+                    throw new Error(data.message || "No se pudo consultar el RUC");
+                }
+
+                nombreInput.value = data.nombre || "";
+                if (direccionInput && data.direccion) {
+                    direccionInput.value = data.direccion;
+                }
+            } catch (error) {
+                console.error("Error RUC:", error);
+                lastRucConsulted = null;
+                alertify.error(error.message || "Error al consultar RUC");
+            }
         });
     }
 
@@ -573,6 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
     subCat2Select?.addEventListener("change", onSubCat2Change);
     marcaSelect?.addEventListener("change", onMarcaChange);
     modeloSelect?.addEventListener("change", onModeloChange);
+    configurarConsultaRuc(rucClienteInput, razonSocialEmpresaInput, direccionClienteInput);
 
     cargarBasesReceta();
 
