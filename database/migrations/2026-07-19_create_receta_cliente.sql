@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS receta_cliente (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    id_receta INT UNSIGNED NOT NULL,
+    id_receta BIGINT UNSIGNED NOT NULL,
     razon_social_empresa VARCHAR(200) NOT NULL,
     direccion VARCHAR(250) NOT NULL,
     ruc VARCHAR(11) NOT NULL,

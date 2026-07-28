@@ -446,7 +446,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        clienteModalEl?.addEventListener("show.bs.modal", renderClienteModal);
+        clienteModalEl?.addEventListener("show.bs.modal", async () => {
+            await cargarClienteDesdeServidor();
+            renderClienteModal();
+        });
 
         cargarBasesReceta();
 
@@ -502,6 +505,26 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error(error);
             alertify.error(error.message || "Error cargando receta");
             renderEmptyState("No se pudo cargar la receta.");
+        }
+    }
+
+    async function cargarClienteDesdeServidor() {
+        if (!hash) {
+            cliente = null;
+            return;
+        }
+
+        try {
+            const res = await fetch(`controller/get_receta.php?id=${encodeURIComponent(hash)}`);
+            const data = await res.json();
+
+            if (!res.ok || data.error || !data.receta) {
+                return;
+            }
+
+            cliente = data.cliente || null;
+        } catch (error) {
+            console.error(error);
         }
     }
 

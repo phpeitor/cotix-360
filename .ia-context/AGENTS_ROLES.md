@@ -10,7 +10,7 @@ Definir responsabilidades para trabajar el proyecto con agentes o colaboradores 
 - Backend: PHP con capas `controller/`, `model/`, `database/`.
 - Frontend: JavaScript, Bootstrap, Grid.js y assets en `assets/`.
 - Base de datos: MySQL con migraciones en `database/migrations/`.
-- Documentacion fuente: `README.md`, `docs/REGLAS_DESARROLLO.md` y `docs/CALCULO_VARIABLES.md`.
+- Documentacion fuente: `README.md`, `docs/REGLAS_DESARROLLO.md` y `.ia-context/CALCULO_VARIABLES.md`.
 
 ## Agente Alpha - Full Stack
 
@@ -57,7 +57,7 @@ Definir responsabilidades para trabajar el proyecto con agentes o colaboradores 
 
 - Verificar que cada cambio cumpla `docs/REGLAS_DESARROLLO.md`.
 - Probar flujos de cotizacion, recetas, cargas, PDFs y permisos.
-- Validar calculos contra `docs/CALCULO_VARIABLES.md`.
+- Validar calculos contra `.ia-context/CALCULO_VARIABLES.md`.
 - Revisar que SSE emita y cierre eventos correctamente.
 - Confirmar que roles como Tecnico no vean precios ni totales sensibles.
 - Reportar pasos de reproduccion, resultado esperado y resultado actual.

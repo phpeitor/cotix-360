@@ -62,7 +62,7 @@ Mantener controladores, modelos y calculos comerciales consistentes, seguros y f
 ## Calculos comerciales
 
 - Las reglas de calculo deben ser deterministas y compartidas entre pantallas y PDFs.
-- Respetar `docs/CALCULO_VARIABLES.md` para totales por moneda y `Total Peru`.
+- Respetar `.ia-context/CALCULO_VARIABLES.md` para totales por moneda y `Total Peru`.
 - Conservar precision interna y redondear solo para presentacion.
 - Si se modifica FOB, flete, gastos, interes, factor, margen o conversion de moneda, actualizar documentacion funcional y pruebas manuales relevantes.
 

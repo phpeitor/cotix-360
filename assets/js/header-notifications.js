@@ -27,6 +27,17 @@
         const meta = parseMeta(item.meta_json || item.meta);
         const tipo = String(item.tipo || '').trim();
 
+        if (tipo === 'receta') {
+            const cargo = Number(window.PERMISOS_STATE?.cargo ?? (typeof CARGO !== 'undefined' ? CARGO : 0));
+            const recetaId = item.receta_id || meta.receta_id;
+
+            if ((cargo === 1 || cargo === 3) && recetaId && typeof md5 === 'function') {
+                return `receta_form.php?id=${md5(String(recetaId))}`;
+            }
+
+            return '';
+        }
+
         if (tipo !== 'item_receta') {
             return '';
         }
@@ -71,6 +82,9 @@
         const tone = escapeHtml(item.tone || 'secondary');
         const url = notificationUrl(item);
         const attrs = url ? ` role="button" data-href="${escapeHtml(url)}" style="cursor:pointer;"` : '';
+        const recetaMeta = item.tipo === 'receta' && item.receta_id
+            ? `#${escapeHtml(item.receta_id)} | Total items: ${escapeHtml(item.total_items ?? 0)}`
+            : '';
 
         return `
             <div class="dropdown-item notification-item py-2 text-wrap active" id="${id}"${attrs}>
@@ -85,7 +99,7 @@
                     <span class="flex-grow-1 text-muted">
                         <span class="fw-medium text-body">${usuario}</span> - ${titulo}
                         <br />
-                        <span class="fs-12">${detalle}</span>
+                        <span class="fs-12"> ${recetaMeta} | ${detalle}</span>
                         <br />
                         <span class="fs-12">${fecha}</span>
                     </span>
@@ -122,7 +136,9 @@
             icon: item.icon,
             tone: item.tone,
             tipo: item.tipo,
-            meta_json: item.meta_json
+            meta_json: item.meta_json,
+            receta_id: item.receta_id,
+            total_items: item.total_items
         };
     }
 
@@ -158,6 +174,10 @@
 
             headerContainer.innerHTML = '';
 
+            if (typeof window.getPermisosState === 'function') {
+                await window.getPermisosState();
+            }
+
             const [dashboardRes, notificationsRes] = await Promise.all([
                 fetch('controller/dashboard.php'),
                 fetch('controller/header_notifications.php')
@@ -176,7 +196,10 @@
                     : String(item.doc || ''),
                 fecha: item.ultima_fecha,
                 icon: item.doc && String(item.doc).length >= 32 ? 'ti-message-circle' : 'ti-plus',
-                tone: item.doc && String(item.doc).length >= 32 ? 'danger' : 'secondary'
+                tone: item.doc && String(item.doc).length >= 32 ? 'danger' : 'secondary',
+                tipo: String(item.tipo || '').toLowerCase(),
+                receta_id: item.receta_id,
+                total_items: item.total_items
             }, 'notification-dashboard')) : [];
 
             const persistedItems = Array.isArray(notificationsJson?.notifications) ? notificationsJson.notifications.map(item => createNotificationEntry({

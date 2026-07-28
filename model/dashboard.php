@@ -110,7 +110,9 @@ class Dashboard {
                 b.usuario,
                 MD5(b.doc) AS doc,
                 MAX(a.fecha) AS ultima_fecha,
-                'usuario' as tipo
+                'usuario' as tipo,
+                NULL AS receta_id,
+                NULL AS total_items
                 FROM login a
                 LEFT JOIN personal b ON a.id_user = b.idpersonal
                 WHERE a.tipo = 'IN'
@@ -125,7 +127,9 @@ class Dashboard {
                 t.usuario,
                 t.estado AS doc,
                 t.created_at AS ultima_fecha,
-                'cotización' as tipo
+                'cotización' as tipo,
+                NULL AS receta_id,
+                NULL AS total_items
                 FROM (
                     SELECT
                         b.usuario,
@@ -145,16 +149,22 @@ class Dashboard {
                 t2.usuario,
                 t2.estado AS doc,
                 t2.created_at AS ultima_fecha,
-                'receta' as tipo
+                'receta' as tipo,
+                t2.id AS receta_id,
+                t2.total_items
                 FROM (
                     SELECT
+                        a.id,
                         b.usuario,
                         a.estado,
-                        a.created_at
+                        a.created_at,
+                        COALESCE(SUM(rd.cantidad), 0) AS total_items
                     FROM recetas a
                     LEFT JOIN personal b ON a.usuario_id = b.IDPERSONAL
+                    LEFT JOIN receta_detalle rd ON rd.receta_id = a.id
                     WHERE  a.created_at >= CURDATE()
                     AND a.created_at < CURDATE() + INTERVAL 1 DAY
+                    GROUP BY a.id, b.usuario, a.estado, a.created_at
                     ORDER BY a.created_at DESC
                     LIMIT 5
                 ) t2

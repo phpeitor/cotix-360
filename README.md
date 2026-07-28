@@ -81,10 +81,9 @@ DB_PASS=
 # Requerido por controller/acceso.php y controller/logout.php
 IP_API_URL=https://api.ipify.org
 
-# Opcional (solo si usas integración externa de config/api.php)
-API_CLINIC_STATUS_URL=
-HEALTH_WORKER_ID=
-DOCUMENT_TYPE_ID=
+# Opcional (consulta DNI usada por config/api.php; API_DNI_URL_2 es fallback)
+API_DNI_URL=
+API_DNI_URL_2=
 ```
 
 4. Crear la base de datos y cargar estructura/datos iniciales según tu script SQL interno.

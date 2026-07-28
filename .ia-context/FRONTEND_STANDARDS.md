@@ -47,7 +47,7 @@ Mantener interfaces consistentes, seguras y mantenibles para los modulos de coti
 
 ## Calculos y moneda
 
-- Usar las formulas documentadas en `docs/CALCULO_VARIABLES.md` para totales de recetas.
+- Usar las formulas documentadas en `.ia-context/CALCULO_VARIABLES.md` para totales de recetas.
 - Mostrar soles y dolares con 2 decimales; tipo de cambio con 3 decimales.
 - Conservar precision interna y redondear al presentar.
 - Para totales mixtos, mostrar `Total S/`, `Total $` y `Total Peru` cuando aplique.
@@ -72,4 +72,4 @@ Mantener interfaces consistentes, seguras y mantenibles para los modulos de coti
 3. Las validaciones criticas existen tambien en backend.
 4. Los errores al usuario son claros y no filtran informacion sensible.
 5. El flujo funciona en desktop y mobile cuando la vista sea usada por usuarios finales.
-6. Si se modificaron calculos, se actualizo `docs/CALCULO_VARIABLES.md` o la documentacion funcional relacionada.
+6. Si se modificaron calculos, se actualizo `.ia-context/CALCULO_VARIABLES.md` o la documentacion funcional relacionada.
