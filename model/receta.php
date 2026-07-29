@@ -242,6 +242,7 @@ class Receta {
                 c.id,
                 c.id_receta_duplicada,
                 p.usuario,
+                p2.usuario AS usuario_aprobador,
                 c.nombre,
                 rc.ruc AS cliente_ruc,
                 rc.razon_social_empresa AS cliente_razon_social_empresa,
@@ -257,12 +258,14 @@ class Receta {
             FROM recetas_ingenieria c
             LEFT JOIN detalle_ingenieria cd ON cd.receta_id = c.id
             LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
+            LEFT JOIN personal p2 ON p2.IDPERSONAL = c.usuario_upd
             LEFT JOIN receta_cliente rc ON rc.id_receta = c.id_receta_duplicada
             WHERE c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)
             GROUP BY
                 c.id,
                 c.id_receta_duplicada,
                 p.usuario,
+                p2.usuario,
                 c.nombre,
                 rc.ruc,
                 rc.razon_social_empresa,
@@ -275,6 +278,47 @@ class Receta {
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':fec_ini', $fec_ini);
         $stmt->bindValue(':fec_fin', $fec_fin);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function obtenerIngenieriaPorHash(string $hash): ?array
+    {
+        $sql = "SELECT c.*,
+                       p.usuario,
+                       p2.usuario AS usuario_aprobador,
+                       rc.razon_social_empresa AS cliente_razon_social_empresa,
+                       rc.direccion AS cliente_direccion,
+                       rc.ruc AS cliente_ruc,
+                       rc.nombre_completo AS cliente_nombre_completo,
+                       rc.correo AS cliente_correo,
+                       rc.celular AS cliente_celular,
+                       rc.motivo AS cliente_motivo
+                FROM recetas_ingenieria c
+                LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
+                LEFT JOIN personal p2 ON p2.IDPERSONAL = c.usuario_upd
+                LEFT JOIN receta_cliente rc ON rc.id_receta = c.id_receta_duplicada
+                WHERE MD5(c.id) = :hash
+                LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    public function obtenerDetalleIngenieriaPorHash(string $hash): array
+    {
+        $sql = "SELECT d.*
+                FROM detalle_ingenieria d
+                INNER JOIN recetas_ingenieria r ON r.id = d.receta_id
+                WHERE MD5(r.id) = :hash
+                ORDER BY d.tipo ASC, d.sub_cat_1 ASC, d.sub_cat_2 ASC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':hash', $hash);
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];

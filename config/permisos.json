@@ -59,7 +59,8 @@
     "nombre": "Ingeniería",
     "acceso": [
       "home.php",
-      "ingenieria.php"
+      "ingenieria.php",
+      "ingenieria_form.php"
     ]
   }
 }

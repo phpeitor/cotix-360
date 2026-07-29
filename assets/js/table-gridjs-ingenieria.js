@@ -23,8 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const grid = new gridjs.Grid({
         columns: [
             { id: "id", name: "ID", width: "70px" },
-            { id: "id_receta_duplicada", name: "Origen", width: "90px" },
-            { id: "usuario", name: "Usuario", width: "100px" },
+            { id: "id_receta_duplicada", name: "Origen", hidden: true },
+            { id: "usuario", name: "Usuario", width: "120px" },
+            { id: "usuario_aprobador", name: "Aprobado", width: "120px" },
             {
                 id: "nombre",
                 name: "Receta",
@@ -46,7 +47,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 formatter: (cell, row) => renderItems(cell, row)
             },
             { id: "total_items", name: "", hidden: true },
-            { id: "created_at", name: "Fecha", width: "170px" }
+            { id: "created_at", name: "Fecha", width: "170px" },
+            {
+                id: "acciones",
+                name: "Opciones",
+                width: "100px",
+                sort: false,
+                formatter: (_, row) => {
+                    const id = row?.cells?.[0]?.data;
+                    const hashId = typeof md5 === "function" ? md5(String(id)) : String(id);
+
+                    return gridjs.html(`
+                        <a href="ingenieria_form.php?id=${hashId}"
+                           class="btn btn-soft-primary btn-icon btn-sm rounded-circle"
+                           data-bs-toggle="tooltip"
+                           data-bs-title="Ver">
+                            <i class="ti ti-eye"></i>
+                        </a>
+                    `);
+                }
+            }
         ],
         server: {
             url: buildUrl(),
@@ -107,8 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderRecetaCliente(nombre, row) {
         const recetaNombre = String(nombre ?? "").trim();
-        const ruc = String(row?.cells?.[4]?.data ?? "").trim();
-        const razonSocial = String(row?.cells?.[5]?.data ?? "").trim();
+        const ruc = String(row?.cells?.[5]?.data ?? "").trim();
+        const razonSocial = String(row?.cells?.[6]?.data ?? "").trim();
         const cliente = [ruc, razonSocial].filter(Boolean).join(" - ");
 
         return gridjs.html(`
@@ -123,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!items) return "";
 
         const arr = String(items).split("|").map(i => i.trim()).filter(Boolean);
-        const total = Number(row?.cells?.[8]?.data ?? arr.length);
+        const total = Number(row?.cells?.[9]?.data ?? arr.length);
         const id = String(row?.cells?.[0]?.data ?? "").trim();
 
         if (arr.length <= 4) {
