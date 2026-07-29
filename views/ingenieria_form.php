@@ -92,6 +92,7 @@ require_once ROOT . '/controller/check_session.php';
                                 </div>
 
                                 <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#cliente-modal" data-bs-title="Cliente" data-bs-placement="bottom"><i class="ti ti-user-circle fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom"><i class="ti ti-search fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon js-navigate" data-href="ingenieria.php" data-bs-title="Volver" data-bs-placement="bottom"><i class="ti ti-corner-up-left-double fs-18"></i></button>
                                 </div>
@@ -119,7 +120,8 @@ require_once ROOT . '/controller/check_session.php';
                                                 </p>
                                             </div>
                                             <div class="col-lg-3 col-12">
-                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Cliente</span> <span id="cliente_resumen">-</span></p>
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total PE S/.</span> <span id="total_peru">0.00</span></p>
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-minimalistic-outline" class="text-success"></iconify-icon> <span class="text-dark">Total PE $</span> <span id="total_peru_dolares">0.00</span></p>
                                             </div>
                                         </div>
                                     </div>
@@ -140,6 +142,11 @@ require_once ROOT . '/controller/check_session.php';
                                             <tbody id="ingenieriaDetalleBody"></tbody>
                                         </table>
                                     </div>
+                                </div>
+                                <div class="card-footer border-0 text-end">
+                                    <button type="submit" class="btn btn-success btn-icon" data-bs-toggle="tooltip" data-bs-title="Guardar receta">
+                                        <i class="ti ti-device-floppy"></i>
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -215,10 +222,59 @@ require_once ROOT . '/controller/check_session.php';
         </div>
     </div>
 
+    <div id="cliente-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="cliente-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-bg-primary border-0">
+                    <h4 class="modal-title" id="cliente-modalLabel">Información del cliente</h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <label class="form-label">RUC</label>
+                            <input type="text" class="form-control" id="clienteRuc" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Nombre (Razón Social de la Empresa)</label>
+                            <input type="text" class="form-control" id="clienteRazonSocial" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Nombre completo</label>
+                            <input type="text" class="form-control" id="clienteNombreCompleto" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Correo</label>
+                            <input type="email" class="form-control" id="clienteCorreo" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Celular</label>
+                            <input type="text" class="form-control" id="clienteCelular" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Motivo</label>
+                            <input type="text" class="form-control" id="clienteMotivo" readonly>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Dirección</label>
+                            <textarea class="form-control" id="clienteDireccion" rows="3" readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="btnGuardarCliente" disabled aria-disabled="true">Guardar cliente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php include ROOT . '/layout/theme.html'; ?>
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="./assets/js/ingenieria_form.js?v=1.1"></script>
+    <script src="./assets/js/ingenieria_form.js?v=1.2"></script>
 </body>
 </html>

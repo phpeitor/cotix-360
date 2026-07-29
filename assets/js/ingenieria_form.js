@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const modeloSelect = document.getElementById("filterModelo");
 
     const fields = {
+        form: document.querySelector("form.form-ingenieria"),
         id: document.getElementById("ingenieria_id"),
         nombre: document.getElementById("receta_nombre_display"),
         nombreInput: document.getElementById("inputRecetaNombre"),
@@ -24,14 +25,23 @@ document.addEventListener("DOMContentLoaded", () => {
         totalItem: document.getElementById("total_item"),
         totalSoles: document.getElementById("total_soles"),
         totalDolares: document.getElementById("total_dolares"),
+        totalPeru: document.getElementById("total_peru"),
+        totalPeruDolares: document.getElementById("total_peru_dolares"),
         tipoCambio: document.getElementById("tipo_cambio_sunat"),
         tipoCambioInput: document.getElementById("tipo_cambio_input"),
         btnTipoCambio: document.getElementById("btnEditTipoCambio"),
-        clienteResumen: document.getElementById("cliente_resumen")
+        clienteRuc: document.getElementById("clienteRuc"),
+        clienteRazonSocial: document.getElementById("clienteRazonSocial"),
+        clienteNombreCompleto: document.getElementById("clienteNombreCompleto"),
+        clienteCorreo: document.getElementById("clienteCorreo"),
+        clienteCelular: document.getElementById("clienteCelular"),
+        clienteMotivo: document.getElementById("clienteMotivo"),
+        clienteDireccion: document.getElementById("clienteDireccion")
     };
 
     let receta = null;
     let detalle = [];
+    let cliente = null;
 
     if (!hash) {
         alertify.error("ID inválido");
@@ -70,6 +80,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (event.key === "Escape") cancelTipoCambio();
         });
 
+        fields.form?.addEventListener("submit", event => {
+            event.preventDefault();
+            alertify.success("Receta ingeniería guardada");
+            loadIngenieria();
+        });
+
         document.addEventListener("click", event => {
             const delBtn = event.target.closest("[data-delete-detalle]");
             if (delBtn) {
@@ -102,8 +118,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             receta = data.receta || {};
             detalle = Array.isArray(data.detalle) ? data.detalle : [];
+            cliente = data.cliente || null;
 
-            renderHeader(data.cliente || null);
+            renderHeader();
             renderDetalle();
             initTooltips();
         } catch (error) {
@@ -139,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (el) el.textContent = value || "-";
     }
 
-    function renderHeader(cliente) {
+    function renderHeader() {
         setText(fields.id, receta.id);
         setText(fields.nombre, receta.nombre || "-");
         setText(fields.usuario, receta.usuario);
@@ -147,7 +164,14 @@ document.addEventListener("DOMContentLoaded", () => {
         fields.estado.innerHTML = `<span class="badge badge-outline-success">${escapeHtml(receta.estado || "GANADO")}</span>`;
         setText(fields.fecha, receta.created_at);
         setText(fields.tipoCambio, Number(receta.tipo_cambio || 0).toFixed(3));
-        setText(fields.clienteResumen, cliente ? `${cliente.ruc || ""} ${cliente.razon_social_empresa || ""}`.trim() : "-");
+
+        fields.clienteRuc.value = cliente?.ruc || "";
+        fields.clienteRazonSocial.value = cliente?.razon_social_empresa || "";
+        fields.clienteNombreCompleto.value = cliente?.nombre_completo || "";
+        fields.clienteCorreo.value = cliente?.correo || "";
+        fields.clienteCelular.value = cliente?.celular || "";
+        fields.clienteMotivo.value = cliente?.motivo || "";
+        fields.clienteDireccion.value = cliente?.direccion || "";
     }
 
     function renderDetalle() {
@@ -211,6 +235,13 @@ document.addEventListener("DOMContentLoaded", () => {
         setText(fields.totalItem, String(totalItems));
         setText(fields.totalSoles, money(totalSoles));
         setText(fields.totalDolares, money(totalDolares));
+
+        const tipoCambio = Number(receta?.tipo_cambio) || 1;
+        const totalPE = totalSoles + (totalDolares * tipoCambio);
+        const totalPEDolares = tipoCambio > 0 ? totalPE / tipoCambio : 0;
+
+        setText(fields.totalPeru, money(totalPE));
+        setText(fields.totalPeruDolares, money(totalPEDolares));
     }
 
     async function post(url, body) {
@@ -279,6 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await post("controller/upd_ingenieria_header.php", { hash, field: "tipo_cambio", value: String(value) });
             receta.tipo_cambio = value;
             setText(fields.tipoCambio, value.toFixed(3));
+            renderDetalle();
             alertify.success("Tipo de cambio actualizado");
             cancelTipoCambio();
         } catch (error) {
