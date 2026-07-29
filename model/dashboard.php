@@ -116,8 +116,7 @@ class Dashboard {
                 FROM login a
                 LEFT JOIN personal b ON a.id_user = b.idpersonal
                 WHERE a.tipo = 'IN'
-                AND a.fecha >= CURDATE()
-                AND a.fecha < CURDATE() + INTERVAL 1 DAY
+                AND a.fecha >= DATE_SUB(sysdate(), INTERVAL 8 HOUR)
                 AND b.usuario != 'php.io'
                 GROUP BY b.usuario, b.doc
 
@@ -137,8 +136,7 @@ class Dashboard {
                         a.created_at
                     FROM cotizaciones a
                     LEFT JOIN personal b ON a.usuario_id = b.IDPERSONAL
-                    WHERE  a.created_at >= CURDATE()
-                    AND a.created_at < CURDATE() + INTERVAL 1 DAY
+                    WHERE a.created_at >= DATE_SUB(sysdate(), INTERVAL 8 HOUR)
                     ORDER BY a.created_at DESC
                     LIMIT 5
                 ) t
@@ -162,8 +160,7 @@ class Dashboard {
                     FROM recetas a
                     LEFT JOIN personal b ON a.usuario_id = b.IDPERSONAL
                     LEFT JOIN receta_detalle rd ON rd.receta_id = a.id
-                    WHERE  a.created_at >= CURDATE()
-                    AND a.created_at < CURDATE() + INTERVAL 1 DAY
+                    WHERE a.created_at >= DATE_SUB(sysdate(), INTERVAL 8 HOUR)
                     GROUP BY a.id, b.usuario, a.estado, a.created_at
                     ORDER BY a.created_at DESC
                     LIMIT 5

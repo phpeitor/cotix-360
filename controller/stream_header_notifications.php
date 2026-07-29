@@ -32,6 +32,23 @@ function sse_send(string $event, array $payload): void
     flush();
 }
 
+function header_notifications_payload(Dashboard $dashboard): array
+{
+    return [
+        'header' => $dashboard->header(),
+        'notifications' => $dashboard->headerNotifications(10),
+        'timestamp' => date('c')
+    ];
+}
+
+function header_notifications_signature(array $payload): string
+{
+    return md5(json_encode([
+        'header' => $payload['header'] ?? [],
+        'notifications' => $payload['notifications'] ?? []
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+}
+
 if (!isset($_SESSION['session_id']) || (int)$_SESSION['session_id'] <= 0) {
     sse_send('error', ['message' => 'Sesión expirada o usuario no autenticado']);
     exit;
@@ -45,8 +62,10 @@ try {
     echo "retry: 3000\n\n";
     flush();
 
-    $baseline = $dashboard->headerNotificationsSignature();
-    $lastSignature = $baseline['total'] . '|' . $baseline['max_id'];
+    $payload = header_notifications_payload($dashboard);
+    $lastSignature = header_notifications_signature($payload);
+    sse_send('header_notifications', $payload);
+
     $startedAt = time();
     $maxLifetimeSeconds = 45;
     $pollSeconds = 2;
@@ -54,17 +73,12 @@ try {
     $pingEverySeconds = 15;
 
     while (!connection_aborted()) {
-        $firma = $dashboard->headerNotificationsSignature();
-        $signature = $firma['total'] . '|' . $firma['max_id'];
+        $payload = header_notifications_payload($dashboard);
+        $signature = header_notifications_signature($payload);
 
         if ($signature !== $lastSignature) {
-            sse_send('header_notifications', [
-                'total' => (int)$firma['total'],
-                'notifications' => $dashboard->headerNotifications(10),
-                'timestamp' => date('c')
-            ]);
+            sse_send('header_notifications', $payload);
 
-            $baseline = $firma;
             $lastSignature = $signature;
             $lastPingAt = time();
         } elseif ((time() - $lastPingAt) >= $pingEverySeconds) {

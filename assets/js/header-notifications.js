@@ -72,6 +72,56 @@
         badgeEl.className = 'noti-icon-badge d-none';
     }
 
+    function injectStreamStyles() {
+        if (document.getElementById('header-notifications-stream-styles')) return;
+
+        const style = document.createElement('style');
+        style.id = 'header-notifications-stream-styles';
+        style.textContent = `
+            @keyframes notificationGlow {
+                0% { box-shadow: 0 0 0 0 rgba(58, 151, 95, .55); transform: translateY(0); }
+                45% { box-shadow: 0 0 0 10px rgba(58, 151, 95, .12); transform: translateY(-1px); }
+                100% { box-shadow: 0 0 0 0 rgba(58, 151, 95, 0); transform: translateY(0); }
+            }
+
+            @keyframes notificationItemFlash {
+                0% { background-color: rgba(58, 151, 95, .2); }
+                100% { background-color: transparent; }
+            }
+
+            .notification-stream-glow {
+                animation: notificationGlow 1.25s ease-out 2;
+            }
+
+            .notification-stream-item-flash {
+                animation: notificationItemFlash 1.8s ease-out 1;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    function openNotificationsDropdown(badgeEl, headerContainer) {
+        const toggleEl = badgeEl?.closest('.dropdown')?.querySelector('[data-bs-toggle="dropdown"]');
+        if (!toggleEl) return;
+
+        if (window.bootstrap?.Dropdown) {
+            window.bootstrap.Dropdown.getOrCreateInstance(toggleEl).show();
+        } else if (toggleEl.getAttribute('aria-expanded') !== 'true') {
+            toggleEl.click();
+        }
+
+        toggleEl.classList.remove('notification-stream-glow');
+        void toggleEl.offsetWidth;
+        toggleEl.classList.add('notification-stream-glow');
+
+        const firstItem = headerContainer?.querySelector('.notification-item');
+        if (firstItem) {
+            firstItem.classList.remove('notification-stream-item-flash');
+            void firstItem.offsetWidth;
+            firstItem.classList.add('notification-stream-item-flash');
+        }
+    }
+
     function notificationHtml(item) {
         const id = escapeHtml(item.id || item.domId || `notification-${Date.now()}`);
         const usuario = escapeHtml(item.usuario || 'Sistema');
@@ -83,7 +133,7 @@
         const url = notificationUrl(item);
         const attrs = url ? ` role="button" data-href="${escapeHtml(url)}" style="cursor:pointer;"` : '';
         const recetaMeta = item.tipo === 'receta' && item.receta_id
-            ? `#${escapeHtml(item.receta_id)} | Total items: ${escapeHtml(item.total_items ?? 0)}`
+            ? `#${escapeHtml(item.receta_id)} | Total items: ${escapeHtml(item.total_items ?? 0)} | `
             : '';
 
         return `
@@ -99,7 +149,7 @@
                     <span class="flex-grow-1 text-muted">
                         <span class="fw-medium text-body">${usuario}</span> - ${titulo}
                         <br />
-                        <span class="fs-12"> ${recetaMeta} | ${detalle}</span>
+                        <span class="fs-12"> ${recetaMeta} ${detalle}</span>
                         <br />
                         <span class="fs-12">${fecha}</span>
                     </span>
@@ -142,6 +192,53 @@
         };
     }
 
+    function createDashboardEntry(item, index) {
+        return createNotificationEntry({
+            id: `dashboard-${index + 1}`,
+            key: `dashboard-${item.tipo || ''}-${item.usuario || ''}-${item.doc || ''}-${item.ultima_fecha || ''}-${item.receta_id || ''}`,
+            usuario: String(item.usuario || '').toLowerCase(),
+            titulo: String(item.tipo || 'Actividad').toLowerCase(),
+            detalle: item.doc && String(item.doc).length >= 32
+                ? `inició sesión ${String(item.doc).substring(0, 12)}*******`
+                : String(item.doc || ''),
+            fecha: item.ultima_fecha,
+            icon: item.doc && String(item.doc).length >= 32 ? 'ti-message-circle' : 'ti-plus',
+            tone: item.doc && String(item.doc).length >= 32 ? 'danger' : 'secondary',
+            tipo: String(item.tipo || '').toLowerCase(),
+            receta_id: item.receta_id,
+            total_items: item.total_items
+        }, 'notification-dashboard');
+    }
+
+    function createPersistedEntry(item) {
+        return createNotificationEntry({
+            id: `db-${item.id}`,
+            key: `db-${item.id}`,
+            usuario: item.usuario,
+            titulo: item.titulo,
+            detalle: item.detalle,
+            fecha: item.created_at,
+            icon: item.icon,
+            tone: item.tone,
+            tipo: item.tipo,
+            meta_json: item.meta_json
+        }, 'notification-db');
+    }
+
+    function normalizeItems(dashboardItems, persistedItems) {
+        const dashboardEntries = (Array.isArray(dashboardItems) ? dashboardItems : []).map(createDashboardEntry);
+        const persistedEntries = (Array.isArray(persistedItems) ? persistedItems : []).map(createPersistedEntry);
+
+        return [...persistedEntries, ...dashboardEntries];
+    }
+
+    function hasNewNotification(items, seenIds) {
+        return (Array.isArray(items) ? items : []).some(item => {
+            const key = String(item.key || item.id || '');
+            return key && !seenIds.has(key);
+        });
+    }
+
     function renderNotifications(headerContainer, badgeEl, items) {
         const seen = new Set();
         headerContainer.innerHTML = '';
@@ -172,6 +269,7 @@
             const badgeEl = document.querySelector('.noti-icon-badge');
             if (!headerContainer) return;
 
+            injectStreamStyles();
             headerContainer.innerHTML = '';
 
             if (typeof window.getPermisosState === 'function') {
@@ -186,38 +284,10 @@
             const dashboardJson = await dashboardRes.json();
             const notificationsJson = await notificationsRes.json();
 
-            const dashboardItems = Array.isArray(dashboardJson?.data?.header) ? dashboardJson.data.header.map((item, index) => createNotificationEntry({
-                id: `dashboard-${index + 1}`,
-                key: `dashboard-${index + 1}`,
-                usuario: String(item.usuario || '').toLowerCase(),
-                titulo: String(item.tipo || 'Actividad').toLowerCase(),
-                detalle: item.doc && String(item.doc).length >= 32
-                    ? `inició sesión ${String(item.doc).substring(0, 12)}*******`
-                    : String(item.doc || ''),
-                fecha: item.ultima_fecha,
-                icon: item.doc && String(item.doc).length >= 32 ? 'ti-message-circle' : 'ti-plus',
-                tone: item.doc && String(item.doc).length >= 32 ? 'danger' : 'secondary',
-                tipo: String(item.tipo || '').toLowerCase(),
-                receta_id: item.receta_id,
-                total_items: item.total_items
-            }, 'notification-dashboard')) : [];
-
-            const persistedItems = Array.isArray(notificationsJson?.notifications) ? notificationsJson.notifications.map(item => createNotificationEntry({
-                id: `db-${item.id}`,
-                key: `db-${item.id}`,
-                usuario: item.usuario,
-                titulo: item.titulo,
-                detalle: item.detalle,
-                fecha: item.created_at,
-                icon: item.icon,
-                tone: item.tone,
-                tipo: item.tipo,
-                meta_json: item.meta_json
-            }, 'notification-db')) : [];
-
-            const allItems = [...persistedItems, ...dashboardItems];
-
-            const seenIds = renderNotifications(headerContainer, badgeEl, allItems);
+            let seenIds = renderNotifications(headerContainer, badgeEl, normalizeItems(
+                dashboardJson?.data?.header,
+                notificationsJson?.notifications
+            ));
 
             if (typeof window.EventSource !== 'undefined') {
                 const stream = new EventSource('controller/stream_header_notifications.php');
@@ -225,30 +295,17 @@
                 stream.addEventListener('header_notifications', event => {
                     try {
                         const payload = JSON.parse(event.data || '{}');
-                        const items = Array.isArray(payload.notifications) ? payload.notifications : [];
+                        const streamItems = normalizeItems(
+                            payload.header,
+                            payload.notifications
+                        );
+                        const shouldOpenDropdown = hasNewNotification(streamItems, seenIds);
 
-                        items.forEach(item => {
-                            const rendered = createNotificationEntry({
-                                id: `db-${item.id}`,
-                                key: `db-${item.id}`,
-                                usuario: item.usuario,
-                                titulo: item.titulo,
-                                detalle: item.detalle,
-                                fecha: item.created_at,
-                                icon: item.icon,
-                                tone: item.tone,
-                                tipo: item.tipo,
-                                meta_json: item.meta_json
-                            }, 'notification-live');
+                        seenIds = renderNotifications(headerContainer, badgeEl, streamItems);
 
-                            if (!rendered.key || seenIds.has(rendered.key)) {
-                                return;
-                            }
-
-                            seenIds.add(rendered.key);
-                            headerContainer.insertAdjacentHTML('afterbegin', notificationHtml(rendered));
-                            ensureBadgeVisible(badgeEl, seenIds.size);
-                        });
+                        if (shouldOpenDropdown) {
+                            openNotificationsDropdown(badgeEl, headerContainer);
+                        }
                     } catch (err) {
                         console.error('header-notifications stream parse error:', err);
                     }
