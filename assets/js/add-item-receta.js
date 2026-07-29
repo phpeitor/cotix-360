@@ -172,4 +172,9 @@ document.addEventListener("DOMContentLoaded", () => {
             alertify.error("Error al cargar sub categoría 2");
         }
     });
+
+    loadCategoriasByTipo().catch(error => {
+        console.error(error);
+        alertify.error("Error al cargar categorías");
+    });
 });

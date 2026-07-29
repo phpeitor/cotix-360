@@ -4,10 +4,11 @@ require_once ROOT . '/controller/check_session.php';
 require_once ROOT . '/model/item.php';
 
 $selects = new Item();
+$defaultTipo = 'PRODUCTO';
 $tipos = $selects->obtenerRecetaTipos();
-$categorias = $selects->obtenerRecetaCategorias();
-$sub_cat_1 = $selects->obtenerRecetaSubCategorias1();
-$sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
+$categorias = $selects->obtenerRecetaCategorias($defaultTipo);
+$sub_cat_1 = $selects->obtenerRecetaSubCategorias1($defaultTipo);
+$sub_cat_2 = $selects->obtenerRecetaSubCategorias2($defaultTipo);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,9 +67,8 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label">Tipo</label>
                                             <select id="filterTipo" name="tipo" class="form-select" required>
-                                                <option value="">-- Todas --</option>
                                                 <?php foreach ($tipos as $b): ?>
-                                                    <option value="<?= $b['tipo'] ?>"><?= $b['tipo'] ?></option>
+                                                    <option value="<?= $b['tipo'] ?>" <?= strtoupper(trim((string)$b['tipo'])) === $defaultTipo ? 'selected' : '' ?>><?= $b['tipo'] ?></option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
@@ -76,7 +76,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label">Categoría</label>
                                             <select id="filterCategoria" name="categoria" class="form-select" required>
-                                                <option value="">-- Todos --</option>
+                                                <option value="">-- Todas --</option>
                                                 <?php foreach ($categorias as $b): ?>
                                                     <option value="<?= $b['categoria'] ?>"><?= $b['categoria'] ?></option>
                                                 <?php endforeach; ?>
@@ -175,7 +175,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.0"></script>
-    <script src="./assets/js/add-item-receta.js?v=1.0"></script>
+    <script src="./assets/js/add-item-receta.js?v=1.1"></script>
     <script src="./assets/js/form-validation.js?v=1.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>

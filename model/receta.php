@@ -196,6 +196,8 @@ class Receta {
                 c.id,
                 p.usuario,
                 c.nombre,
+                rc.ruc AS cliente_ruc,
+                rc.razon_social_empresa AS cliente_razon_social_empresa,
                 c.estado,
                 c.created_at,
                 c.updated_at,
@@ -208,9 +210,10 @@ class Receta {
             FROM recetas c
             LEFT JOIN receta_detalle cd ON cd.receta_id = c.id
             LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
+            LEFT JOIN receta_cliente rc ON rc.id_receta = c.id
             WHERE $where
             GROUP BY
-                c.id, p.usuario, c.nombre, c.estado, c.created_at, c.updated_at
+                c.id, p.usuario, c.nombre, rc.ruc, rc.razon_social_empresa, c.estado, c.created_at, c.updated_at
             ORDER BY c.id DESC
         ";
 
@@ -462,6 +465,45 @@ class Receta {
                 FROM receta_categoria
                 WHERE receta_id = :receta_id
                   AND COALESCE(margen, 0) > 0";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        return (int)($row['total'] ?? 0) > 0;
+    }
+
+    public function recetaTieneNombre(int $recetaId): bool
+    {
+        $sql = "SELECT COUNT(*) AS total
+                FROM recetas
+                WHERE id = :receta_id
+                  AND nombre IS NOT NULL
+                  AND TRIM(nombre) <> ''";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        return (int)($row['total'] ?? 0) > 0;
+    }
+
+    public function recetaTieneClienteCompleto(int $recetaId): bool
+    {
+        $sql = "SELECT COUNT(*) AS total
+                FROM receta_cliente
+                WHERE id_receta = :receta_id
+                  AND TRIM(COALESCE(razon_social_empresa, '')) <> ''
+                  AND TRIM(COALESCE(direccion, '')) <> ''
+                  AND TRIM(COALESCE(ruc, '')) <> ''
+                  AND TRIM(COALESCE(nombre_completo, '')) <> ''
+                  AND TRIM(COALESCE(correo, '')) <> ''
+                  AND TRIM(COALESCE(celular, '')) <> ''
+                  AND TRIM(COALESCE(motivo, '')) <> ''";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);

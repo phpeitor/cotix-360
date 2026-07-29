@@ -66,7 +66,6 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label">Tipo</label>
                                             <select id="filterTipo" name="tipo" class="form-select" required>
-                                                <option value="">-- Todas --</option>
                                                 <?php foreach ($tipos as $b): ?>
                                                     <option value="<?= $b['tipo'] ?>"><?= $b['tipo'] ?></option>
                                                 <?php endforeach; ?>
@@ -76,7 +75,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label">Categoría</label>
                                             <select id="filterCategoria" name="categoria" class="form-select" required >
-                                                <option value="">-- Todos --</option>
+                                                <option value="">-- Todas --</option>
                                                 <?php foreach ($categorias as $b): ?>
                                                     <option value="<?= $b['categoria'] ?>"><?= $b['categoria'] ?></option>
                                                 <?php endforeach; ?>

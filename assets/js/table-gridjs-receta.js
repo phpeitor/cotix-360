@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 id: "nombre",
                 name: "Receta",
                 width: "220px",
-                formatter: (cell) => gridjs.html(`<span>${String(cell ?? "-")}</span>`)
+                formatter: (cell, row) => renderRecetaCliente(cell, row)
             },
             {
                 id: "estado",
@@ -220,6 +220,34 @@ document.addEventListener("DOMContentLoaded", () => {
         return gridjs.html(
             `<span class="badge ${cls}">${estado}</span>`
         );
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function renderRecetaCliente(nombre, row) {
+        const data = row?.cells?.[0]?._?.data || {};
+        const recetaNombre = String(nombre ?? "").trim();
+        const ruc = String(data.cliente_ruc ?? "").trim();
+        const razonSocial = String(data.cliente_razon_social_empresa ?? "").trim();
+        const cliente = [ruc, razonSocial].filter(Boolean).join(" - ");
+
+        if (!recetaNombre && !cliente) {
+            return gridjs.html("<span>-</span>");
+        }
+
+        return gridjs.html(`
+            <div class="lh-sm">
+                <span>${escapeHtml(recetaNombre || "-")}</span>
+                ${cliente ? `<small class="d-block text-muted mt-1">${escapeHtml(cliente)}</small>` : ""}
+            </div>
+        `);
     }
 
     function renderItems(items, row) {
