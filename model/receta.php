@@ -235,6 +235,51 @@ class Receta {
         return $rows;
     }
 
+    public function tableIngenieria(string $fec_ini, string $fec_fin): array
+    {
+        $sql = "
+            SELECT
+                c.id,
+                c.id_receta_duplicada,
+                p.usuario,
+                c.nombre,
+                rc.ruc AS cliente_ruc,
+                rc.razon_social_empresa AS cliente_razon_social_empresa,
+                c.estado,
+                c.created_at,
+                c.updated_at,
+                COALESCE(SUM(cd.cantidad), 0) AS total_items,
+                GROUP_CONCAT(
+                    CONCAT(cd.nombre, ' x ', COALESCE(cd.cantidad, 0))
+                    ORDER BY cd.nombre
+                    SEPARATOR ' | '
+                ) AS items
+            FROM recetas_ingenieria c
+            LEFT JOIN detalle_ingenieria cd ON cd.receta_id = c.id
+            LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
+            LEFT JOIN receta_cliente rc ON rc.id_receta = c.id_receta_duplicada
+            WHERE c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)
+            GROUP BY
+                c.id,
+                c.id_receta_duplicada,
+                p.usuario,
+                c.nombre,
+                rc.ruc,
+                rc.razon_social_empresa,
+                c.estado,
+                c.created_at,
+                c.updated_at
+            ORDER BY c.id DESC
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':fec_ini', $fec_ini);
+        $stmt->bindValue(':fec_fin', $fec_fin);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
     public function firmaListaReceta(string $fec_ini, string $fec_fin): array
     {
         $sessionCargo = $_SESSION['session_cargo'] ?? null;

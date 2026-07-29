@@ -96,6 +96,7 @@ require_once ROOT . '/controller/check_session.php';
                                                 <option value="3">Supervisor</option>
                                                 <option value="4">Tecnico</option>
                                                 <option value="5">Compras</option>
+                                                <option value="6">Ingeniería</option>
                                             </select>
                                             <div class="invalid-feedback">
                                                 Please select an option.

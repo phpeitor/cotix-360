@@ -70,12 +70,12 @@
                 </div>
             </li>
 
-            <li class="side-nav-title mt-2">Cotiza Templates</li>
+            <li class="side-nav-title mt-2"> Quotes & Prescription</li>
 
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarExtendedUI" aria-expanded="false" aria-controls="sidebarExtendedUI" class="side-nav-link">
                     <span class="menu-icon"><i class="ti ti-box-multiple-3"></i></span>
-                    <span class="menu-text"> Templatex </span>
+                    <span class="menu-text"> Templates </span>
                     <span class="menu-arrow"></span>
                 </a>
                 <div class="collapse" id="sidebarExtendedUI">
@@ -90,18 +90,37 @@
                                 <span class="menu-text">Plantilla de Receta</span>
                             </a>
                         </li>
-                        <li class="side-nav-item">
-                            <a href="cotizaciones.php" class="side-nav-link">
-                                <span class="menu-text">Cotizaciones</span>
-                            </a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="receta_list.php" class="side-nav-link">
-                                <span class="menu-text">Recetas</span>
-                            </a>
-                        </li>
                     </ul>
                 </div>
+            </li>
+
+            <li class="side-nav-item">
+                <a href="cotizaciones.php" class="side-nav-link">
+                    <span class="menu-icon"><i class="ti ti-file-invoice"></i></span>
+                    <span class="menu-text">Cotizaciones</span>
+                </a>
+            </li>
+            <li class="side-nav-item">
+                <a href="receta_list.php" class="side-nav-link">
+                    <span class="menu-icon"><i class="ti ti-file-text"></i></span>
+                    <span class="menu-text">Recetas</span>
+                </a>
+            </li>
+
+            <li class="side-nav-title mt-2">Purchasing & Engineering</li>
+
+            <li class="side-nav-item">
+                <a href="ingenieria.php" class="side-nav-link">
+                    <span class="menu-icon"><i class="ti ti-tools"></i></span>
+                    <span class="menu-text"> Ingeniería </span>
+                </a>
+            </li>
+
+            <li class="side-nav-item">
+                <a href="compras.php" class="side-nav-link">
+                    <span class="menu-icon"><i class="ti ti-shopping-cart"></i></span>
+                    <span class="menu-text"> Compras </span>
+                </a>
             </li>
         </ul>
         <div class="clearfix"></div>

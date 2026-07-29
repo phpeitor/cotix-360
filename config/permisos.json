@@ -54,5 +54,12 @@
       "pdf_cotizacion.php",
       "calculo.php"
     ]
+  },
+  "6": {
+    "nombre": "Ingeniería",
+    "acceso": [
+      "home.php",
+      "ingenieria.php"
+    ]
   }
 }
