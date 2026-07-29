@@ -459,6 +459,96 @@ class Receta {
         return $stmt->rowCount() > 0;
     }
 
+    public function crearRecetaIngenieriaDesdeReceta(int $recetaId, int $usuarioUpd): int
+    {
+        $stmtExistente = $this->conn->prepare("SELECT id FROM recetas_ingenieria WHERE id_receta_duplicada = :receta_id LIMIT 1");
+        $stmtExistente->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmtExistente->execute();
+        $existente = (int)($stmtExistente->fetchColumn() ?: 0);
+
+        if ($existente > 0) {
+            return $existente;
+        }
+
+        $sqlCabecera = "INSERT INTO recetas_ingenieria (
+                            id_receta_duplicada,
+                            usuario_id,
+                            nombre,
+                            observacion,
+                            estado,
+                            created_at,
+                            updated_at,
+                            usuario_upd,
+                            tipo_cambio
+                        ) SELECT
+                            id,
+                            usuario_id,
+                            nombre,
+                            observacion,
+                            'GANADO',
+                            :created_at,
+                            :updated_at,
+                            :usuario_upd,
+                            tipo_cambio
+                        FROM recetas
+                        WHERE id = :receta_id";
+
+        $stmtCabecera = $this->conn->prepare($sqlCabecera);
+        $stmtCabecera->bindValue(':created_at', $this->nowLima);
+        $stmtCabecera->bindValue(':updated_at', $this->nowLima);
+        $stmtCabecera->bindValue(':usuario_upd', $usuarioUpd, PDO::PARAM_INT);
+        $stmtCabecera->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmtCabecera->execute();
+
+        $ingenieriaId = (int)$this->conn->lastInsertId();
+        if ($ingenieriaId <= 0) {
+            throw new RuntimeException('No se pudo crear la receta de ingeniería');
+        }
+
+        $sqlDetalle = "INSERT INTO detalle_ingenieria (
+                           receta_id,
+                           item_id,
+                           categoria,
+                           sub_cat_1,
+                           sub_cat_2,
+                           marca,
+                           modelo,
+                           nombre,
+                           descripcion,
+                           uni_medida,
+                           precio,
+                           moneda,
+                           tipo,
+                           created_at,
+                           cantidad
+                       ) SELECT
+                           :ingenieria_id,
+                           item_id,
+                           categoria,
+                           sub_cat_1,
+                           sub_cat_2,
+                           marca,
+                           modelo,
+                           nombre,
+                           descripcion,
+                           uni_medida,
+                           precio,
+                           moneda,
+                           tipo,
+                           :created_at,
+                           cantidad
+                       FROM receta_detalle
+                       WHERE receta_id = :receta_id";
+
+        $stmtDetalle = $this->conn->prepare($sqlDetalle);
+        $stmtDetalle->bindValue(':ingenieria_id', $ingenieriaId, PDO::PARAM_INT);
+        $stmtDetalle->bindValue(':created_at', $this->nowLima);
+        $stmtDetalle->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmtDetalle->execute();
+
+        return $ingenieriaId;
+    }
+
     public function recetaTieneMargenes(int $recetaId): bool
     {
         $sql = "SELECT COUNT(*) AS total

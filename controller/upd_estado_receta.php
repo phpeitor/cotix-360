@@ -51,18 +51,32 @@ try {
         throw new Exception('No se puede aprobar la receta porque no tiene márgenes registrados');
     }
 
+    $receta->begin();
+
     $ok = $receta->actualizar_estado((int)$id, $estado,(int)$_SESSION['session_id']);
 
     if (!$ok) {
         throw new Exception("No se pudo actualizar el estado");
     }
 
+    $ingenieriaId = null;
+    if ($accion === 'aprobar') {
+        $ingenieriaId = $receta->crearRecetaIngenieriaDesdeReceta((int)$id, (int)$_SESSION['session_id']);
+    }
+
+    $receta->commit();
+
     echo json_encode([
         'success' => true,
-        'estado'  => $estado
+        'estado'  => $estado,
+        'ingenieria_id' => $ingenieriaId
     ]);
 
 } catch (Throwable $e) {
+    if (isset($receta) && $receta instanceof Receta) {
+        $receta->rollback();
+    }
+
     http_response_code(400);
     echo json_encode([
         'success' => false,
