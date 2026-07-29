@@ -324,6 +324,107 @@ class Receta {
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
+    public function actualizarNombreIngenieria(string $hash, string $nombre): bool
+    {
+        $sql = "UPDATE recetas_ingenieria
+                SET nombre = :nombre, updated_at = :updated_at
+                WHERE MD5(id) = :hash";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':nombre', $nombre);
+        $stmt->bindValue(':updated_at', $this->nowLima);
+        $stmt->bindValue(':hash', $hash);
+        return $stmt->execute();
+    }
+
+    public function actualizarTipoCambioIngenieria(string $hash, float $tipoCambio): bool
+    {
+        $sql = "UPDATE recetas_ingenieria
+                SET tipo_cambio = :tipo_cambio, updated_at = :updated_at
+                WHERE MD5(id) = :hash";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':tipo_cambio', $tipoCambio);
+        $stmt->bindValue(':updated_at', $this->nowLima);
+        $stmt->bindValue(':hash', $hash);
+        return $stmt->execute();
+    }
+
+    public function agregarDetalleIngenieriaDesdeItem(string $hash, int $itemId, int $cantidad = 1): bool
+    {
+        $sql = "INSERT INTO detalle_ingenieria (
+                    receta_id,
+                    item_id,
+                    categoria,
+                    sub_cat_1,
+                    sub_cat_2,
+                    marca,
+                    modelo,
+                    nombre,
+                    descripcion,
+                    uni_medida,
+                    precio,
+                    moneda,
+                    tipo,
+                    created_at,
+                    cantidad
+                ) SELECT
+                    r.id,
+                    i.id,
+                    i.categoria,
+                    i.sub_cat_1,
+                    i.sub_cat_2,
+                    i.marca,
+                    i.modelo,
+                    i.nombre,
+                    i.descripcion,
+                    i.uni_medida,
+                    i.precio,
+                    i.moneda,
+                    i.tipo,
+                    :created_at,
+                    :cantidad
+                FROM recetas_ingenieria r
+                INNER JOIN receta_items i ON i.id = :item_id
+                WHERE MD5(r.id) = :hash
+                LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':created_at', $this->nowLima);
+        $stmt->bindValue(':cantidad', max(1, $cantidad), PDO::PARAM_INT);
+        $stmt->bindValue(':item_id', $itemId, PDO::PARAM_INT);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    }
+
+    public function eliminarDetalleIngenieria(string $hash, int $detalleId): bool
+    {
+        $sql = "DELETE d
+                FROM detalle_ingenieria d
+                INNER JOIN recetas_ingenieria r ON r.id = d.receta_id
+                WHERE MD5(r.id) = :hash
+                  AND d.id = :detalle_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->bindValue(':detalle_id', $detalleId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
+    }
+
+    public function actualizarCantidadDetalleIngenieria(string $hash, int $detalleId, int $cantidad): bool
+    {
+        $sql = "UPDATE detalle_ingenieria d
+                INNER JOIN recetas_ingenieria r ON r.id = d.receta_id
+                SET d.cantidad = :cantidad
+                WHERE MD5(r.id) = :hash
+                  AND d.id = :detalle_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':cantidad', max(1, $cantidad), PDO::PARAM_INT);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->bindValue(':detalle_id', $detalleId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
     public function firmaListaReceta(string $fec_ini, string $fec_fin): array
     {
         $sessionCargo = $_SESSION['session_cargo'] ?? null;
