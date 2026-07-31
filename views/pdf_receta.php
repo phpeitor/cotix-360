@@ -65,6 +65,7 @@ if (!$hash) {
     http_response_code(400);
     exit("ID inválido");
 }
+$mostrarDetalle = !isset($_GET['detalle']) || (string)$_GET['detalle'] === '1';
 
 $recetaModel = new Receta();
 $items      = new Item();
@@ -261,58 +262,59 @@ ob_start();
         </tr>
     </table>
 
-    <table class="section-table">
-        <thead>
-            <tr class="section-head">
-                <th style="width: <?= $esTecnico ? '88%' : '68%'; ?>;">DESCRIPCIÓN</th>
-                <th style="width: 12%;">CANT.</th>
-                <?php if (!$esTecnico): ?>
-                    <th style="width: 10%;">PRECIO $</th>
-                <?php endif; ?>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($detalle as $i): ?>
-                <?php
-                    $descripcion = normalizarTextoDetallePdf($i['descripcion']);
-                    $rutaDetalle = formatearRutaDetallePdf([$i['marca'], $i['modelo'], $i['uni_medida']]);
-                    $categoriaDetalle = formatearRutaDetallePdf([$i['categoria'], $i['sub_cat_1'], $i['sub_cat_2']]);
-                    $cantidad = (int)($i['cantidad'] ?? 0);
-                    $precioUnitario = (float)($i['precio'] ?? 0);
-                    $subtotalLinea = $precioUnitario * $cantidad;
-                    $simboloLinea = strtoupper(trim((string)($i['moneda'] ?? ''))) === 'DOLLAR' ? '$' : 'S/';
-                    
-                    // Mostrar precio en DÓLARES: si el item está en soles, convertir usando tipo de cambio; si ya está en dólares usar el valor real
-                    $esEnSoles = strtoupper(trim((string)($i['moneda'] ?? ''))) !== 'DOLLAR';
-                    if ($esEnSoles) {
-                        $precioMostrado = $tipoCambio > 0 ? ($subtotalLinea / $tipoCambio) : 0;
-                    } else {
-                        $precioMostrado = $subtotalLinea;
-                    }
-                    $simboloMostrado = '$';
-                ?>
-                <tr class="item-row">
-                    <td>
-                        <div class="item-description"><?= escaparPdf((string)($i['nombre'] ?? 'SIN NOMBRE')) ?></div>
-                        <?php if ($descripcion !== ''): ?>
-                            <div class="item-subline"><?= escaparPdf($descripcion) ?></div>
-                        <?php endif; ?>
-                        <?php if ($rutaDetalle !== ''): ?>
-                            <div class="item-subline"><?= escaparPdf($rutaDetalle) ?></div>
-                        <?php endif; ?>
-                        <?php if ($categoriaDetalle !== ''): ?>
-                            <div class="item-meta"><?= escaparPdf($categoriaDetalle) ?></div>
-                        <?php endif; ?>
-                        <div class="item-meta">Tipo: <?= escaparPdf((string)($i['tipo'] ?? '')) ?></div>
-                    </td>
-                    <td class="item-qty"><?= (int)$cantidad ?></td>
+    <?php if ($mostrarDetalle): ?>
+        <table class="section-table">
+            <thead>
+                <tr class="section-head">
+                    <th style="width: <?= $esTecnico ? '88%' : '68%'; ?>;">DESCRIPCIÓN</th>
+                    <th style="width: 12%;">CANT.</th>
                     <?php if (!$esTecnico): ?>
-                        <td class="item-price"><?= escaparPdf(formatearMontoPdf($precioMostrado, $simboloMostrado)) ?></td>
+                        <th style="width: 10%;">PRECIO $</th>
                     <?php endif; ?>
                 </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php foreach ($detalle as $i): ?>
+                    <?php
+                        $descripcion = normalizarTextoDetallePdf($i['descripcion']);
+                        $rutaDetalle = formatearRutaDetallePdf([$i['marca'], $i['modelo'], $i['uni_medida']]);
+                        $categoriaDetalle = formatearRutaDetallePdf([$i['categoria'], $i['sub_cat_1'], $i['sub_cat_2']]);
+                        $cantidad = (int)($i['cantidad'] ?? 0);
+                        $precioUnitario = (float)($i['precio'] ?? 0);
+                        $subtotalLinea = $precioUnitario * $cantidad;
+
+                        // Mostrar precio en DÓLARES: si el item está en soles, convertir usando tipo de cambio; si ya está en dólares usar el valor real
+                        $esEnSoles = strtoupper(trim((string)($i['moneda'] ?? ''))) !== 'DOLLAR';
+                        if ($esEnSoles) {
+                            $precioMostrado = $tipoCambio > 0 ? ($subtotalLinea / $tipoCambio) : 0;
+                        } else {
+                            $precioMostrado = $subtotalLinea;
+                        }
+                        $simboloMostrado = '$';
+                    ?>
+                    <tr class="item-row">
+                        <td>
+                            <div class="item-description"><?= escaparPdf((string)($i['nombre'] ?? 'SIN NOMBRE')) ?></div>
+                            <?php if ($descripcion !== ''): ?>
+                                <div class="item-subline"><?= escaparPdf($descripcion) ?></div>
+                            <?php endif; ?>
+                            <?php if ($rutaDetalle !== ''): ?>
+                                <div class="item-subline"><?= escaparPdf($rutaDetalle) ?></div>
+                            <?php endif; ?>
+                            <?php if ($categoriaDetalle !== ''): ?>
+                                <div class="item-meta"><?= escaparPdf($categoriaDetalle) ?></div>
+                            <?php endif; ?>
+                            <div class="item-meta">Tipo: <?= escaparPdf((string)($i['tipo'] ?? '')) ?></div>
+                        </td>
+                        <td class="item-qty"><?= (int)$cantidad ?></td>
+                        <?php if (!$esTecnico): ?>
+                            <td class="item-price"><?= escaparPdf(formatearMontoPdf($precioMostrado, $simboloMostrado)) ?></td>
+                        <?php endif; ?>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
 
     <table style="width: 100%; margin-top: 2mm;">
         <?php if ($esTecnico): ?>

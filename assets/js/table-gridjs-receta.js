@@ -8,6 +8,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnGuardarNombreReceta = document.getElementById("btn-guardar-nombre-receta");
     const successModal = successModalEl ? new bootstrap.Modal(successModalEl) : null;
 
+    function confirmarDetallePdf() {
+        return new Promise(resolve => {
+            alertify.confirm(
+                "Detalle de receta",
+                "¿Quieres ver detalle de la receta en el PDF?",
+                () => resolve(true),
+                () => resolve(false)
+            ).set("labels", { ok: "Si", cancel: "No" });
+        });
+    }
+
+    function abrirPdfReceta(hash, mostrarDetalle) {
+        const detalle = mostrarDetalle ? "1" : "0";
+        window.open(`pdf_receta.php?id=${encodeURIComponent(hash)}&detalle=${detalle}`, "_blank", "noopener,noreferrer");
+    }
+
     function initTooltips() {
         document.querySelectorAll('[data-bs-toggle="tooltip"], .btn-tooltip').forEach(el => {
             if (!bootstrap.Tooltip.getInstance(el)) {
@@ -494,13 +510,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const nombreReceta = String(json.receta.nombre ?? "").trim();
 
             if (nombreReceta !== "") {
-                window.open(`pdf_receta.php?id=${encodeURIComponent(hash)}`, "_blank", "noopener,noreferrer");
+                abrirPdfReceta(hash, await confirmarDetallePdf());
                 return;
             }
 
             // Si el usuario es técnico (cargo === 4) no mostrar modal, abrir PDF directamente
             if (typeof CARGO !== 'undefined' && Number(CARGO) === 4) {
-                window.open(`pdf_receta.php?id=${encodeURIComponent(hash)}`, "_blank", "noopener,noreferrer");
+                abrirPdfReceta(hash, await confirmarDetallePdf());
                 return;
             }
 
@@ -530,11 +546,13 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        const hash = pendingPdfHash;
+
         try {
             btnGuardarNombreReceta.disabled = true;
 
             const body = new URLSearchParams({
-                hash: pendingPdfHash,
+                hash,
                 nombre
             });
 
@@ -553,7 +571,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             successModal?.hide();
             alertify.success("Nombre de receta guardado");
-            window.open(`pdf_receta.php?id=${encodeURIComponent(pendingPdfHash)}`, "_blank", "noopener,noreferrer");
+            abrirPdfReceta(hash, await confirmarDetallePdf());
             grid.forceRender();
         } catch (error) {
             alertify.error("Error de conexion al guardar nombre");
