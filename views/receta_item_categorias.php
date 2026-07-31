@@ -41,6 +41,61 @@ require_once ROOT . '/controller/check_session.php';
         #table-gridjs .gridjs-sort-desc::before {
             content: "↓";
         }
+
+        #table-gridjs,
+        #table-gridjs .gridjs-container {
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        #table-gridjs .gridjs-wrapper {
+            clear: both;
+            overflow-x: auto;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #table-gridjs .gridjs-footer {
+            clear: both;
+        }
+
+        #table-gridjs .gridjs-table {
+            min-width: 980px;
+        }
+
+        #table-gridjs th,
+        #table-gridjs td {
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        @media (max-width: 575.98px) {
+            .categorias-card .card-header {
+                align-items: flex-start !important;
+                gap: .75rem;
+            }
+
+            .categorias-card .card-body {
+                padding-left: .75rem;
+                padding-right: .75rem;
+            }
+
+            #table-gridjs .gridjs-search,
+            #table-gridjs .gridjs-search-input {
+                width: 100%;
+            }
+
+            #table-gridjs .gridjs-head,
+            #table-gridjs .gridjs-footer {
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            #table-gridjs .gridjs-pagination {
+                gap: .5rem;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -67,7 +122,7 @@ require_once ROOT . '/controller/check_session.php';
 
                 <div class="row">
                     <div class="col-lg-12">
-                        <div class="card">
+                        <div class="card categorias-card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
                                 <h4 class="header-title mb-0">Gestión de Categorías</h4>
                                 <button type="button" id="btnNuevo" class="btn btn-sm rounded-pill btn-success">

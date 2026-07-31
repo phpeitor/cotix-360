@@ -16,7 +16,7 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/receta.css?v=1.1" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/receta.css?v=1.2" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
     <style>
@@ -81,17 +81,17 @@ require_once ROOT . '/controller/check_session.php';
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="card">
-                            <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
-                                <div>
+                            <div class="card-header receta-form-header border-bottom border-dashed d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                <div class="receta-title-wrap">
                                     <h4 class="header-title mb-0">Receta #<span id="receta_id"></span></h4>
-                                    <div class="d-flex align-items-center gap-2">
+                                    <div class="d-flex align-items-center gap-2 flex-wrap receta-name-row">
                                         <p class="text-muted fs-14 mb-0" id="receta_nombre_display"></p>
                                         <button type="button" class="btn btn-sm btn-outline-secondary" id="btnEditRecetaNombre" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar nombre"><i class="ti ti-edit"></i></button>
                                     </div>
                                     <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none" style="max-width:400px;" placeholder="Nombre de la receta">
                                 </div>
 
-                                <div class="row g-3">
+                                <div class="row g-3 receta-meta-row">
                                     <div class="col-lg-4">
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="avatar-lg bg-light d-flex align-items-center justify-content-center rounded">
@@ -129,7 +129,7 @@ require_once ROOT . '/controller/check_session.php';
                                     </div>
                                 </div>
 
-                                <div class="d-flex align-items-center gap-2">
+                                <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end receta-header-actions">
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-categoria-modal" data-bs-title="Márgen" data-bs-placement="bottom" <?= (int)$_SESSION['session_cargo'] === 4 ? 'disabled aria-disabled="true" title="No disponible para este cargo"' : '' ?>><i class="ti ti-box fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#cliente-modal" data-bs-title="Cliente" data-bs-placement="bottom"><i class="ti ti-user-circle fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom"><i class="ti ti-search fs-18"></i></button>

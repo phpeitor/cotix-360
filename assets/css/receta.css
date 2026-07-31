@@ -119,6 +119,28 @@
     cursor: help;
 }
 
+.receta-form-header > * {
+    min-width: 0;
+}
+
+.receta-title-wrap {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.receta-name-row p {
+    overflow-wrap: anywhere;
+}
+
+.receta-meta-row {
+    flex: 999 1 520px;
+    min-width: 280px;
+}
+
+.receta-header-actions {
+    flex: 0 0 auto;
+}
+
 .tipo-cambio-pulse {
     animation: tipo-cambio-pulse 1.8s ease-in-out infinite;
     border: 1px solid rgba(var(--bs-warning-rgb), .7);
@@ -145,5 +167,33 @@
 @media (prefers-reduced-motion: reduce) {
     .tipo-cambio-pulse {
         animation: none;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .receta-form-header {
+        align-items: flex-start !important;
+    }
+
+    .receta-meta-row {
+        flex-basis: 100%;
+        min-width: 0;
+        order: 3;
+    }
+
+    .receta-header-actions {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .receta-title-wrap,
+    .receta-header-actions {
+        flex-basis: 100%;
+    }
+
+    .receta-header-actions {
+        justify-content: flex-start !important;
+        margin-left: 0;
     }
 }
