@@ -179,6 +179,23 @@ table {
     vertical-align: top;
 }
 
+.offer-type-row td {
+    background: #dceee9;
+    color: #046c5b;
+    font-weight: bold;
+    letter-spacing: 0.8px;
+    padding: 1.4mm 2mm;
+    border-bottom: 0.35mm solid #4f4f4f;
+}
+
+.offer-group-row td {
+    background: #f4f8f7;
+    color: #333;
+    font-weight: bold;
+    padding: 1.2mm 2mm;
+    border-bottom: 0.25mm solid #8a8a8a;
+}
+
 .item-description {
     font-size: 11px;
     letter-spacing: 0.3px;

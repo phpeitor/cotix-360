@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             {
                 name: "Opciones",
-                width: "170px",
+                width: "210px",
                 sort: false,
                 formatter: renderAcciones
             }
@@ -351,6 +351,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     title="Duplicar">
                 <i class="ti ti-copy"></i>
             </button>
+
+            <a href="pdf_receta.php?id=${hashId}&oferta=1"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Oferta PDF"
+                data-bs-toggle="tooltip"
+                data-bs-title="Oferta PDF"
+                class="btn btn-soft-info btn-icon btn-sm rounded-circle">
+                    <i class="ti ti-file-dollar"></i>
+            </a>
         `;
 
         if (estado === "Aprobada") {

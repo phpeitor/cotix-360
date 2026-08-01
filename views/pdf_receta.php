@@ -55,6 +55,39 @@ function formatearRutaDetallePdf(array $partes) {
     return implode(' / ', $clean);
 }
 
+function agruparOfertaPorSubcat1Pdf(array $detalle): array {
+    $grupos = [
+        'PRODUCTO' => [],
+        'SERVICIO' => [],
+    ];
+
+    foreach ($detalle as $item) {
+        $tipo = strtoupper(trim((string)($item['tipo'] ?? '')));
+        $tipo = $tipo === 'PRODUCTO' ? 'PRODUCTO' : 'SERVICIO';
+        $subcat = trim((string)($item['sub_cat_1'] ?? ''));
+        $subcat = $subcat !== '' ? $subcat : 'Sin subcategoria';
+
+        if (!isset($grupos[$tipo][$subcat])) {
+            $grupos[$tipo][$subcat] = [];
+        }
+
+        $grupos[$tipo][$subcat][] = $item;
+    }
+
+    foreach ($grupos as &$tipoGrupos) {
+        uksort($tipoGrupos, 'strcasecmp');
+        foreach ($tipoGrupos as &$itemsGrupo) {
+            usort($itemsGrupo, function ($a, $b) {
+                return strcasecmp((string)($a['nombre'] ?? ''), (string)($b['nombre'] ?? ''));
+            });
+        }
+        unset($itemsGrupo);
+    }
+    unset($tipoGrupos);
+
+    return $grupos;
+}
+
 /*ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -66,6 +99,7 @@ if (!$hash) {
     exit("ID inválido");
 }
 $mostrarDetalle = !isset($_GET['detalle']) || (string)$_GET['detalle'] === '1';
+$esOferta = isset($_GET['oferta']) && (string)$_GET['oferta'] === '1';
 
 $recetaModel = new Receta();
 $items      = new Item();
@@ -165,6 +199,7 @@ $totalMargenDolaresAll = decimalAjustPdf($totalMargenDolaresAll, 2);
 $baseTotalDolares = decimalAjustPdf($totalDolaresConvertidos + $totalMargenDolaresAll, 2);
 $igvOverTotal = decimalAjustPdf($baseTotalDolares * 0.18, 2);
 $totalConIgvDolares = decimalAjustPdf($baseTotalDolares + $igvOverTotal, 2);
+$detalleOfertaAgrupado = $esOferta ? agruparOfertaPorSubcat1Pdf($detalle) : [];
 
 ob_start();
 ?>
@@ -213,6 +248,7 @@ ob_start();
     $usuarioRegistro = trim((string)($receta['usuario'] ?? ''));
     $usuarioActual = trim((string)($_SESSION['session_usuario'] ?? $receta['usu_upd'] ?? $receta['usuario'] ?? ''));
     $nombreReceta = trim((string)preg_replace('/\s*-\s*\d+$/', '', trim((string)($receta['nombre'] ?? 'RECETA'))));
+    $tituloDocumento = $esOferta ? 'OFERTA ' . $nombreReceta : $nombreReceta;
     $empresaLinea1 = 'Sistema interno';
     $empresaLinea2 = 'Lima, Perú';
 ?>
@@ -244,7 +280,7 @@ ob_start();
                 <?php endif; ?>
             </td>
             <td class="hero-right">
-                <div class="title"><?= escaparPdf($nombreReceta !== '' ? mb_strtoupper($nombreReceta, 'UTF-8') : 'RECETA') ?></div>
+                <div class="title"><?= escaparPdf(trim($tituloDocumento) !== '' ? mb_strtoupper(trim($tituloDocumento), 'UTF-8') : ($esOferta ? 'OFERTA' : 'RECETA')) ?></div>
             </td>
         </tr>
     </table>
@@ -252,7 +288,7 @@ ob_start();
     <table class="panels">
         <tr>
             <td class="panel" style="padding-right: 6mm;">
-                <div class="panel-title">RECETA</div>
+                <div class="panel-title"><?= $esOferta ? 'OFERTA' : 'RECETA' ?></div>
                 <div class="panel-name"><?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Sin responsable') ?></div>
                 <p class="panel-line">Usuario registro: <?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Desconocido') ?></p>
                 <p class="panel-line">Fecha creación: <?= escaparPdf($fechaReceta !== '' ? $fechaReceta : 'N/D') ?></p>
@@ -269,7 +305,44 @@ ob_start();
         </tr>
     </table>
 
-    <?php if ($mostrarDetalle): ?>
+    <?php if ($mostrarDetalle && $esOferta): ?>
+        <table class="section-table">
+            <thead>
+                <tr class="section-head">
+                    <th style="width: 24%;">NOMBRE</th>
+                    <th style="width: 48%;">DESCRIPCIÓN</th>
+                    <th style="width: 16%;">MARCA</th>
+                    <th style="width: 12%;">CANT.</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach (['PRODUCTO' => 'PRODUCTOS', 'SERVICIO' => 'SERVICIOS'] as $tipoOferta => $tituloTipo): ?>
+                    <?php if (empty($detalleOfertaAgrupado[$tipoOferta])) continue; ?>
+                    <tr class="offer-type-row">
+                        <td colspan="4"><?= escaparPdf($tituloTipo) ?></td>
+                    </tr>
+                    <?php foreach ($detalleOfertaAgrupado[$tipoOferta] as $subcat => $itemsGrupo): ?>
+                        <tr class="offer-group-row">
+                            <td colspan="4"><?= escaparPdf($subcat) ?></td>
+                        </tr>
+                        <?php foreach ($itemsGrupo as $i): ?>
+                            <?php
+                                $descripcion = normalizarTextoDetallePdf($i['descripcion'] ?? '');
+                                $marca = trim((string)($i['marca'] ?? ''));
+                                $cantidad = (int)($i['cantidad'] ?? 0);
+                            ?>
+                            <tr class="item-row">
+                                <td><div class="item-description"><?= escaparPdf((string)($i['nombre'] ?? 'SIN NOMBRE')) ?></div></td>
+                                <td><div class="item-subline"><?= escaparPdf($descripcion !== '' ? $descripcion : '-') ?></div></td>
+                                <td><div class="item-subline"><?= escaparPdf($marca !== '' ? $marca : '-') ?></div></td>
+                                <td class="item-qty"><?= (int)$cantidad ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endforeach; ?>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php elseif ($mostrarDetalle): ?>
         <table class="section-table">
             <thead>
                 <tr class="section-head">
@@ -324,7 +397,16 @@ ob_start();
     <?php endif; ?>
 
     <table style="width: 100%; margin-top: 2mm;">
-        <?php if ($esTecnico): ?>
+        <?php if ($esOferta): ?>
+            <tr>
+                <td style="width: 50%; background: transparent; padding: 2mm 3mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
+                    <strong>Total Items:</strong> <?= $totalItems ?>
+                </td>
+                <td style="width: 50%; background: transparent; padding: 2mm 3mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top; text-align: right;">
+                    <strong>Total Oferta:</strong> $<?= number_format($totalConIgvDolares, 2) ?>
+                </td>
+            </tr>
+        <?php elseif ($esTecnico): ?>
             <tr>
                 <td style="background: transparent; padding: 2mm 3mm; border-bottom: 0.35mm solid #4f4f4f;">
                     <strong>Total Items:</strong> <?= $totalItems ?>
@@ -386,4 +468,4 @@ $nombreArchivoBase = trim((string)$nombreArchivoBase, '_');
 if ($nombreArchivoBase === '') {
     $nombreArchivoBase = 'receta';
 }
-$pdf->stream($nombreArchivoBase . '.pdf', ["Attachment" => false]);
+$pdf->stream(($esOferta ? 'oferta_' : '') . $nombreArchivoBase . '.pdf', ["Attachment" => false]);
