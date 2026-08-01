@@ -40,7 +40,7 @@ try {
     }
 
     if ($accion === 'aprobar' && !$receta->recetaTieneClienteCompleto((int)$id)) {
-        throw new Exception('No se puede aprobar la receta porque no tiene datos del cliente completos');
+        throw new Exception('No se puede aprobar la receta porque no tiene datos del cliente y comerciales completos');
     }
 
     if ($accion === 'aprobar' && $receta->recetaTieneProductosPrecioCero((int)$id)) {

@@ -39,7 +39,6 @@ try {
     $usuarioUpd = isset($_SESSION['session_id']) ? (int)$_SESSION['session_id'] : null;
 
     $receta = new Receta();
-    // Obtener id real para concatenar al nombre
     $row = $receta->obtenerPorHash($hash);
     if (!$row) {
         echo json_encode([
@@ -49,10 +48,7 @@ try {
         exit;
     }
 
-    $id = (int)$row['id'];
-    $prefixed = sprintf('%s-%d', $nombre, $id);
-
-    $ok = $receta->actualizarNombrePorHash($hash, $prefixed, $usuarioUpd);
+    $ok = $receta->actualizarNombrePorHash($hash, $nombre, $usuarioUpd);
 
     echo json_encode([
         'success' => $ok,

@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderRecetaCliente(nombre, row) {
-        const recetaNombre = String(nombre ?? "").trim();
+        const recetaNombre = String(nombre ?? "").trim().replace(/\s*-\s*\d+$/, "").trim();
         const ruc = String(row?.cells?.[5]?.data ?? "").trim();
         const razonSocial = String(row?.cells?.[6]?.data ?? "").trim();
         const cliente = [ruc, razonSocial].filter(Boolean).join(" - ");

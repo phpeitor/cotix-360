@@ -879,7 +879,10 @@ class Receta {
                   AND TRIM(COALESCE(nombre_completo, '')) <> ''
                   AND TRIM(COALESCE(correo, '')) <> ''
                   AND TRIM(COALESCE(celular, '')) <> ''
-                  AND TRIM(COALESCE(motivo, '')) <> ''";
+                  AND TRIM(COALESCE(motivo, '')) <> ''
+                  AND TRIM(COALESCE(tiempo_entrega, '')) <> ''
+                  AND TRIM(COALESCE(condiciones_pago, '')) <> ''
+                  AND TRIM(COALESCE(vendedor, '')) <> ''";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);

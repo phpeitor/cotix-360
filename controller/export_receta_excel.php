@@ -80,7 +80,7 @@ try {
     }
 
     $tipoCambio = (float)($receta['tipo_cambio'] ?? 1);
-    $nombreReceta = trim((string)($receta['nombre'] ?? 'RECETA'));
+    $nombreReceta = trim((string)preg_replace('/\s*-\s*\d+$/', '', trim((string)($receta['nombre'] ?? 'RECETA'))));
     $numeroReceta = sprintf('RC-%06d', (int)($receta['id'] ?? 0));
     $estadoReceta = (string)($receta['estado'] ?? '');
     $fechaCreacion = formatearFechaExcel($receta['created_at'] ?? null);

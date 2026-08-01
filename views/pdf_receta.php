@@ -212,7 +212,7 @@ ob_start();
         : '';
     $usuarioRegistro = trim((string)($receta['usuario'] ?? ''));
     $usuarioActual = trim((string)($_SESSION['session_usuario'] ?? $receta['usu_upd'] ?? $receta['usuario'] ?? ''));
-    $nombreReceta = trim((string)($receta['nombre'] ?? 'RECETA'));
+    $nombreReceta = trim((string)preg_replace('/\s*-\s*\d+$/', '', trim((string)($receta['nombre'] ?? 'RECETA'))));
     $empresaLinea1 = 'Sistema interno';
     $empresaLinea2 = 'Lima, Perú';
 ?>
