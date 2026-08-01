@@ -56,6 +56,16 @@ try {
         throw new Exception('Solo se puede modificar recetas con estado Enviada');
     }
 
+    $puedeEditarPrecio = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3], true);
+    $preciosActuales = [];
+    $preciosManualActuales = [];
+
+    foreach ($receta->obtenerDetallePorId($recetaId) as $detalleActual) {
+        $detalleItemId = (int)($detalleActual['item_id'] ?? 0);
+        $preciosActuales[$detalleItemId] = (float)($detalleActual['precio'] ?? 0);
+        $preciosManualActuales[$detalleItemId] = (int)($detalleActual['precio_manual'] ?? 0);
+    }
+
     $receta->begin();
 
     $okCabecera = $receta->actualizarCabeceraEdicion(
@@ -93,7 +103,12 @@ try {
             'nombre' => $item['nombre'] ?? '',
             'descripcion' => $item['descripcion'] ?? '',
             'uni_medida' => $item['uni_medida'] ?? '',
-            'precio' => (float)($item['precio'] ?? 0),
+            'precio' => $puedeEditarPrecio
+                ? (float)($item['precio'] ?? 0)
+                : (float)($preciosActuales[$itemId] ?? ($item['precio'] ?? 0)),
+            'precio_manual' => $puedeEditarPrecio
+                ? (int)($item['precio_manual'] ?? 0)
+                : (int)($preciosManualActuales[$itemId] ?? 0),
             'moneda' => $item['moneda'] ?? '',
             'tipo' => $item['tipo'] ?? '',
             'cantidad' => $cantidad,

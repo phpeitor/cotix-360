@@ -61,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const userCargo = Number(recetaForm?.dataset?.userCargo || 0);
     const isTecnico = userCargo === 4;
+    const canEditDetallePrice = [1, 3].includes(userCargo);
     const btnInfoCategoriaModal = document.querySelector('[data-bs-target="#info-categoria-modal"]');
 
     if (isTecnico && btnInfoCategoriaModal) {
@@ -75,6 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentPage = 1;
     let receta = null;
     let detalle = [];
+    let cambiosPrecioActuales = [];
     let cambiosPrecioByItem = new Map();
     let cambiosStreamSignature = "";
     let cambiosEventSource = null;
@@ -539,6 +541,7 @@ document.addEventListener("DOMContentLoaded", () => {
             cliente = data.cliente || null;
             detalle = Array.isArray(data.detalle) ? data.detalle : [];
             const cambiosPrecio = Array.isArray(data.cambios_precio) ? data.cambios_precio : [];
+            cambiosPrecioActuales = cambiosPrecio;
             cambiosPrecioByItem = new Map(cambiosPrecio.map(item => [getClaveCambioPrecio(item), item]));
             cambiosStreamSignature = getCambiosPrecioSignature(cambiosPrecio);
             currentPage = 1;
@@ -798,6 +801,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (shouldNotify) {
             alertify.warning(`Se detectaron ${cambios.length} cambios de precio.`);
         }
+    }
+
+    function quitarCambioPrecioManual(item) {
+        const clave = getClaveCambioPrecio(item);
+        if (!clave || !cambiosPrecioByItem.has(clave)) return;
+
+        cambiosPrecioByItem.delete(clave);
+        cambiosPrecioActuales = cambiosPrecioActuales.filter(cambio => getClaveCambioPrecio(cambio) !== clave);
+        cambiosStreamSignature = getCambiosPrecioSignature(cambiosPrecioActuales);
+        renderAlertasCambioPrecio(cambiosPrecioActuales, false);
     }
 
     function renderCategoriasRecetaModal(rows, source) {
@@ -1148,6 +1161,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 cambiosStreamSignature = nextSignature;
+                cambiosPrecioActuales = cambios;
                 cambiosPrecioByItem = new Map(cambios.map(item => [getClaveCambioPrecio(item), item]));
 
                 if (receta && typeof payload.estado === "string") {
@@ -1259,6 +1273,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function normalizarPrecio(value) {
+        const parsed = parseFloat(String(value ?? "").replace(/,/g, "."));
+        if (!Number.isFinite(parsed) || parsed < 0) return 0;
+        return parsed;
+    }
+
     function getResumenTotales() {
         let totalItems = 0;
         let totalSoles = 0;
@@ -1316,7 +1336,7 @@ document.addEventListener("DOMContentLoaded", () => {
         calcularTotales();
     }
 
-    function actualizarSubtotalFila(itemId, cantidad) {
+    function actualizarSubtotalFila(itemId, cantidad = null) {
         if (!tbody) return;
 
         const row = tbody.querySelector(`tr[data-item-id="${CSS.escape(String(itemId))}"]`);
@@ -1325,13 +1345,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const item = detalle.find(x => Number(x.item_id) === Number(itemId));
         if (!item) return;
 
-        const subtotal = getSubtotal({ ...item, cantidad });
+        const subtotal = getSubtotal({ ...item, cantidad: cantidad ?? item.cantidad });
         const subtotalEl = row.querySelector(".item-subtotal-value");
         if (subtotalEl) {
             subtotalEl.textContent = format2(subtotal);
         }
 
-        row.dataset.cantidad = String(cantidad);
+        if (cantidad !== null) {
+            row.dataset.cantidad = String(cantidad);
+        }
     }
 
     function actualizarCantidadDesdeInput(itemId, value) {
@@ -1346,6 +1368,27 @@ document.addEventListener("DOMContentLoaded", () => {
         const nueva = clampCantidad(value);
         detalle[idx].cantidad = nueva;
         actualizarSubtotalFila(itemId, nueva);
+        calcularTotales();
+    }
+
+    function actualizarPrecioDesdeInput(itemId, value) {
+        if (!isRecetaEditable()) {
+            alertify.error("Solo se puede modificar recetas con estado Enviada");
+            return;
+        }
+
+        if (!canEditDetallePrice) {
+            alertify.error("No tienes permisos para modificar precios");
+            return;
+        }
+
+        const idx = detalle.findIndex(x => Number(x.item_id) === Number(itemId));
+        if (idx < 0) return;
+
+        detalle[idx].precio = normalizarPrecio(value);
+        detalle[idx].precio_manual = 1;
+        quitarCambioPrecioManual(detalle[idx]);
+        actualizarSubtotalFila(itemId);
         calcularTotales();
     }
 
@@ -1394,6 +1437,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const tooltipCambioPrecio = cambioPrecio
                 ? escapeAttr(`Precio actualizado\n Anterior: ${formatMoneda(cambioPrecio.moneda_receta, cambioPrecio.precio_receta)} - ${formatFechaCambioTooltip(cambioPrecio.fecha_anterior)}\n Actual: ${formatMoneda(cambioPrecio.moneda_actual, cambioPrecio.precio_actual)} - ${formatFechaCambioTooltip(cambioPrecio.fecha_cambio)}`)
                 : "";
+            const precioEditable = editable && canEditDetallePrice;
+            const precioCell = precioEditable
+                ? `<div class="d-inline-flex align-items-center justify-content-end gap-1">
+                        <span class="text-muted fs-12">${monedaSimbolo}</span>
+                        <input type="number" class="form-control form-control-sm text-end item-price-input" style="width:96px;" min="0" step="0.01" value="${precio.toFixed(2)}" data-id="${itemId}">
+                   </div>`
+                : `<span class="text-muted fs-12">${monedaSimbolo}</span>
+                   <h5 class="fs-14 mt-1 fw-normal mb-0">${format2(precio)}</h5>`;
 
             return `
                 <tr data-item-id="${itemId}" data-cantidad="${cantidad}" class="${cambioPrecio ? "table-warning" : ""}">
@@ -1431,8 +1482,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     </td>
                     <td class="text-end precio-tooltip ${isTecnico ? "d-none" : ""}" data-bs-toggle="tooltip" data-bs-title="${tooltipPrecio}">
-                        <span class="text-muted fs-12">${monedaSimbolo}</span>
-                        <h5 class="fs-14 mt-1 fw-normal mb-0">${format2(precio)}</h5>
+                        ${precioCell}
                     </td>
                     <td class="text-end ${isTecnico ? "d-none" : ""}">
                         <span class="text-muted fs-12">${monedaSimbolo}</span>
@@ -1472,6 +1522,26 @@ document.addEventListener("DOMContentLoaded", () => {
                     e.preventDefault();
                     input.value = String(clampCantidad(input.value));
                     actualizarCantidadDesdeInput(input.dataset.id, input.value);
+                }
+            });
+        });
+
+        tbody.querySelectorAll(".item-price-input").forEach(input => {
+            input.addEventListener("input", () => {
+                actualizarPrecioDesdeInput(input.dataset.id, input.value);
+            });
+            input.addEventListener("change", () => {
+                const precio = normalizarPrecio(input.value);
+                input.value = precio.toFixed(2);
+                actualizarPrecioDesdeInput(input.dataset.id, precio);
+            });
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    const precio = normalizarPrecio(input.value);
+                    input.value = precio.toFixed(2);
+                    actualizarPrecioDesdeInput(input.dataset.id, precio);
+                    input.blur();
                 }
             });
         });
@@ -1610,6 +1680,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 descripcion: item.descripcion || "",
                 uni_medida: item.uni_medida || "",
                 precio: Number(item.precio) || 0,
+                precio_manual: Number(item.precio_manual) ? 1 : 0,
                 moneda: item.moneda || "",
                 tipo: item.tipo || "",
                 cantidad: clampCantidad(item.cantidad)

@@ -180,6 +180,7 @@ class Receta {
                     descripcion,
                     uni_medida,
                     precio,
+                    precio_manual,
                     moneda,
                     tipo,
                     created_at,
@@ -196,6 +197,7 @@ class Receta {
                     :descripcion,
                     :uni_medida,
                     :precio,
+                    :precio_manual,
                     :moneda,
                     :tipo,
                     :created_at,
@@ -214,6 +216,7 @@ class Receta {
         $stmt->bindValue(':descripcion', (string)($data['descripcion'] ?? ''));
         $stmt->bindValue(':uni_medida', (string)($data['uni_medida'] ?? ''));
         $stmt->bindValue(':precio', (float)($data['precio'] ?? 0));
+        $stmt->bindValue(':precio_manual', !empty($data['precio_manual']) ? 1 : 0, PDO::PARAM_INT);
         $stmt->bindValue(':moneda', (string)($data['moneda'] ?? ''));
         $stmt->bindValue(':tipo', (string)($data['tipo'] ?? ''));
         $stmt->bindValue(':created_at', $this->nowLima);
@@ -622,6 +625,7 @@ class Receta {
                             descripcion,
                             uni_medida,
                             precio,
+                            precio_manual,
                             moneda,
                             tipo,
                             created_at,
@@ -638,6 +642,7 @@ class Receta {
                             descripcion,
                             uni_medida,
                             precio,
+                            precio_manual,
                             moneda,
                             tipo,
                             :created_at,
@@ -996,6 +1001,7 @@ class Receta {
                 AND LOWER(TRIM(COALESCE(r.sub_cat_2, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')))
                 AND LOWER(TRIM(COALESCE(r.descripcion, ''))) = LOWER(TRIM(COALESCE(d.descripcion, '')))
                 WHERE d.receta_id = :receta_id
+                  AND COALESCE(d.precio_manual, 0) = 0
                   AND (
                     ROUND(COALESCE(d.precio, 0), 4) <> ROUND(COALESCE(r.precio, 0), 4)
                     OR COALESCE(d.moneda, '') <> COALESCE(r.moneda, '')
@@ -1004,6 +1010,19 @@ class Receta {
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
         $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function obtenerDetallePorId(int $recetaId): array
+    {
+        $sql = "SELECT *
+                FROM receta_detalle
+                WHERE receta_id = :receta_id";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
@@ -1040,6 +1059,7 @@ class Receta {
                                         AND LOWER(TRIM(COALESCE(r.sub_cat_2, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')))
                                         AND LOWER(TRIM(COALESCE(r.descripcion, ''))) = LOWER(TRIM(COALESCE(d.descripcion, '')))
                 WHERE d.receta_id = :receta_id
+                  AND COALESCE(d.precio_manual, 0) = 0
                   AND (
                     ROUND(COALESCE(d.precio, 0), 4) <> ROUND(COALESCE(r.precio, 0), 4)
                     OR COALESCE(d.moneda, '') <> COALESCE(r.moneda, '')
@@ -1067,8 +1087,10 @@ class Receta {
                                                                                 AND LOWER(TRIM(COALESCE(r.sub_cat_2, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')))
                                                                                 AND LOWER(TRIM(COALESCE(r.descripcion, ''))) = LOWER(TRIM(COALESCE(d.descripcion, '')))
                 SET d.precio = r.precio,
-                    d.moneda = r.moneda
+                    d.moneda = r.moneda,
+                    d.precio_manual = 0
                 WHERE d.receta_id = :receta_id
+                  AND COALESCE(d.precio_manual, 0) = 0
                   AND (
                     ROUND(COALESCE(d.precio, 0), 4) <> ROUND(COALESCE(r.precio, 0), 4)
                     OR COALESCE(d.moneda, '') <> COALESCE(r.moneda, '')
