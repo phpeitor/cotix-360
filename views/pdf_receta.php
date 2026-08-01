@@ -207,6 +207,9 @@ ob_start();
 <?php
     $numeroReceta = formatearNumeroRecetaPdf($receta['id']);
     $fechaReceta = formatearFechaPdf($receta['created_at'] ?? null);
+    $fechaAprobacion = strtolower((string)($receta['estado'] ?? '')) === 'aprobada'
+        ? formatearFechaPdf($receta['updated_at'] ?? null)
+        : '';
     $usuarioRegistro = trim((string)($receta['usuario'] ?? ''));
     $usuarioActual = trim((string)($_SESSION['session_usuario'] ?? $receta['usu_upd'] ?? $receta['usuario'] ?? ''));
     $nombreReceta = trim((string)($receta['nombre'] ?? 'RECETA'));
@@ -252,7 +255,11 @@ ob_start();
                 <div class="panel-title">RECETA</div>
                 <div class="panel-name"><?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Sin responsable') ?></div>
                 <p class="panel-line">Usuario registro: <?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Desconocido') ?></p>
+                <p class="panel-line">Fecha creación: <?= escaparPdf($fechaReceta !== '' ? $fechaReceta : 'N/D') ?></p>
                 <p class="panel-line">Estado: <?= escaparPdf($receta['estado'] ?? 'N/D') ?> (<?= escaparPdf($receta['usu_upd'] ?? 'N/D') ?>)</p>
+                <?php if ($fechaAprobacion !== ''): ?>
+                    <p class="panel-line">Fecha aprobación: <?= escaparPdf($fechaAprobacion) ?></p>
+                <?php endif; ?>
             </td>
             <td class="panel" style="padding-left: 6mm; text-align: right;">
                 <div class="panel-title">MG INDUSOL</div>

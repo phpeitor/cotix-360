@@ -48,6 +48,19 @@ function formatearRutaExcel(array $partes): string
     return implode(' / ', $limpias);
 }
 
+function formatearFechaExcel($fecha): string
+{
+    if (empty($fecha)) {
+        return '';
+    }
+
+    try {
+        return (new DateTime((string)$fecha))->format('Y-m-d H:i');
+    } catch (Throwable $e) {
+        return (string)$fecha;
+    }
+}
+
 try {
     $hash = $_GET['id'] ?? null;
 
@@ -69,6 +82,11 @@ try {
     $tipoCambio = (float)($receta['tipo_cambio'] ?? 1);
     $nombreReceta = trim((string)($receta['nombre'] ?? 'RECETA'));
     $numeroReceta = sprintf('RC-%06d', (int)($receta['id'] ?? 0));
+    $estadoReceta = (string)($receta['estado'] ?? '');
+    $fechaCreacion = formatearFechaExcel($receta['created_at'] ?? null);
+    $fechaAprobacion = strcasecmp($estadoReceta, 'Aprobada') === 0
+        ? formatearFechaExcel($receta['updated_at'] ?? null)
+        : '';
 
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
@@ -78,20 +96,23 @@ try {
     $sheet->setCellValue('A2', 'Receta: ' . ($nombreReceta !== '' ? mb_strtoupper($nombreReceta, 'UTF-8') : $numeroReceta));
     $sheet->setCellValue('A3', 'ID: ' . $numeroReceta);
     $sheet->setCellValue('A4', 'Usuario: ' . (string)($receta['usuario'] ?? ''));
-    $sheet->setCellValue('A5', 'Estado: ' . (string)($receta['estado'] ?? ''));
+    $sheet->setCellValue('A5', 'Estado: ' . $estadoReceta);
     $sheet->setCellValue('A6', 'Tipo de cambio: ' . number_format($tipoCambio, 3));
+    $sheet->setCellValue('A7', 'Usuario aprueba: ' . (string)($receta['usu_upd'] ?? ''));
+    $sheet->setCellValue('A8', 'Fecha creación: ' . ($fechaCreacion !== '' ? $fechaCreacion : 'N/D'));
+    $sheet->setCellValue('A9', 'Fecha aprobación: ' . ($fechaAprobacion !== '' ? $fechaAprobacion : 'N/D'));
 
-    $headerRow = 9;
-    $columns = ['A' => 'Item', 'B' => 'Descripción', 'C' => 'Detalle', 'D' => 'Tipo', 'E' => 'Cant.', 'F' => 'Precio unitario $', 'G' => 'Subtotal $'];
+    $headerRow = 11;
+    $columns = ['A' => 'Item', 'B' => 'Marca / Modelo / UM', 'C' => 'Descripción', 'D' => 'Detalle', 'E' => 'Tipo', 'F' => 'Cant.', 'G' => 'Precio unitario $', 'H' => 'Subtotal $'];
 
     foreach ($columns as $col => $title) {
         $sheet->setCellValue($col . $headerRow, $title);
     }
 
-    $sheet->getStyle('A1:G6')->getFont()->setBold(true);
+    $sheet->getStyle('A1:H9')->getFont()->setBold(true);
     $sheet->getStyle('A1')->getFont()->setSize(14);
 
-    $headerStyle = $sheet->getStyle('A' . $headerRow . ':G' . $headerRow);
+    $headerStyle = $sheet->getStyle('A' . $headerRow . ':H' . $headerRow);
     $headerStyle->getFont()->setBold(true);
     $headerStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9E2F3');
     $headerStyle->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -106,6 +127,7 @@ try {
     foreach ($detalle as $item) {
         $descripcion = normalizarTextoExcel($item['descripcion'] ?? '');
         $rutaDetalle = formatearRutaExcel([$item['categoria'] ?? '', $item['sub_cat_1'] ?? '', $item['sub_cat_2'] ?? '']);
+        $marcaModeloUnidad = formatearRutaExcel([$item['marca'] ?? '', $item['modelo'] ?? '', $item['uni_medida'] ?? '']);
         $tipo = trim((string)($item['tipo'] ?? ''));
         $cantidad = (int)($item['cantidad'] ?? 0);
         $precio = (float)($item['precio'] ?? 0);
@@ -124,14 +146,15 @@ try {
         }
 
         $sheet->setCellValue('A' . $row, (string)($item['nombre'] ?? 'SIN NOMBRE'));
-        $sheet->setCellValue('B' . $row, $descripcion);
-        $sheet->setCellValue('C' . $row, $rutaDetalle);
-        $sheet->setCellValue('D' . $row, $tipo);
-        $sheet->setCellValue('E' . $row, $cantidad);
-        $sheet->setCellValue('F' . $row, $precioDolar);
-        $sheet->setCellValue('G' . $row, $subtotalDolar);
+        $sheet->setCellValue('B' . $row, $marcaModeloUnidad);
+        $sheet->setCellValue('C' . $row, $descripcion);
+        $sheet->setCellValue('D' . $row, $rutaDetalle);
+        $sheet->setCellValue('E' . $row, $tipo);
+        $sheet->setCellValue('F' . $row, $cantidad);
+        $sheet->setCellValue('G' . $row, $precioDolar);
+        $sheet->setCellValue('H' . $row, $subtotalDolar);
 
-        $sheet->getStyle('E' . $row . ':G' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('F' . $row . ':H' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $row++;
     }
 
@@ -238,11 +261,11 @@ try {
 
     $totals = [
         ['A', 'Total Items', $totalItems],
-        ['A', 'Total Producto $', $totalProductoDolares],
-        ['A', 'Total Servicio $', $totalServicioDolares],
+        ['A', 'SubTotal Producto $', $totalProductoDolares],
+        ['A', 'SubTotal Servicio $', $totalServicioDolares],
         ['D', 'Total $', $totalDolaresConvertidos],
         ['D', 'Margen $', $totalMargenDolaresAll],
-        ['D', 'IGV 18% (sobre Total$ + Margen$)', $igvOverTotal],
+        ['D', 'IGV 18%', $igvOverTotal],
         ['D', 'Total + IGV', $totalConIgvDolares],
     ];
 
@@ -252,19 +275,20 @@ try {
         $sheet->setCellValue(chr(ord($col) + 1) . $targetRow, $value);
     }
 
-    $sheet->getStyle('A' . $totalsStart . ':G' . ($totalsStart + count($totals) - 1))->getFont()->setBold(true);
+    $sheet->getStyle('A' . $totalsStart . ':H' . ($totalsStart + count($totals) - 1))->getFont()->setBold(true);
 
-    $sheet->getStyle('F' . ($headerRow + 1) . ':G' . ($row - 1))
+    $sheet->getStyle('G' . ($headerRow + 1) . ':H' . ($row - 1))
         ->getNumberFormat()
         ->setFormatCode('#,##0.00');
-    $sheet->getStyle('B' . ($headerRow + 1) . ':C' . ($row - 1))->getAlignment()->setWrapText(true);
+    $sheet->getStyle('B' . ($headerRow + 1) . ':D' . ($row - 1))->getAlignment()->setWrapText(true);
 
     $sheet->getStyle('B' . ($totalsStart + 1) . ':B' . ($totalsStart + 2))->getNumberFormat()->setFormatCode('#,##0.00');
     $sheet->getStyle('E' . $totalsStart . ':E' . ($totalsStart + count($totals) - 1))->getNumberFormat()->setFormatCode('#,##0.00');
 
     $sheet->getColumnDimension('B')->setWidth(33);
-    $sheet->getColumnDimension('C')->setWidth(26);
-    foreach (['A', 'D', 'E', 'F', 'G'] as $col) {
+    $sheet->getColumnDimension('C')->setWidth(33);
+    $sheet->getColumnDimension('D')->setWidth(26);
+    foreach (['A', 'E', 'F', 'G', 'H'] as $col) {
         $sheet->getColumnDimension($col)->setAutoSize(true);
     }
 
