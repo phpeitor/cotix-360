@@ -60,13 +60,14 @@ table {
     font-size: 80px;
     font-weight: bold;
     color: rgba(0,0,0,0.08);
-    z-index: -1;
+    z-index: 20;
     text-transform: uppercase;
     white-space: nowrap;
 }
 
 .watermark.aprobada { color: rgba(25, 135, 84, 0.15); }
 .watermark.anulada { color: rgba(220, 53, 69, 0.15); }
+.watermark.copia { color: rgba(4, 108, 91, 0.18); }
 
 .hero {
     margin-top: 16mm;
@@ -326,3 +327,113 @@ table {
 
 .right { text-align: right; }
 .center { text-align: center; }
+
+.offer-pdf {
+    color: #17211f;
+    font-size: 9.5px;
+}
+
+.offer-pdf .top-band,
+.offer-pdf .bottom-band,
+.offer-pdf .corner-top-right,
+.offer-pdf .corner-bottom-left {
+    display: none;
+}
+
+.offer-pdf .page {
+    padding-top: 1mm;
+}
+
+.offer-pdf .hero {
+    margin-top: 0;
+    padding-top: 0;
+    margin-bottom: 3mm;
+    border-bottom: 0.25mm solid #dfe8e5;
+}
+
+.offer-pdf .hero-left {
+    width: 45%;
+    text-align: left;
+    padding-bottom: 3mm;
+}
+
+.offer-pdf .hero-right {
+    width: 55%;
+}
+
+.offer-pdf .hero-logo {
+    width: 88px;
+    margin: 0;
+}
+
+.offer-pdf .panels {
+    margin-top: 0;
+    margin-bottom: 5mm;
+}
+
+.offer-pdf .panel-title {
+    font-size: 12px;
+    color: #0b6f62;
+    letter-spacing: 1.2px;
+    margin-bottom: 1mm;
+}
+
+.offer-pdf .panel-line {
+    color: #33413e;
+    font-size: 9.4px;
+    line-height: 1.25;
+}
+
+.offer-pdf .section-table {
+    margin-top: 2mm;
+}
+
+.offer-pdf .section-head th {
+    background: #0b6f62;
+    font-size: 10.5px;
+    letter-spacing: 1.4px;
+    padding: 2mm 2.4mm;
+}
+
+.offer-pdf .offer-type-row td {
+    background: #eef8f5;
+    color: #0b6f62;
+    border-bottom: 0.25mm solid #d5e4df;
+    padding: 1.5mm 2mm;
+}
+
+.offer-pdf .offer-group-row td {
+    background: #fff;
+    color: #17211f;
+    border-bottom: 0.25mm solid #dfe8e5;
+    padding: 1.6mm 2mm 1.2mm;
+}
+
+.offer-pdf .item-row td {
+    border-bottom: 0.22mm solid #dfe8e5;
+    padding: 1.7mm 2mm;
+}
+
+.offer-pdf .item-description {
+    font-size: 9.7px;
+    letter-spacing: 0;
+}
+
+.offer-pdf .item-subline,
+.offer-pdf .item-meta {
+    color: #34423f;
+    font-size: 8.6px;
+}
+
+.offer-pdf .item-qty {
+    color: #17211f;
+    font-weight: bold;
+}
+
+.offer-pdf .pdf-footer {
+    bottom: 8mm;
+    color: #44514e;
+    border-top: 0.25mm solid #dfe8e5;
+    padding-top: 2mm;
+    background: transparent;
+}

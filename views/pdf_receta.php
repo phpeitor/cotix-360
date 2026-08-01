@@ -208,7 +208,7 @@ ob_start();
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Receta PDF</title>
+    <title><?= $esOferta ? 'Oferta PDF' : 'Receta PDF' ?></title>
 <?php
     // Cargar archivo CSS externo para Dompdf
     $cssPath = ROOT . '/assets/css/pdf_receta.css';
@@ -221,12 +221,14 @@ ob_start();
     <?= $cssContent ?>
     </style>
 </head>
-<body>
+<body class="<?= $esOferta ? 'offer-pdf' : '' ?>">
 <?php
     $estado = strtolower($receta['estado'] ?? '');
     $wmClass = '';
 
-    if ($estado === 'aprobada') {
+    if ($esOferta) {
+        $wmClass = 'copia';
+    } elseif ($estado === 'aprobada') {
         $wmClass = 'aprobada';
     } elseif ($estado === 'anulada') {
         $wmClass = 'anulada';
@@ -235,7 +237,7 @@ ob_start();
 
 <?php if ($wmClass): ?>
     <div class="watermark <?= $wmClass ?>">
-        <?= htmlspecialchars($receta['estado']) ?>
+        <?= htmlspecialchars($esOferta ? 'COPIA' : ($receta['estado'] ?? '')) ?>
     </div>
 <?php endif; ?>
 
@@ -249,6 +251,17 @@ ob_start();
     $usuarioActual = trim((string)($_SESSION['session_usuario'] ?? $receta['usu_upd'] ?? $receta['usuario'] ?? ''));
     $nombreReceta = trim((string)preg_replace('/\s*-\s*\d+$/', '', trim((string)($receta['nombre'] ?? 'RECETA'))));
     $tituloDocumento = $esOferta ? 'OFERTA ' . $nombreReceta : $nombreReceta;
+    $clienteLineasOferta = array_filter([
+        trim((string)($receta['cliente_razon_social_empresa'] ?? '')) !== '' ? 'Cliente: ' . trim((string)$receta['cliente_razon_social_empresa']) : '',
+        trim((string)($receta['cliente_ruc'] ?? '')) !== '' ? 'RUC: ' . trim((string)$receta['cliente_ruc']) : '',
+        trim((string)($receta['cliente_nombre_completo'] ?? '')) !== '' ? 'Contacto: ' . trim((string)$receta['cliente_nombre_completo']) : '',
+        trim((string)($receta['cliente_correo'] ?? '')) !== '' ? 'Correo: ' . trim((string)$receta['cliente_correo']) : '',
+        trim((string)($receta['cliente_celular'] ?? '')) !== '' ? 'Celular: ' . trim((string)$receta['cliente_celular']) : '',
+        trim((string)($receta['cliente_motivo'] ?? '')) !== '' ? 'Motivo: ' . trim((string)$receta['cliente_motivo']) : '',
+        trim((string)($receta['cliente_tiempo_entrega'] ?? '')) !== '' ? 'Tiempo de entrega: ' . trim((string)$receta['cliente_tiempo_entrega']) : '',
+        trim((string)($receta['cliente_condiciones_pago'] ?? '')) !== '' ? 'Condiciones de pago: ' . trim((string)$receta['cliente_condiciones_pago']) : '',
+        trim((string)($receta['cliente_vendedor'] ?? '')) !== '' ? 'Vendedor: ' . trim((string)$receta['cliente_vendedor']) : '',
+    ]);
     $empresaLinea1 = 'Sistema interno';
     $empresaLinea2 = 'Lima, Perú';
 ?>
@@ -280,7 +293,9 @@ ob_start();
                 <?php endif; ?>
             </td>
             <td class="hero-right">
-                <div class="title"><?= escaparPdf(trim($tituloDocumento) !== '' ? mb_strtoupper(trim($tituloDocumento), 'UTF-8') : ($esOferta ? 'OFERTA' : 'RECETA')) ?></div>
+                <?php if (!$esOferta): ?>
+                    <div class="title"><?= escaparPdf(trim($tituloDocumento) !== '' ? mb_strtoupper(trim($tituloDocumento), 'UTF-8') : 'RECETA') ?></div>
+                <?php endif; ?>
             </td>
         </tr>
     </table>
@@ -288,13 +303,25 @@ ob_start();
     <table class="panels">
         <tr>
             <td class="panel" style="padding-right: 6mm;">
-                <div class="panel-title"><?= $esOferta ? 'OFERTA' : 'RECETA' ?></div>
-                <div class="panel-name"><?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Sin responsable') ?></div>
-                <p class="panel-line">Usuario registro: <?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Desconocido') ?></p>
-                <p class="panel-line">Fecha creación: <?= escaparPdf($fechaReceta !== '' ? $fechaReceta : 'N/D') ?></p>
-                <p class="panel-line">Estado: <?= escaparPdf($receta['estado'] ?? 'N/D') ?> (<?= escaparPdf($receta['usu_upd'] ?? 'N/D') ?>)</p>
-                <?php if ($fechaAprobacion !== ''): ?>
-                    <p class="panel-line">Fecha aprobación: <?= escaparPdf($fechaAprobacion) ?></p>
+                <div class="panel-title">
+                    <?= $esOferta ? 'OFERTA ' . escaparPdf($numeroReceta) : 'RECETA' ?>
+                </div>
+                <?php if ($esOferta): ?>
+                    <?php if (!empty($clienteLineasOferta)): ?>
+                        <?php foreach ($clienteLineasOferta as $lineaOferta): ?>
+                            <p class="panel-line"><?= escaparPdf($lineaOferta) ?></p>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p class="panel-line">Datos de cliente pendientes</p>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <div class="panel-name"><?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Sin responsable') ?></div>
+                    <p class="panel-line">Usuario registro: <?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Desconocido') ?></p>
+                    <p class="panel-line">Fecha creación: <?= escaparPdf($fechaReceta !== '' ? $fechaReceta : 'N/D') ?></p>
+                    <p class="panel-line">Estado: <?= escaparPdf($receta['estado'] ?? 'N/D') ?> (<?= escaparPdf($receta['usu_upd'] ?? 'N/D') ?>)</p>
+                    <?php if ($fechaAprobacion !== ''): ?>
+                        <p class="panel-line">Fecha aprobación: <?= escaparPdf($fechaAprobacion) ?></p>
+                    <?php endif; ?>
                 <?php endif; ?>
             </td>
             <td class="panel" style="padding-left: 6mm; text-align: right;">
@@ -397,16 +424,7 @@ ob_start();
     <?php endif; ?>
 
     <table style="width: 100%; margin-top: 2mm;">
-        <?php if ($esOferta): ?>
-            <tr>
-                <td style="width: 50%; background: transparent; padding: 2mm 3mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
-                    <strong>Total Items:</strong> <?= $totalItems ?>
-                </td>
-                <td style="width: 50%; background: transparent; padding: 2mm 3mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top; text-align: right;">
-                    <strong>Total Oferta:</strong> $<?= number_format($totalConIgvDolares, 2) ?>
-                </td>
-            </tr>
-        <?php elseif ($esTecnico): ?>
+        <?php if ($esTecnico && !$esOferta): ?>
             <tr>
                 <td style="background: transparent; padding: 2mm 3mm; border-bottom: 0.35mm solid #4f4f4f;">
                     <strong>Total Items:</strong> <?= $totalItems ?>
