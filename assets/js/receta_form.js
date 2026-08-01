@@ -2045,11 +2045,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const precio = Number(item.precio) || 0;
-        if (precio <= 0) {
-            const nombre = String(item.nombre || item.descripcion || "item").trim();
-            alertify.warning(`No se puede agregar ${nombre}: el precio debe ser mayor a 0.`);
-            return;
-        }
 
         const existente = detalle.some(x => Number(x.item_id) === itemId);
         if (existente) {
