@@ -221,7 +221,7 @@ ob_start();
     <?= $cssContent ?>
     </style>
 </head>
-<body class="<?= $esOferta ? 'offer-pdf' : '' ?>">
+<body class="<?= $esOferta ? 'offer-pdf' : 'recipe-pdf' ?>">
 <?php
     $estado = strtolower($receta['estado'] ?? '');
     $wmClass = '';

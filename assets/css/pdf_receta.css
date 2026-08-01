@@ -437,3 +437,118 @@ table {
     padding-top: 2mm;
     background: transparent;
 }
+
+.recipe-pdf {
+    color: #17212b;
+    font-size: 9.5px;
+}
+
+.recipe-pdf .top-band,
+.recipe-pdf .bottom-band,
+.recipe-pdf .corner-top-right,
+.recipe-pdf .corner-bottom-left {
+    display: none;
+}
+
+.recipe-pdf .page {
+    padding-top: 1mm;
+}
+
+.recipe-pdf .hero {
+    margin-top: 0;
+    padding-top: 0;
+    margin-bottom: 3mm;
+    border-bottom: 0.25mm solid #dbe5ec;
+}
+
+.recipe-pdf .hero-left {
+    width: 35%;
+    text-align: left;
+    padding-bottom: 3mm;
+}
+
+.recipe-pdf .hero-right {
+    width: 65%;
+    vertical-align: middle;
+}
+
+.recipe-pdf .hero-logo {
+    width: 88px;
+    margin: 0;
+}
+
+.recipe-pdf .title {
+    color: #1f596d;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    line-height: 1.25;
+}
+
+.recipe-pdf .panels {
+    margin-top: 0;
+    margin-bottom: 5mm;
+}
+
+.recipe-pdf .panel-title {
+    color: #1f596d;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+    margin-bottom: 1mm;
+}
+
+.recipe-pdf .panel-name {
+    color: #17212b;
+    font-size: 11px;
+    letter-spacing: 0.4px;
+}
+
+.recipe-pdf .panel-line {
+    color: #3d4a53;
+    font-size: 9.4px;
+    line-height: 1.25;
+}
+
+.recipe-pdf .section-table {
+    margin-top: 2mm;
+}
+
+.recipe-pdf .section-head th {
+    background: #1f596d;
+    font-size: 10.5px;
+    letter-spacing: 1.2px;
+    padding: 2mm 2.4mm;
+}
+
+.recipe-pdf .item-row td {
+    border-bottom: 0.22mm solid #dbe5ec;
+    padding: 1.7mm 2mm;
+}
+
+.recipe-pdf .item-description {
+    font-size: 9.8px;
+    letter-spacing: 0;
+}
+
+.recipe-pdf .item-subline {
+    color: #3d4a53;
+    font-size: 8.7px;
+}
+
+.recipe-pdf .item-meta {
+    color: #6a7780;
+    font-size: 8.2px;
+}
+
+.recipe-pdf .item-qty,
+.recipe-pdf .item-price {
+    color: #17212b;
+    font-weight: bold;
+}
+
+.recipe-pdf .pdf-footer {
+    bottom: 8mm;
+    color: #4d5a63;
+    border-top: 0.25mm solid #dbe5ec;
+    padding-top: 2mm;
+    background: transparent;
+}
