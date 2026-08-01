@@ -25,7 +25,13 @@ try {
     $cambiosPrecio = $recetaModel->obtenerCambiosPrecio((int)$receta['id']);
 
     $cliente = null;
-    if (trim((string)($receta['cliente_razon_social_empresa'] ?? '')) !== '' || trim((string)($receta['cliente_ruc'] ?? '')) !== '') {
+    if (
+        trim((string)($receta['cliente_razon_social_empresa'] ?? '')) !== ''
+        || trim((string)($receta['cliente_ruc'] ?? '')) !== ''
+        || trim((string)($receta['cliente_tiempo_entrega'] ?? '')) !== ''
+        || trim((string)($receta['cliente_condiciones_pago'] ?? '')) !== ''
+        || trim((string)($receta['cliente_vendedor'] ?? '')) !== ''
+    ) {
         $cliente = [
             'razon_social_empresa' => $receta['cliente_razon_social_empresa'] ?? '',
             'direccion' => $receta['cliente_direccion'] ?? '',
@@ -34,6 +40,9 @@ try {
             'correo' => $receta['cliente_correo'] ?? '',
             'celular' => $receta['cliente_celular'] ?? '',
             'motivo' => $receta['cliente_motivo'] ?? '',
+            'tiempo_entrega' => $receta['cliente_tiempo_entrega'] ?? '',
+            'condiciones_pago' => $receta['cliente_condiciones_pago'] ?? '',
+            'vendedor' => $receta['cliente_vendedor'] ?? '',
         ];
     }
 

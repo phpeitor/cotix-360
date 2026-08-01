@@ -16,7 +16,7 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/receta.css?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/receta.css?v=1.2" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -74,10 +74,16 @@ require_once ROOT . '/controller/check_session.php';
                             <form class="needs-validation form-receta" novalidate="" data-user-cargo="<?= (int)$_SESSION['session_cargo'] ?>">
                                 <div class="card-body p-0">
                                     <div class="p-3 border-bottom bg-body-tertiary">
-                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
                                             <h5 class="mb-0">Datos del cliente</h5>
-                                            <span class="text-muted fs-12">Completa esta información antes de guardar la receta.</span>
+                                            <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                                                <span class="text-muted fs-12">Completa esta información antes de guardar la receta.</span>
+                                                <button type="button" id="btnToggleDatosCliente" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#datosClienteCollapse" aria-expanded="true" aria-controls="datosClienteCollapse">
+                                                    <i class="ti ti-chevron-up me-1"></i><span>Colapsar</span>
+                                                </button>
+                                            </div>
                                         </div>
+                                        <div class="collapse show" id="datosClienteCollapse">
                                         <div class="row g-3">
                                             <div class="col-lg-4 col-md-6">
                                                 <label class="form-label" for="ruc_cliente">RUC</label>
@@ -115,6 +121,7 @@ require_once ROOT . '/controller/check_session.php';
                                                 <div class="invalid-feedback">Ingresa el motivo o nombre de la solicitud.</div>
                                             </div>
                                         </div>
+                                        </div>
                                     </div>
 
                                     <div class="bg-success bg-opacity-10 py-1 text-center">
@@ -140,6 +147,7 @@ require_once ROOT . '/controller/check_session.php';
                                             
                                             <div class="col-lg-3 col-12">
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total S/.</span> <span id="total_peru">0.00</span></p>
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-minimalistic-outline" class="text-success"></iconify-icon> <span class="text-dark">Total $</span> <span id="total_peru_dolares">0.00</span></p>
                                             </div>
 
                                         </div>
@@ -321,7 +329,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js"></script>
-    <script src="./assets/js/form-receta.js?v=1.2"></script>
+    <script src="./assets/js/form-receta.js?v=1.5"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

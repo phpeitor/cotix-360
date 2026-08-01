@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalSolesEl = document.getElementById("total_soles");
     const totalDolaresEl = document.getElementById("total_dolares");
     const totalPeruEl = document.getElementById("total_peru");
+    const totalPeruDolaresEl = document.getElementById("total_peru_dolares");
     const tipoCambioInput = document.getElementById("tipo_cambio_sunat");
     const tipoCambioFechaEl = document.getElementById("tipo_cambio_sunat_fecha");
     const tcMinusBtn = document.querySelector(".tc-minus");
@@ -26,6 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const previewTotalSolesEl = document.getElementById("previewTotalSoles");
     const previewTotalDolaresEl = document.getElementById("previewTotalDolares");
     const previewTotalPEEl = document.getElementById("previewTotalPE");
+    const datosClienteCollapseEl = document.getElementById("datosClienteCollapse");
+    const btnToggleDatosCliente = document.getElementById("btnToggleDatosCliente");
     const recetaForm = document.querySelector("form.form-receta");
     const paginationFromEl = document.getElementById("pagination_from");
     const paginationToEl = document.getElementById("pagination_to");
@@ -140,6 +143,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let lastRucConsulted = null;
 
+        function limpiarDatosRuc() {
+            nombreInput.value = "";
+            if (direccionInput) {
+                direccionInput.value = "";
+            }
+        }
+
         rucInput.addEventListener("input", async () => {
             const ruc = String(rucInput.value || "").replace(/\D/g, "").slice(0, 11);
             if (rucInput.value !== ruc) {
@@ -148,31 +158,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (ruc.length < 11) {
                 lastRucConsulted = null;
+                limpiarDatosRuc();
                 return;
             }
 
             if (ruc === lastRucConsulted) return;
             lastRucConsulted = ruc;
+            limpiarDatosRuc();
 
             try {
                 const res = await fetch(`./config/api-ruc.php?ruc=${encodeURIComponent(ruc)}`);
                 const data = await res.json();
 
+                if (String(rucInput.value || "").replace(/\D/g, "").slice(0, 11) !== ruc) {
+                    return;
+                }
+
                 if (!res.ok || !data.ok) {
                     throw new Error(data.message || "No se pudo consultar el RUC");
                 }
 
+                if (!String(data.nombre || "").trim()) {
+                    throw new Error("No se encontro razon social para el RUC");
+                }
+
                 nombreInput.value = data.nombre || "";
-                if (direccionInput && data.direccion) {
-                    direccionInput.value = data.direccion;
+                if (direccionInput) {
+                    direccionInput.value = data.direccion || "";
                 }
             } catch (error) {
                 console.error("Error RUC:", error);
                 lastRucConsulted = null;
+                limpiarDatosRuc();
                 alertify.error(error.message || "Error al consultar RUC");
             }
         });
     }
+
+    datosClienteCollapseEl?.addEventListener("shown.bs.collapse", () => {
+        btnToggleDatosCliente?.setAttribute("aria-expanded", "true");
+        if (btnToggleDatosCliente) {
+            btnToggleDatosCliente.innerHTML = '<i class="ti ti-chevron-up me-1"></i><span>Colapsar</span>';
+        }
+    });
+
+    datosClienteCollapseEl?.addEventListener("hidden.bs.collapse", () => {
+        btnToggleDatosCliente?.setAttribute("aria-expanded", "false");
+        if (btnToggleDatosCliente) {
+            btnToggleDatosCliente.innerHTML = '<i class="ti ti-chevron-down me-1"></i><span>Expandir</span>';
+        }
+    });
 
     function createQtyStep(initialValue = 1) {
         const wrapper = document.createElement("div");
@@ -777,8 +812,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const tc = getTipoCambioActual();
         const totalPE = totalSoles + (totalDolares * tc);
+        const totalPEDolares = tc > 0 ? totalPE / tc : 0;
 
-        return { contadorItems, totalSoles, totalDolares, totalPE };
+        return { contadorItems, totalSoles, totalDolares, totalPE, totalPEDolares };
     }
 
     function renderPreviewTable() {
@@ -891,12 +927,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function calcularTotales() {
-        const { contadorItems, totalSoles, totalDolares, totalPE } = getResumenTotales();
+        const { contadorItems, totalSoles, totalDolares, totalPE, totalPEDolares } = getResumenTotales();
 
         if (totalItemEl) totalItemEl.textContent = contadorItems;
         if (totalSolesEl) totalSolesEl.textContent = format2(decimalAdjust('round', totalSoles, '-2'));
         if (totalDolaresEl) totalDolaresEl.textContent = format2(decimalAdjust('round', totalDolares, '-2'));
         if (totalPeruEl) totalPeruEl.textContent = format2(decimalAdjust('round', totalPE, '-2'));
+        if (totalPeruDolaresEl) totalPeruDolaresEl.textContent = format2(decimalAdjust('round', totalPEDolares, '-2'));
 
         renderPagination();
     }

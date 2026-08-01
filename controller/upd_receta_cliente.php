@@ -26,6 +26,10 @@ try {
         exit;
     }
 
+    if (!in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3], true)) {
+        throw new Exception('No tienes permisos para actualizar los datos del cliente');
+    }
+
     $recetaId = isset($_POST['receta_id']) ? (int)$_POST['receta_id'] : 0;
     $razonSocialEmpresa = trim((string)($_POST['razon_social_empresa'] ?? ''));
     $direccion = trim((string)($_POST['direccion'] ?? ''));

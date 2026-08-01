@@ -119,6 +119,53 @@ class Receta {
         return $stmt->execute();
     }
 
+    public function guardarCondicionesComerciales(array $data): bool
+    {
+        $sql = "INSERT INTO receta_cliente (
+                    id_receta,
+                    razon_social_empresa,
+                    direccion,
+                    ruc,
+                    nombre_completo,
+                    correo,
+                    celular,
+                    motivo,
+                    tiempo_entrega,
+                    condiciones_pago,
+                    vendedor,
+                    created_at,
+                    updated_at
+                ) VALUES (
+                    :id_receta,
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    :tiempo_entrega,
+                    :condiciones_pago,
+                    :vendedor,
+                    :created_at,
+                    :updated_at
+                ) ON DUPLICATE KEY UPDATE
+                    tiempo_entrega = VALUES(tiempo_entrega),
+                    condiciones_pago = VALUES(condiciones_pago),
+                    vendedor = VALUES(vendedor),
+                    updated_at = VALUES(updated_at)";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id_receta', (int)($data['receta_id'] ?? 0), PDO::PARAM_INT);
+        $stmt->bindValue(':tiempo_entrega', (string)($data['tiempo_entrega'] ?? ''));
+        $stmt->bindValue(':condiciones_pago', (string)($data['condiciones_pago'] ?? ''));
+        $stmt->bindValue(':vendedor', (string)($data['vendedor'] ?? ''));
+        $stmt->bindValue(':created_at', $this->nowLima);
+        $stmt->bindValue(':updated_at', $this->nowLima);
+
+        return $stmt->execute();
+    }
+
     public function guardarDetalle(array $data): bool
     {
         $sql = "INSERT INTO receta_detalle (
@@ -291,10 +338,13 @@ class Receta {
                        rc.razon_social_empresa AS cliente_razon_social_empresa,
                        rc.direccion AS cliente_direccion,
                        rc.ruc AS cliente_ruc,
-                       rc.nombre_completo AS cliente_nombre_completo,
-                       rc.correo AS cliente_correo,
-                       rc.celular AS cliente_celular,
-                       rc.motivo AS cliente_motivo
+                        rc.nombre_completo AS cliente_nombre_completo,
+                        rc.correo AS cliente_correo,
+                        rc.celular AS cliente_celular,
+                        rc.motivo AS cliente_motivo,
+                        rc.tiempo_entrega AS cliente_tiempo_entrega,
+                        rc.condiciones_pago AS cliente_condiciones_pago,
+                        rc.vendedor AS cliente_vendedor
                 FROM recetas_ingenieria c
                 LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
                 LEFT JOIN personal p2 ON p2.IDPERSONAL = c.usuario_upd
@@ -483,7 +533,10 @@ class Receta {
                        rc.nombre_completo AS cliente_nombre_completo,
                        rc.correo AS cliente_correo,
                        rc.celular AS cliente_celular,
-                       rc.motivo AS cliente_motivo
+                       rc.motivo AS cliente_motivo,
+                       rc.tiempo_entrega AS cliente_tiempo_entrega,
+                       rc.condiciones_pago AS cliente_condiciones_pago,
+                       rc.vendedor AS cliente_vendedor
                 FROM recetas c
                 LEFT JOIN personal p on p.IDPERSONAL=c.usuario_id
                 LEFT JOIN personal p2 on p2.IDPERSONAL=c.usuario_upd
@@ -619,6 +672,44 @@ class Receta {
         $stmtCategorias->bindValue(':nuevo_id', $nuevoId, PDO::PARAM_INT);
         $stmtCategorias->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
         $stmtCategorias->execute();
+
+        $sqlCliente = "INSERT INTO receta_cliente (
+                            id_receta,
+                            razon_social_empresa,
+                            direccion,
+                            ruc,
+                            nombre_completo,
+                            correo,
+                            celular,
+                            motivo,
+                            tiempo_entrega,
+                            condiciones_pago,
+                            vendedor,
+                            created_at,
+                            updated_at
+                       ) SELECT
+                            :nuevo_id,
+                            razon_social_empresa,
+                            direccion,
+                            ruc,
+                            nombre_completo,
+                            correo,
+                            celular,
+                            motivo,
+                            tiempo_entrega,
+                            condiciones_pago,
+                            vendedor,
+                            :created_at,
+                            :updated_at
+                       FROM receta_cliente
+                       WHERE id_receta = :receta_id";
+
+        $stmtCliente = $this->conn->prepare($sqlCliente);
+        $stmtCliente->bindValue(':nuevo_id', $nuevoId, PDO::PARAM_INT);
+        $stmtCliente->bindValue(':created_at', $this->nowLima);
+        $stmtCliente->bindValue(':updated_at', $this->nowLima);
+        $stmtCliente->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmtCliente->execute();
 
         return $nuevoId;
     }

@@ -38,6 +38,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const clienteCelularEl = document.getElementById("clienteCelular");
     const clienteMotivoEl = document.getElementById("clienteMotivo");
     const clienteDireccionEl = document.getElementById("clienteDireccion");
+    const condicionesModalEl = document.getElementById("condiciones-modal");
+    const btnGuardarCondiciones = document.getElementById("btnGuardarCondiciones");
+    const tiempoEntregaEl = document.getElementById("tiempoEntrega");
+    const condicionesPagoEl = document.getElementById("condicionesPago");
+    const vendedorEl = document.getElementById("vendedor");
 
     const baseSelect = document.getElementById("filterBase");
     const categoriaSelect = document.getElementById("categoria");
@@ -490,6 +495,13 @@ document.addEventListener("DOMContentLoaded", () => {
             renderClienteModal();
         });
 
+        condicionesModalEl?.addEventListener("show.bs.modal", async () => {
+            await cargarClienteDesdeServidor();
+            renderCondicionesModal();
+        });
+
+        btnGuardarCondiciones?.addEventListener("click", guardarCondicionesComerciales);
+
         configurarConsultaRuc(clienteRucEl, clienteRazonSocialEl, clienteDireccionEl);
 
         cargarBasesReceta();
@@ -581,6 +593,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (clienteDireccionEl) clienteDireccionEl.value = data.direccion || "";
     }
 
+    function renderCondicionesModal() {
+        const data = cliente || {};
+
+        if (tiempoEntregaEl) tiempoEntregaEl.value = data.tiempo_entrega || "";
+        if (condicionesPagoEl) condicionesPagoEl.value = data.condiciones_pago || "";
+        if (vendedorEl) vendedorEl.value = data.vendedor || "";
+    }
+
     function getClienteModalPayload() {
         return {
             razon_social_empresa: String(clienteRazonSocialEl?.value || "").trim(),
@@ -591,6 +611,60 @@ document.addEventListener("DOMContentLoaded", () => {
             celular: String(clienteCelularEl?.value || "").replace(/\D/g, "").trim(),
             motivo: String(clienteMotivoEl?.value || "").trim(),
         };
+    }
+
+    function getCondicionesPayload() {
+        return {
+            tiempo_entrega: String(tiempoEntregaEl?.value || "").trim(),
+            condiciones_pago: String(condicionesPagoEl?.value || "").trim(),
+            vendedor: String(vendedorEl?.value || "").trim(),
+        };
+    }
+
+    async function guardarCondicionesComerciales() {
+        if (!receta?.id) {
+            alertify.error("Receta inválida");
+            return;
+        }
+
+        const payload = getCondicionesPayload();
+
+        if (!payload.tiempo_entrega || !payload.condiciones_pago || !payload.vendedor) {
+            alertify.error("Completa tiempo de entrega, condiciones de pago y vendedor");
+            return;
+        }
+
+        btnGuardarCondiciones.disabled = true;
+        try {
+            const fd = new FormData();
+            fd.append("receta_id", String(receta.id));
+            fd.append("tiempo_entrega", payload.tiempo_entrega);
+            fd.append("condiciones_pago", payload.condiciones_pago);
+            fd.append("vendedor", payload.vendedor);
+
+            const res = await fetch("controller/upd_receta_condiciones.php", {
+                method: "POST",
+                body: fd
+            });
+
+            const json = await res.json();
+            if (!res.ok || !json.ok) {
+                throw new Error(json.message || "No se pudieron guardar los datos comerciales");
+            }
+
+            cliente = {
+                ...(cliente || {}),
+                ...(json.condiciones || payload)
+            };
+            alertify.success("Datos comerciales guardados");
+            const modal = bootstrap.Modal.getInstance(condicionesModalEl) || new bootstrap.Modal(condicionesModalEl);
+            modal.hide();
+        } catch (error) {
+            console.error(error);
+            alertify.error(error.message || "Error al guardar datos comerciales");
+        } finally {
+            btnGuardarCondiciones.disabled = false;
+        }
     }
 
     function clienteCompleto(data = cliente) {
