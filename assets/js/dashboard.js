@@ -94,12 +94,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                 : "#";
                 
                 cotizacionesContainer.insertAdjacentHTML("beforeend", `
-                    <div class="d-flex align-items-start gap-2 position-relative mb-2">
+                    <div class="dashboard-recent-item d-flex align-items-start gap-2 position-relative mb-2">
                         <div class="avatar-md flex-shrink-0">
                             <img src="assets/images/brands/${logo}.svg" height="22">
                         </div>
 
-                        <div class="flex-grow-1">
+                        <div class="dashboard-recent-content flex-grow-1">
                             <h5 class="fs-13 my-1">
                                 <a href="${link}" class="stretched-link link-reset ${!ES_ADMIN ? 'disabled-link' : ''}"
                                     ${!ES_ADMIN ? 'onclick="return false;"' : ''}>
@@ -109,8 +109,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                             ${renderItemsString(coti.items)}
                         </div>
 
-                        <div class="ms-auto">
-                            <span class="badge ${badgeByEstado(coti.estado)} px-1 py-1" >
+                        <div class="dashboard-recent-status ms-auto">
+                            <span class="badge dashboard-status-badge ${badgeByEstado(coti.estado)} px-1 py-1" >
                                 ${coti.estado}
                             </span>
                         </div>
@@ -150,12 +150,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                     : "#";
 
                 recetasContainer.insertAdjacentHTML("beforeend", `
-                    <div class="d-flex align-items-start gap-2 position-relative mb-2">
+                    <div class="dashboard-recent-item d-flex align-items-start gap-2 position-relative mb-2">
                         <div class="avatar-md flex-shrink-0">
                             <img src="assets/images/brands/${logo}.svg" height="22">
                         </div>
 
-                        <div class="flex-grow-1">
+                        <div class="dashboard-recent-content flex-grow-1">
                             <h5 class="fs-13 my-1">
                                 <a href="${link}" class="stretched-link link-reset ${!ES_ADMIN ? 'disabled-link' : ''}"
                                     ${!ES_ADMIN ? 'onclick="return false;"' : ''}>
@@ -166,8 +166,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                             ${renderItemsString(receta.items, 3)}
                         </div>
 
-                        <div class="ms-auto">
-                            <span class="badge ${badgeByEstado(receta.estado)} px-1 py-1">
+                        <div class="dashboard-recent-status ms-auto">
+                            <span class="badge dashboard-status-badge ${badgeByEstado(receta.estado)} px-1 py-1">
                                 ${receta.estado}
                             </span>
                         </div>

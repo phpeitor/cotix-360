@@ -8,20 +8,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnGuardarNombreReceta = document.getElementById("btn-guardar-nombre-receta");
     const successModal = successModalEl ? new bootstrap.Modal(successModalEl) : null;
 
-    function confirmarDetallePdf() {
+    function confirmarPdfDetalle() {
         return new Promise(resolve => {
             alertify.confirm(
                 "Detalle de receta",
-                "¿Quieres ver detalle de la receta en el PDF?",
+                "¿Desea generar el PDF del detalle de la receta?",
                 () => resolve(true),
                 () => resolve(false)
             ).set("labels", { ok: "Si", cancel: "No" });
         });
     }
 
-    function abrirPdfReceta(hash, mostrarDetalle) {
-        const detalle = mostrarDetalle ? "1" : "0";
-        window.open(`pdf_receta.php?id=${encodeURIComponent(hash)}&detalle=${detalle}`, "_blank", "noopener,noreferrer");
+    function abrirPdfReceta(hash) {
+        window.open(`pdf_receta.php?id=${encodeURIComponent(hash)}&detalle=1`, "_blank", "noopener,noreferrer");
     }
 
     function initTooltips() {
@@ -510,13 +509,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const nombreReceta = String(json.receta.nombre ?? "").trim();
 
             if (nombreReceta !== "") {
-                abrirPdfReceta(hash, await confirmarDetallePdf());
+                if (!await confirmarPdfDetalle()) return;
+                abrirPdfReceta(hash);
                 return;
             }
 
             // Si el usuario es técnico (cargo === 4) no mostrar modal, abrir PDF directamente
             if (typeof CARGO !== 'undefined' && Number(CARGO) === 4) {
-                abrirPdfReceta(hash, await confirmarDetallePdf());
+                if (!await confirmarPdfDetalle()) return;
+                abrirPdfReceta(hash);
                 return;
             }
 
@@ -571,7 +572,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             successModal?.hide();
             alertify.success("Nombre de receta guardado");
-            abrirPdfReceta(hash, await confirmarDetallePdf());
+            if (!await confirmarPdfDetalle()) {
+                grid.forceRender();
+                return;
+            }
+            abrirPdfReceta(hash);
             grid.forceRender();
         } catch (error) {
             alertify.error("Error de conexion al guardar nombre");

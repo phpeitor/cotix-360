@@ -17,6 +17,35 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
+    <style>
+        .dashboard-recent-item {
+            min-width: 0;
+        }
+
+        .dashboard-recent-content {
+            min-width: 0;
+        }
+
+        .dashboard-recent-content h5,
+        .dashboard-recent-content a,
+        .dashboard-recent-content span,
+        .dashboard-recent-content li {
+            overflow-wrap: anywhere;
+        }
+
+        .dashboard-recent-status {
+            flex: 0 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .dashboard-status-badge {
+            max-width: 72px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
 </head>
 
 <body>
@@ -386,7 +415,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/formUtils.js"></script>
     <script src="./assets/js/dashboard-sales.js"></script>
-    <script src="./assets/js/dashboard.js"></script>
+    <script src="./assets/js/dashboard.js?v=1.1"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
