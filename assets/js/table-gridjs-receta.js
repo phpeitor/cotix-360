@@ -7,6 +7,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputNombreReceta = document.getElementById("input-nombre-receta");
     const btnGuardarNombreReceta = document.getElementById("btn-guardar-nombre-receta");
     const successModal = successModalEl ? new bootstrap.Modal(successModalEl) : null;
+    const ofertaModalEl = document.getElementById("oferta-pdf-modal");
+    const ofertaModal = ofertaModalEl ? new bootstrap.Modal(ofertaModalEl) : null;
+    const ofertaItemsContainer = document.getElementById("oferta-items-container");
+    const ofertaItemsSelectedCount = document.getElementById("oferta-items-selected-count");
+    const btnOfertaSelectAll = document.getElementById("btn-oferta-select-all");
+    const btnOfertaClearAll = document.getElementById("btn-oferta-clear-all");
+    const btnGenerarOfertaPdf = document.getElementById("btn-generar-oferta-pdf");
+    let ofertaActualHash = "";
 
     function confirmarPdfDetalle() {
         return new Promise(resolve => {
@@ -313,6 +321,127 @@ document.addEventListener("DOMContentLoaded", () => {
         return gridjs.html(itemsHtml);
     }
 
+    function agruparDetalleOferta(detalle) {
+        const grupos = { PRODUCTO: new Map(), SERVICIO: new Map() };
+
+        detalle.forEach(item => {
+            const tipo = String(item.tipo || "").trim().toUpperCase() === "PRODUCTO" ? "PRODUCTO" : "SERVICIO";
+            const subcat = String(item.sub_cat_1 || "Sin subcategoria").trim() || "Sin subcategoria";
+
+            if (!grupos[tipo].has(subcat)) {
+                grupos[tipo].set(subcat, []);
+            }
+
+            grupos[tipo].get(subcat).push(item);
+        });
+
+        return grupos;
+    }
+
+    function renderOfertaItemsModal(detalle) {
+        if (!ofertaItemsContainer) return;
+
+        const grupos = agruparDetalleOferta(detalle);
+        let html = "";
+
+        Object.entries({ PRODUCTO: "Productos", SERVICIO: "Servicios" }).forEach(([tipo, titulo]) => {
+            const subcats = grupos[tipo];
+            if (!subcats || subcats.size === 0) return;
+
+            html += `
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h5 class="mb-0 text-uppercase fs-13 fw-bold text-primary">${escapeHtml(titulo)}</h5>
+                    </div>`;
+
+            subcats.forEach((items, subcat) => {
+                const groupId = `oferta-grupo-${tipo}-${md5(subcat).slice(0, 8)}`;
+                html += `
+                    <div class="card border mb-2">
+                        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                            <div class="form-check mb-0">
+                                <input class="form-check-input oferta-grupo-check" type="checkbox" id="${groupId}" data-group="${groupId}" checked>
+                                <label class="form-check-label fw-semibold" for="${groupId}">${escapeHtml(subcat)}</label>
+                            </div>
+                            <span class="badge bg-primary-subtle text-primary">${items.length} items</span>
+                        </div>
+                        <div class="list-group list-group-flush">`;
+
+                items.forEach(item => {
+                    const itemId = String(item.id || "").trim();
+                    const inputId = `oferta-item-${itemId}`;
+                    const descripcion = String(item.descripcion || "-").trim() || "-";
+                    const marca = String(item.marca || "-").trim() || "-";
+                    const cantidad = String(item.cantidad || "0").trim() || "0";
+
+                    html += `
+                        <label class="list-group-item d-flex gap-3 align-items-start">
+                            <input class="form-check-input mt-1 oferta-item-check" type="checkbox" id="${inputId}" value="${escapeHtml(itemId)}" data-group="${groupId}" checked>
+                            <span class="flex-grow-1">
+                                <span class="fw-semibold d-block">${escapeHtml(item.nombre || "SIN NOMBRE")}</span>
+                                <span class="text-muted small d-block">${escapeHtml(descripcion)}</span>
+                                <span class="text-muted small">Marca: ${escapeHtml(marca)} · Cant.: ${escapeHtml(cantidad)}</span>
+                            </span>
+                        </label>`;
+                });
+
+                html += `</div></div>`;
+            });
+
+            html += `</div>`;
+        });
+
+        ofertaItemsContainer.innerHTML = html || '<div class="alert alert-warning mb-0">No hay items para mostrar.</div>';
+        actualizarContadorOferta();
+    }
+
+    function actualizarContadorOferta() {
+        if (!ofertaItemsSelectedCount) return;
+
+        const checks = Array.from(document.querySelectorAll(".oferta-item-check"));
+        const selected = checks.filter(check => check.checked).length;
+        ofertaItemsSelectedCount.textContent = `${selected} item${selected === 1 ? "" : "s"} seleccionado${selected === 1 ? "" : "s"}`;
+    }
+
+    function abrirOfertaPdfSeleccionada() {
+        const selectedItems = Array.from(document.querySelectorAll(".oferta-item-check:checked"))
+            .map(check => check.value)
+            .filter(Boolean);
+
+        if (!selectedItems.length) {
+            alertify.error("Seleccione al menos un item para imprimir");
+            return;
+        }
+
+        const selectedCols = Array.from(document.querySelectorAll(".oferta-columna:checked"))
+            .map(check => check.value)
+            .filter(Boolean);
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "pdf_receta.php";
+        form.target = "_blank";
+        form.style.display = "none";
+
+        [
+            ["id", ofertaActualHash],
+            ["oferta", "1"],
+            ["oferta_items", selectedItems.join(",")],
+            ["oferta_cols", selectedCols.join(",")]
+        ].forEach(([name, value]) => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+        form.remove();
+        ofertaModal?.hide();
+    }
+
     document.addEventListener("click", (e) => {
         const btn = e.target.closest("[data-receta-items-toggle]");
         if (!btn) return;
@@ -358,7 +487,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 title="Oferta PDF"
                 data-bs-toggle="tooltip"
                 data-bs-title="Oferta PDF"
-                class="btn btn-soft-info btn-icon btn-sm rounded-circle">
+                class="btn btn-soft-info btn-icon btn-sm rounded-circle btn-oferta-receta"
+                data-hash="${hashId}">
                     <i class="ti ti-file-dollar"></i>
             </a>
         `;
@@ -542,6 +672,110 @@ document.addEventListener("DOMContentLoaded", () => {
             alertify.error("Error de conexion al validar nombre de receta");
         }
     });
+
+    document.addEventListener("click", async (e) => {
+        const btnOferta = e.target.closest(".btn-oferta-receta");
+        if (!btnOferta) return;
+
+        e.preventDefault();
+
+        const hash = String(btnOferta.dataset.hash || "").trim();
+        if (!hash) {
+            alertify.error("No se pudo identificar la receta");
+            return;
+        }
+
+        try {
+            btnOferta.classList.add("disabled");
+
+            const res = await fetch(`controller/get_receta.php?id=${encodeURIComponent(hash)}`);
+            const json = await res.json();
+
+            if (!res.ok || json.error || !json.receta) {
+                alertify.error(json.message || "No se pudo validar la receta");
+                return;
+            }
+
+            const cliente = json.cliente || {};
+            const campos = [
+                ["razon_social_empresa", "Razón social"],
+                ["direccion", "Dirección"],
+                ["ruc", "RUC"],
+                ["nombre_completo", "Contacto"],
+                ["correo", "Correo"],
+                ["celular", "Celular"],
+                ["motivo", "Motivo"],
+                ["tiempo_entrega", "Tiempo de entrega"],
+                ["condiciones_pago", "Condiciones de pago"],
+                ["vendedor", "Vendedor"]
+            ];
+
+            const faltantes = campos
+                .filter(([key]) => String(cliente[key] ?? "").trim() === "")
+                .map(([, label]) => label);
+
+            if (faltantes.length) {
+                alertify.alert(
+                    "Datos incompletos",
+                    `Para emitir la oferta PDF complete datos de cliente y comerciales:<br><br>${faltantes.map(campo => `- ${escapeHtml(campo)}`).join("<br>")}`
+                );
+                return;
+            }
+
+            ofertaActualHash = hash;
+            document.querySelectorAll(".oferta-columna").forEach(check => {
+                check.checked = true;
+            });
+            renderOfertaItemsModal(Array.isArray(json.detalle) ? json.detalle : []);
+            ofertaModal?.show();
+        } catch (error) {
+            alertify.error("Error de conexión al validar la oferta");
+        } finally {
+            btnOferta.classList.remove("disabled");
+        }
+    });
+
+    ofertaItemsContainer?.addEventListener("change", (e) => {
+        const itemCheck = e.target.closest(".oferta-item-check");
+        const groupCheck = e.target.closest(".oferta-grupo-check");
+
+        if (groupCheck) {
+            const group = groupCheck.dataset.group;
+            document.querySelectorAll(`.oferta-item-check[data-group="${group}"]`).forEach(check => {
+                check.checked = groupCheck.checked;
+            });
+        }
+
+        if (itemCheck) {
+            const group = itemCheck.dataset.group;
+            const items = Array.from(document.querySelectorAll(`.oferta-item-check[data-group="${group}"]`));
+            const groupInput = document.querySelector(`.oferta-grupo-check[data-group="${group}"]`);
+            if (groupInput) {
+                groupInput.checked = items.every(check => check.checked);
+                groupInput.indeterminate = items.some(check => check.checked) && !groupInput.checked;
+            }
+        }
+
+        actualizarContadorOferta();
+    });
+
+    btnOfertaSelectAll?.addEventListener("click", () => {
+        document.querySelectorAll(".oferta-item-check, .oferta-grupo-check").forEach(check => {
+            check.checked = true;
+            check.indeterminate = false;
+        });
+        actualizarContadorOferta();
+    });
+
+    btnOfertaClearAll?.addEventListener("click", () => {
+        document.querySelectorAll(".oferta-item-check, .oferta-grupo-check").forEach(check => {
+            check.checked = false;
+            check.indeterminate = false;
+        });
+        actualizarContadorOferta();
+    });
+
+    btnGenerarOfertaPdf?.addEventListener("click", abrirOfertaPdfSeleccionada);
 
     btnGuardarNombreReceta?.addEventListener("click", async () => {
         const nombre = String(inputNombreReceta?.value ?? "").trim();

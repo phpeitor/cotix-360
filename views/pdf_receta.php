@@ -93,13 +93,13 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 */
 
-$hash = $_GET['id'] ?? null;
+$hash = $_REQUEST['id'] ?? null;
 if (!$hash) {
     http_response_code(400);
     exit("ID inválido");
 }
-$mostrarDetalle = !isset($_GET['detalle']) || (string)$_GET['detalle'] === '1';
-$esOferta = isset($_GET['oferta']) && (string)$_GET['oferta'] === '1';
+$mostrarDetalle = !isset($_REQUEST['detalle']) || (string)$_REQUEST['detalle'] === '1';
+$esOferta = isset($_REQUEST['oferta']) && (string)$_REQUEST['oferta'] === '1';
 
 $recetaModel = new Receta();
 $items      = new Item();
@@ -199,7 +199,26 @@ $totalMargenDolaresAll = decimalAjustPdf($totalMargenDolaresAll, 2);
 $baseTotalDolares = decimalAjustPdf($totalDolaresConvertidos + $totalMargenDolaresAll, 2);
 $igvOverTotal = decimalAjustPdf($baseTotalDolares * 0.18, 2);
 $totalConIgvDolares = decimalAjustPdf($baseTotalDolares + $igvOverTotal, 2);
-$detalleOfertaAgrupado = $esOferta ? agruparOfertaPorSubcat1Pdf($detalle) : [];
+$ofertaItemsParam = trim((string)($_REQUEST['oferta_items'] ?? ''));
+$ofertaItemIds = $ofertaItemsParam !== ''
+    ? array_filter(array_map('intval', explode(',', $ofertaItemsParam)), fn($id) => $id > 0)
+    : [];
+$ofertaColsParam = trim((string)($_REQUEST['oferta_cols'] ?? ''));
+$ofertaCols = array_key_exists('oferta_cols', $_REQUEST)
+    ? array_values(array_intersect(array_filter(explode(',', $ofertaColsParam)), ['descripcion', 'marca', 'cantidad']))
+    : ['descripcion', 'marca', 'cantidad'];
+$detalleOfertaVisible = $detalle;
+if ($esOferta && !empty($ofertaItemIds)) {
+    $idsPermitidos = array_flip($ofertaItemIds);
+    $detalleOfertaVisible = array_values(array_filter($detalle, function ($item) use ($idsPermitidos) {
+        return isset($idsPermitidos[(int)($item['id'] ?? 0)]);
+    }));
+}
+$detalleOfertaAgrupado = $esOferta ? agruparOfertaPorSubcat1Pdf($detalleOfertaVisible) : [];
+$ofertaMostrarDescripcion = in_array('descripcion', $ofertaCols, true);
+$ofertaMostrarMarca = in_array('marca', $ofertaCols, true);
+$ofertaMostrarCantidad = in_array('cantidad', $ofertaCols, true);
+$ofertaColspan = 1 + ($ofertaMostrarDescripcion ? 1 : 0) + ($ofertaMostrarMarca ? 1 : 0) + ($ofertaMostrarCantidad ? 1 : 0);
 
 ob_start();
 ?>
@@ -336,21 +355,27 @@ ob_start();
         <table class="section-table">
             <thead>
                 <tr class="section-head">
-                    <th style="width: 24%;">NOMBRE</th>
-                    <th style="width: 48%;">DESCRIPCIÓN</th>
-                    <th style="width: 16%;">MARCA</th>
-                    <th style="width: 12%;">CANT.</th>
+                    <th>NOMBRE</th>
+                    <?php if ($ofertaMostrarDescripcion): ?>
+                        <th>DESCRIPCIÓN</th>
+                    <?php endif; ?>
+                    <?php if ($ofertaMostrarMarca): ?>
+                        <th>MARCA</th>
+                    <?php endif; ?>
+                    <?php if ($ofertaMostrarCantidad): ?>
+                        <th>CANT.</th>
+                    <?php endif; ?>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach (['PRODUCTO' => 'PRODUCTOS', 'SERVICIO' => 'SERVICIOS'] as $tipoOferta => $tituloTipo): ?>
                     <?php if (empty($detalleOfertaAgrupado[$tipoOferta])) continue; ?>
                     <tr class="offer-type-row">
-                        <td colspan="4"><?= escaparPdf($tituloTipo) ?></td>
+                        <td colspan="<?= $ofertaColspan ?>"><?= escaparPdf($tituloTipo) ?></td>
                     </tr>
                     <?php foreach ($detalleOfertaAgrupado[$tipoOferta] as $subcat => $itemsGrupo): ?>
                         <tr class="offer-group-row">
-                            <td colspan="4"><?= escaparPdf($subcat) ?></td>
+                            <td colspan="<?= $ofertaColspan ?>"><?= escaparPdf($subcat) ?></td>
                         </tr>
                         <?php foreach ($itemsGrupo as $i): ?>
                             <?php
@@ -360,9 +385,15 @@ ob_start();
                             ?>
                             <tr class="item-row">
                                 <td><div class="item-description"><?= escaparPdf((string)($i['nombre'] ?? 'SIN NOMBRE')) ?></div></td>
-                                <td><div class="item-subline"><?= escaparPdf($descripcion !== '' ? $descripcion : '-') ?></div></td>
-                                <td><div class="item-subline"><?= escaparPdf($marca !== '' ? $marca : '-') ?></div></td>
-                                <td class="item-qty"><?= (int)$cantidad ?></td>
+                                <?php if ($ofertaMostrarDescripcion): ?>
+                                    <td><div class="item-subline"><?= escaparPdf($descripcion !== '' ? $descripcion : '-') ?></div></td>
+                                <?php endif; ?>
+                                <?php if ($ofertaMostrarMarca): ?>
+                                    <td><div class="item-subline"><?= escaparPdf($marca !== '' ? $marca : '-') ?></div></td>
+                                <?php endif; ?>
+                                <?php if ($ofertaMostrarCantidad): ?>
+                                    <td class="item-qty"><?= (int)$cantidad ?></td>
+                                <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                     <?php endforeach; ?>

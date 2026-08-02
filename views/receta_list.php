@@ -203,10 +203,56 @@ require_once ROOT . '/controller/check_session.php';
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
+    <div id="oferta-pdf-modal" class="modal fade" tabindex="-1" aria-labelledby="ofertaPdfModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <h4 class="modal-title mb-1" id="ofertaPdfModalLabel">Oferta PDF</h4>
+                        <p class="text-muted mb-0">Selecciona los items y columnas que se imprimiran en la oferta.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card border bg-light-subtle mb-3">
+                        <div class="card-body py-3">
+                            <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between">
+                                <div class="d-flex flex-wrap gap-3">
+                                    <div class="form-check form-switch mb-0">
+                                        <input class="form-check-input oferta-columna" type="checkbox" id="oferta-col-descripcion" value="descripcion" checked>
+                                        <label class="form-check-label" for="oferta-col-descripcion">Descripcion</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-0">
+                                        <input class="form-check-input oferta-columna" type="checkbox" id="oferta-col-marca" value="marca" checked>
+                                        <label class="form-check-label" for="oferta-col-marca">Marca</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-0">
+                                        <input class="form-check-input oferta-columna" type="checkbox" id="oferta-col-cantidad" value="cantidad" checked>
+                                        <label class="form-check-label" for="oferta-col-cantidad">Cantidad</label>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-sm btn-light" id="btn-oferta-select-all">Seleccionar todo</button>
+                                    <button type="button" class="btn btn-sm btn-light" id="btn-oferta-clear-all">Limpiar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="oferta-items-container"></div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <span class="text-muted me-auto" id="oferta-items-selected-count">0 items seleccionados</span>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-info" id="btn-generar-oferta-pdf">Generar PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
-    <script src="./assets/js/table-gridjs-receta.js?v=1.5"></script>
+    <script src="./assets/js/table-gridjs-receta.js?v=1.6"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
