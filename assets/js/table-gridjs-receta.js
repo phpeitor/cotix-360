@@ -518,6 +518,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 data-hash="${hashId}">
                     <i class="ti ti-file-dollar"></i>
             </a>
+
+            <a href="controller/export_oferta_comercial_excel.php?id=${hashId}"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Oferta Excel"
+                data-bs-toggle="tooltip"
+                data-bs-title="Oferta Excel"
+                class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-oferta-excel"
+                data-hash="${hashId}">
+                    <i class="ti ti-file-spreadsheet"></i>
+            </a>
         `;
 
         if (estado === "Aprobada") {
@@ -701,6 +712,64 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.addEventListener("click", async (e) => {
+        const btnOfertaExcel = e.target.closest(".btn-oferta-excel");
+        if (btnOfertaExcel) {
+            e.preventDefault();
+
+            const hash = String(btnOfertaExcel.dataset.hash || "").trim();
+            if (!hash) {
+                alertify.error("No se pudo identificar la receta");
+                return;
+            }
+
+            try {
+                btnOfertaExcel.classList.add("disabled");
+                const res = await fetch(`controller/get_receta.php?id=${encodeURIComponent(hash)}`);
+                const json = await res.json();
+
+                if (!res.ok || json.error || !json.receta) {
+                    alertify.error(json.message || "No se pudo validar la receta");
+                    return;
+                }
+
+                const cliente = json.cliente || {};
+                const campos = [
+                    ["razon_social_empresa", "Razón social"],
+                    ["direccion", "Dirección"],
+                    ["ruc", "RUC"],
+                    ["nombre_completo", "Contacto"],
+                    ["correo", "Correo"],
+                    ["celular", "Celular"],
+                    ["motivo", "Motivo"],
+                    ["tiempo_entrega", "Tiempo de entrega"],
+                    ["condiciones_pago", "Condiciones de pago"],
+                    ["vendedor", "Vendedor"],
+                    ["vendedor_correo", "Email vendedor"],
+                    ["vendedor_telefono", "Teléfono vendedor"],
+                    ["condiciones_economicas_dias", "Días de suspensión"]
+                ];
+
+                const faltantes = campos
+                    .filter(([key]) => String(cliente[key] ?? "").trim() === "")
+                    .map(([, label]) => label);
+
+                if (faltantes.length) {
+                    alertify.alert(
+                        "Datos incompletos",
+                        `Para emitir la oferta Excel complete datos de cliente y comerciales:<br><br>${faltantes.map(campo => `- ${escapeHtml(campo)}`).join("<br>")}`
+                    );
+                    return;
+                }
+
+                window.open(`controller/export_oferta_comercial_excel.php?id=${encodeURIComponent(hash)}`, "_blank", "noopener,noreferrer");
+            } catch (error) {
+                alertify.error("Error de conexión al validar la oferta");
+            } finally {
+                btnOfertaExcel.classList.remove("disabled");
+            }
+            return;
+        }
+
         const btnOferta = e.target.closest(".btn-oferta-receta");
         if (!btnOferta) return;
 
