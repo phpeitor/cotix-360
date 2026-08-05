@@ -147,6 +147,39 @@
     box-shadow: 0 0 0 0 rgba(var(--bs-warning-rgb), .55);
 }
 
+.commercial-conditions-box {
+    border: 1px solid var(--bs-border-color);
+    border-radius: .65rem;
+    background: var(--bs-body-bg);
+    padding: .9rem 1rem;
+}
+
+.commercial-conditions-title {
+    color: var(--bs-secondary-color);
+    font-weight: 700;
+    margin-bottom: .5rem;
+}
+
+.commercial-conditions-text {
+    color: var(--bs-body-color);
+    font-size: .82rem;
+    line-height: 1.45;
+    margin-bottom: 0;
+}
+
+.commercial-days-input {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    margin: 0 .2rem;
+    vertical-align: middle;
+}
+
+.commercial-days-input .form-control {
+    width: 5.25rem;
+    display: inline-block;
+}
+
 @keyframes tipo-cambio-pulse {
     0% {
         box-shadow: 0 0 0 0 rgba(var(--bs-warning-rgb), .55);

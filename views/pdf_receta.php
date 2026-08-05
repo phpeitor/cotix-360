@@ -277,7 +277,7 @@ ob_start();
         trim((string)($receta['cliente_correo'] ?? '')) !== '' ? 'Correo: ' . trim((string)$receta['cliente_correo']) : '',
         trim((string)($receta['cliente_celular'] ?? '')) !== '' ? 'Celular: ' . trim((string)$receta['cliente_celular']) : '',
         trim((string)($receta['cliente_motivo'] ?? '')) !== '' ? 'Motivo: ' . trim((string)$receta['cliente_motivo']) : '',
-        trim((string)($receta['cliente_tiempo_entrega'] ?? '')) !== '' ? 'Tiempo de entrega: ' . trim((string)$receta['cliente_tiempo_entrega']) : '',
+        (int)preg_replace('/\D+/', '', (string)($receta['cliente_tiempo_entrega'] ?? '')) > 0 ? 'Tiempo de entrega: ' . (int)preg_replace('/\D+/', '', (string)$receta['cliente_tiempo_entrega']) . ' días' : '',
         trim((string)($receta['cliente_condiciones_pago'] ?? '')) !== '' ? 'Condiciones de pago: ' . trim((string)$receta['cliente_condiciones_pago']) : '',
         trim((string)($receta['cliente_vendedor'] ?? '')) !== '' ? 'Vendedor: ' . trim((string)$receta['cliente_vendedor']) : '',
         trim((string)($receta['cliente_vendedor_correo'] ?? '')) !== '' ? 'Email vendedor: ' . trim((string)$receta['cliente_vendedor_correo']) : '',
@@ -494,7 +494,7 @@ ob_start();
 
     <?php if ($esOferta && $condicionesEconomicasDias > 0): ?>
         <div class="economic-conditions">
-            <div class="economic-conditions-title">6. Condiciones Económicas por Suspensión de Servicio:</div>
+            <div class="economic-conditions-title">Condiciones Económicas por Suspensión de Servicio:</div>
             <div class="economic-conditions-text"><?= escaparPdf($textoCondicionesEconomicas) ?></div>
         </div>
     <?php endif; ?>

@@ -17,7 +17,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/receta.css?v=1.2" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/receta.css?v=1.3" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
     <style>
@@ -450,7 +450,10 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
                     <div class="row g-3">
                         <div class="col-lg-6">
                             <label class="form-label" for="tiempoEntrega">Tiempo de entrega</label>
-                            <input type="text" class="form-control" id="tiempoEntrega" maxlength="150" placeholder="Ej. 15 días útiles">
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="tiempoEntrega" min="1" max="999" step="1" placeholder="Ej. 15">
+                                <span class="input-group-text">días</span>
+                            </div>
                         </div>
                         <div class="col-lg-6">
                             <label class="form-label" for="vendedor">Vendedor</label>
@@ -468,13 +471,17 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
                             <label class="form-label" for="condicionesPago">Condiciones de pago</label>
                             <textarea class="form-control" id="condicionesPago" rows="3" maxlength="200" placeholder="Ej. 50% adelanto, 50% contra entrega"></textarea>
                         </div>
-                        <div class="col-lg-6">
-                            <label class="form-label" for="condicionesEconomicasDias">Condiciones económicas por suspensión de servicio</label>
-                            <div class="input-group">
-                                <input type="number" class="form-control" id="condicionesEconomicasDias" min="1" max="999" step="1" placeholder="Ej. 15">
-                                <span class="input-group-text">días</span>
+                        <div class="col-12">
+                            <div class="commercial-conditions-box">
+                                <div class="commercial-conditions-title">Condiciones Económicas por Suspensión de Servicio:</div>
+                                <p class="commercial-conditions-text">
+                                    En caso de que el servicio sea pausado o suspendido por un periodo superior a
+                                    <span class="commercial-days-input">
+                                        <input type="number" class="form-control form-control-sm" id="condicionesEconomicasDias" min="1" max="999" step="1" placeholder="10">
+                                        <span>días</span>
+                                    </span>, debido a causas no imputables a nuestra empresa, y en concordancia con los principios generales establecidos, la propuesta inicial comercial perderá su vigencia. La reanudación del servicio estará sujeta a una reformulación de la oferta comercial que reconozca los costos directos e indirectos derivados de la postergación, tales como la reposición, adquisición o sustitución de materiales y componentes afectados por deterioro o caducidad, así como los costos de renovación de acreditaciones, homologaciones e inducciones del personal y demás requisitos técnicos o administrativos exigidos para la operatividad del proyecto.
+                                </p>
                             </div>
-                            <small class="text-muted">Solo se guarda la cantidad de días; el texto se genera en el PDF.</small>
                         </div>
                     </div>
                 </div>
@@ -493,7 +500,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js"></script>
-    <script src="./assets/js/receta_form.js?v=2.0"></script>
+    <script src="./assets/js/receta_form.js?v=2.1"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

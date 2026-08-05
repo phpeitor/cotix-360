@@ -22,7 +22,7 @@ try {
     }
 
     $recetaId = isset($_POST['receta_id']) ? (int)$_POST['receta_id'] : 0;
-    $tiempoEntrega = trim((string)($_POST['tiempo_entrega'] ?? ''));
+    $tiempoEntrega = isset($_POST['tiempo_entrega']) ? (int)$_POST['tiempo_entrega'] : 0;
     $condicionesPago = trim((string)($_POST['condiciones_pago'] ?? ''));
     $vendedor = trim((string)($_POST['vendedor'] ?? ''));
     $vendedorCorreo = trim((string)($_POST['vendedor_correo'] ?? ''));
@@ -33,7 +33,7 @@ try {
         throw new Exception('Receta inválida');
     }
 
-    if ($tiempoEntrega === '' || $condicionesPago === '' || $vendedor === '' || $vendedorCorreo === '' || $vendedorTelefono === '' || $condicionesEconomicasDias <= 0) {
+    if ($tiempoEntrega <= 0 || $condicionesPago === '' || $vendedor === '' || $vendedorCorreo === '' || $vendedorTelefono === '' || $condicionesEconomicasDias <= 0) {
         throw new Exception('Completa tiempo de entrega, condiciones de pago, vendedor, email, teléfono y días de suspensión');
     }
 
@@ -55,7 +55,7 @@ try {
     echo json_encode([
         'ok' => true,
         'condiciones' => [
-            'tiempo_entrega' => $tiempoEntrega,
+            'tiempo_entrega' => (string)$tiempoEntrega,
             'condiciones_pago' => $condicionesPago,
             'vendedor' => $vendedor,
             'vendedor_correo' => $vendedorCorreo,

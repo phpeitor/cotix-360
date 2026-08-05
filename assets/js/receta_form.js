@@ -602,7 +602,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderCondicionesModal() {
         const data = cliente || {};
 
-        if (tiempoEntregaEl) tiempoEntregaEl.value = data.tiempo_entrega || "";
+        if (tiempoEntregaEl) tiempoEntregaEl.value = String(data.tiempo_entrega || "").replace(/\D/g, "");
         if (condicionesPagoEl) condicionesPagoEl.value = data.condiciones_pago || "";
         if (vendedorEl) vendedorEl.value = data.vendedor || "";
         if (vendedorCorreoEl) vendedorCorreoEl.value = data.vendedor_correo || "";
@@ -624,7 +624,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getCondicionesPayload() {
         return {
-            tiempo_entrega: String(tiempoEntregaEl?.value || "").trim(),
+            tiempo_entrega: String(tiempoEntregaEl?.value || "").replace(/\D/g, "").trim(),
             condiciones_pago: String(condicionesPagoEl?.value || "").trim(),
             vendedor: String(vendedorEl?.value || "").trim(),
             vendedor_correo: String(vendedorCorreoEl?.value || "").trim(),
