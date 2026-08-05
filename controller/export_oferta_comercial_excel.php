@@ -63,25 +63,23 @@ try {
 
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
-    $sheet->setTitle('FORMA GENERAL');
+    $sheet->setTitle('GENERAL');
     $sheet->setShowGridlines(true);
 
-    foreach (range('A', 'N') as $col) {
+    foreach (range('A', 'L') as $col) {
         $sheet->getColumnDimension($col)->setWidth(match ($col) {
-            'A' => 4.8,
-            'B' => 14,
-            'C' => 7,
-            'D' => 17,
-            'E' => 19,
+            'A' => 12,
+            'B' => 3,
+            'C' => 10,
+            'D' => 8,
+            'E' => 22,
             'F' => 26,
-            'G' => 10,
+            'G' => 8,
             'H' => 12,
-            'I' => 7,
-            'J' => 28,
-            'K' => 12,
-            'L' => 13,
-            'M' => 13,
-            'N' => 16,
+            'I' => 3,
+            'J' => 25,
+            'K' => 13,
+            'L' => 15,
             default => 10,
         });
     }
@@ -90,8 +88,8 @@ try {
         $sheet->getRowDimension($row)->setRowHeight($row === 20 || $row === 21 ? 20 : 18);
     }
 
-    $sheet->getStyle('A1:N21')->getFont()->setName('Courier New')->setSize(10);
-    $sheet->getStyle('A1:N21')->getAlignment()
+    $sheet->getStyle('A1:L21')->getFont()->setName('Consolas')->setSize(10);
+    $sheet->getStyle('A1:L21')->getAlignment()
         ->setVertical(Alignment::VERTICAL_CENTER)
         ->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
@@ -103,74 +101,69 @@ try {
             ],
         ],
     ];
-    $sheet->getStyle('A1:N21')->applyFromArray($thinBorder);
-    $sheet->getStyle('A10:N10')->getBorders()->getTop()->setBorderStyle(Border::BORDER_MEDIUM);
-    $sheet->getStyle('A10:N10')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
+    $sheet->getStyle('A1:L21')->applyFromArray($thinBorder);
+    $sheet->getStyle('A10:L10')->getBorders()->getTop()->setBorderStyle(Border::BORDER_MEDIUM);
+    $sheet->getStyle('A10:L10')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
     $sheet->getStyle('A11:G18')->getBorders()->getRight()->setBorderStyle(Border::BORDER_MEDIUM);
-    $sheet->getStyle('H11:N18')->getBorders()->getLeft()->setBorderStyle(Border::BORDER_MEDIUM);
-    $sheet->getStyle('A19:N19')->getBorders()->getTop()->setBorderStyle(Border::BORDER_MEDIUM);
-    $sheet->getStyle('A21:N21')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
+    $sheet->getStyle('H11:L18')->getBorders()->getLeft()->setBorderStyle(Border::BORDER_MEDIUM);
+    $sheet->getStyle('A19:L19')->getBorders()->getTop()->setBorderStyle(Border::BORDER_MEDIUM);
+    $sheet->getStyle('A21:L21')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
 
-    $logoPath = __DIR__ . '/../assets/images/mg-indusol-logo.svg';
+    $logoPath = __DIR__ . '/../assets/images/mg-indusol-logo.png';
     if (is_readable($logoPath)) {
         $drawing = new Drawing();
         $drawing->setName('MG Indusol');
         $drawing->setPath($logoPath);
-        $drawing->setCoordinates('A2');
+        $drawing->setCoordinates('A3');
         $drawing->setOffsetX(10);
-        $drawing->setOffsetY(10);
-        $drawing->setWidth(280);
+        $drawing->setOffsetY(6);
+        $drawing->setWidth(230);
         $drawing->setWorksheet($sheet);
     }
 
-    $sheet->mergeCells('A2:C8');
-    $sheet->mergeCells('D2:H2');
-    $sheet->mergeCells('D3:H3');
-    $sheet->mergeCells('D4:H4');
-    $sheet->mergeCells('D5:H5');
-    $sheet->mergeCells('D6:H6');
-    $sheet->mergeCells('D7:H7');
-    $sheet->mergeCells('D8:H8');
-    $sheet->mergeCells('J4:N4');
-    $sheet->mergeCells('J5:N5');
-    $sheet->mergeCells('K8:N8');
-    $sheet->mergeCells('A9:C9');
-    $sheet->mergeCells('A20:N20');
-    $sheet->mergeCells('A21:N21');
+    $sheet->mergeCells('A2:D8');
+    $sheet->mergeCells('E2:H2');
+    $sheet->mergeCells('E3:H3');
+    $sheet->mergeCells('E4:H4');
+    $sheet->mergeCells('E5:H5');
+    $sheet->mergeCells('E6:H6');
+    $sheet->mergeCells('E7:H7');
+    $sheet->mergeCells('E8:H8');
+    $sheet->mergeCells('J4:L4');
+    $sheet->mergeCells('J5:L5');
+    $sheet->mergeCells('J9:L9');
+    $sheet->mergeCells('A20:L20');
+    $sheet->mergeCells('A21:L21');
 
-    $sheet->setCellValue('D2', 'MG INDUSTRIAL SOLUTION S.A.C.');
-    $sheet->setCellValue('D3', 'MG INDUSOL SAC');
-    $sheet->setCellValueExplicit('D4', 'RUC:20548328854', DataType::TYPE_STRING);
-    $sheet->setCellValue('D5', 'Calle Brea y Pariñas 102, of 704, Stgo de Surco.');
-    $sheet->setCellValue('D6', 'Central Telf. (01)3048091');
-    $sheet->setCellValue('D7', 'E-mail: ventas@mgindusol.com /contacto@mgindusol.com');
-    $sheet->setCellValue('D8', 'Página Web. www.mgindusol.com');
-    $sheet->getStyle('D2:H8')->getFont()->setBold(true);
+    $sheet->setCellValue('E2', 'MG INDUSTRIAL SOLUTION S.A.C.');
+    $sheet->setCellValue('E3', 'MG INDUSOL SAC');
+    $sheet->setCellValueExplicit('E4', 'RUC:20548328854', DataType::TYPE_STRING);
+    $sheet->setCellValue('E5', 'Calle Brea y Pariñas 102, of 704, Stgo de Surco.');
+    $sheet->setCellValue('E6', 'Central Telf. (01)3048091');
+    $sheet->setCellValue('E7', 'E-mail: ventas@mgindusol.com /contacto@mgindusol.com');
+    $sheet->setCellValue('E8', 'Página Web. www.mgindusol.com');
+    $sheet->getStyle('E2:H8')->getFont()->setBold(true);
 
     $sheet->setCellValue('J4', 'Cotización');
     $sheet->setCellValue('J5', 'N° ' . numeroOfertaExcel($receta));
-    $sheet->setCellValue('K9', fechaOfertaExcel($receta['updated_at'] ?? $receta['created_at'] ?? null));
-    $sheet->getStyle('J4:N5')->getFont()->setBold(true)->setSize(16);
-    $sheet->getStyle('J4:N5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-    $sheet->getStyle('K9:N9')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-    $sheet->setCellValue('A9', '(DATOS CLIENTE)');
-    $sheet->getStyle('A9')->getFont()->getColor()->setARGB('FFFF0000');
-    $sheet->getStyle('A9')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    $sheet->setCellValue('J9', fechaOfertaExcel($receta['updated_at'] ?? $receta['created_at'] ?? null));
+    $sheet->getStyle('J4:L5')->getFont()->setBold(true)->setSize(16);
+    $sheet->getStyle('J4:L5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    $sheet->getStyle('J9:L9')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
     $sheet->setCellValue('A11', 'Cotización realizada para:');
     $sheet->setCellValue('H11', 'Cotización realizada por:');
     $sheet->mergeCells('A11:G11');
-    $sheet->mergeCells('H11:N11');
-    $sheet->getStyle('A11:N11')->getFont()->setBold(true);
+    $sheet->mergeCells('H11:L11');
+    $sheet->getStyle('A11:L11')->getFont()->setBold(true);
     $sheet->getStyle('A11:G11')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
-    $sheet->getStyle('H11:N11')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
+    $sheet->getStyle('H11:L11')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
 
     $clienteRows = [
         12 => ['Cliente', textoOfertaExcel($receta['cliente_razon_social_empresa'] ?? '')],
         13 => ['Dirección', textoOfertaExcel($receta['cliente_direccion'] ?? '')],
         14 => ['Ruc', textoOfertaExcel($receta['cliente_ruc'] ?? '')],
-        15 => ['NOMBRE COMPLETO', textoOfertaExcel($receta['cliente_nombre_completo'] ?? '')],
+        15 => ['Nombre', textoOfertaExcel($receta['cliente_nombre_completo'] ?? '')],
         16 => ['E-mail', textoOfertaExcel($receta['cliente_correo'] ?? '')],
         17 => ['Teléfonos', textoOfertaExcel($receta['cliente_celular'] ?? '')],
         18 => ['Motivo', textoOfertaExcel($receta['cliente_motivo'] ?? '')],
@@ -183,7 +176,6 @@ try {
         $sheet->mergeCells('C' . $row . ':F' . $row);
     }
     $sheet->getStyle('A12:A18')->getFont()->setBold(true);
-    $sheet->getStyle('A15:C15')->getFont()->getColor()->setARGB('FFFF0000');
     $sheet->getStyle('C16')->getFont()->getColor()->setARGB('FF0000FF');
     $sheet->getStyle('C16')->getFont()->setUnderline(Font::UNDERLINE_SINGLE);
     $sheet->getStyle('C12:F18')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
@@ -197,7 +189,7 @@ try {
         13 => ['RUC', '20548328854'],
         14 => ['Dirección', 'Calle Brea y Pariñas N°102 , Ofic. 704,Piso 7'],
         15 => ['', 'Santiago de Surco'],
-        16 => ['VENDEDOR', $vendedor],
+        16 => ['Vendedor', $vendedor],
         17 => ['E-mail', $vendedorCorreo],
         18 => ['Teléfonos', '(01) 3048091, Cel. ' . $vendedorTelefono],
     ];
@@ -206,21 +198,17 @@ try {
         $sheet->setCellValue('H' . $row, $label);
         $sheet->setCellValue('I' . $row, $label !== '' ? ':' : '');
         $sheet->setCellValueExplicit('J' . $row, $value, DataType::TYPE_STRING);
-        $sheet->mergeCells('J' . $row . ':' . ($row === 16 ? 'K' : 'N') . $row);
+        $sheet->mergeCells('J' . $row . ':L' . $row);
     }
-    $sheet->mergeCells('L16:N16');
-    $sheet->setCellValue('L16', '(DATOS COMERCIALES)');
-    $sheet->getStyle('H16:L18')->getFont()->getColor()->setARGB('FFFF0000');
     $sheet->getStyle('J17')->getFont()->getColor()->setARGB('FF0000FF');
     $sheet->getStyle('J17')->getFont()->setUnderline(Font::UNDERLINE_SINGLE);
     $sheet->getStyle('H12:H18')->getFont()->setBold(true);
-    $sheet->getStyle('J12:N18')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    $sheet->getStyle('J12:L18')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
-    $sheet->setCellValue('A20', 'Estimado/a, en respuesta a su solicitud de cotización sobre los precios de los productos de nuestra compañía. A continuación le brindamos nuestra');
-    $sheet->setCellValue('A21', 'oferta:');
+    $sheet->setCellValue('A20', 'Estimado/a, en respuesta a su solicitud de cotización sobre los precios de los productos de nuestra compañía. A continuación le brindamos nuestra oferta:');
     $sheet->getStyle('A20:A21')->getAlignment()->setWrapText(true);
 
-    $sheet->getPageSetup()->setPrintArea('A1:N21');
+    $sheet->getPageSetup()->setPrintArea('A1:L21');
     $sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
     $sheet->getPageMargins()->setTop(0.25)->setRight(0.25)->setLeft(0.25)->setBottom(0.25);
 
