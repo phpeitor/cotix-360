@@ -280,9 +280,13 @@ ob_start();
         trim((string)($receta['cliente_tiempo_entrega'] ?? '')) !== '' ? 'Tiempo de entrega: ' . trim((string)$receta['cliente_tiempo_entrega']) : '',
         trim((string)($receta['cliente_condiciones_pago'] ?? '')) !== '' ? 'Condiciones de pago: ' . trim((string)$receta['cliente_condiciones_pago']) : '',
         trim((string)($receta['cliente_vendedor'] ?? '')) !== '' ? 'Vendedor: ' . trim((string)$receta['cliente_vendedor']) : '',
+        trim((string)($receta['cliente_vendedor_correo'] ?? '')) !== '' ? 'Email vendedor: ' . trim((string)$receta['cliente_vendedor_correo']) : '',
+        trim((string)($receta['cliente_vendedor_telefono'] ?? '')) !== '' ? 'Teléfono vendedor: ' . trim((string)$receta['cliente_vendedor_telefono']) : '',
     ]);
     $empresaLinea1 = 'Sistema interno';
     $empresaLinea2 = 'Lima, Perú';
+    $condicionesEconomicasDias = (int)($receta['cliente_condiciones_economicas_dias'] ?? 0);
+    $textoCondicionesEconomicas = '6.1. En caso de que el servicio sea pausado o suspendido por un periodo superior a ' . $condicionesEconomicasDias . ' días, debido a causas no imputables a nuestra empresa, y en concordancia con los principios generales establecidos, la propuesta inicial comercial perderá su vigencia. La reanudación del servicio estará sujeta a una reformulación de la oferta comercial que reconozca los costos directos e indirectos derivados de la postergación, tales como la reposición, adquisición o sustitución de materiales y componentes afectados por deterioro o caducidad, así como los costos de renovación de acreditaciones, homologaciones e inducciones del personal y demás requisitos técnicos o administrativos exigidos para la operatividad del proyecto.';
 ?>
 
 <div class="top-band"></div>
@@ -485,6 +489,13 @@ ob_start();
                 <div style="font-weight: 700; margin-bottom: 2mm;">Observación</div>
                 <div style="font-size: 11px; line-height: 1.2;"><?= nl2br(escaparPdf($receta['observacion'])) ?></div>
             </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($esOferta && $condicionesEconomicasDias > 0): ?>
+        <div class="economic-conditions">
+            <div class="economic-conditions-title">6. Condiciones Económicas por Suspensión de Servicio:</div>
+            <div class="economic-conditions-text"><?= escaparPdf($textoCondicionesEconomicas) ?></div>
         </div>
     <?php endif; ?>
 

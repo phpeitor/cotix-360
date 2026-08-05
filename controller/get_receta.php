@@ -31,6 +31,9 @@ try {
         || trim((string)($receta['cliente_tiempo_entrega'] ?? '')) !== ''
         || trim((string)($receta['cliente_condiciones_pago'] ?? '')) !== ''
         || trim((string)($receta['cliente_vendedor'] ?? '')) !== ''
+        || trim((string)($receta['cliente_vendedor_correo'] ?? '')) !== ''
+        || trim((string)($receta['cliente_vendedor_telefono'] ?? '')) !== ''
+        || (int)($receta['cliente_condiciones_economicas_dias'] ?? 0) > 0
     ) {
         $cliente = [
             'razon_social_empresa' => $receta['cliente_razon_social_empresa'] ?? '',
@@ -43,6 +46,9 @@ try {
             'tiempo_entrega' => $receta['cliente_tiempo_entrega'] ?? '',
             'condiciones_pago' => $receta['cliente_condiciones_pago'] ?? '',
             'vendedor' => $receta['cliente_vendedor'] ?? '',
+            'vendedor_correo' => $receta['cliente_vendedor_correo'] ?? '',
+            'vendedor_telefono' => $receta['cliente_vendedor_telefono'] ?? '',
+            'condiciones_economicas_dias' => $receta['cliente_condiciones_economicas_dias'] ?? '',
         ];
     }
 

@@ -43,6 +43,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const tiempoEntregaEl = document.getElementById("tiempoEntrega");
     const condicionesPagoEl = document.getElementById("condicionesPago");
     const vendedorEl = document.getElementById("vendedor");
+    const vendedorCorreoEl = document.getElementById("vendedorCorreo");
+    const vendedorTelefonoEl = document.getElementById("vendedorTelefono");
+    const condicionesEconomicasDiasEl = document.getElementById("condicionesEconomicasDias");
 
     const baseSelect = document.getElementById("filterBase");
     const categoriaSelect = document.getElementById("categoria");
@@ -602,6 +605,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (tiempoEntregaEl) tiempoEntregaEl.value = data.tiempo_entrega || "";
         if (condicionesPagoEl) condicionesPagoEl.value = data.condiciones_pago || "";
         if (vendedorEl) vendedorEl.value = data.vendedor || "";
+        if (vendedorCorreoEl) vendedorCorreoEl.value = data.vendedor_correo || "";
+        if (vendedorTelefonoEl) vendedorTelefonoEl.value = data.vendedor_telefono || "";
+        if (condicionesEconomicasDiasEl) condicionesEconomicasDiasEl.value = data.condiciones_economicas_dias || "";
     }
 
     function getClienteModalPayload() {
@@ -621,6 +627,9 @@ document.addEventListener("DOMContentLoaded", () => {
             tiempo_entrega: String(tiempoEntregaEl?.value || "").trim(),
             condiciones_pago: String(condicionesPagoEl?.value || "").trim(),
             vendedor: String(vendedorEl?.value || "").trim(),
+            vendedor_correo: String(vendedorCorreoEl?.value || "").trim(),
+            vendedor_telefono: String(vendedorTelefonoEl?.value || "").replace(/\D/g, "").trim(),
+            condiciones_economicas_dias: String(condicionesEconomicasDiasEl?.value || "").replace(/\D/g, "").trim(),
         };
     }
 
@@ -632,8 +641,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const payload = getCondicionesPayload();
 
-        if (!payload.tiempo_entrega || !payload.condiciones_pago || !payload.vendedor) {
-            alertify.error("Completa tiempo de entrega, condiciones de pago y vendedor");
+        if (!payload.tiempo_entrega || !payload.condiciones_pago || !payload.vendedor || !payload.vendedor_correo || !payload.vendedor_telefono || !payload.condiciones_economicas_dias) {
+            alertify.error("Completa tiempo de entrega, condiciones de pago, vendedor, email, teléfono y días de suspensión");
             return;
         }
 
@@ -644,6 +653,9 @@ document.addEventListener("DOMContentLoaded", () => {
             fd.append("tiempo_entrega", payload.tiempo_entrega);
             fd.append("condiciones_pago", payload.condiciones_pago);
             fd.append("vendedor", payload.vendedor);
+            fd.append("vendedor_correo", payload.vendedor_correo);
+            fd.append("vendedor_telefono", payload.vendedor_telefono);
+            fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
 
             const res = await fetch("controller/upd_receta_condiciones.php", {
                 method: "POST",
@@ -680,6 +692,9 @@ document.addEventListener("DOMContentLoaded", () => {
             clienteData.correo,
             clienteData.celular,
             clienteData.motivo,
+            clienteData.vendedor_correo,
+            clienteData.vendedor_telefono,
+            clienteData.condiciones_economicas_dias,
         ].every(value => String(value ?? "").trim() !== "");
     }
 

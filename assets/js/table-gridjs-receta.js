@@ -734,7 +734,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 ["motivo", "Motivo"],
                 ["tiempo_entrega", "Tiempo de entrega"],
                 ["condiciones_pago", "Condiciones de pago"],
-                ["vendedor", "Vendedor"]
+                ["vendedor", "Vendedor"],
+                ["vendedor_correo", "Email vendedor"],
+                ["vendedor_telefono", "Teléfono vendedor"],
+                ["condiciones_economicas_dias", "Días de suspensión"]
             ];
 
             const faltantes = campos

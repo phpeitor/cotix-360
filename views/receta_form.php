@@ -456,9 +456,25 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
                             <label class="form-label" for="vendedor">Vendedor</label>
                             <input type="text" class="form-control" id="vendedor" maxlength="150" placeholder="Nombre del vendedor">
                         </div>
+                        <div class="col-lg-6">
+                            <label class="form-label" for="vendedorCorreo">Email vendedor</label>
+                            <input type="email" class="form-control" id="vendedorCorreo" maxlength="150" placeholder="correo@empresa.com">
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label" for="vendedorTelefono">Teléfono vendedor</label>
+                            <input type="text" class="form-control" id="vendedorTelefono" maxlength="50" placeholder="Ej. 987654321">
+                        </div>
                         <div class="col-12">
                             <label class="form-label" for="condicionesPago">Condiciones de pago</label>
                             <textarea class="form-control" id="condicionesPago" rows="3" maxlength="200" placeholder="Ej. 50% adelanto, 50% contra entrega"></textarea>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label" for="condicionesEconomicasDias">Condiciones económicas por suspensión de servicio</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="condicionesEconomicasDias" min="1" max="999" step="1" placeholder="Ej. 15">
+                                <span class="input-group-text">días</span>
+                            </div>
+                            <small class="text-muted">Solo se guarda la cantidad de días; el texto se genera en el PDF.</small>
                         </div>
                     </div>
                 </div>

@@ -25,13 +25,16 @@ try {
     $tiempoEntrega = trim((string)($_POST['tiempo_entrega'] ?? ''));
     $condicionesPago = trim((string)($_POST['condiciones_pago'] ?? ''));
     $vendedor = trim((string)($_POST['vendedor'] ?? ''));
+    $vendedorCorreo = trim((string)($_POST['vendedor_correo'] ?? ''));
+    $vendedorTelefono = preg_replace('/\D+/', '', (string)($_POST['vendedor_telefono'] ?? ''));
+    $condicionesEconomicasDias = isset($_POST['condiciones_economicas_dias']) ? (int)$_POST['condiciones_economicas_dias'] : 0;
 
     if ($recetaId <= 0) {
         throw new Exception('Receta inválida');
     }
 
-    if ($tiempoEntrega === '' || $condicionesPago === '' || $vendedor === '') {
-        throw new Exception('Completa tiempo de entrega, condiciones de pago y vendedor');
+    if ($tiempoEntrega === '' || $condicionesPago === '' || $vendedor === '' || $vendedorCorreo === '' || $vendedorTelefono === '' || $condicionesEconomicasDias <= 0) {
+        throw new Exception('Completa tiempo de entrega, condiciones de pago, vendedor, email, teléfono y días de suspensión');
     }
 
     $receta = new Receta();
@@ -40,6 +43,9 @@ try {
         'tiempo_entrega' => $tiempoEntrega,
         'condiciones_pago' => $condicionesPago,
         'vendedor' => $vendedor,
+        'vendedor_correo' => $vendedorCorreo,
+        'vendedor_telefono' => $vendedorTelefono,
+        'condiciones_economicas_dias' => $condicionesEconomicasDias,
     ]);
 
     if (!$ok) {
@@ -52,6 +58,9 @@ try {
             'tiempo_entrega' => $tiempoEntrega,
             'condiciones_pago' => $condicionesPago,
             'vendedor' => $vendedor,
+            'vendedor_correo' => $vendedorCorreo,
+            'vendedor_telefono' => $vendedorTelefono,
+            'condiciones_economicas_dias' => $condicionesEconomicasDias,
         ]
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {

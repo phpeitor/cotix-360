@@ -328,6 +328,26 @@ table {
 .right { text-align: right; }
 .center { text-align: center; }
 
+.economic-conditions {
+    margin-top: 4mm;
+    border: 0.25mm solid #9aa6a3;
+    color: #000;
+    font-family: DejaVu Sans Mono, monospace;
+    font-size: 8.5px;
+    line-height: 1.35;
+    padding: 1mm 1.2mm;
+}
+
+.economic-conditions-title {
+    font-weight: bold;
+    text-decoration: underline;
+    margin-bottom: 0.8mm;
+}
+
+.economic-conditions-text {
+    text-align: justify;
+}
+
 .offer-pdf {
     color: #17211f;
     font-size: 9.5px;

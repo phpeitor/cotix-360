@@ -133,6 +133,9 @@ class Receta {
                     tiempo_entrega,
                     condiciones_pago,
                     vendedor,
+                    vendedor_correo,
+                    vendedor_telefono,
+                    condiciones_economicas_dias,
                     created_at,
                     updated_at
                 ) VALUES (
@@ -147,12 +150,18 @@ class Receta {
                     :tiempo_entrega,
                     :condiciones_pago,
                     :vendedor,
+                    :vendedor_correo,
+                    :vendedor_telefono,
+                    :condiciones_economicas_dias,
                     :created_at,
                     :updated_at
                 ) ON DUPLICATE KEY UPDATE
                     tiempo_entrega = VALUES(tiempo_entrega),
                     condiciones_pago = VALUES(condiciones_pago),
                     vendedor = VALUES(vendedor),
+                    vendedor_correo = VALUES(vendedor_correo),
+                    vendedor_telefono = VALUES(vendedor_telefono),
+                    condiciones_economicas_dias = VALUES(condiciones_economicas_dias),
                     updated_at = VALUES(updated_at)";
 
         $stmt = $this->conn->prepare($sql);
@@ -160,6 +169,9 @@ class Receta {
         $stmt->bindValue(':tiempo_entrega', (string)($data['tiempo_entrega'] ?? ''));
         $stmt->bindValue(':condiciones_pago', (string)($data['condiciones_pago'] ?? ''));
         $stmt->bindValue(':vendedor', (string)($data['vendedor'] ?? ''));
+        $stmt->bindValue(':vendedor_correo', (string)($data['vendedor_correo'] ?? ''));
+        $stmt->bindValue(':vendedor_telefono', (string)($data['vendedor_telefono'] ?? ''));
+        $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_economicas_dias'] ?? 0), PDO::PARAM_INT);
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->bindValue(':updated_at', $this->nowLima);
 
@@ -347,7 +359,10 @@ class Receta {
                         rc.motivo AS cliente_motivo,
                         rc.tiempo_entrega AS cliente_tiempo_entrega,
                         rc.condiciones_pago AS cliente_condiciones_pago,
-                        rc.vendedor AS cliente_vendedor
+                         rc.vendedor AS cliente_vendedor,
+                         rc.vendedor_correo AS cliente_vendedor_correo,
+                         rc.vendedor_telefono AS cliente_vendedor_telefono,
+                         rc.condiciones_economicas_dias AS cliente_condiciones_economicas_dias
                 FROM recetas_ingenieria c
                 LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
                 LEFT JOIN personal p2 ON p2.IDPERSONAL = c.usuario_upd
@@ -637,7 +652,10 @@ class Receta {
                        rc.motivo AS cliente_motivo,
                        rc.tiempo_entrega AS cliente_tiempo_entrega,
                        rc.condiciones_pago AS cliente_condiciones_pago,
-                       rc.vendedor AS cliente_vendedor
+                       rc.vendedor AS cliente_vendedor,
+                       rc.vendedor_correo AS cliente_vendedor_correo,
+                       rc.vendedor_telefono AS cliente_vendedor_telefono,
+                       rc.condiciones_economicas_dias AS cliente_condiciones_economicas_dias
                 FROM recetas c
                 LEFT JOIN personal p on p.IDPERSONAL=c.usuario_id
                 LEFT JOIN personal p2 on p2.IDPERSONAL=c.usuario_upd
@@ -788,6 +806,9 @@ class Receta {
                             tiempo_entrega,
                             condiciones_pago,
                             vendedor,
+                            vendedor_correo,
+                            vendedor_telefono,
+                            condiciones_economicas_dias,
                             created_at,
                             updated_at
                        ) SELECT
@@ -802,6 +823,9 @@ class Receta {
                             tiempo_entrega,
                             condiciones_pago,
                             vendedor,
+                            vendedor_correo,
+                            vendedor_telefono,
+                            condiciones_economicas_dias,
                             :created_at,
                             :updated_at
                        FROM receta_cliente
@@ -980,7 +1004,10 @@ class Receta {
                   AND TRIM(COALESCE(motivo, '')) <> ''
                   AND TRIM(COALESCE(tiempo_entrega, '')) <> ''
                   AND TRIM(COALESCE(condiciones_pago, '')) <> ''
-                  AND TRIM(COALESCE(vendedor, '')) <> ''";
+                  AND TRIM(COALESCE(vendedor, '')) <> ''
+                  AND TRIM(COALESCE(vendedor_correo, '')) <> ''
+                  AND TRIM(COALESCE(vendedor_telefono, '')) <> ''
+                  AND COALESCE(condiciones_economicas_dias, 0) > 0";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
