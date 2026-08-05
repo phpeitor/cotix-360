@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once ROOT . '/controller/check_session.php';
+$esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -98,18 +99,18 @@ require_once ROOT . '/controller/check_session.php';
                                 </div>
                             </div>
 
-                            <form class="form-ingenieria" novalidate>
+                            <form class="form-ingenieria" novalidate data-user-cargo="<?= (int)$_SESSION['session_cargo'] ?>">
                                 <div class="card-body p-0">
                                     <div class="bg-success bg-opacity-10 py-1 text-center">
                                         <p class="m-0"><b id="total_item">0</b> item(s) agregados</p>
                                     </div>
-                                    <div class="border border-dashed p-2 rounded text-center">
+                                    <div class="border border-dashed p-2 rounded text-center <?= $esCargoIngenieria ? 'd-none' : '' ?>">
                                         <div class="row align-items-center">
                                             <div class="col-lg-3 col-6 border-end">
-                                                <p class="text-muted fw-medium fs-14 mb-0"><span class="text-dark">Total S/. </span> <span id="total_soles">0.00</span></p>
+                                                <p class="text-muted fw-medium fs-14 mb-0"><span class="text-dark">SubTotal S/. </span> <span id="total_soles">0.00</span></p>
                                             </div>
                                             <div class="col-lg-3 col-6 border-end">
-                                                <p class="text-muted fw-medium fs-14 mb-0"><span class="text-dark">Total $ </span> <span id="total_dolares">0.00</span></p>
+                                                <p class="text-muted fw-medium fs-14 mb-0"><span class="text-dark">SubTotal $ </span> <span id="total_dolares">0.00</span></p>
                                             </div>
                                             <div class="col-lg-3 col-12 border-end">
                                                 <p class="tipo-cambio-highlight text-muted fw-medium fs-12 mb-1">
@@ -120,8 +121,8 @@ require_once ROOT . '/controller/check_session.php';
                                                 </p>
                                             </div>
                                             <div class="col-lg-3 col-12">
-                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total PE S/.</span> <span id="total_peru">0.00</span></p>
-                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-minimalistic-outline" class="text-success"></iconify-icon> <span class="text-dark">Total PE $</span> <span id="total_peru_dolares">0.00</span></p>
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total S/.</span> <span id="total_peru">0.00</span></p>
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-minimalistic-outline" class="text-success"></iconify-icon> <span class="text-dark">Total $</span> <span id="total_peru_dolares">0.00</span></p>
                                             </div>
                                         </div>
                                     </div>
@@ -134,8 +135,8 @@ require_once ROOT . '/controller/check_session.php';
                                                     <th>Detalle</th>
                                                     <th>Tipo</th>
                                                     <th class="text-center">Cant.</th>
-                                                    <th class="text-end">Precio</th>
-                                                    <th class="text-end">Total</th>
+                                                    <th class="text-end <?= $esCargoIngenieria ? 'd-none' : '' ?>">Precio</th>
+                                                    <th class="text-end <?= $esCargoIngenieria ? 'd-none' : '' ?>">Total</th>
                                                     <th class="text-center">Acción</th>
                                                 </tr>
                                             </thead>
@@ -161,7 +162,7 @@ require_once ROOT . '/controller/check_session.php';
         <div class="modal-dialog" style="max-width: 840px;">
             <div class="modal-content">
                 <div class="modal-header text-bg-info border-0">
-                    <h4 class="modal-title" id="info-header-modalLabel">Buscar item para agregar a ingeniería</h4>
+                    <h4 class="modal-title" id="info-header-modalLabel">Buscar item para agregar a la receta</h4>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -196,7 +197,7 @@ require_once ROOT . '/controller/check_session.php';
                             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
                                 <div>
                                     <label class="form-label mb-0">Items disponibles</label>
-                                    <span class="text-muted fs-12 d-block">Selecciona un item desde la tabla para agregarlo.</span>
+                                    <span class="text-muted fs-12 d-block">Selecciona un item desde la tabla para agregarlo a la receta.</span>
                                 </div>
                                 <span class="badge bg-light text-dark" id="itemsResultCount">0 resultados</span>
                             </div>
@@ -206,7 +207,7 @@ require_once ROOT . '/controller/check_session.php';
                                         <tr>
                                             <th>Item</th>
                                             <th class="text-center">Cant.</th>
-                                            <th class="text-end">Precio</th>
+                                            <th class="text-end <?= $esCargoIngenieria ? 'd-none' : '' ?>">Precio</th>
                                             <th class="text-center">Acción</th>
                                         </tr>
                                     </thead>
@@ -275,6 +276,6 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="./assets/js/ingenieria_form.js?v=1.2"></script>
+    <script src="./assets/js/ingenieria_form.js?v=1.3"></script>
 </body>
 </html>

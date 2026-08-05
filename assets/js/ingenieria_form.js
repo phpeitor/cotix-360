@@ -42,6 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let receta = null;
     let detalle = [];
     let cliente = null;
+    const MAX_CANTIDAD = 5000;
+    const userCargo = Number(fields.form?.dataset?.userCargo || 0);
+    const esCargoIngenieria = userCargo === 6;
 
     if (!hash) {
         alertify.error("ID inválido");
@@ -82,8 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         fields.form?.addEventListener("submit", event => {
             event.preventDefault();
-            alertify.success("Receta ingeniería guardada");
-            loadIngenieria();
+            guardarIngenieria();
         });
 
         document.addEventListener("click", event => {
@@ -101,7 +103,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const addBtn = event.target.closest("[data-add-item]");
             if (addBtn) {
-                agregarItem(Number(addBtn.dataset.addItem || 0), Number(addBtn.dataset.cantidad || 1));
+                const row = addBtn.closest("tr");
+                const qtyInput = row?.querySelector(".qty-input, .item-cantidad");
+                agregarItem(Number(addBtn.dataset.addItem || 0), clampCantidad(qtyInput?.value || 1));
             }
         });
     }
@@ -152,6 +156,32 @@ document.addEventListener("DOMContentLoaded", () => {
         return String(moneda || "").toUpperCase() === "DOLLAR" ? "$" : "S/.";
     }
 
+    function getRandomLogo() {
+        const n = Math.floor(Math.random() * 9) + 1;
+        return `assets/images/products/logo/logo-${n}.svg`;
+    }
+
+    function clampCantidad(value) {
+        const parsed = Number.parseInt(String(value ?? "1"), 10);
+        if (!Number.isFinite(parsed)) return 1;
+        return Math.min(MAX_CANTIDAD, Math.max(1, parsed));
+    }
+
+    function normalizarTextoDetalle(valor) {
+        const texto = String(valor ?? "").trim();
+        return texto === "" || texto === "-" ? "" : texto;
+    }
+
+    function formatearRutaDetalle(valores) {
+        const partes = [];
+        valores.forEach(valor => {
+            const texto = normalizarTextoDetalle(valor);
+            if (!texto || partes[partes.length - 1] === texto) return;
+            partes.push(texto);
+        });
+        return partes.join(" / ");
+    }
+
     function setText(el, value) {
         if (el) el.textContent = value || "-";
     }
@@ -189,38 +219,58 @@ document.addEventListener("DOMContentLoaded", () => {
             if (String(item.moneda || "").toUpperCase() === "DOLLAR") totalDolares += total;
             else totalSoles += total;
 
-            const detalleLinea1 = [item.categoria, item.sub_cat_1, item.sub_cat_2].filter(Boolean).join(" / ");
-            const detalleLinea2 = [item.marca, item.modelo, item.uni_medida].filter(Boolean).join(" / ");
+            const itemNombre = escapeHtml(item.nombre || "-");
+            const itemDescripcion = escapeHtml(normalizarTextoDetalle(item.descripcion) || "-");
+            const detalleLinea1 = escapeHtml(formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]) || "-");
+            const detalleLinea2 = escapeHtml(formatearRutaDetalle([item.marca, item.modelo, item.uni_medida]) || "-");
+            const tipo = String(item.tipo || "-").toUpperCase();
+            const tipoColor = tipo === "PRODUCTO" ? "text-success" : "text-info";
 
             return `
                 <tr>
                     <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center">
-                                <iconify-icon icon="solar:box-bold-duotone" class="fs-22 text-primary"></iconify-icon>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-md flex-shrink-0 me-2">
+                                <span class="avatar-title bg-primary-subtle rounded-circle">
+                                    <img src="${getRandomLogo()}" alt="" height="22">
+                                </span>
                             </div>
                             <div>
-                                <span class="text-muted fs-12">${escapeHtml(item.nombre || "-")}</span>
-                                <h5 class="fs-14 mt-1 fw-semibold mb-0">${escapeHtml(detalleLinea2 || "-")}</h5>
+                                <span class="text-muted fs-12">${itemNombre}</span><br>
+                                <h5 class="fs-14 mt-1 item-description">${itemDescripcion}</h5>
                             </div>
                         </div>
                     </td>
                     <td>
-                        <span class="text-muted fs-12">${escapeHtml(detalleLinea1 || "-")}</span>
-                        <h5 class="fs-14 mt-1 fw-normal">${escapeHtml(item.descripcion || "-")}</h5>
+                        <span class="text-muted fs-12">${detalleLinea1}</span>
+                        <h5 class="fs-14 mt-1 fw-normal">${detalleLinea2}</h5>
                     </td>
-                    <td><span class="text-muted fs-12">Tipo</span><h5 class="fs-14 mt-1 fw-normal"><span class="badge bg-info-subtle text-info rounded-circle me-1">&nbsp;</span>${escapeHtml(item.tipo || "-")}</h5></td>
+                    <td>
+                        <span class="text-muted fs-12">Tipo</span>
+                        <h5 class="fs-14 mt-1 fw-normal">
+                            <i class="ti ti-circle-filled fs-12 ${tipoColor}"></i>
+                            ${escapeHtml(tipo)}
+                        </h5>
+                    </td>
                     <td class="text-center">
-                        <div class="input-step border bg-body-secondary p-1 rounded-pill d-inline-flex align-items-center justify-content-center">
-                            <button type="button" class="minus bg-light text-dark border-0 rounded-circle" data-qty-detalle="${item.id}" data-delta="-1">-</button>
-                            <span class="px-3 fw-semibold">${cantidad}</span>
-                            <button type="button" class="plus bg-light text-dark border-0 rounded-circle" data-qty-detalle="${item.id}" data-delta="1">+</button>
+                        <div class="input-step border bg-body-secondary px-1 py-0 rounded-pill d-inline-flex align-items-center overflow-visible" style="height:30px;">
+                            <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:22px;min-width:22px;height:22px;" data-qty-detalle="${item.id}" data-delta="-1">-</button>
+                            <span class="text-dark text-center border-0 bg-body-secondary rounded h-100 fw-semibold d-inline-flex align-items-center justify-content-center" style="width:46px;font-size:12px;">${cantidad}</span>
+                            <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:22px;min-width:22px;height:22px;" data-qty-detalle="${item.id}" data-delta="1">+</button>
                         </div>
                     </td>
-                    <td class="text-end">${simbolo}<br>${money(precio)}</td>
-                    <td class="text-end fw-semibold">${simbolo}<br>${money(total)}</td>
+                    ${esCargoIngenieria ? "" : `
+                        <td class="text-end">
+                            <span class="text-muted fs-12">${simbolo}</span>
+                            <h5 class="fs-14 mt-1 fw-normal mb-0">${money(precio)}</h5>
+                        </td>
+                        <td class="text-end">
+                            <span class="text-muted fs-12">${simbolo}</span>
+                            <h5 class="fs-14 mt-1 fw-normal mb-0">${money(total)}</h5>
+                        </td>
+                    `}
                     <td class="text-center">
-                        <button type="button" class="btn btn-soft-danger btn-icon btn-sm" data-delete-detalle="${item.id}" data-bs-toggle="tooltip" data-bs-title="Eliminar">
+                        <button type="button" class="btn btn-sm btn-danger" data-delete-detalle="${item.id}" data-bs-toggle="tooltip" data-bs-title="Eliminar">
                             <i class="ti ti-trash"></i>
                         </button>
                     </td>
@@ -229,7 +279,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }).join("");
 
         if (!detalle.length) {
-            tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">Sin detalle registrado</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${esCargoIngenieria ? 5 : 7}" class="text-center text-muted py-4">Sin detalle registrado</td></tr>`;
         }
 
         setText(fields.totalItem, String(totalItems));
@@ -253,6 +303,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const json = await res.json();
         if (!res.ok || !json.success) throw new Error(json.message || "No se pudo actualizar");
         return json;
+    }
+
+    async function guardarIngenieria() {
+        try {
+            await post("controller/guardar_ingenieria.php", { hash });
+            alertify.success("Receta ingeniería guardada");
+            await loadIngenieria();
+        } catch (error) {
+            alertify.alert("Validación de ingeniería", error.message || "No se pudo guardar ingeniería");
+        }
     }
 
     async function toggleNombre(save = false) {
@@ -352,8 +412,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function agregarItem(itemId, cantidad) {
         if (!itemId) return;
+
+        const existente = detalle.some(row => Number(row.item_id || row.id_item || 0) === Number(itemId));
+        if (existente) {
+            alertify.error("Este item ya fue agregado");
+            return;
+        }
+
+        const cantidadNormalizada = clampCantidad(cantidad);
         try {
-            await post("controller/upd_ingenieria_detalle.php", { hash, accion: "agregar", item_id: String(itemId), cantidad: String(cantidad || 1) });
+            await post("controller/upd_ingenieria_detalle.php", { hash, accion: "agregar", item_id: String(itemId), cantidad: String(cantidadNormalizada) });
             alertify.success("Item agregado");
             await loadIngenieria();
         } catch (error) {
@@ -369,16 +437,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setOptions(selectEl, rows, placeholder, key) {
+        if (!selectEl) return;
+
+        const options = rows
+            .map(row => row?.[key])
+            .filter(value => value !== null && value !== undefined && String(value).trim() !== "")
+            .map(value => ({ value, label: value }));
+
+        selectEl.disabled = options.length === 0;
+
+        if (selectEl.choicesInstance) {
+            selectEl.choicesInstance.clearChoices();
+            selectEl.choicesInstance.setChoices(
+                [{ value: "", label: placeholder, disabled: true, selected: true }, ...options],
+                "value",
+                "label",
+                true
+            );
+            options.length === 0 ? selectEl.choicesInstance.disable() : selectEl.choicesInstance.enable();
+            return;
+        }
+
         selectEl.innerHTML = `<option value="">${placeholder}</option>`;
-        rows.forEach(row => {
-            const value = row?.[key];
-            if (!value) return;
+        options.forEach(option => {
             const opt = document.createElement("option");
-            opt.value = value;
-            opt.textContent = value;
+            opt.value = option.value;
+            opt.textContent = option.label;
             selectEl.appendChild(opt);
         });
-        selectEl.disabled = rows.length === 0;
     }
 
     function filtros() {
@@ -460,29 +546,66 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function resetSelect(selectEl, placeholder) {
         if (!selectEl) return;
-        selectEl.innerHTML = `<option value="">${placeholder}</option>`;
         selectEl.disabled = true;
+
+        if (selectEl.choicesInstance) {
+            selectEl.choicesInstance.clearChoices();
+            selectEl.choicesInstance.setChoices([
+                { value: "", label: placeholder, disabled: true, selected: true }
+            ], "value", "label", true);
+            selectEl.choicesInstance.disable();
+            return;
+        }
+
+        selectEl.innerHTML = `<option value="">${placeholder}</option>`;
     }
 
     function renderItemsDisponibles(items) {
         itemsResultCount.textContent = `${items.length} resultados`;
         if (!items.length) {
-            itemSearchBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">Sin items disponibles.</td></tr>`;
+            itemSearchBody.innerHTML = `<tr><td colspan="${esCargoIngenieria ? 3 : 4}" class="text-center text-muted py-4">Sin items disponibles.</td></tr>`;
             return;
         }
         itemSearchBody.innerHTML = items.map(item => {
             const simbolo = monedaSimbolo(item.moneda);
+            const itemNombre = escapeHtml(item.nombre || "-");
+            const itemDescripcion = escapeHtml(normalizarTextoDetalle(item.descripcion) || "-");
+            const detalleLinea1 = escapeHtml(formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]) || "-");
+            const detalleLinea2 = escapeHtml(formatearRutaDetalle([item.marca, item.modelo, item.uni_medida]) || "-");
             return `
                 <tr>
                     <td>
-                        <div class="fw-semibold">${escapeHtml(item.nombre || "-")}</div>
-                        <span class="text-muted fs-12">${escapeHtml([item.marca, item.modelo, item.uni_medida].filter(Boolean).join(" / ") || "-")}</span>
+                        <div class="item-title">${itemNombre}</div>
+                        ${itemDescripcion !== "-" ? `<div class="item-subtitle">${itemDescripcion}</div>` : ""}
+                        <div class="item-title">${detalleLinea1}</div>
+                        <div class="item-subtitle">${detalleLinea2}</div>
                     </td>
-                    <td class="text-center"><input type="number" class="form-control form-control-sm mx-auto item-cantidad" value="1" min="1" max="5000" style="width:80px"></td>
-                    <td class="text-end">${simbolo} ${money(item.precio)}</td>
-                    <td class="text-center"><button type="button" class="btn btn-soft-success btn-icon btn-sm" data-add-item="${item.id}" onclick="this.dataset.cantidad=this.closest('tr').querySelector('.item-cantidad').value"><i class="ti ti-plus"></i></button></td>
+                    <td class="text-center align-middle receta-qty-cell">
+                        <div data-touchspin class="input-step border bg-body-secondary px-1 py-0 mt-1 rounded-pill d-inline-flex align-items-center overflow-visible" style="height:28px;">
+                            <button type="button" class="qty-minus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:20px;min-width:20px;height:20px;">-</button>
+                            <input type="number" class="qty-input text-dark text-center border-0 bg-body-secondary rounded h-100 fw-semibold" style="width:46px;font-size:12px;" value="1" min="1" max="${MAX_CANTIDAD}" step="1" inputmode="numeric" pattern="[0-9]*">
+                            <button type="button" class="qty-plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:20px;min-width:20px;height:20px;">+</button>
+                        </div>
+                    </td>
+                    ${esCargoIngenieria ? "" : `<td class="text-end">${simbolo} ${money(item.precio)}</td>`}
+                    <td class="text-center"><button type="button" class="btn btn-sm btn-primary" data-add-item="${item.id}"><i class="ti ti-plus"></i></button></td>
                 </tr>
             `;
         }).join("");
+
+        itemSearchBody.querySelectorAll("tr").forEach(row => {
+            const input = row.querySelector(".qty-input");
+            if (!input) return;
+
+            row.querySelector(".qty-minus")?.addEventListener("click", () => {
+                input.value = String(clampCantidad(Number(input.value) - 1));
+            });
+            row.querySelector(".qty-plus")?.addEventListener("click", () => {
+                input.value = String(clampCantidad(Number(input.value) + 1));
+            });
+            input.addEventListener("change", () => {
+                input.value = String(clampCantidad(input.value));
+            });
+        });
     }
 });

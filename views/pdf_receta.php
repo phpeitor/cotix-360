@@ -306,9 +306,9 @@ ob_start();
         <tr>
             <td class="hero-left">
                 <?php if ($logoDataUri): ?>
-                    <img src="<?= $logoDataUri ?>" alt="Logo" class="hero-logo">
+                    <img src="<?= $logoDataUri ?>" alt="Logo" class="hero-logo" style="width: 45mm; height: auto;" />
                 <?php else: ?>
-                    <div style="width: 100px; height: 80px; background: #f0f0f0; margin: 0 auto;"></div>
+                    <div style="width: 45mm; height: 13mm; background: #f0f0f0;"></div>
                 <?php endif; ?>
             </td>
             <td class="hero-right">

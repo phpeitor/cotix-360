@@ -79,12 +79,12 @@ table {
 }
 
 .hero-left {
-    width: 10%;
-    text-align: center;
+    width: 34%;
+    text-align: left;
 }
 
 .hero-logo {
-    width: 100px;
+    width: 45mm;
     height: auto;
     margin-bottom: 1mm;
 }
@@ -362,7 +362,7 @@ table {
 }
 
 .offer-pdf .hero-logo {
-    width: 88px;
+    width: 45mm;
     margin: 0;
 }
 
@@ -473,7 +473,7 @@ table {
 }
 
 .recipe-pdf .hero-logo {
-    width: 88px;
+    width: 45mm;
     margin: 0;
 }
 

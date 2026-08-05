@@ -2,6 +2,10 @@
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../model/item.php';
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
 try {
     $item = new Item();
 
@@ -34,6 +38,12 @@ try {
             break;
         default:
             $data = $item->obtenerItemsRecetaFiltrados($tipo, $categoria, $subCat1, $subCat2, $marca, $modelo);
+            if ((int)($_SESSION['session_cargo'] ?? 0) === 6) {
+                foreach ($data as &$row) {
+                    unset($row['precio']);
+                }
+                unset($row);
+            }
             break;
     }
 

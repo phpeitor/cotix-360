@@ -236,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const map = {
             "Borrador": "badge-outline-primary",
             "Enviada": "badge-outline-info",
+            "Ofertado": "badge-outline-warning",
             "Aprobada": "badge-outline-success",
             "Anulada": "badge-outline-danger"
         };
@@ -403,7 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ofertaItemsSelectedCount.textContent = `${selected} item${selected === 1 ? "" : "s"} seleccionado${selected === 1 ? "" : "s"}`;
     }
 
-    function abrirOfertaPdfSeleccionada() {
+    async function abrirOfertaPdfSeleccionada() {
         const selectedItems = Array.from(document.querySelectorAll(".oferta-item-check:checked"))
             .map(check => check.value)
             .filter(Boolean);
@@ -416,6 +417,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const selectedCols = Array.from(document.querySelectorAll(".oferta-columna:checked"))
             .map(check => check.value)
             .filter(Boolean);
+
+        try {
+            if (btnGenerarOfertaPdf) {
+                btnGenerarOfertaPdf.disabled = true;
+            }
+
+            const estadoRes = await fetch("controller/upd_receta_ofertado.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ id: ofertaActualHash })
+            });
+            const estadoJson = await estadoRes.json();
+
+            if (!estadoRes.ok || !estadoJson.success) {
+                alertify.error(estadoJson.message || "No se pudo actualizar el estado de la receta");
+                return;
+            }
+        } catch (error) {
+            alertify.error("Error de conexión al actualizar el estado");
+            return;
+        } finally {
+            if (btnGenerarOfertaPdf) {
+                btnGenerarOfertaPdf.disabled = false;
+            }
+        }
 
         const form = document.createElement("form");
         form.method = "POST";
@@ -440,6 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
         form.submit();
         form.remove();
         ofertaModal?.hide();
+        grid.forceRender();
     }
 
     document.addEventListener("click", (e) => {

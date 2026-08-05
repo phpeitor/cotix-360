@@ -478,6 +478,104 @@ class Receta {
         return $stmt->execute();
     }
 
+    public function totalIngenieriaDolaresPorHash(string $hash): float
+    {
+        $sql = "SELECT ROUND(COALESCE(SUM(
+                    CASE
+                        WHEN UPPER(COALESCE(d.moneda, '')) = 'DOLLAR' THEN COALESCE(d.precio, 0) * COALESCE(d.cantidad, 0)
+                        ELSE (COALESCE(d.precio, 0) * COALESCE(d.cantidad, 0)) / NULLIF(COALESCE(r.tipo_cambio, 0), 0)
+                    END
+                ), 0), 2) AS total
+                FROM detalle_ingenieria d
+                INNER JOIN recetas_ingenieria r ON r.id = d.receta_id
+                WHERE MD5(r.id) = :hash";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        return (float)($row['total'] ?? 0);
+    }
+
+    public function totalRecetaOrigenDolares(int $recetaId): float
+    {
+        $sql = "SELECT ROUND(COALESCE(SUM(
+                    CASE
+                        WHEN UPPER(COALESCE(d.moneda, '')) = 'DOLLAR' THEN COALESCE(d.precio, 0) * COALESCE(d.cantidad, 0)
+                        ELSE (COALESCE(d.precio, 0) * COALESCE(d.cantidad, 0)) / NULLIF(COALESCE(r.tipo_cambio, 0), 0)
+                    END
+                ), 0), 2) AS total
+                FROM receta_detalle d
+                INNER JOIN recetas r ON r.id = d.receta_id
+                WHERE r.id = :receta_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        return (float)($row['total'] ?? 0);
+    }
+
+    public function registrarHistorialIngenieria(int $ingenieriaId, string $accion, ?int $detalleId, ?int $itemId, array $antes, array $despues, int $usuarioId): bool
+    {
+        $this->crearTablaHistorialIngenieria();
+
+        $sql = "INSERT INTO ingenieria_historial (
+                    ingenieria_id,
+                    detalle_id,
+                    item_id,
+                    accion,
+                    antes_json,
+                    despues_json,
+                    usuario_id,
+                    created_at
+                ) VALUES (
+                    :ingenieria_id,
+                    :detalle_id,
+                    :item_id,
+                    :accion,
+                    :antes_json,
+                    :despues_json,
+                    :usuario_id,
+                    :created_at
+                )";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':ingenieria_id', $ingenieriaId, PDO::PARAM_INT);
+        if ($detalleId !== null) {
+            $stmt->bindValue(':detalle_id', $detalleId, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':detalle_id', null, PDO::PARAM_NULL);
+        }
+        if ($itemId !== null) {
+            $stmt->bindValue(':item_id', $itemId, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':item_id', null, PDO::PARAM_NULL);
+        }
+        $stmt->bindValue(':accion', $accion);
+        $stmt->bindValue(':antes_json', json_encode($antes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $stmt->bindValue(':despues_json', json_encode($despues, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+        $stmt->bindValue(':created_at', $this->nowLima);
+        return $stmt->execute();
+    }
+
+    private function crearTablaHistorialIngenieria(): void
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS ingenieria_historial (
+                    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                    ingenieria_id BIGINT UNSIGNED NOT NULL,
+                    detalle_id INT NULL DEFAULT NULL,
+                    item_id INT NULL DEFAULT NULL,
+                    accion VARCHAR(40) NOT NULL,
+                    antes_json JSON NULL,
+                    despues_json JSON NULL,
+                    usuario_id INT NULL DEFAULT NULL,
+                    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    KEY idx_ingenieria_historial_ingenieria (ingenieria_id),
+                    KEY idx_ingenieria_historial_accion (accion)
+                )";
+        $this->conn->exec($sql);
+    }
+
     public function firmaListaReceta(string $fec_ini, string $fec_fin): array
     {
         $sessionCargo = $_SESSION['session_cargo'] ?? null;

@@ -68,7 +68,7 @@ require_once ROOT . '/controller/check_session.php';
                                         <i class="ti ti-eye me-1" data-bs-toggle="tooltip" data-bs-title="Vista previa" data-bs-placement="top"></i> Preview
                                     </button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal"><i class="ti ti-search fs-18" data-bs-toggle="tooltip" data-bs-title="Buscar" data-bs-placement="bottom"></i></button>
-                                    <button type="button" class="btn btn-dark btn-icon"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
+                                    <button type="button" class="btn btn-dark btn-icon" onclick="window.history.back();"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                                 </div>
                             </div>
                             <form class="needs-validation form-receta" novalidate="" data-user-cargo="<?= (int)$_SESSION['session_cargo'] ?>">

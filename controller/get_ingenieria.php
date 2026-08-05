@@ -2,6 +2,10 @@
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../model/receta.php';
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
 try {
     $hash = $_GET['id'] ?? null;
 
@@ -21,6 +25,13 @@ try {
     }
 
     $detalle = $recetaModel->obtenerDetalleIngenieriaPorHash($hash);
+    if ((int)($_SESSION['session_cargo'] ?? 0) === 6) {
+        foreach ($detalle as &$row) {
+            unset($row['precio']);
+        }
+        unset($row);
+        unset($receta['tipo_cambio']);
+    }
     $cliente = null;
 
     if (trim((string)($receta['cliente_razon_social_empresa'] ?? '')) !== '' || trim((string)($receta['cliente_ruc'] ?? '')) !== '') {
