@@ -5,6 +5,7 @@ header('Pragma: public');
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../model/receta.php';
+require_once __DIR__ . '/oferta_comercial_helpers.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -17,146 +18,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
-}
-
-function textoOfertaExcel($value): string
-{
-    return trim(preg_replace('/\s+/', ' ', html_entity_decode(strip_tags((string)($value ?? '')), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')));
-}
-
-function fechaOfertaExcel($fecha): string
-{
-    try {
-        return (new DateTime((string)$fecha))->format('j/n/Y');
-    } catch (Throwable $e) {
-        return (new DateTime('now', new DateTimeZone('America/Lima')))->format('j/n/Y');
-    }
-}
-
-function numeroOfertaExcel(array $receta): string
-{
-    $year = date('Y');
-    if (!empty($receta['created_at'])) {
-        try {
-            $year = (new DateTime((string)$receta['created_at']))->format('Y');
-        } catch (Throwable $e) {
-            $year = date('Y');
-        }
-    }
-
-    return sprintf('%05d-%s', (int)($receta['id'] ?? 0), $year);
-}
-
-function agruparOfertaExcel(array $detalle): array
-{
-    $grupos = [];
-    foreach ($detalle as $item) {
-        $subcat = textoOfertaExcel($item['sub_cat_1'] ?? '');
-        if ($subcat === '') {
-            $subcat = 'SIN CATEGORÍA';
-        }
-
-        if (!isset($grupos[$subcat])) {
-            $grupos[$subcat] = [];
-        }
-        $grupos[$subcat][] = $item;
-    }
-
-    return $grupos;
-}
-
-function totalOfertaConMargenExcel(array $categorias): float
-{
-    $total = 0.0;
-
-    foreach ($categorias as $categoria) {
-        $subtotal = (float)($categoria['subtotal'] ?? 0);
-        $margen = max(0, min(100, (float)($categoria['margen'] ?? 0)));
-        $margenDecimal = $margen / 100;
-
-        if ($subtotal <= 0 || $margenDecimal >= 1) {
-            continue;
-        }
-
-        $total += $subtotal / (1 - $margenDecimal);
-    }
-
-    return $total;
-}
-
-function normalizarSubcatOfertaExcel($value): string
-{
-    $text = mb_strtoupper(textoOfertaExcel($value), 'UTF-8');
-    return strtr($text, [
-        'Á' => 'A',
-        'É' => 'E',
-        'Í' => 'I',
-        'Ó' => 'O',
-        'Ú' => 'U',
-        'Ü' => 'U',
-        'Ñ' => 'N',
-    ]);
-}
-
-function detalleTieneSubcatOfertaExcel(array $subcatsPresentes, array $subcatsBuscadas): bool
-{
-    foreach ($subcatsBuscadas as $subcat) {
-        if (isset($subcatsPresentes[normalizarSubcatOfertaExcel($subcat)])) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-function enteroEnLetrasOfertaExcel(int $numero): string
-{
-    $unidades = ['', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
-    $especiales = [10 => 'DIEZ', 11 => 'ONCE', 12 => 'DOCE', 13 => 'TRECE', 14 => 'CATORCE', 15 => 'QUINCE', 20 => 'VEINTE'];
-    $decenas = [2 => 'VEINTI', 3 => 'TREINTA', 4 => 'CUARENTA', 5 => 'CINCUENTA', 6 => 'SESENTA', 7 => 'SETENTA', 8 => 'OCHENTA', 9 => 'NOVENTA'];
-    $centenas = [1 => 'CIENTO', 2 => 'DOSCIENTOS', 3 => 'TRESCIENTOS', 4 => 'CUATROCIENTOS', 5 => 'QUINIENTOS', 6 => 'SEISCIENTOS', 7 => 'SETECIENTOS', 8 => 'OCHOCIENTOS', 9 => 'NOVECIENTOS'];
-
-    if ($numero === 0) return 'CERO';
-    if ($numero === 100) return 'CIEN';
-    if ($numero < 10) return $unidades[$numero];
-    if (isset($especiales[$numero])) return $especiales[$numero];
-    if ($numero < 20) return 'DIECI' . strtolower($unidades[$numero - 10]);
-    if ($numero < 30) return $numero === 20 ? 'VEINTE' : 'VEINTI' . strtolower($unidades[$numero - 20]);
-    if ($numero < 100) {
-        $decena = intdiv($numero, 10);
-        $unidad = $numero % 10;
-        return $decenas[$decena] . ($unidad > 0 ? ' Y ' . $unidades[$unidad] : '');
-    }
-    if ($numero < 1000) {
-        $centena = intdiv($numero, 100);
-        $resto = $numero % 100;
-        return $centenas[$centena] . ($resto > 0 ? ' ' . enteroEnLetrasOfertaExcel($resto) : '');
-    }
-    if ($numero < 1000000) {
-        $miles = intdiv($numero, 1000);
-        $resto = $numero % 1000;
-        $textoMiles = $miles === 1 ? 'MIL' : enteroEnLetrasOfertaExcel($miles) . ' MIL';
-        return $textoMiles . ($resto > 0 ? ' ' . enteroEnLetrasOfertaExcel($resto) : '');
-    }
-
-    $millones = intdiv($numero, 1000000);
-    $resto = $numero % 1000000;
-    $textoMillones = $millones === 1 ? 'UN MILLON' : enteroEnLetrasOfertaExcel($millones) . ' MILLONES';
-    return $textoMillones . ($resto > 0 ? ' ' . enteroEnLetrasOfertaExcel($resto) : '');
-}
-
-function totalEnLetrasOfertaExcel(float $monto): string
-{
-    $monto = round($monto, 2);
-    $entero = (int)floor($monto);
-    $centimos = (int)round(($monto - $entero) * 100);
-
-    if ($centimos === 100) {
-        $entero++;
-        $centimos = 0;
-    }
-
-    return mb_strtoupper(enteroEnLetrasOfertaExcel($entero), 'UTF-8') . ' Y ' . str_pad((string)$centimos, 2, '0', STR_PAD_LEFT) . '/100 DÓLARES';
 }
 
 try {
@@ -563,6 +424,28 @@ try {
             $sheet->mergeCells('H' . $row . ':L' . $row);
             $sheet->setCellValue('H' . $row, $extra);
         }
+        $row++;
+    }
+
+    $sheet->mergeCells('A' . $row . ':L' . $row);
+    $sheet->setCellValue('A' . $row, 'TERMINOS Y CONDICIONES DE VENTA');
+    $sheet->getRowDimension($row)->setRowHeight(18);
+    $sheet->getStyle('A' . $row . ':L' . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF92D050');
+    $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+    $row++;
+
+    foreach (terminosCondicionesVentaOferta() as $termino) {
+        $sheet->mergeCells('A' . $row . ':L' . $row);
+        $sheet->setCellValue('A' . $row, $termino);
+
+        $isTitle = (bool)preg_match('/^\d+\.\s+Sobre\s+/u', $termino);
+        $height = $isTitle ? 18 : max(22, min(76, (int)ceil(mb_strlen($termino, 'UTF-8') / 120) * 16));
+        $sheet->getRowDimension($row)->setRowHeight($height);
+
+        if ($isTitle) {
+            $sheet->getStyle('A' . $row)->getFont()->setBold(true)->setUnderline(Font::UNDERLINE_SINGLE);
+        }
+
         $row++;
     }
 
