@@ -160,8 +160,8 @@ class Receta {
                     '',
                     '',
                     '',
-                    '',
-                    0,
+                    :descripcion,
+                    :cantidad_items,
                     :tiempo_entrega,
                     :condiciones_pago,
                     :vendedor,
@@ -176,6 +176,8 @@ class Receta {
                     vendedor = VALUES(vendedor),
                     vendedor_correo = VALUES(vendedor_correo),
                     vendedor_telefono = VALUES(vendedor_telefono),
+                    descripcion = VALUES(descripcion),
+                    cantidad_items = VALUES(cantidad_items),
                     condiciones_economicas_dias = VALUES(condiciones_economicas_dias),
                     updated_at = VALUES(updated_at)";
 
@@ -186,6 +188,8 @@ class Receta {
         $stmt->bindValue(':vendedor', (string)($data['vendedor'] ?? ''));
         $stmt->bindValue(':vendedor_correo', (string)($data['vendedor_correo'] ?? ''));
         $stmt->bindValue(':vendedor_telefono', (string)($data['vendedor_telefono'] ?? ''));
+        $stmt->bindValue(':descripcion', (string)($data['descripcion'] ?? ''));
+        $stmt->bindValue(':cantidad_items', (int)($data['cantidad_items'] ?? 0), PDO::PARAM_INT);
         $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_economicas_dias'] ?? 0), PDO::PARAM_INT);
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->bindValue(':updated_at', $this->nowLima);

@@ -45,6 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const vendedorEl = document.getElementById("vendedor");
     const vendedorCorreoEl = document.getElementById("vendedorCorreo");
     const vendedorTelefonoEl = document.getElementById("vendedorTelefono");
+    const descripcionRecetaEl = document.getElementById("descripcionReceta");
+    const cantidadItemsRecetaEl = document.getElementById("cantidadItemsReceta");
     const condicionesEconomicasDiasEl = document.getElementById("condicionesEconomicasDias");
 
     const baseSelect = document.getElementById("filterBase");
@@ -607,6 +609,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (vendedorEl) vendedorEl.value = data.vendedor || "";
         if (vendedorCorreoEl) vendedorCorreoEl.value = data.vendedor_correo || "";
         if (vendedorTelefonoEl) vendedorTelefonoEl.value = data.vendedor_telefono || "";
+        if (descripcionRecetaEl) descripcionRecetaEl.value = data.descripcion || "";
+        if (cantidadItemsRecetaEl) cantidadItemsRecetaEl.value = data.cantidad_items || "";
         if (condicionesEconomicasDiasEl) condicionesEconomicasDiasEl.value = data.condiciones_economicas_dias || "";
     }
 
@@ -629,6 +633,8 @@ document.addEventListener("DOMContentLoaded", () => {
             vendedor: String(vendedorEl?.value || "").trim(),
             vendedor_correo: String(vendedorCorreoEl?.value || "").trim(),
             vendedor_telefono: String(vendedorTelefonoEl?.value || "").replace(/\D/g, "").trim(),
+            descripcion: String(descripcionRecetaEl?.value || "").trim(),
+            cantidad_items: String(cantidadItemsRecetaEl?.value || "").replace(/\D/g, "").trim(),
             condiciones_economicas_dias: String(condicionesEconomicasDiasEl?.value || "").replace(/\D/g, "").trim(),
         };
     }
@@ -641,8 +647,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const payload = getCondicionesPayload();
 
-        if (!payload.tiempo_entrega || !payload.condiciones_pago || !payload.vendedor || !payload.vendedor_correo || !payload.vendedor_telefono || !payload.condiciones_economicas_dias) {
-            alertify.error("Completa tiempo de entrega, condiciones de pago, vendedor, email, teléfono y días de suspensión");
+        if (!payload.tiempo_entrega || !payload.condiciones_pago || !payload.vendedor || !payload.vendedor_correo || !payload.vendedor_telefono || !payload.descripcion || !payload.cantidad_items || !payload.condiciones_economicas_dias) {
+            alertify.error("Completa tiempo de entrega, vendedor, descripcion, cantidad, condiciones de pago y días de suspensión");
             return;
         }
 
@@ -655,6 +661,8 @@ document.addEventListener("DOMContentLoaded", () => {
             fd.append("vendedor", payload.vendedor);
             fd.append("vendedor_correo", payload.vendedor_correo);
             fd.append("vendedor_telefono", payload.vendedor_telefono);
+            fd.append("descripcion", payload.descripcion);
+            fd.append("cantidad_items", payload.cantidad_items);
             fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
 
             const res = await fetch("controller/upd_receta_condiciones.php", {

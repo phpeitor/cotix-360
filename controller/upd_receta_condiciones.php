@@ -27,14 +27,20 @@ try {
     $vendedor = trim((string)($_POST['vendedor'] ?? ''));
     $vendedorCorreo = trim((string)($_POST['vendedor_correo'] ?? ''));
     $vendedorTelefono = preg_replace('/\D+/', '', (string)($_POST['vendedor_telefono'] ?? ''));
+    $descripcion = trim((string)($_POST['descripcion'] ?? ''));
+    $cantidadItems = isset($_POST['cantidad_items']) ? (int)$_POST['cantidad_items'] : 0;
     $condicionesEconomicasDias = isset($_POST['condiciones_economicas_dias']) ? (int)$_POST['condiciones_economicas_dias'] : 0;
 
     if ($recetaId <= 0) {
         throw new Exception('Receta inválida');
     }
 
-    if ($tiempoEntrega <= 0 || $condicionesPago === '' || $vendedor === '' || $vendedorCorreo === '' || $vendedorTelefono === '' || $condicionesEconomicasDias <= 0) {
-        throw new Exception('Completa tiempo de entrega, condiciones de pago, vendedor, email, teléfono y días de suspensión');
+    if ($tiempoEntrega <= 0 || $condicionesPago === '' || $vendedor === '' || $vendedorCorreo === '' || $vendedorTelefono === '' || $descripcion === '' || $cantidadItems <= 0 || $condicionesEconomicasDias <= 0) {
+        throw new Exception('Completa tiempo de entrega, vendedor, descripcion, cantidad, condiciones de pago y días de suspensión');
+    }
+
+    if ($cantidadItems > 5000) {
+        throw new Exception('La cantidad debe estar entre 1 y 5000');
     }
 
     $receta = new Receta();
@@ -45,6 +51,8 @@ try {
         'vendedor' => $vendedor,
         'vendedor_correo' => $vendedorCorreo,
         'vendedor_telefono' => $vendedorTelefono,
+        'descripcion' => $descripcion,
+        'cantidad_items' => $cantidadItems,
         'condiciones_economicas_dias' => $condicionesEconomicasDias,
     ]);
 
@@ -60,6 +68,8 @@ try {
             'vendedor' => $vendedor,
             'vendedor_correo' => $vendedorCorreo,
             'vendedor_telefono' => $vendedorTelefono,
+            'descripcion' => $descripcion,
+            'cantidad_items' => $cantidadItems,
             'condiciones_economicas_dias' => $condicionesEconomicasDias,
         ]
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

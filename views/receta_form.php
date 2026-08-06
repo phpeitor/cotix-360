@@ -448,6 +448,18 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
 
                 <div class="modal-body">
                     <div class="row g-3">
+                        <div class="col-lg-4">
+                            <label class="form-label" for="vendedor">Vendedor</label>
+                            <input type="text" class="form-control" id="vendedor" maxlength="150" placeholder="Nombre del vendedor">
+                        </div>
+                        <div class="col-lg-4">
+                            <label class="form-label" for="vendedorCorreo">Email vendedor</label>
+                            <input type="email" class="form-control" id="vendedorCorreo" maxlength="150" placeholder="correo@empresa.com">
+                        </div>
+                        <div class="col-lg-4">
+                            <label class="form-label" for="vendedorTelefono">Teléfono vendedor</label>
+                            <input type="text" class="form-control" id="vendedorTelefono" maxlength="50" placeholder="Ej. 987654321">
+                        </div>
                         <div class="col-lg-6">
                             <label class="form-label" for="tiempoEntrega">Tiempo de entrega</label>
                             <div class="input-group">
@@ -456,17 +468,14 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
                             </div>
                         </div>
                         <div class="col-lg-6">
-                            <label class="form-label" for="vendedor">Vendedor</label>
-                            <input type="text" class="form-control" id="vendedor" maxlength="150" placeholder="Nombre del vendedor">
+                            <label class="form-label" for="cantidadItemsReceta">Cantidad</label>
+                            <input type="number" class="form-control" id="cantidadItemsReceta" min="1" max="5000" step="1" placeholder="Ej. 10">
                         </div>
-                        <div class="col-lg-6">
-                            <label class="form-label" for="vendedorCorreo">Email vendedor</label>
-                            <input type="email" class="form-control" id="vendedorCorreo" maxlength="150" placeholder="correo@empresa.com">
+                        <div class="col-lg-12">
+                            <label class="form-label" for="descripcionReceta">Descripcion</label>
+                            <textarea class="form-control" id="descripcionReceta" maxlength="500" rows="3" placeholder="Descripcion de la receta"></textarea>
                         </div>
-                        <div class="col-lg-6">
-                            <label class="form-label" for="vendedorTelefono">Teléfono vendedor</label>
-                            <input type="text" class="form-control" id="vendedorTelefono" maxlength="50" placeholder="Ej. 987654321">
-                        </div>
+                        
                         <div class="col-12">
                             <label class="form-label" for="condicionesPago">Condiciones de pago</label>
                             <textarea class="form-control" id="condicionesPago" rows="3" maxlength="200" placeholder="Ej. 50% adelanto, 50% contra entrega"></textarea>
@@ -500,7 +509,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js"></script>
-    <script src="./assets/js/receta_form.js?v=2.1"></script>
+    <script src="./assets/js/receta_form.js?v=2.2"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
