@@ -208,7 +208,7 @@ require_once ROOT . '/controller/check_session.php';
             <div class="modal-content">
                 <div class="modal-header border-0 pb-0">
                     <div>
-                        <h4 class="modal-title mb-1" id="ofertaPdfModalLabel">Oferta PDF</h4>
+                        <h4 class="modal-title mb-1" id="ofertaPdfModalLabel">Oferta comercial</h4>
                         <p class="text-muted mb-0">Selecciona los items y columnas que se imprimiran en la oferta.</p>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -217,20 +217,7 @@ require_once ROOT . '/controller/check_session.php';
                     <div class="card border bg-light-subtle mb-3">
                         <div class="card-body py-3">
                             <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between">
-                                <div class="d-flex flex-wrap gap-3">
-                                    <div class="form-check form-switch mb-0">
-                                        <input class="form-check-input oferta-columna" type="checkbox" id="oferta-col-descripcion" value="descripcion" checked>
-                                        <label class="form-check-label" for="oferta-col-descripcion">Descripcion</label>
-                                    </div>
-                                    <div class="form-check form-switch mb-0">
-                                        <input class="form-check-input oferta-columna" type="checkbox" id="oferta-col-marca" value="marca" checked>
-                                        <label class="form-check-label" for="oferta-col-marca">Marca</label>
-                                    </div>
-                                    <div class="form-check form-switch mb-0">
-                                        <input class="form-check-input oferta-columna" type="checkbox" id="oferta-col-cantidad" value="cantidad" checked>
-                                        <label class="form-check-label" for="oferta-col-cantidad">Cantidad</label>
-                                    </div>
-                                </div>
+                                <span class="text-muted fs-13">Configura descripción y marca dentro de cada grupo.</span>
                                 <div class="d-flex gap-2">
                                     <button type="button" class="btn btn-sm btn-light" id="btn-oferta-select-all">Seleccionar todo</button>
                                     <button type="button" class="btn btn-sm btn-light" id="btn-oferta-clear-all">Limpiar</button>
@@ -243,6 +230,7 @@ require_once ROOT . '/controller/check_session.php';
                 <div class="modal-footer border-0 pt-0">
                     <span class="text-muted me-auto" id="oferta-items-selected-count">0 items seleccionados</span>
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="btn-generar-oferta-excel">Generar Excel</button>
                     <button type="button" class="btn btn-info" id="btn-generar-oferta-pdf">Generar PDF</button>
                 </div>
             </div>
@@ -252,7 +240,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
-    <script src="./assets/js/table-gridjs-receta.js?v=1.7"></script>
+    <script src="./assets/js/table-gridjs-receta.js?v=1.9"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

@@ -47,8 +47,26 @@ function numeroOfertaExcel(array $receta): string
     return sprintf('%05d-%s', (int)($receta['id'] ?? 0), $year);
 }
 
+function agruparOfertaExcel(array $detalle): array
+{
+    $grupos = [];
+    foreach ($detalle as $item) {
+        $subcat = textoOfertaExcel($item['sub_cat_1'] ?? '');
+        if ($subcat === '') {
+            $subcat = 'SIN CATEGORÍA';
+        }
+
+        if (!isset($grupos[$subcat])) {
+            $grupos[$subcat] = [];
+        }
+        $grupos[$subcat][] = $item;
+    }
+
+    return $grupos;
+}
+
 try {
-    $hash = $_GET['id'] ?? null;
+    $hash = $_REQUEST['id'] ?? null;
     if (!$hash) {
         http_response_code(400);
         exit('ID inválido');
@@ -60,6 +78,32 @@ try {
         http_response_code(404);
         exit('Receta no encontrada');
     }
+    $detalle = $recetaModel->obtenerDetallePorHash((string)$hash);
+
+    $ofertaItemsParam = trim((string)($_REQUEST['oferta_items'] ?? ''));
+    $ofertaItemIds = $ofertaItemsParam !== ''
+        ? array_filter(array_map('intval', explode(',', $ofertaItemsParam)), fn($id) => $id > 0)
+        : [];
+    if (!empty($ofertaItemIds)) {
+        $idsPermitidos = array_flip($ofertaItemIds);
+        $detalle = array_values(array_filter($detalle, function ($item) use ($idsPermitidos) {
+            return isset($idsPermitidos[(int)($item['id'] ?? 0)]);
+        }));
+    }
+
+    $ofertaGroupCols = [];
+    $ofertaGroupColsJson = trim((string)($_REQUEST['oferta_group_cols'] ?? ''));
+    if ($ofertaGroupColsJson !== '') {
+        $decodedGroupCols = json_decode($ofertaGroupColsJson, true);
+        if (is_array($decodedGroupCols)) {
+            foreach ($decodedGroupCols as $subcat => $cols) {
+                if (is_array($cols)) {
+                    $ofertaGroupCols[(string)$subcat] = array_values(array_intersect($cols, ['descripcion', 'marca']));
+                }
+            }
+        }
+    }
+    $detalleAgrupado = agruparOfertaExcel($detalle);
 
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
@@ -208,7 +252,73 @@ try {
     $sheet->setCellValue('A20', 'Estimado/a, en respuesta a su solicitud de cotización sobre los precios de los productos de nuestra compañía. A continuación le brindamos nuestra oferta:');
     $sheet->getStyle('A20:A21')->getAlignment()->setWrapText(true);
 
-    $sheet->getPageSetup()->setPrintArea('A1:L21');
+    $tableHeaderRow = 23;
+    $sheet->getRowDimension(22)->setRowHeight(12);
+    $sheet->getRowDimension($tableHeaderRow)->setRowHeight(18);
+    $sheet->mergeCells('C' . $tableHeaderRow . ':F' . $tableHeaderRow);
+    $sheet->mergeCells('H' . $tableHeaderRow . ':I' . $tableHeaderRow);
+    $sheet->mergeCells('K' . $tableHeaderRow . ':L' . $tableHeaderRow);
+    $sheet->setCellValue('C' . $tableHeaderRow, 'DESCRIPCION');
+    $sheet->setCellValue('G' . $tableHeaderRow, 'MARCA');
+    $sheet->setCellValue('H' . $tableHeaderRow, 'TIEMPO DE ENTREGA');
+    $sheet->setCellValue('J' . $tableHeaderRow, 'CANT.');
+    $sheet->setCellValue('K' . $tableHeaderRow, 'VALOR TOTAL');
+    $sheet->getStyle('A' . $tableHeaderRow . ':L' . $tableHeaderRow)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF92D050');
+    $sheet->getStyle('A' . $tableHeaderRow . ':L' . $tableHeaderRow)->getFont()->setBold(true);
+    $sheet->getStyle('A' . $tableHeaderRow . ':L' . $tableHeaderRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+    $row = $tableHeaderRow + 1;
+    $itemNumber = 1;
+    $tiempoEntregaDias = (int)preg_replace('/\D+/', '', (string)($receta['cliente_tiempo_entrega'] ?? ''));
+    $tiempoEntregaTexto = $tiempoEntregaDias > 0 ? $tiempoEntregaDias . ' días' : 'TIEMPO DE ENTREGA';
+
+    foreach ($detalleAgrupado as $subcat => $itemsGrupo) {
+        $sheet->mergeCells('A' . $row . ':L' . $row);
+        $sheet->setCellValue('A' . $row, mb_strtoupper($subcat, 'UTF-8'));
+        $sheet->getStyle('A' . $row . ':L' . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFFF00');
+        $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $row++;
+
+        foreach ($itemsGrupo as $item) {
+            $nombre = textoOfertaExcel($item['nombre'] ?? 'SIN NOMBRE');
+            $descripcion = textoOfertaExcel($item['descripcion'] ?? '');
+            $marca = textoOfertaExcel($item['marca'] ?? '');
+            $cantidad = (int)($item['cantidad'] ?? 0);
+            $descripcionCelda = $nombre;
+            $colsGrupo = $ofertaGroupCols[$subcat] ?? ['descripcion', 'marca'];
+            $mostrarDescripcion = in_array('descripcion', $colsGrupo, true);
+            $mostrarMarca = in_array('marca', $colsGrupo, true);
+
+            if ($mostrarDescripcion && $descripcion !== '') {
+                $descripcionCelda .= "\n" . $descripcion;
+            }
+
+            $sheet->mergeCells('C' . $row . ':F' . $row);
+            $sheet->mergeCells('H' . $row . ':I' . $row);
+            $sheet->mergeCells('K' . $row . ':L' . $row);
+            $sheet->setCellValue('A' . $row, str_pad((string)$itemNumber, 2, '0', STR_PAD_LEFT));
+            $sheet->setCellValue('C' . $row, $descripcionCelda);
+            $sheet->setCellValue('G' . $row, $mostrarMarca ? $marca : '');
+            $sheet->setCellValue('H' . $row, $tiempoEntregaTexto);
+            $sheet->setCellValue('J' . $row, $cantidad);
+            $sheet->setCellValue('K' . $row, 'TOTAL RECETA +MARGEN');
+            $sheet->getRowDimension($row)->setRowHeight(96);
+            $sheet->getStyle('A' . $row . ':L' . $row)->getAlignment()
+                ->setVertical(Alignment::VERTICAL_CENTER)
+                ->setWrapText(true);
+            $sheet->getStyle('A' . $row . ':B' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('G' . $row . ':L' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $itemNumber++;
+            $row++;
+        }
+    }
+
+    $tableEndRow = max($row - 1, $tableHeaderRow);
+    $sheet->getStyle('A' . $tableHeaderRow . ':L' . $tableEndRow)->applyFromArray($thinBorder);
+    $sheet->getStyle('A' . $tableHeaderRow . ':L' . $tableEndRow)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_MEDIUM);
+
+    $sheet->getPageSetup()->setPrintArea('A1:L' . $tableEndRow);
     $sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
     $sheet->getPageMargins()->setTop(0.25)->setRight(0.25)->setLeft(0.25)->setBottom(0.25);
 

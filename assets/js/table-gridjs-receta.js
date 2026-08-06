@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnOfertaSelectAll = document.getElementById("btn-oferta-select-all");
     const btnOfertaClearAll = document.getElementById("btn-oferta-clear-all");
     const btnGenerarOfertaPdf = document.getElementById("btn-generar-oferta-pdf");
+    const btnGenerarOfertaExcel = document.getElementById("btn-generar-oferta-excel");
     let ofertaActualHash = "";
 
     function confirmarPdfDetalle() {
@@ -358,13 +359,23 @@ document.addEventListener("DOMContentLoaded", () => {
             subcats.forEach((items, subcat) => {
                 const groupId = `oferta-grupo-${tipo}-${md5(subcat).slice(0, 8)}`;
                 html += `
-                    <div class="card border mb-2">
-                        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                        <div class="card border mb-2">
+                        <div class="card-header bg-light py-2 d-flex flex-wrap gap-3 justify-content-between align-items-center">
                             <div class="form-check mb-0">
                                 <input class="form-check-input oferta-grupo-check" type="checkbox" id="${groupId}" data-group="${groupId}" checked>
                                 <label class="form-check-label fw-semibold" for="${groupId}">${escapeHtml(subcat)}</label>
                             </div>
-                            <span class="badge bg-primary-subtle text-primary">${items.length} items</span>
+                            <div class="d-flex flex-wrap gap-3 align-items-center">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input oferta-grupo-col-check" type="checkbox" id="${groupId}-descripcion" data-subcat="${escapeHtml(subcat)}" value="descripcion" checked>
+                                    <label class="form-check-label" for="${groupId}-descripcion">Descripcion</label>
+                                </div>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input oferta-grupo-col-check" type="checkbox" id="${groupId}-marca" data-subcat="${escapeHtml(subcat)}" value="marca" checked>
+                                    <label class="form-check-label" for="${groupId}-marca">Marca</label>
+                                </div>
+                                <span class="badge bg-primary-subtle text-primary">${items.length} items</span>
+                            </div>
                         </div>
                         <div class="list-group list-group-flush">`;
 
@@ -404,6 +415,25 @@ document.addEventListener("DOMContentLoaded", () => {
         ofertaItemsSelectedCount.textContent = `${selected} item${selected === 1 ? "" : "s"} seleccionado${selected === 1 ? "" : "s"}`;
     }
 
+    function getOfertaGroupCols() {
+        const groupCols = {};
+        document.querySelectorAll(".oferta-grupo-col-check").forEach(check => {
+            const subcat = String(check.dataset.subcat || "").trim();
+            if (!subcat) return;
+            if (!groupCols[subcat]) groupCols[subcat] = [];
+            if (check.checked) groupCols[subcat].push(check.value);
+        });
+        return groupCols;
+    }
+
+    function getOfertaColsUnion() {
+        const cols = new Set(["cantidad"]);
+        Object.values(getOfertaGroupCols()).forEach(groupCols => {
+            groupCols.forEach(col => cols.add(col));
+        });
+        return Array.from(cols);
+    }
+
     async function abrirOfertaPdfSeleccionada() {
         const selectedItems = Array.from(document.querySelectorAll(".oferta-item-check:checked"))
             .map(check => check.value)
@@ -414,9 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const selectedCols = Array.from(document.querySelectorAll(".oferta-columna:checked"))
-            .map(check => check.value)
-            .filter(Boolean);
+        const selectedCols = getOfertaColsUnion();
 
         try {
             if (btnGenerarOfertaPdf) {
@@ -467,6 +495,42 @@ document.addEventListener("DOMContentLoaded", () => {
         form.remove();
         ofertaModal?.hide();
         grid.forceRender();
+    }
+
+    function abrirOfertaExcelSeleccionada() {
+        const selectedItems = Array.from(document.querySelectorAll(".oferta-item-check:checked"))
+            .map(check => check.value)
+            .filter(Boolean);
+
+        if (!selectedItems.length) {
+            alertify.error("Seleccione al menos un item para exportar");
+            return;
+        }
+
+        const groupCols = getOfertaGroupCols();
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "controller/export_oferta_comercial_excel.php";
+        form.target = "_blank";
+        form.style.display = "none";
+
+        [
+            ["id", ofertaActualHash],
+            ["oferta_items", selectedItems.join(",")],
+            ["oferta_group_cols", JSON.stringify(groupCols)]
+        ].forEach(([name, value]) => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+        form.remove();
+        ofertaModal?.hide();
     }
 
     document.addEventListener("click", (e) => {
@@ -761,7 +825,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                window.open(`controller/export_oferta_comercial_excel.php?id=${encodeURIComponent(hash)}`, "_blank", "noopener,noreferrer");
+                ofertaActualHash = hash;
+                renderOfertaItemsModal(Array.isArray(json.detalle) ? json.detalle : []);
+                ofertaModal?.show();
             } catch (error) {
                 alertify.error("Error de conexión al validar la oferta");
             } finally {
@@ -822,9 +888,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             ofertaActualHash = hash;
-            document.querySelectorAll(".oferta-columna").forEach(check => {
-                check.checked = true;
-            });
             renderOfertaItemsModal(Array.isArray(json.detalle) ? json.detalle : []);
             ofertaModal?.show();
         } catch (error) {
@@ -859,7 +922,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     btnOfertaSelectAll?.addEventListener("click", () => {
-        document.querySelectorAll(".oferta-item-check, .oferta-grupo-check").forEach(check => {
+        document.querySelectorAll(".oferta-item-check, .oferta-grupo-check, .oferta-grupo-col-check").forEach(check => {
             check.checked = true;
             check.indeterminate = false;
         });
@@ -875,6 +938,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     btnGenerarOfertaPdf?.addEventListener("click", abrirOfertaPdfSeleccionada);
+    btnGenerarOfertaExcel?.addEventListener("click", abrirOfertaExcelSeleccionada);
 
     btnGuardarNombreReceta?.addEventListener("click", async () => {
         const nombre = String(inputNombreReceta?.value ?? "").trim();
