@@ -75,7 +75,6 @@ function agruparOfertaPorSubcat1Pdf(array $detalle): array {
     }
 
     foreach ($grupos as &$tipoGrupos) {
-        uksort($tipoGrupos, 'strcasecmp');
         foreach ($tipoGrupos as &$itemsGrupo) {
             usort($itemsGrupo, function ($a, $b) {
                 return strcasecmp((string)($a['nombre'] ?? ''), (string)($b['nombre'] ?? ''));

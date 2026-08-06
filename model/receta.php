@@ -403,8 +403,9 @@ class Receta {
         $sql = "SELECT d.*
                 FROM detalle_ingenieria d
                 INNER JOIN recetas_ingenieria r ON r.id = d.receta_id
+                LEFT JOIN vw_receta_items_orden o ON o.tipo = d.tipo AND o.sub_cat_1 = d.sub_cat_1
                 WHERE MD5(r.id) = :hash
-                ORDER BY d.tipo ASC, d.sub_cat_1 ASC, d.sub_cat_2 ASC";
+                ORDER BY d.tipo ASC, COALESCE(o.orden, 9999) ASC, d.sub_cat_1 ASC, d.sub_cat_2 ASC";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':hash', $hash);
@@ -874,7 +875,7 @@ class Receta {
                 LEFT JOIN vw_receta_items_orden b on a.tipo=b.tipo and a.sub_cat_1=b.sub_cat_1
                 LEFT JOIN receta_items r on r.id = a.item_id
                 WHERE MD5(receta_id) = :hash
-                order by tipo asc, orden asc, sub_cat_2 asc";
+                order by tipo asc, COALESCE(b.orden, 9999) asc, a.sub_cat_1 asc, sub_cat_2 asc";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':hash', $hash);
         $stmt->execute();
@@ -1267,7 +1268,8 @@ class Receta {
                     Agrupa por categoria
                     Concatena sub_cat_1
                     ========================================================= */
-                    SELECT 
+                    SELECT
+                        rd.tipo,
                         CONCAT(
                             rd.categoria,
                             ' (',
@@ -1301,16 +1303,21 @@ class Receta {
                         ) AS subtotal,
 
                         'DOLLAR' AS moneda,
+                        MIN(COALESCE(o.orden, 9999)) AS orden_key,
                         rd.receta_id
 
                     FROM receta_detalle rd
                     INNER JOIN recetas r
                         ON r.id = rd.receta_id
+                    LEFT JOIN vw_receta_items_orden o
+                        ON o.tipo = rd.tipo
+                       AND o.sub_cat_1 = rd.sub_cat_1
 
                     WHERE rd.receta_id = :receta_id
                     AND rd.tipo = 'SERVICIO'
 
                     GROUP BY 
+                        rd.tipo,
                         rd.categoria,
                         rd.receta_id
                         
@@ -1321,7 +1328,8 @@ class Receta {
                     Agrupa por sub_cat_1
                     Concatena sub_cat_2
                     ========================================================= */
-                    SELECT 
+                    SELECT
+                        rd.tipo,
                         CONCAT(
                             rd.sub_cat_1,
                             ' (',
@@ -1352,16 +1360,21 @@ class Receta {
                         ) AS subtotal,
 
                         'DOLLAR' AS moneda,
+                        MIN(COALESCE(o.orden, 9999)) AS orden_key,
                         rd.receta_id
 
                     FROM receta_detalle rd
                     INNER JOIN recetas r
                         ON r.id = rd.receta_id
+                    LEFT JOIN vw_receta_items_orden o
+                        ON o.tipo = rd.tipo
+                       AND o.sub_cat_1 = rd.sub_cat_1
 
                     WHERE rd.receta_id = :receta_id
                     AND rd.tipo = 'PRODUCTO'
 
                     GROUP BY 
+                        rd.tipo,
                         rd.sub_cat_1,
                         rd.receta_id
 
@@ -1371,7 +1384,7 @@ class Receta {
                 AND a.sub_cat_1 = b.sub_cat_1
 
                 WHERE a.receta_id = :receta_id
-                ORDER BY a.sub_cat_1";
+                ORDER BY a.tipo, a.orden_key, a.sub_cat_1";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
         $stmt->execute();

@@ -1,15 +1,21 @@
 document.addEventListener("DOMContentLoaded", () => {
     const tableEl = document.getElementById("table-gridjs");
     const btnNuevo = document.getElementById("btnNuevo");
+    const btnOrdenSubCat = document.getElementById("btnOrdenSubCat");
+    const ordenSubCatModalEl = document.getElementById("ordenSubCatModal");
+    const ordenSubCatContent = document.getElementById("ordenSubCatContent");
+    const btnGuardarOrdenSubCat = document.getElementById("btnGuardarOrdenSubCat");
     const modalEl = document.getElementById("categoriaModal");
     const modalTitle = document.getElementById("categoriaModalTitle");
     const form = document.getElementById("categoriaForm");
     const estadoWrap = document.getElementById("estadoWrap");
     const estadoSwitch = document.getElementById("estadoSwitch");
     const modal = new bootstrap.Modal(modalEl);
+    const ordenSubCatModal = ordenSubCatModalEl ? new bootstrap.Modal(ordenSubCatModalEl) : null;
 
     const endpoint = "controller/receta_item_categoria.php";
     let currentRows = [];
+    let ordenRows = [];
 
     function estadoBadge(value) {
         return String(value) === "1"
@@ -116,9 +122,188 @@ document.addEventListener("DOMContentLoaded", () => {
         }).forceRender();
     }
 
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function groupOrdenRows(rows) {
+        return rows.reduce((groups, row) => {
+            const tipo = String(row.tipo || "SIN TIPO").trim() || "SIN TIPO";
+            if (!groups[tipo]) groups[tipo] = [];
+            groups[tipo].push(row);
+            return groups;
+        }, {});
+    }
+
+    function renderOrdenSubCat(rows) {
+        if (!ordenSubCatContent) return;
+
+        const groups = groupOrdenRows(rows);
+        const html = Object.entries(groups).map(([tipo, items]) => `
+            <div class="col-lg-6">
+                <div class="card border h-100 mb-0">
+                    <div class="card-header bg-light py-2">
+                        <h6 class="mb-0 text-uppercase">${escapeHtml(tipo)}</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="subcat-order-list" data-tipo="${escapeHtml(tipo)}">
+                            ${items.map((item, idx) => `
+                                <div class="subcat-order-item" draggable="true" data-tipo="${escapeHtml(item.tipo)}" data-subcat="${escapeHtml(item.sub_cat_1)}">
+                                    <span class="subcat-order-handle"><i class="ti ti-grip-vertical"></i></span>
+                                    <span class="badge bg-primary-subtle text-primary order-number">${idx + 1}</span>
+                                    <span class="fw-semibold flex-grow-1">${escapeHtml(item.sub_cat_1)}</span>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-light btn-order-up" title="Subir"><i class="ti ti-arrow-up"></i></button>
+                                        <button type="button" class="btn btn-light btn-order-down" title="Bajar"><i class="ti ti-arrow-down"></i></button>
+                                    </div>
+                                </div>
+                            `).join("")}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join("");
+
+        ordenSubCatContent.innerHTML = html || '<div class="col-12 text-center text-muted py-4">No hay sub categorías para ordenar.</div>';
+        refreshOrderNumbers();
+    }
+
+    function refreshOrderNumbers() {
+        document.querySelectorAll(".subcat-order-list").forEach(list => {
+            list.querySelectorAll(".subcat-order-item").forEach((item, idx) => {
+                const number = item.querySelector(".order-number");
+                if (number) number.textContent = String(idx + 1);
+            });
+        });
+    }
+
+    async function cargarOrdenSubCat() {
+        if (!ordenSubCatContent) return;
+        ordenSubCatContent.innerHTML = '<div class="col-12 text-center text-muted py-4">Cargando orden...</div>';
+
+        const res = await fetch(`${endpoint}?action=order_list`);
+        const json = await res.json();
+
+        if (!res.ok || !Array.isArray(json)) {
+            throw new Error(json.message || "No se pudo cargar el orden");
+        }
+
+        ordenRows = json;
+        renderOrdenSubCat(ordenRows);
+    }
+
+    function moveOrderItem(item, direction) {
+        const sibling = direction === "up" ? item.previousElementSibling : item.nextElementSibling;
+        if (!sibling) return;
+
+        if (direction === "up") {
+            item.parentElement.insertBefore(item, sibling);
+        } else {
+            item.parentElement.insertBefore(sibling, item);
+        }
+
+        refreshOrderNumbers();
+    }
+
+    function getOrdenPayload() {
+        const payload = [];
+        document.querySelectorAll(".subcat-order-list").forEach(list => {
+            list.querySelectorAll(".subcat-order-item").forEach((item, idx) => {
+                payload.push({
+                    tipo: item.dataset.tipo || "",
+                    sub_cat_1: item.dataset.subcat || "",
+                    orden: idx + 1,
+                });
+            });
+        });
+        return payload;
+    }
+
     btnNuevo?.addEventListener("click", () => {
         fillForm();
         modal.show();
+    });
+
+    btnOrdenSubCat?.addEventListener("click", async () => {
+        try {
+            ordenSubCatModal?.show();
+            await cargarOrdenSubCat();
+        } catch (error) {
+            console.error(error);
+            alertify.error(error.message || "Error al cargar el orden");
+        }
+    });
+
+    btnGuardarOrdenSubCat?.addEventListener("click", async () => {
+        const payload = getOrdenPayload();
+        if (!payload.length) {
+            alertify.error("No hay sub categorías para guardar");
+            return;
+        }
+
+        btnGuardarOrdenSubCat.disabled = true;
+        try {
+            const res = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ action: "order_save", orden: JSON.stringify(payload) }).toString()
+            });
+            const json = await res.json();
+
+            if (!res.ok || !json.ok) {
+                throw new Error(json.message || "No se pudo guardar el orden");
+            }
+
+            alertify.success(json.message || "Orden guardado correctamente");
+            ordenSubCatModal?.hide();
+        } catch (error) {
+            console.error(error);
+            alertify.error(error.message || "Error al guardar el orden");
+        } finally {
+            btnGuardarOrdenSubCat.disabled = false;
+        }
+    });
+
+    ordenSubCatContent?.addEventListener("click", (event) => {
+        const item = event.target.closest(".subcat-order-item");
+        if (!item) return;
+
+        if (event.target.closest(".btn-order-up")) {
+            moveOrderItem(item, "up");
+            return;
+        }
+
+        if (event.target.closest(".btn-order-down")) {
+            moveOrderItem(item, "down");
+        }
+    });
+
+    ordenSubCatContent?.addEventListener("dragstart", (event) => {
+        const item = event.target.closest(".subcat-order-item");
+        if (!item) return;
+        item.classList.add("dragging");
+        event.dataTransfer.effectAllowed = "move";
+    });
+
+    ordenSubCatContent?.addEventListener("dragend", (event) => {
+        event.target.closest(".subcat-order-item")?.classList.remove("dragging");
+        refreshOrderNumbers();
+    });
+
+    ordenSubCatContent?.addEventListener("dragover", (event) => {
+        const list = event.target.closest(".subcat-order-list");
+        const dragging = document.querySelector(".subcat-order-item.dragging");
+        if (!list || !dragging || dragging.parentElement !== list) return;
+
+        event.preventDefault();
+        const siblings = [...list.querySelectorAll(".subcat-order-item:not(.dragging)")];
+        const next = siblings.find(item => event.clientY <= item.getBoundingClientRect().top + item.offsetHeight / 2);
+        list.insertBefore(dragging, next || null);
     });
 
     form?.addEventListener("submit", async (event) => {

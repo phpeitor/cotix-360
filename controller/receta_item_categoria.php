@@ -30,6 +30,11 @@ try {
         exit;
     }
 
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'order_list') {
+        echo json_encode($item->obtenerRecetaSubCat1Orden(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);
         echo json_encode(['ok' => false, 'message' => 'Método no permitido']);
@@ -47,6 +52,18 @@ try {
             'ok' => $item->bajaRecetaCategoria($id),
             'message' => 'Categoría suspendida correctamente'
         ]);
+        exit;
+    }
+
+    if ($action === 'order_save') {
+        $orden = json_decode((string)($_POST['orden'] ?? ''), true);
+        if (!is_array($orden) || empty($orden)) {
+            echo json_encode(['ok' => false, 'message' => 'No se recibió el orden de sub categorías']);
+            exit;
+        }
+
+        $item->guardarRecetaSubCat1Orden($orden);
+        echo json_encode(['ok' => true, 'message' => 'Orden guardado correctamente']);
         exit;
     }
 

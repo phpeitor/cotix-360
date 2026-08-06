@@ -574,23 +574,12 @@ document.addEventListener("DOMContentLoaded", () => {
             <a href="pdf_receta.php?id=${hashId}&oferta=1"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Oferta PDF"
+                title="Oferta PComercialDF"
                 data-bs-toggle="tooltip"
-                data-bs-title="Oferta PDF"
+                data-bs-title="Oferta Comercial"
                 class="btn btn-soft-info btn-icon btn-sm rounded-circle btn-oferta-receta"
                 data-hash="${hashId}">
                     <i class="ti ti-file-dollar"></i>
-            </a>
-
-            <a href="controller/export_oferta_comercial_excel.php?id=${hashId}"
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Oferta Excel"
-                data-bs-toggle="tooltip"
-                data-bs-title="Oferta Excel"
-                class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-oferta-excel"
-                data-hash="${hashId}">
-                    <i class="ti ti-file-spreadsheet"></i>
             </a>
         `;
 

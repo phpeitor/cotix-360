@@ -69,6 +69,34 @@ require_once ROOT . '/controller/check_session.php';
             vertical-align: middle;
         }
 
+        .subcat-order-list {
+            display: grid;
+            gap: .5rem;
+            min-height: 80px;
+        }
+
+        .subcat-order-item {
+            align-items: center;
+            background: var(--bs-body-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: .65rem;
+            cursor: grab;
+            display: flex;
+            gap: .75rem;
+            padding: .65rem .75rem;
+        }
+
+        .subcat-order-item.dragging {
+            opacity: .55;
+        }
+
+        .subcat-order-handle {
+            color: var(--bs-secondary-color);
+            cursor: grab;
+            font-size: 1.15rem;
+            line-height: 1;
+        }
+
         @media (max-width: 575.98px) {
             .categorias-card .card-header {
                 align-items: flex-start !important;
@@ -125,9 +153,14 @@ require_once ROOT . '/controller/check_session.php';
                         <div class="card categorias-card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
                                 <h4 class="header-title mb-0">Gestión de Categorías</h4>
-                                <button type="button" id="btnNuevo" class="btn btn-sm rounded-pill btn-success">
-                                    <i class="ti ti-plus fs-18"></i> Nuevo
-                                </button>
+                                <div class="d-flex gap-2 flex-wrap justify-content-end">
+                                    <button type="button" id="btnOrdenSubCat" class="btn btn-sm rounded-pill btn-outline-primary">
+                                        <i class="ti ti-arrows-sort fs-18"></i> Orden sub cat 1
+                                    </button>
+                                    <button type="button" id="btnNuevo" class="btn btn-sm rounded-pill btn-success">
+                                        <i class="ti ti-plus fs-18"></i> Nuevo
+                                    </button>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div id="table-gridjs"></div>
@@ -193,11 +226,34 @@ require_once ROOT . '/controller/check_session.php';
         </div>
     </div>
 
+    <div class="modal fade" id="ordenSubCatModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title">Orden de Sub Categoría 1</h5>
+                        <p class="text-muted mb-0 fs-13">Arrastra o usa las flechas para definir el orden por tipo.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="ordenSubCatContent" class="row g-3">
+                        <div class="col-12 text-center text-muted py-4">Cargando orden...</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnGuardarOrdenSubCat">Guardar orden</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php include ROOT . '/layout/theme.html'; ?>
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
-    <script src="./assets/js/table-gridjs-receta-categorias.js"></script>
+    <script src="./assets/js/table-gridjs-receta-categorias.js?v=1.1"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
 </html>

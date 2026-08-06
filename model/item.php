@@ -244,14 +244,15 @@ class Item {
         return $valor === '' ? null : $valor;
     }
 
-    private function agregarFiltroReceta(string &$sql, array &$params, string $campo, ?string $valor): void {
+    private function agregarFiltroReceta(string &$sql, array &$params, string $campo, ?string $valor, ?string $paramName = null): void {
         $valor = $this->limpiarFiltroReceta($valor);
         if ($valor === null) {
             return;
         }
 
-        $sql .= " AND {$campo} = :{$campo}";
-        $params[":{$campo}"] = $valor;
+        $paramName = $paramName ?: $campo;
+        $sql .= " AND {$campo} = :{$paramName}";
+        $params[":{$paramName}"] = $valor;
     }
 
     public function obtenerRecetaTipos(): array {
@@ -283,16 +284,19 @@ class Item {
     }
 
     public function obtenerRecetaSubCategorias1(?string $tipo = null, ?string $categoria = null): array {
-        $sql = "SELECT DISTINCT sub_cat_1
-                FROM receta_item_categorias
-                WHERE sub_cat_1 IS NOT NULL
-                AND TRIM(sub_cat_1) <> ''
-                AND estado = 1";
+        $sql = "SELECT c.sub_cat_1, MIN(COALESCE(o.orden, 9999)) AS orden
+                FROM receta_item_categorias c
+                LEFT JOIN vw_receta_items_orden o
+                    ON o.tipo = c.tipo
+                   AND o.sub_cat_1 = c.sub_cat_1
+                WHERE c.sub_cat_1 IS NOT NULL
+                AND TRIM(c.sub_cat_1) <> ''
+                AND c.estado = 1";
         $params = [];
 
-        $this->agregarFiltroReceta($sql, $params, 'tipo', $tipo);
-        $this->agregarFiltroReceta($sql, $params, 'categoria', $categoria);
-        $sql .= " ORDER BY sub_cat_1";
+        $this->agregarFiltroReceta($sql, $params, 'c.tipo', $tipo, 'tipo');
+        $this->agregarFiltroReceta($sql, $params, 'c.categoria', $categoria, 'categoria');
+        $sql .= " GROUP BY c.sub_cat_1 ORDER BY orden, c.sub_cat_1";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute($params);
@@ -324,6 +328,61 @@ class Item {
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerRecetaSubCat1Orden(): array {
+        $sql = "SELECT
+                    c.tipo,
+                    c.sub_cat_1,
+                    COALESCE(o.orden, 9999) AS orden
+                FROM (
+                    SELECT tipo, sub_cat_1
+                    FROM receta_item_categorias
+                    GROUP BY tipo, sub_cat_1
+                ) c
+                LEFT JOIN receta_item_subcat_orden o
+                    ON o.tipo = c.tipo
+                   AND o.sub_cat_1 = c.sub_cat_1
+                ORDER BY c.tipo ASC, COALESCE(o.orden, 9999) ASC, c.sub_cat_1 ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function guardarRecetaSubCat1Orden(array $items): bool {
+        $this->conn->beginTransaction();
+
+        try {
+            $sql = "INSERT INTO receta_item_subcat_orden (tipo, sub_cat_1, orden, created_at, updated_at)
+                    VALUES (:tipo, :sub_cat_1, :orden, :created_at, :updated_at)
+                    ON DUPLICATE KEY UPDATE
+                        orden = VALUES(orden),
+                        updated_at = VALUES(updated_at)";
+            $stmt = $this->conn->prepare($sql);
+
+            foreach ($items as $item) {
+                $tipo = $this->v($item['tipo'] ?? '');
+                $subCat1 = $this->v($item['sub_cat_1'] ?? '');
+                $orden = (int)($item['orden'] ?? 0);
+
+                if ($tipo === '' || $subCat1 === '' || $orden <= 0) {
+                    continue;
+                }
+
+                $stmt->bindValue(':tipo', $tipo);
+                $stmt->bindValue(':sub_cat_1', $subCat1);
+                $stmt->bindValue(':orden', $orden, PDO::PARAM_INT);
+                $stmt->bindValue(':created_at', $this->nowLima);
+                $stmt->bindValue(':updated_at', $this->nowLima);
+                $stmt->execute();
+            }
+
+            $this->conn->commit();
+            return true;
+        } catch (Throwable $e) {
+            $this->conn->rollBack();
+            throw $e;
+        }
     }
 
     public function guardarRecetaCategoria(array $data): int {
