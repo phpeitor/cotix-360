@@ -408,7 +408,9 @@ class Receta {
         $sql = "SELECT d.*
                 FROM detalle_ingenieria d
                 INNER JOIN recetas_ingenieria r ON r.id = d.receta_id
-                LEFT JOIN vw_receta_items_orden o ON o.tipo = d.tipo AND o.sub_cat_1 = d.sub_cat_1
+                LEFT JOIN vw_receta_items_orden o
+                    ON o.tipo COLLATE utf8mb4_unicode_ci = d.tipo COLLATE utf8mb4_unicode_ci
+                   AND o.sub_cat_1 COLLATE utf8mb4_unicode_ci = d.sub_cat_1 COLLATE utf8mb4_unicode_ci
                 WHERE MD5(r.id) = :hash
                 ORDER BY d.tipo ASC, COALESCE(o.orden, 9999) ASC, d.sub_cat_1 ASC, d.sub_cat_2 ASC";
 
@@ -616,6 +618,54 @@ class Receta {
                     KEY idx_ingenieria_historial_accion (accion)
                 )";
         $this->conn->exec($sql);
+    }
+
+    public function listarHistorialIngenieriaPorHash(string $hash, int $page = 1, int $perPage = 10): array
+    {
+        $this->crearTablaHistorialIngenieria();
+
+        $page = max(1, $page);
+        $perPage = max(1, min(50, $perPage));
+        $offset = ($page - 1) * $perPage;
+
+        $sqlTotal = "SELECT COUNT(*) AS total
+                     FROM ingenieria_historial h
+                     INNER JOIN recetas_ingenieria i ON i.id = h.ingenieria_id
+                     WHERE MD5(i.id) = :hash";
+        $stmtTotal = $this->conn->prepare($sqlTotal);
+        $stmtTotal->bindValue(':hash', $hash);
+        $stmtTotal->execute();
+        $total = (int)(($stmtTotal->fetch(PDO::FETCH_ASSOC) ?: [])['total'] ?? 0);
+
+        $sql = "SELECT h.id,
+                       h.ingenieria_id,
+                       h.detalle_id,
+                       h.item_id,
+                       h.accion,
+                       h.antes_json,
+                       h.despues_json,
+                       h.usuario_id,
+                       p.usuario,
+                       h.created_at
+                FROM ingenieria_historial h
+                INNER JOIN recetas_ingenieria i ON i.id = h.ingenieria_id
+                LEFT JOIN personal p ON p.IDPERSONAL = h.usuario_id
+                WHERE MD5(i.id) = :hash
+                ORDER BY h.id DESC
+                LIMIT :limit OFFSET :offset";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [],
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $perPage,
+            'total_pages' => max(1, (int)ceil($total / $perPage)),
+        ];
     }
 
     public function firmaListaReceta(string $fec_ini, string $fec_fin): array
@@ -1159,11 +1209,11 @@ class Receta {
                 INNER JOIN recetas r1 ON r1.id = d.receta_id
                 LEFT JOIN recetas r_original ON r_original.id = r1.id_receta_duplicada
                 INNER JOIN receta_items r ON
-                LOWER(TRIM(COALESCE(r.nombre, ''))) = LOWER(TRIM(COALESCE(d.nombre, '')))
-                AND LOWER(TRIM(COALESCE(r.categoria, ''))) = LOWER(TRIM(COALESCE(d.categoria, '')))
-                AND LOWER(TRIM(COALESCE(r.sub_cat_1, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')))
-                AND LOWER(TRIM(COALESCE(r.sub_cat_2, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')))
-                AND LOWER(TRIM(COALESCE(r.descripcion, ''))) = LOWER(TRIM(COALESCE(d.descripcion, '')))
+                LOWER(TRIM(COALESCE(r.nombre, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.nombre, '')) COLLATE utf8mb4_unicode_ci)
+                AND LOWER(TRIM(COALESCE(r.categoria, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.categoria, '')) COLLATE utf8mb4_unicode_ci)
+                AND LOWER(TRIM(COALESCE(r.sub_cat_1, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')) COLLATE utf8mb4_unicode_ci)
+                AND LOWER(TRIM(COALESCE(r.sub_cat_2, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')) COLLATE utf8mb4_unicode_ci)
+                AND LOWER(TRIM(COALESCE(r.descripcion, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.descripcion, '')) COLLATE utf8mb4_unicode_ci)
                 WHERE d.receta_id = :receta_id
                   AND COALESCE(d.precio_manual, 0) = 0
                   AND (
@@ -1217,11 +1267,11 @@ class Receta {
                     ) AS checksum
                                 FROM receta_detalle d
                                 INNER JOIN receta_items r ON
-                                        LOWER(TRIM(COALESCE(r.nombre, ''))) = LOWER(TRIM(COALESCE(d.nombre, '')))
-                                        AND LOWER(TRIM(COALESCE(r.categoria, ''))) = LOWER(TRIM(COALESCE(d.categoria, '')))
-                                        AND LOWER(TRIM(COALESCE(r.sub_cat_1, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')))
-                                        AND LOWER(TRIM(COALESCE(r.sub_cat_2, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')))
-                                        AND LOWER(TRIM(COALESCE(r.descripcion, ''))) = LOWER(TRIM(COALESCE(d.descripcion, '')))
+                                        LOWER(TRIM(COALESCE(r.nombre, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.nombre, '')) COLLATE utf8mb4_unicode_ci)
+                                        AND LOWER(TRIM(COALESCE(r.categoria, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.categoria, '')) COLLATE utf8mb4_unicode_ci)
+                                        AND LOWER(TRIM(COALESCE(r.sub_cat_1, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')) COLLATE utf8mb4_unicode_ci)
+                                        AND LOWER(TRIM(COALESCE(r.sub_cat_2, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')) COLLATE utf8mb4_unicode_ci)
+                                        AND LOWER(TRIM(COALESCE(r.descripcion, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.descripcion, '')) COLLATE utf8mb4_unicode_ci)
                 WHERE d.receta_id = :receta_id
                   AND COALESCE(d.precio_manual, 0) = 0
                   AND (
@@ -1245,11 +1295,11 @@ class Receta {
     {
         $sql = "UPDATE receta_detalle d
                                 INNER JOIN receta_items r ON
-                                        LOWER(TRIM(COALESCE(r.nombre, ''))) = LOWER(TRIM(COALESCE(d.nombre, '')))
-                                        AND LOWER(TRIM(COALESCE(r.categoria, ''))) = LOWER(TRIM(COALESCE(d.categoria, '')))
-                                        AND LOWER(TRIM(COALESCE(r.sub_cat_1, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')))
-                                                                                AND LOWER(TRIM(COALESCE(r.sub_cat_2, ''))) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')))
-                                                                                AND LOWER(TRIM(COALESCE(r.descripcion, ''))) = LOWER(TRIM(COALESCE(d.descripcion, '')))
+                                        LOWER(TRIM(COALESCE(r.nombre, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.nombre, '')) COLLATE utf8mb4_unicode_ci)
+                                        AND LOWER(TRIM(COALESCE(r.categoria, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.categoria, '')) COLLATE utf8mb4_unicode_ci)
+                                        AND LOWER(TRIM(COALESCE(r.sub_cat_1, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')) COLLATE utf8mb4_unicode_ci)
+                                                                                AND LOWER(TRIM(COALESCE(r.sub_cat_2, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')) COLLATE utf8mb4_unicode_ci)
+                                                                                AND LOWER(TRIM(COALESCE(r.descripcion, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.descripcion, '')) COLLATE utf8mb4_unicode_ci)
                 SET d.precio = r.precio,
                     d.moneda = r.moneda,
                     d.precio_manual = 0

@@ -13,9 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const ofertaItemsSelectedCount = document.getElementById("oferta-items-selected-count");
     const btnOfertaSelectAll = document.getElementById("btn-oferta-select-all");
     const btnOfertaClearAll = document.getElementById("btn-oferta-clear-all");
+    const btnOfertarReceta = document.getElementById("btn-ofertar-receta");
     const btnGenerarOfertaPdf = document.getElementById("btn-generar-oferta-pdf");
     const btnGenerarOfertaExcel = document.getElementById("btn-generar-oferta-excel");
     let ofertaActualHash = "";
+    let ofertaActualEstado = "";
 
     function confirmarPdfDetalle() {
         return new Promise(resolve => {
@@ -505,6 +507,13 @@ document.addEventListener("DOMContentLoaded", () => {
         return true;
     }
 
+    function actualizarBotonOfertar() {
+        if (!btnOfertarReceta) return;
+
+        const estado = String(ofertaActualEstado || "").trim().toUpperCase();
+        btnOfertarReceta.classList.toggle("d-none", estado !== "ENVIADA");
+    }
+
     async function abrirOfertaPdfSeleccionada() {
         const selectedItems = Array.from(document.querySelectorAll(".oferta-item-check:checked"))
             .map(check => check.value)
@@ -516,31 +525,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const groupCols = getOfertaGroupCols();
-
-        try {
-            if (btnGenerarOfertaPdf) {
-                btnGenerarOfertaPdf.disabled = true;
-            }
-
-            const estadoRes = await fetch("controller/upd_receta_ofertado.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams({ id: ofertaActualHash })
-            });
-            const estadoJson = await estadoRes.json();
-
-            if (!estadoRes.ok || !estadoJson.success) {
-                alertify.error(estadoJson.message || "No se pudo actualizar el estado de la receta");
-                return;
-            }
-        } catch (error) {
-            alertify.error("Error de conexión al actualizar el estado");
-            return;
-        } finally {
-            if (btnGenerarOfertaPdf) {
-                btnGenerarOfertaPdf.disabled = false;
-            }
-        }
 
         const form = document.createElement("form");
         form.method = "POST";
@@ -565,7 +549,6 @@ document.addEventListener("DOMContentLoaded", () => {
         form.submit();
         form.remove();
         ofertaModal?.hide();
-        grid.forceRender();
     }
 
     function abrirOfertaExcelSeleccionada() {
@@ -602,6 +585,48 @@ document.addEventListener("DOMContentLoaded", () => {
         form.submit();
         form.remove();
         ofertaModal?.hide();
+    }
+
+    async function ofertarRecetaActual() {
+        if (!ofertaActualHash) {
+            alertify.error("No se pudo identificar la receta");
+            return;
+        }
+
+        if (String(ofertaActualEstado || "").trim().toUpperCase() !== "ENVIADA") {
+            alertify.error("Solo se puede ofertar una receta en estado Enviada");
+            return;
+        }
+
+        try {
+            if (btnOfertarReceta) {
+                btnOfertarReceta.disabled = true;
+            }
+
+            const estadoRes = await fetch("controller/upd_receta_ofertado.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ id: ofertaActualHash })
+            });
+            const estadoJson = await estadoRes.json();
+
+            if (!estadoRes.ok || !estadoJson.success) {
+                alertify.error(estadoJson.message || "No se pudo actualizar el estado de la receta");
+                return;
+            }
+
+            ofertaActualEstado = "Ofertado";
+            actualizarBotonOfertar();
+            alertify.success(estadoJson.message || "Receta marcada como ofertada");
+            ofertaModal?.hide();
+            grid.forceRender();
+        } catch (error) {
+            alertify.error("Error de conexión al actualizar el estado");
+        } finally {
+            if (btnOfertarReceta) {
+                btnOfertarReceta.disabled = false;
+            }
+        }
     }
 
     document.addEventListener("click", (e) => {
@@ -861,6 +886,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 ofertaActualHash = hash;
+                ofertaActualEstado = String(json.receta.estado || "");
+                actualizarBotonOfertar();
                 renderOfertaItemsModal(Array.isArray(json.detalle) ? json.detalle : []);
                 ofertaModal?.show();
             } catch (error) {
@@ -898,6 +925,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             ofertaActualHash = hash;
+            ofertaActualEstado = String(json.receta.estado || "");
+            actualizarBotonOfertar();
             renderOfertaItemsModal(Array.isArray(json.detalle) ? json.detalle : []);
             ofertaModal?.show();
         } catch (error) {
@@ -949,6 +978,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btnGenerarOfertaPdf?.addEventListener("click", abrirOfertaPdfSeleccionada);
     btnGenerarOfertaExcel?.addEventListener("click", abrirOfertaExcelSeleccionada);
+    btnOfertarReceta?.addEventListener("click", ofertarRecetaActual);
 
     btnGuardarNombreReceta?.addEventListener("click", async () => {
         const nombre = String(inputNombreReceta?.value ?? "").trim();

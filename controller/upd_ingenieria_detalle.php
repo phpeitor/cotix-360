@@ -31,6 +31,8 @@ try {
         throw new Exception('Receta de ingeniería no encontrada');
     }
     $usuarioId = (int)$_SESSION['session_id'];
+    $receta->begin();
+    $historial = null;
 
     if ($accion === 'agregar') {
         $itemId = (int)($_POST['item_id'] ?? 0);
@@ -51,7 +53,7 @@ try {
             $detalleNuevo = $receta->obtenerDetalleIngenieriaPorHash($hash);
             foreach ($detalleNuevo as $row) {
                 if ((int)($row['item_id'] ?? 0) === $itemId) {
-                    $receta->registrarHistorialIngenieria((int)$ingenieria['id'], 'agregar_item', (int)$row['id'], $itemId, [], $row, $usuarioId);
+                    $historial = ['agregar_item', (int)$row['id'], $itemId, [], $row];
                     break;
                 }
             }
@@ -71,7 +73,7 @@ try {
         }
         $ok = $receta->eliminarDetalleIngenieria($hash, $detalleId);
         if ($ok) {
-            $receta->registrarHistorialIngenieria((int)$ingenieria['id'], 'eliminar_item', $detalleId, isset($antes['item_id']) ? (int)$antes['item_id'] : null, $antes, [], $usuarioId);
+            $historial = ['eliminar_item', $detalleId, isset($antes['item_id']) ? (int)$antes['item_id'] : null, $antes, []];
         }
     } elseif ($accion === 'cantidad') {
         $detalleId = (int)($_POST['detalle_id'] ?? 0);
@@ -91,7 +93,7 @@ try {
         if ($ok) {
             $despues = $antes;
             $despues['cantidad'] = max(1, $cantidad);
-            $receta->registrarHistorialIngenieria((int)$ingenieria['id'], 'cambiar_cantidad', $detalleId, isset($antes['item_id']) ? (int)$antes['item_id'] : null, $antes, $despues, $usuarioId);
+            $historial = ['cambiar_cantidad', $detalleId, isset($antes['item_id']) ? (int)$antes['item_id'] : null, $antes, $despues];
         }
     } else {
         throw new Exception('Acción no permitida');
@@ -101,8 +103,41 @@ try {
         throw new Exception('No se pudo actualizar el detalle');
     }
 
+    $totalIngenieria = $receta->totalIngenieriaDolaresPorHash($hash);
+    $totalOrigen = $receta->totalRecetaOrigenDolares((int)($ingenieria['id_receta_duplicada'] ?? 0));
+
+    if ($totalIngenieria > $totalOrigen + 0.01) {
+        $puedeVerMontos = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3], true);
+        $mensaje = 'No se puede actualizar. La receta aprobada tiene un monto menor al monto de ingeniería.';
+        if ($puedeVerMontos) {
+            $mensaje = 'No se puede actualizar. La receta aprobada tiene un monto menor ($' .
+                number_format($totalOrigen, 2) . ') al monto de ingeniería ($' .
+                number_format($totalIngenieria, 2) . ').';
+        }
+        throw new Exception($mensaje);
+    }
+
+    $receta->commit();
+
+    if ($historial !== null) {
+        [$accionHistorial, $detalleHistorialId, $itemHistorialId, $antesHistorial, $despuesHistorial] = $historial;
+        $receta->registrarHistorialIngenieria(
+            (int)$ingenieria['id'],
+            $accionHistorial,
+            $detalleHistorialId,
+            $itemHistorialId,
+            $antesHistorial,
+            $despuesHistorial,
+            $usuarioId
+        );
+    }
+
     echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
+    if (isset($receta)) {
+        $receta->rollback();
+    }
+
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }

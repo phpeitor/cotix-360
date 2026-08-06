@@ -3,6 +3,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const tbody = document.getElementById("ingenieriaDetalleBody");
     const itemSearchBody = document.getElementById("recetaItemsTableBody");
     const itemsResultCount = document.getElementById("itemsResultCount");
+    const historialBody = document.getElementById("ingenieriaHistorialBody");
+    const historialCount = document.getElementById("historialIngenieriaCount");
+    const historialInfo = document.getElementById("ingenieriaHistorialInfo");
+    const historialPagination = document.getElementById("ingenieriaHistorialPagination");
 
     const baseSelect = document.getElementById("filterBase");
     const categoriaSelect = document.getElementById("categoria");
@@ -36,7 +40,18 @@ document.addEventListener("DOMContentLoaded", () => {
         clienteCorreo: document.getElementById("clienteCorreo"),
         clienteCelular: document.getElementById("clienteCelular"),
         clienteMotivo: document.getElementById("clienteMotivo"),
-        clienteDireccion: document.getElementById("clienteDireccion")
+        clienteDireccion: document.getElementById("clienteDireccion"),
+        condicionesModal: document.getElementById("condiciones-modal"),
+        btnGuardarCondiciones: document.getElementById("btnGuardarCondiciones"),
+        tiempoEntrega: document.getElementById("tiempoEntrega"),
+        condicionesPago: document.getElementById("condicionesPago"),
+        vendedor: document.getElementById("vendedor"),
+        vendedorCorreo: document.getElementById("vendedorCorreo"),
+        vendedorTelefono: document.getElementById("vendedorTelefono"),
+        descripcionReceta: document.getElementById("descripcionReceta"),
+        cantidadItemsReceta: document.getElementById("cantidadItemsReceta"),
+        condicionesEconomicasDias: document.getElementById("condicionesEconomicasDias"),
+        condicionesEconomicasVisible: document.getElementById("condicionesEconomicasVisible")
     };
 
     let receta = null;
@@ -45,6 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const MAX_CANTIDAD = 5000;
     const userCargo = Number(fields.form?.dataset?.userCargo || 0);
     const esCargoIngenieria = userCargo === 6;
+    const HISTORIAL_PAGE_SIZE = 10;
+    let historialPage = 1;
 
     if (!hash) {
         alertify.error("ID inválido");
@@ -56,6 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function init() {
         initTooltips();
         loadIngenieria();
+        cargarHistorialIngenieria();
         cargarBases();
 
         baseSelect?.addEventListener("change", cargarCategorias);
@@ -87,6 +105,9 @@ document.addEventListener("DOMContentLoaded", () => {
             event.preventDefault();
             guardarIngenieria();
         });
+
+        fields.condicionesModal?.addEventListener("show.bs.modal", renderCondicionesModal);
+        fields.btnGuardarCondiciones?.addEventListener("click", guardarCondicionesComerciales);
 
         document.addEventListener("click", event => {
             const delBtn = event.target.closest("[data-delete-detalle]");
@@ -186,6 +207,123 @@ document.addEventListener("DOMContentLoaded", () => {
         if (el) el.textContent = value || "-";
     }
 
+    function parseJsonSeguro(value) {
+        if (!value) return {};
+        if (typeof value === "object") return value;
+        try {
+            return JSON.parse(value);
+        } catch (error) {
+            return {};
+        }
+    }
+
+    function labelAccionHistorial(accion) {
+        const map = {
+            agregar_item: "Agregar item",
+            eliminar_item: "Eliminar item",
+            cambiar_cantidad: "Cambiar cantidad",
+            guardar_ingenieria: "Guardar ingeniería",
+        };
+        return map[accion] || String(accion || "-").replace(/_/g, " ");
+    }
+
+    function claseAccionHistorial(accion) {
+        const map = {
+            agregar_item: "bg-success-subtle text-success",
+            eliminar_item: "bg-danger-subtle text-danger",
+            cambiar_cantidad: "bg-warning-subtle text-warning-emphasis",
+            guardar_ingenieria: "bg-info-subtle text-info",
+        };
+        return map[accion] || "bg-secondary-subtle text-secondary";
+    }
+
+    function resumenHistorial(row) {
+        const accion = String(row.accion || "");
+        const antes = parseJsonSeguro(row.antes_json);
+        const despues = parseJsonSeguro(row.despues_json);
+        const nombre = despues.nombre || antes.nombre || "";
+
+        if (accion === "cambiar_cantidad") {
+            return `${nombre ? escapeHtml(nombre) + "<br>" : ""}Cantidad: ${escapeHtml(antes.cantidad ?? "-")} <span class="mx-1">⮞</span> ${escapeHtml(despues.cantidad ?? "-")}`;
+        }
+
+        if (accion === "agregar_item") {
+            return `${escapeHtml(nombre || "Item agregado")}<br>Cantidad: ${escapeHtml(despues.cantidad ?? "-")}`;
+        }
+
+        if (accion === "eliminar_item") {
+            return `${escapeHtml(nombre || "Item eliminado")}<br>Cantidad: ${escapeHtml(antes.cantidad ?? "-")}`;
+        }
+
+        if (accion === "guardar_ingenieria") {
+            const totalOrigen = Number(antes.total_origen_dolares || 0).toFixed(2);
+            const totalIngenieria = Number(despues.total_ingenieria_dolares || 0).toFixed(2);
+            return `Total origen: $ ${escapeHtml(totalOrigen)}<br>Total ingeniería: $ ${escapeHtml(totalIngenieria)}`;
+        }
+
+        return "-";
+    }
+
+    function renderHistorialIngenieria(historial) {
+        const rows = Array.isArray(historial?.rows) ? historial.rows : [];
+        const total = Number(historial?.total || 0);
+        const page = Number(historial?.page || 1);
+        const perPage = Number(historial?.per_page || HISTORIAL_PAGE_SIZE);
+        const totalPages = Math.max(1, Number(historial?.total_pages || 1));
+
+        if (historialCount) historialCount.textContent = `${total} registro${total === 1 ? "" : "s"}`;
+
+        if (!rows.length) {
+            if (historialBody) historialBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">Sin historial registrado.</td></tr>`;
+            if (historialInfo) historialInfo.textContent = "Showing 0 of 0 Results";
+            if (historialPagination) historialPagination.innerHTML = "";
+            return;
+        }
+
+        if (historialBody) {
+            historialBody.innerHTML = rows.map(row => `
+                <tr>
+                    <td>${escapeHtml(row.created_at || "-")}</td>
+                    <td>${escapeHtml(row.usuario || row.usuario_id || "-")}</td>
+                    <td><span class="badge ${claseAccionHistorial(row.accion)}">${escapeHtml(labelAccionHistorial(row.accion))}</span></td>
+                    <td class="text-wrap">${resumenHistorial(row)}</td>
+                </tr>
+            `).join("");
+        }
+
+        const from = total === 0 ? 0 : ((page - 1) * perPage) + 1;
+        const to = Math.min(total, page * perPage);
+        if (historialInfo) historialInfo.textContent = `Showing ${from} to ${to} of ${total} Results`;
+
+        if (historialPagination) {
+            let html = `
+                <li class="page-item ${page <= 1 ? "disabled" : ""}">
+                    <a class="page-link" href="#" data-historial-page="${page - 1}"><i class="ti ti-chevron-left"></i></a>
+                </li>`;
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<li class="page-item ${i === page ? "active" : ""}"><a class="page-link" href="#" data-historial-page="${i}">${i}</a></li>`;
+            }
+            html += `
+                <li class="page-item ${page >= totalPages ? "disabled" : ""}">
+                    <a class="page-link" href="#" data-historial-page="${page + 1}"><i class="ti ti-chevron-right"></i></a>
+                </li>`;
+            historialPagination.innerHTML = html;
+        }
+    }
+
+    async function cargarHistorialIngenieria(page = historialPage) {
+        if (!historialBody) return;
+        historialPage = Math.max(1, Number(page || 1));
+        try {
+            const res = await fetch(`controller/get_ingenieria_historial.php?${new URLSearchParams({ id: hash, page: String(historialPage), per_page: String(HISTORIAL_PAGE_SIZE) }).toString()}`);
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.message || "No se pudo cargar historial");
+            renderHistorialIngenieria(data.historial);
+        } catch (error) {
+            historialBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-4">${escapeHtml(error.message || "Error al cargar historial")}</td></tr>`;
+        }
+    }
+
     function renderHeader() {
         setText(fields.id, receta.id);
         setText(fields.nombre, receta.nombre || "-");
@@ -202,6 +340,64 @@ document.addEventListener("DOMContentLoaded", () => {
         fields.clienteCelular.value = cliente?.celular || "";
         fields.clienteMotivo.value = cliente?.motivo || "";
         fields.clienteDireccion.value = cliente?.direccion || "";
+    }
+
+    function renderCondicionesModal() {
+        const data = cliente || {};
+        if (fields.tiempoEntrega) fields.tiempoEntrega.value = String(data.tiempo_entrega || "").replace(/\D/g, "");
+        if (fields.condicionesPago) fields.condicionesPago.value = data.condiciones_pago || "";
+        if (fields.vendedor) fields.vendedor.value = data.vendedor || "";
+        if (fields.vendedorCorreo) fields.vendedorCorreo.value = data.vendedor_correo || "";
+        if (fields.vendedorTelefono) fields.vendedorTelefono.value = data.vendedor_telefono || "";
+        if (fields.descripcionReceta) fields.descripcionReceta.value = data.descripcion || "";
+        if (fields.cantidadItemsReceta) fields.cantidadItemsReceta.value = data.cantidad_items || "";
+        if (fields.condicionesEconomicasDias) fields.condicionesEconomicasDias.value = data.condiciones_economicas_dias || "";
+        if (fields.condicionesEconomicasVisible) fields.condicionesEconomicasVisible.checked = String(data.condiciones_economicas_visible || "0") === "1";
+    }
+
+    function getCondicionesPayload() {
+        return {
+            tiempo_entrega: String(fields.tiempoEntrega?.value || "").replace(/\D/g, "").trim(),
+            condiciones_pago: String(fields.condicionesPago?.value || "").trim(),
+            vendedor: String(fields.vendedor?.value || "").trim(),
+            vendedor_correo: String(fields.vendedorCorreo?.value || "").trim(),
+            vendedor_telefono: String(fields.vendedorTelefono?.value || "").replace(/\D/g, "").trim(),
+            descripcion: String(fields.descripcionReceta?.value || "").trim(),
+            cantidad_items: String(fields.cantidadItemsReceta?.value || "").replace(/\D/g, "").trim(),
+            condiciones_economicas_dias: String(fields.condicionesEconomicasDias?.value || "").replace(/\D/g, "").trim(),
+            condiciones_economicas_visible: fields.condicionesEconomicasVisible?.checked ? "1" : "0",
+        };
+    }
+
+    async function guardarCondicionesComerciales() {
+        const recetaOrigenId = Number(receta?.id_receta_duplicada || 0);
+        if (recetaOrigenId <= 0) {
+            alertify.error("Receta origen inválida");
+            return;
+        }
+
+        const payload = getCondicionesPayload();
+        if (!payload.tiempo_entrega || !payload.condiciones_pago || !payload.vendedor || !payload.vendedor_correo || !payload.vendedor_telefono || !payload.descripcion || !payload.cantidad_items || !payload.condiciones_economicas_dias) {
+            alertify.error("Completa tiempo de entrega, vendedor, descripcion, cantidad, condiciones de pago y días de suspensión");
+            return;
+        }
+
+        fields.btnGuardarCondiciones.disabled = true;
+        try {
+            const fd = new FormData();
+            fd.append("receta_id", String(recetaOrigenId));
+            Object.entries(payload).forEach(([key, value]) => fd.append(key, value));
+            const res = await fetch("controller/upd_receta_condiciones.php", { method: "POST", body: fd });
+            const json = await res.json();
+            if (!res.ok || !json.ok) throw new Error(json.message || "No se pudieron guardar los datos comerciales");
+            cliente = { ...(cliente || {}), ...(json.condiciones || payload) };
+            alertify.success("Datos comerciales guardados");
+            (bootstrap.Modal.getInstance(fields.condicionesModal) || new bootstrap.Modal(fields.condicionesModal)).hide();
+        } catch (error) {
+            alertify.error(error.message || "Error al guardar datos comerciales");
+        } finally {
+            fields.btnGuardarCondiciones.disabled = false;
+        }
     }
 
     function renderDetalle() {
@@ -310,6 +506,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await post("controller/guardar_ingenieria.php", { hash });
             alertify.success("Receta ingeniería guardada");
             await loadIngenieria();
+            await cargarHistorialIngenieria(1);
         } catch (error) {
             alertify.alert("Validación de ingeniería", error.message || "No se pudo guardar ingeniería");
         }
@@ -391,6 +588,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 await post("controller/upd_ingenieria_detalle.php", { hash, accion: "eliminar", detalle_id: String(detalleId) });
                 alertify.success("Item eliminado");
                 await loadIngenieria();
+                await cargarHistorialIngenieria(1);
             } catch (error) {
                 alertify.error(error.message);
             }
@@ -405,6 +603,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await post("controller/upd_ingenieria_detalle.php", { hash, accion: "cantidad", detalle_id: String(detalleId), cantidad: String(next) });
             item.cantidad = next;
             renderDetalle();
+            await cargarHistorialIngenieria(1);
         } catch (error) {
             alertify.error(error.message);
         }
@@ -424,6 +623,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await post("controller/upd_ingenieria_detalle.php", { hash, accion: "agregar", item_id: String(itemId), cantidad: String(cantidadNormalizada) });
             alertify.success("Item agregado");
             await loadIngenieria();
+            await cargarHistorialIngenieria(1);
         } catch (error) {
             alertify.error(error.message);
         }
@@ -608,4 +808,11 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     }
+
+    historialPagination?.addEventListener("click", event => {
+        const link = event.target.closest("[data-historial-page]");
+        if (!link || link.closest(".disabled") || link.closest(".active")) return;
+        event.preventDefault();
+        cargarHistorialIngenieria(Number(link.dataset.historialPage || 1));
+    });
 });

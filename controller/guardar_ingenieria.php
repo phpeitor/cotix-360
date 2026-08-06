@@ -31,14 +31,16 @@ try {
 
     $totalIngenieria = $receta->totalIngenieriaDolaresPorHash($hash);
     $totalOrigen = $receta->totalRecetaOrigenDolares((int)($ingenieria['id_receta_duplicada'] ?? 0));
-    $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
 
-    if ($esCargoIngenieria && $totalIngenieria > $totalOrigen + 0.01) {
-        throw new Exception(
-            'No se puede guardar. La receta aprobada tiene un monto menor ($' .
-            number_format($totalOrigen, 2) . ') al monto de ingeniería ($' .
-            number_format($totalIngenieria, 2) . ').'
-        );
+    if ($totalIngenieria > $totalOrigen + 0.01) {
+        $puedeVerMontos = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3], true);
+        $mensaje = 'No se puede guardar. La receta aprobada tiene un monto menor al monto de ingeniería.';
+        if ($puedeVerMontos) {
+            $mensaje = 'No se puede guardar. La receta aprobada tiene un monto menor ($' .
+                number_format($totalOrigen, 2) . ') al monto de ingeniería ($' .
+                number_format($totalIngenieria, 2) . ').';
+        }
+        throw new Exception($mensaje);
     }
 
     $receta->registrarHistorialIngenieria(

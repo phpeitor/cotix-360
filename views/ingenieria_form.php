@@ -94,6 +94,7 @@ $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
 
                                 <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end receta-header-actions">
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#cliente-modal" data-bs-title="Cliente" data-bs-placement="bottom"><i class="ti ti-user-circle fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#condiciones-modal" data-bs-title="Datos comerciales" data-bs-placement="bottom"><i class="ti ti-clipboard-text fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom"><i class="ti ti-search fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon js-navigate" data-href="ingenieria.php" data-bs-title="Volver" data-bs-placement="bottom"><i class="ti ti-corner-up-left-double fs-18"></i></button>
                                 </div>
@@ -150,6 +151,40 @@ $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-header border-bottom border-dashed d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div>
+                                    <h4 class="header-title mb-0">Historial de ingeniería</h4>
+                                    <span class="text-muted fs-12">Últimas acciones registradas sobre esta ingeniería.</span>
+                                </div>
+                                <span class="badge bg-light text-dark" id="historialIngenieriaCount">0 registros</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 150px;">Fecha</th>
+                                                <th style="width: 150px;">Usuario</th>
+                                                <th style="width: 150px;">Acción</th>
+                                                <th>Detalle</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="ingenieriaHistorialBody">
+                                            <tr><td colspan="4" class="text-center text-muted py-4">Cargando historial...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer border-0 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="text-muted fs-12" id="ingenieriaHistorialInfo">Showing 0 of 0 Results</div>
+                                <ul class="pagination pagination-boxed pagination-sm mb-0" id="ingenieriaHistorialPagination"></ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -272,10 +307,80 @@ $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
         </div>
     </div>
 
+    <div id="condiciones-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="condiciones-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-bg-secondary border-0">
+                    <h4 class="modal-title" id="condiciones-modalLabel">Datos comerciales</h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-lg-4">
+                            <label class="form-label" for="vendedor">Vendedor</label>
+                            <input type="text" class="form-control" id="vendedor" maxlength="150" placeholder="Nombre del vendedor">
+                        </div>
+                        <div class="col-lg-4">
+                            <label class="form-label" for="vendedorCorreo">Email vendedor</label>
+                            <input type="email" class="form-control" id="vendedorCorreo" maxlength="150" placeholder="correo@empresa.com">
+                        </div>
+                        <div class="col-lg-4">
+                            <label class="form-label" for="vendedorTelefono">Teléfono vendedor</label>
+                            <input type="text" class="form-control" id="vendedorTelefono" maxlength="50" placeholder="Ej. 987654321">
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label" for="tiempoEntrega">Tiempo de entrega</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="tiempoEntrega" min="1" max="999" step="1" placeholder="Ej. 15">
+                                <span class="input-group-text">días</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label" for="cantidadItemsReceta">Cantidad</label>
+                            <input type="number" class="form-control" id="cantidadItemsReceta" min="1" max="5000" step="1" placeholder="Ej. 10">
+                        </div>
+                        <div class="col-lg-12">
+                            <label class="form-label" for="descripcionReceta">Descripcion</label>
+                            <textarea class="form-control" id="descripcionReceta" maxlength="500" rows="3" placeholder="Descripcion de la receta"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="condicionesPago">Condiciones de pago</label>
+                            <textarea class="form-control" id="condicionesPago" rows="3" maxlength="200" placeholder="Ej. 50% adelanto, 50% contra entrega"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <div class="commercial-conditions-box">
+                                <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2">
+                                    <div class="commercial-conditions-title mb-0">Condiciones Económicas por Suspensión de Servicio:</div>
+                                    <div class="form-check form-switch mb-0">
+                                        <input class="form-check-input" type="checkbox" id="condicionesEconomicasVisible">
+                                        <label class="form-check-label" for="condicionesEconomicasVisible">Mostrar en oferta</label>
+                                    </div>
+                                </div>
+                                <p class="commercial-conditions-text">
+                                    En caso de que el servicio sea pausado o suspendido por un periodo superior a
+                                    <span class="commercial-days-input">
+                                        <input type="number" class="form-control form-control-sm" id="condicionesEconomicasDias" min="1" max="999" step="1" placeholder="10">
+                                        <span>días</span>
+                                    </span>, debido a causas no imputables a nuestra empresa, y en concordancia con los principios generales establecidos, la propuesta inicial comercial perderá su vigencia. La reanudación del servicio estará sujeta a una reformulación de la oferta comercial que reconozca los costos directos e indirectos derivados de la postergación, tales como la reposición, adquisición o sustitución de materiales y componentes afectados por deterioro o caducidad, así como los costos de renovación de acreditaciones, homologaciones e inducciones del personal y demás requisitos técnicos o administrativos exigidos para la operatividad del proyecto.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-secondary" id="btnGuardarCondiciones">Guardar datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php include ROOT . '/layout/theme.html'; ?>
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="./assets/js/ingenieria_form.js?v=1.3"></script>
+    <script src="./assets/js/ingenieria_form.js?v=1.6"></script>
 </body>
 </html>

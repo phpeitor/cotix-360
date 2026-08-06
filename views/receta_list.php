@@ -230,6 +230,7 @@ require_once ROOT . '/controller/check_session.php';
                 <div class="modal-footer border-0 pt-0">
                     <span class="text-muted me-auto" id="oferta-items-selected-count">0 items seleccionados</span>
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-warning" id="btn-ofertar-receta">Ofertar</button>
                     <button type="button" class="btn btn-success" id="btn-generar-oferta-excel">Generar Excel</button>
                     <button type="button" class="btn btn-info" id="btn-generar-oferta-pdf">Generar PDF</button>
                 </div>
@@ -240,7 +241,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
-    <script src="./assets/js/table-gridjs-receta.js?v=2.3"></script>
+    <script src="./assets/js/table-gridjs-receta.js?v=2.5"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

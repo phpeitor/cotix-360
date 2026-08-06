@@ -44,8 +44,8 @@ try {
     }
 
     $estado = strtolower((string)($rowReceta['estado'] ?? ''));
-    if (!in_array($estado, ['enviada', 'aprobada'], true)) {
-        throw new Exception('Solo se puede modificar recetas con estado Enviada o Aprobada');
+    if (!in_array($estado, ['enviada', 'ofertado', 'aprobada'], true)) {
+        throw new Exception('Solo se puede modificar recetas con estado Enviada, Ofertado o Aprobada');
     }
 
     $receta->begin();

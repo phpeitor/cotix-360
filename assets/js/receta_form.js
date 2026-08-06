@@ -761,7 +761,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function isTipoCambioEditable() {
-        return ["enviada", "aprobada"].includes(String(receta?.estado || "").toLowerCase());
+        return ["enviada", "ofertado", "aprobada"].includes(String(receta?.estado || "").toLowerCase());
     }
 
     function aplicarBloqueoPorEstado() {
@@ -784,7 +784,7 @@ document.addEventListener("DOMContentLoaded", () => {
             [btnGuardar, !editable, "Solo editable cuando el estado es Enviada"],
             [btnReloadPrecios, !editable || sincronizandoPrecios, sincronizandoPrecios ? "Sincronizando precios..." : "Solo disponible cuando el estado es Enviada"],
             [btnBuscar, !editable, "Solo disponible cuando el estado es Enviada"],
-            [btnEditTipoCambio, !tipoCambioEditable, "Solo editable cuando el estado es Enviada o Aprobada"],
+            [btnEditTipoCambio, !tipoCambioEditable, "Solo editable cuando el estado es Enviada, Ofertado o Aprobada"],
         ].forEach(([button, locked, title]) => setButtonLock(button, locked, title));
 
         if (btnInfoCategoriaModal) {
