@@ -81,6 +81,8 @@ class Receta {
                     correo,
                     celular,
                     motivo,
+                    descripcion,
+                    cantidad_items,
                     created_at,
                     updated_at
                 ) VALUES (
@@ -92,6 +94,8 @@ class Receta {
                     :correo,
                     :celular,
                     :motivo,
+                    :descripcion,
+                    :cantidad_items,
                     :created_at,
                     :updated_at
                 ) ON DUPLICATE KEY UPDATE
@@ -102,9 +106,12 @@ class Receta {
                     correo = VALUES(correo),
                     celular = VALUES(celular),
                     motivo = VALUES(motivo),
+                    descripcion = IF(:actualizar_datos_receta_desc = 1, VALUES(descripcion), descripcion),
+                    cantidad_items = IF(:actualizar_datos_receta_cant = 1, VALUES(cantidad_items), cantidad_items),
                     updated_at = VALUES(updated_at)";
 
         $stmt = $this->conn->prepare($sql);
+        $actualizarDatosReceta = array_key_exists('descripcion', $data) || array_key_exists('cantidad_items', $data);
         $stmt->bindValue(':id_receta', (int)($data['receta_id'] ?? 0), PDO::PARAM_INT);
         $stmt->bindValue(':razon_social_empresa', (string)($data['razon_social_empresa'] ?? ''));
         $stmt->bindValue(':direccion', (string)($data['direccion'] ?? ''));
@@ -113,6 +120,10 @@ class Receta {
         $stmt->bindValue(':correo', (string)($data['correo'] ?? ''));
         $stmt->bindValue(':celular', (string)($data['celular'] ?? ''));
         $stmt->bindValue(':motivo', (string)($data['motivo'] ?? ''));
+        $stmt->bindValue(':descripcion', (string)($data['descripcion'] ?? ''));
+        $stmt->bindValue(':cantidad_items', (int)($data['cantidad_items'] ?? 0), PDO::PARAM_INT);
+        $stmt->bindValue(':actualizar_datos_receta_desc', $actualizarDatosReceta ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':actualizar_datos_receta_cant', $actualizarDatosReceta ? 1 : 0, PDO::PARAM_INT);
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->bindValue(':updated_at', $this->nowLima);
 
@@ -130,6 +141,8 @@ class Receta {
                     correo,
                     celular,
                     motivo,
+                    descripcion,
+                    cantidad_items,
                     tiempo_entrega,
                     condiciones_pago,
                     vendedor,
@@ -147,6 +160,8 @@ class Receta {
                     '',
                     '',
                     '',
+                    '',
+                    0,
                     :tiempo_entrega,
                     :condiciones_pago,
                     :vendedor,
@@ -357,6 +372,8 @@ class Receta {
                         rc.correo AS cliente_correo,
                         rc.celular AS cliente_celular,
                         rc.motivo AS cliente_motivo,
+                        rc.descripcion AS cliente_descripcion,
+                        rc.cantidad_items AS cliente_cantidad_items,
                         rc.tiempo_entrega AS cliente_tiempo_entrega,
                         rc.condiciones_pago AS cliente_condiciones_pago,
                          rc.vendedor AS cliente_vendedor,
@@ -648,9 +665,11 @@ class Receta {
                        rc.ruc AS cliente_ruc,
                        rc.nombre_completo AS cliente_nombre_completo,
                        rc.correo AS cliente_correo,
-                       rc.celular AS cliente_celular,
-                       rc.motivo AS cliente_motivo,
-                       rc.tiempo_entrega AS cliente_tiempo_entrega,
+                        rc.celular AS cliente_celular,
+                        rc.motivo AS cliente_motivo,
+                        rc.descripcion AS cliente_descripcion,
+                        rc.cantidad_items AS cliente_cantidad_items,
+                        rc.tiempo_entrega AS cliente_tiempo_entrega,
                        rc.condiciones_pago AS cliente_condiciones_pago,
                        rc.vendedor AS cliente_vendedor,
                        rc.vendedor_correo AS cliente_vendedor_correo,
@@ -803,6 +822,8 @@ class Receta {
                             correo,
                             celular,
                             motivo,
+                            descripcion,
+                            cantidad_items,
                             tiempo_entrega,
                             condiciones_pago,
                             vendedor,
@@ -820,6 +841,8 @@ class Receta {
                             correo,
                             celular,
                             motivo,
+                            descripcion,
+                            cantidad_items,
                             tiempo_entrega,
                             condiciones_pago,
                             vendedor,

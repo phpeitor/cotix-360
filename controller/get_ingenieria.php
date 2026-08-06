@@ -43,6 +43,8 @@ try {
             'correo' => $receta['cliente_correo'] ?? '',
             'celular' => $receta['cliente_celular'] ?? '',
             'motivo' => $receta['cliente_motivo'] ?? '',
+            'descripcion' => $receta['cliente_descripcion'] ?? '',
+            'cantidad_items' => $receta['cliente_cantidad_items'] ?? '',
         ];
     }
 

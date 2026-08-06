@@ -29,6 +29,8 @@ try {
         trim((string)($receta['cliente_razon_social_empresa'] ?? '')) !== ''
         || trim((string)($receta['cliente_ruc'] ?? '')) !== ''
         || trim((string)($receta['cliente_tiempo_entrega'] ?? '')) !== ''
+        || trim((string)($receta['cliente_descripcion'] ?? '')) !== ''
+        || (int)($receta['cliente_cantidad_items'] ?? 0) > 0
         || trim((string)($receta['cliente_condiciones_pago'] ?? '')) !== ''
         || trim((string)($receta['cliente_vendedor'] ?? '')) !== ''
         || trim((string)($receta['cliente_vendedor_correo'] ?? '')) !== ''
@@ -43,6 +45,8 @@ try {
             'correo' => $receta['cliente_correo'] ?? '',
             'celular' => $receta['cliente_celular'] ?? '',
             'motivo' => $receta['cliente_motivo'] ?? '',
+            'descripcion' => $receta['cliente_descripcion'] ?? '',
+            'cantidad_items' => $receta['cliente_cantidad_items'] ?? '',
             'tiempo_entrega' => $receta['cliente_tiempo_entrega'] ?? '',
             'condiciones_pago' => $receta['cliente_condiciones_pago'] ?? '',
             'vendedor' => $receta['cliente_vendedor'] ?? '',

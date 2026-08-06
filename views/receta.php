@@ -120,6 +120,16 @@ require_once ROOT . '/controller/check_session.php';
                                                 <input type="text" class="form-control" id="motivo_solicitud" name="motivo_solicitud" maxlength="200" required>
                                                 <div class="invalid-feedback">Ingresa el motivo o nombre de la solicitud.</div>
                                             </div>
+                                            <div class="col-lg-8 col-md-12">
+                                                <label class="form-label" for="descripcion_receta">Descripcion de la receta</label>
+                                                <textarea class="form-control" id="descripcion_receta" name="descripcion_receta" placeholder="Suministro de un Tablero Micro-Control  MG-C250GG, con características de gestión de grupos electrógenos marca Cummins, ejecución de lógica de operación entre grupos  con PCC 3.3 con función MLD (No aplica control con utilidad) aplicable para 4-5 grupos electrógenos, con protocolo de comunicación Modbus RTU" rows="5" maxlength="800" required></textarea>
+                                                <div class="invalid-feedback">Ingresa la descripcion de la receta.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-12">
+                                                <label class="form-label" for="cantidad_items_receta">Cantidad items</label>
+                                                <input type="number" class="form-control" id="cantidad_items_receta" name="cantidad_items_receta" min="1" max="5000" step="1" required>
+                                                <div class="invalid-feedback">Ingresa la cantidad de items.</div>
+                                            </div>
                                         </div>
                                         </div>
                                     </div>
@@ -329,7 +339,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js"></script>
-    <script src="./assets/js/form-receta.js?v=1.5"></script>
+    <script src="./assets/js/form-receta.js?v=1.6"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

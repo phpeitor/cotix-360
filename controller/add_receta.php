@@ -46,9 +46,15 @@ try {
     $correoContacto = trim((string)($_POST['correo_contacto'] ?? ''));
     $celularContacto = trim((string)($_POST['celular_contacto'] ?? ''));
     $motivoSolicitud = trim((string)($_POST['motivo_solicitud'] ?? ''));
+    $descripcionReceta = trim((string)($_POST['descripcion_receta'] ?? ''));
+    $cantidadItemsReceta = isset($_POST['cantidad_items_receta']) ? (int)$_POST['cantidad_items_receta'] : 0;
 
-    if ($razonSocialEmpresa === '' || $direccionCliente === '' || $rucCliente === '' || $nombreCompletoContacto === '' || $correoContacto === '' || $celularContacto === '' || $motivoSolicitud === '') {
-        throw new Exception('Completa los datos del cliente antes de guardar la receta');
+    if ($razonSocialEmpresa === '' || $direccionCliente === '' || $rucCliente === '' || $nombreCompletoContacto === '' || $correoContacto === '' || $celularContacto === '' || $motivoSolicitud === '' || $descripcionReceta === '') {
+        throw new Exception('Completa los datos del cliente y de la receta antes de guardar');
+    }
+
+    if ($cantidadItemsReceta < 1 || $cantidadItemsReceta > 5000) {
+        throw new Exception('La cantidad de items debe estar entre 1 y 5000');
     }
 
     if (!preg_match('/^[0-9]{11}$/', $rucCliente)) {
@@ -82,6 +88,8 @@ try {
         'correo' => $correoContacto,
         'celular' => $celularContacto,
         'motivo' => $motivoSolicitud,
+        'descripcion' => $descripcionReceta,
+        'cantidad_items' => $cantidadItemsReceta,
     ]);
 
     foreach ($items as $item) {
