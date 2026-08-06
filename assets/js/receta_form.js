@@ -48,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const descripcionRecetaEl = document.getElementById("descripcionReceta");
     const cantidadItemsRecetaEl = document.getElementById("cantidadItemsReceta");
     const condicionesEconomicasDiasEl = document.getElementById("condicionesEconomicasDias");
+    const condicionesEconomicasVisibleEl = document.getElementById("condicionesEconomicasVisible");
 
     const baseSelect = document.getElementById("filterBase");
     const categoriaSelect = document.getElementById("categoria");
@@ -612,6 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (descripcionRecetaEl) descripcionRecetaEl.value = data.descripcion || "";
         if (cantidadItemsRecetaEl) cantidadItemsRecetaEl.value = data.cantidad_items || "";
         if (condicionesEconomicasDiasEl) condicionesEconomicasDiasEl.value = data.condiciones_economicas_dias || "";
+        if (condicionesEconomicasVisibleEl) condicionesEconomicasVisibleEl.checked = String(data.condiciones_economicas_visible || "0") === "1";
     }
 
     function getClienteModalPayload() {
@@ -636,6 +638,7 @@ document.addEventListener("DOMContentLoaded", () => {
             descripcion: String(descripcionRecetaEl?.value || "").trim(),
             cantidad_items: String(cantidadItemsRecetaEl?.value || "").replace(/\D/g, "").trim(),
             condiciones_economicas_dias: String(condicionesEconomicasDiasEl?.value || "").replace(/\D/g, "").trim(),
+            condiciones_economicas_visible: condicionesEconomicasVisibleEl?.checked ? "1" : "0",
         };
     }
 
@@ -664,6 +667,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fd.append("descripcion", payload.descripcion);
             fd.append("cantidad_items", payload.cantidad_items);
             fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
+            fd.append("condiciones_economicas_visible", payload.condiciones_economicas_visible);
 
             const res = await fetch("controller/upd_receta_condiciones.php", {
                 method: "POST",

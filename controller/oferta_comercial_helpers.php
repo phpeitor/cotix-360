@@ -140,9 +140,9 @@ function totalEnLetrasOfertaExcel(float $monto): string
     return mb_strtoupper(enteroEnLetrasOfertaExcel($entero), 'UTF-8') . ' Y ' . str_pad((string)$centimos, 2, '0', STR_PAD_LEFT) . '/100 DÓLARES';
 }
 
-function terminosCondicionesVentaOferta(): array
+function terminosCondicionesVentaOferta(int $condicionesEconomicasDias = 0, bool $mostrarCondicionesEconomicas = false): array
 {
-    return [
+    $terminos = [
         '1. Sobre la forma de entrega:',
         '1.1. La entrega de la mercancía se efectuará en los almacenes del cliente en Lima adjuntándose los manuales y hojas técnicas que correspondan a ésta cuando estos hayan sido solicitados por el cliente previamente. Puede convenirse con el cliente hacer entrega de la mercadería en las instalaciones de MG INDUSOL S.A.C.',
         '1.2. El transporte y seguro de la mercadería que será entregada al cliente, quedan a solicitud, cuenta, costo y riesgo del mismo (emitente de la orden de compra). En tal sentido, el cliente asume todos los riesgos; incluso, aquellos relacionados con circunstancias de fuerza mayor y/o casos fortuitos y/o hechos de responsabilidad del transportista y, además, asume los riesgos (incluidos daños y perjuicios) que pudiesen sufrir las mercaderías durante el transporte.',
@@ -180,4 +180,11 @@ function terminosCondicionesVentaOferta(): array
         '5.6. El plazo de garantía es fijo y no se prorrogará y consta expresamente en el Certificado De Garantía del Fabricante que MG INDUSOL S.A.C. entregará al cliente.',
         '5.7. La garantía otorgada por el fabricante se perderá si el cliente desarma o modifica cualquier mercadería o equipo sujeto a garantía o procede al montaje o instalación del equipo sin seguir las instrucciones de los manuales de instalación que son entregados con los equipos o que el cliente puede descargar de las páginas web de los fabricantes solicitándolos por escrito.',
     ];
+
+    if ($mostrarCondicionesEconomicas && $condicionesEconomicasDias > 0) {
+        $terminos[] = '6. Condiciones Económicas por Suspensión de Servicio:';
+        $terminos[] = '6.1. En caso de que el servicio sea pausado o suspendido por un periodo superior a ' . $condicionesEconomicasDias . ' días, debido a causas no imputables a nuestra empresa, y en concordancia con los principios generales establecidos, la propuesta inicial comercial perderá su vigencia. La reanudación del servicio estará sujeta a una reformulación de la oferta comercial que reconozca los costos directos e indirectos derivados de la postergación, tales como la reposición, adquisición o sustitución de materiales y componentes afectados por deterioro o caducidad, así como los costos de renovación de acreditaciones, homologaciones e inducciones del personal y demás requisitos técnicos o administrativos exigidos para la operatividad del proyecto.';
+    }
+
+    return $terminos;
 }

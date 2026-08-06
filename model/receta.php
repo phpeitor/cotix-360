@@ -149,6 +149,7 @@ class Receta {
                     vendedor_correo,
                     vendedor_telefono,
                     condiciones_economicas_dias,
+                    condiciones_economicas_visible,
                     created_at,
                     updated_at
                 ) VALUES (
@@ -168,6 +169,7 @@ class Receta {
                     :vendedor_correo,
                     :vendedor_telefono,
                     :condiciones_economicas_dias,
+                    :condiciones_economicas_visible,
                     :created_at,
                     :updated_at
                 ) ON DUPLICATE KEY UPDATE
@@ -179,6 +181,7 @@ class Receta {
                     descripcion = VALUES(descripcion),
                     cantidad_items = VALUES(cantidad_items),
                     condiciones_economicas_dias = VALUES(condiciones_economicas_dias),
+                    condiciones_economicas_visible = VALUES(condiciones_economicas_visible),
                     updated_at = VALUES(updated_at)";
 
         $stmt = $this->conn->prepare($sql);
@@ -191,6 +194,7 @@ class Receta {
         $stmt->bindValue(':descripcion', (string)($data['descripcion'] ?? ''));
         $stmt->bindValue(':cantidad_items', (int)($data['cantidad_items'] ?? 0), PDO::PARAM_INT);
         $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_economicas_dias'] ?? 0), PDO::PARAM_INT);
+        $stmt->bindValue(':condiciones_economicas_visible', (int)($data['condiciones_economicas_visible'] ?? 0), PDO::PARAM_INT);
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->bindValue(':updated_at', $this->nowLima);
 
@@ -383,7 +387,8 @@ class Receta {
                          rc.vendedor AS cliente_vendedor,
                          rc.vendedor_correo AS cliente_vendedor_correo,
                          rc.vendedor_telefono AS cliente_vendedor_telefono,
-                         rc.condiciones_economicas_dias AS cliente_condiciones_economicas_dias
+                          rc.condiciones_economicas_dias AS cliente_condiciones_economicas_dias,
+                          rc.condiciones_economicas_visible AS cliente_condiciones_economicas_visible
                 FROM recetas_ingenieria c
                 LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
                 LEFT JOIN personal p2 ON p2.IDPERSONAL = c.usuario_upd
@@ -679,7 +684,8 @@ class Receta {
                        rc.vendedor AS cliente_vendedor,
                        rc.vendedor_correo AS cliente_vendedor_correo,
                        rc.vendedor_telefono AS cliente_vendedor_telefono,
-                       rc.condiciones_economicas_dias AS cliente_condiciones_economicas_dias
+                        rc.condiciones_economicas_dias AS cliente_condiciones_economicas_dias,
+                        rc.condiciones_economicas_visible AS cliente_condiciones_economicas_visible
                 FROM recetas c
                 LEFT JOIN personal p on p.IDPERSONAL=c.usuario_id
                 LEFT JOIN personal p2 on p2.IDPERSONAL=c.usuario_upd
@@ -832,10 +838,11 @@ class Receta {
                             tiempo_entrega,
                             condiciones_pago,
                             vendedor,
-                            vendedor_correo,
-                            vendedor_telefono,
-                            condiciones_economicas_dias,
-                            created_at,
+                             vendedor_correo,
+                             vendedor_telefono,
+                             condiciones_economicas_dias,
+                             condiciones_economicas_visible,
+                             created_at,
                             updated_at
                        ) SELECT
                             :nuevo_id,
@@ -851,10 +858,11 @@ class Receta {
                             tiempo_entrega,
                             condiciones_pago,
                             vendedor,
-                            vendedor_correo,
-                            vendedor_telefono,
-                            condiciones_economicas_dias,
-                            :created_at,
+                             vendedor_correo,
+                             vendedor_telefono,
+                             condiciones_economicas_dias,
+                             condiciones_economicas_visible,
+                             :created_at,
                             :updated_at
                        FROM receta_cliente
                        WHERE id_receta = :receta_id";

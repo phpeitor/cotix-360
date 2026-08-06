@@ -434,11 +434,14 @@ try {
     $sheet->getStyle('A' . $row)->getFont()->setBold(true);
     $row++;
 
-    foreach (terminosCondicionesVentaOferta() as $termino) {
+    $condicionesEconomicasDias = (int)($receta['cliente_condiciones_economicas_dias'] ?? 0);
+    $condicionesEconomicasVisible = (int)($receta['cliente_condiciones_economicas_visible'] ?? 0) === 1;
+
+    foreach (terminosCondicionesVentaOferta($condicionesEconomicasDias, $condicionesEconomicasVisible) as $termino) {
         $sheet->mergeCells('A' . $row . ':L' . $row);
         $sheet->setCellValue('A' . $row, $termino);
 
-        $isTitle = (bool)preg_match('/^\d+\.\s+Sobre\s+/u', $termino);
+        $isTitle = (bool)preg_match('/^\d+\.\s+(Sobre|Condiciones)\s+/u', $termino);
         $height = $isTitle ? 18 : max(22, min(76, (int)ceil(mb_strlen($termino, 'UTF-8') / 120) * 16));
         $sheet->getRowDimension($row)->setRowHeight($height);
 

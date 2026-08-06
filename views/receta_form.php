@@ -482,7 +482,13 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
                         </div>
                         <div class="col-12">
                             <div class="commercial-conditions-box">
-                                <div class="commercial-conditions-title">Condiciones Económicas por Suspensión de Servicio:</div>
+                                <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2">
+                                    <div class="commercial-conditions-title mb-0">Condiciones Económicas por Suspensión de Servicio:</div>
+                                    <div class="form-check form-switch mb-0">
+                                        <input class="form-check-input" type="checkbox" id="condicionesEconomicasVisible">
+                                        <label class="form-check-label" for="condicionesEconomicasVisible">Mostrar en oferta</label>
+                                    </div>
+                                </div>
                                 <p class="commercial-conditions-text">
                                     En caso de que el servicio sea pausado o suspendido por un periodo superior a
                                     <span class="commercial-days-input">
@@ -509,7 +515,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js"></script>
-    <script src="./assets/js/receta_form.js?v=2.2"></script>
+    <script src="./assets/js/receta_form.js?v=2.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

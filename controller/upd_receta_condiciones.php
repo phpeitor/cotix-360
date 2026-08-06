@@ -30,6 +30,7 @@ try {
     $descripcion = trim((string)($_POST['descripcion'] ?? ''));
     $cantidadItems = isset($_POST['cantidad_items']) ? (int)$_POST['cantidad_items'] : 0;
     $condicionesEconomicasDias = isset($_POST['condiciones_economicas_dias']) ? (int)$_POST['condiciones_economicas_dias'] : 0;
+    $condicionesEconomicasVisible = isset($_POST['condiciones_economicas_visible']) ? (int)$_POST['condiciones_economicas_visible'] : 0;
 
     if ($recetaId <= 0) {
         throw new Exception('Receta inválida');
@@ -54,6 +55,7 @@ try {
         'descripcion' => $descripcion,
         'cantidad_items' => $cantidadItems,
         'condiciones_economicas_dias' => $condicionesEconomicasDias,
+        'condiciones_economicas_visible' => $condicionesEconomicasVisible === 1 ? 1 : 0,
     ]);
 
     if (!$ok) {
@@ -71,6 +73,7 @@ try {
             'descripcion' => $descripcion,
             'cantidad_items' => $cantidadItems,
             'condiciones_economicas_dias' => $condicionesEconomicasDias,
+            'condiciones_economicas_visible' => $condicionesEconomicasVisible === 1 ? 1 : 0,
         ]
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
