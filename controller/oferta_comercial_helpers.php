@@ -103,6 +103,80 @@ function detalleTieneSubcatOfertaExcel(array $subcatsPresentes, array $subcatsBu
     return false;
 }
 
+function subcatsPresentesOfertaExcel(array $detalle): array
+{
+    $subcatsPresentes = [];
+
+    foreach ($detalle as $item) {
+        $subcatNormalizada = normalizarSubcatOfertaExcel($item['sub_cat_1'] ?? '');
+        if ($subcatNormalizada !== '') {
+            $subcatsPresentes[$subcatNormalizada] = true;
+        }
+    }
+
+    return $subcatsPresentes;
+}
+
+function seccionesCondicionalesOfertaExcel(array $detalle): array
+{
+    $subcatsPresentes = subcatsPresentesOfertaExcel($detalle);
+    $secciones = [];
+
+    if (detalleTieneSubcatOfertaExcel($subcatsPresentes, ['PERNERIA', 'CONSUMIBLE', 'EMBALAJE'])) {
+        $secciones[] = [
+            'titulo' => 'PERNERIA, SOPORTES, ACCESORIOS Y EMBALAJE',
+            'contenido' => "* Conjunto de pernería y soporteria estructural, compuesto por pernos, tuercas, arandelas planas y de presión, espárragos, rieles y soportes metálicos, fabricados en acero galvanizado para garantizar resistencia mecánica y protección contra la corrosión.\n\n" .
+                "* Consumibles para ensamblaje, comprendiendo todos los materiales menores necesarios para la correcta instalación y conexionado de los componentes internos. Esto incluye terminales de compresión, punteras, tubos termoencogibles, cintas, bridas plásticas, marcadores, asegurando una conexión segura, duradera y correctamente identificada de los conductores y equipos del tablero.\n\n" .
+                "* Embalaje estándar para tablero. incluye film plástico, esquineros de cartón y base de madera, garantizando protección contra polvo, humedad y golpes durante transporte y manejo.",
+            'altura_excel' => 180,
+        ];
+    }
+
+    if (detalleTieneSubcatOfertaExcel($subcatsPresentes, ['TRABAJADOR'])) {
+        $secciones[] = [
+            'titulo' => 'SERVICIOS DE INGENIERÍA Y PRUEBAS',
+            'contenido' => "El alcance de los servicios comprende la ejecución de trabajos de ingeniería de detalle, configuración y/o programación FAT, pruebas de aceptación en fábrica FAT, como se detalla a continuación\n\n" .
+                "Pruebas FAT-Factory Acceptance Test Comprenden las siguientes actividades según apliquen para cada producto:-Timbrado de las tablas de conexión.-Amarillado sobre los planos esquemáticos.-Energización de todos los equipos de control, protección y medida.-Prueba de medición de continuidad y Megado-Pruebas de mandos de equipos de maniobra.-Parametrización básica de los equipos-Pruebas de verificación de lecturas en equipos-Elaboración de protocolos de prueba",
+            'altura_excel' => 132,
+        ];
+    }
+
+    if (detalleTieneSubcatOfertaExcel($subcatsPresentes, ['INGENIERIA AL DETALLE'])) {
+        $secciones[] = [
+            'titulo' => 'INGENIERÍA DE DETALLE',
+            'contenido' => "Planos mecánicos de distribución de equipos.\n" .
+                "Fichas de conexionado interno.\n" .
+                "Planos / Esquemas eléctrico del Tablero\n" .
+                "Planos unifilares\n" .
+                "Planos mecánicos de distribución de equipos\n" .
+                "Hojas técnicas del tablero.\n" .
+                "Lista de señales de entrada y salida (de ser el caso)\n" .
+                "Plano de integración entre tablero, grupos y celdas del cliente. Indicando lista de cables a utilizar para el cableado externo.\n" .
+                "Protocolos de pruebas\n" .
+                "Filosofía de control\n" .
+                "Plano de arquitectura de tablero",
+            'altura_excel' => 132,
+        ];
+    }
+
+    if (detalleTieneSubcatOfertaExcel($subcatsPresentes, ['DOCUMENTACION DE CALIDAD'])) {
+        $secciones[] = [
+            'titulo' => 'CALIDAD',
+            'contenido' => "Procedimiento de fabricación.\n" .
+                "Hojas técnicas del tablero.\n" .
+                "Plan de Puntos de Inspección (PPI)\n" .
+                "Plan y formatos de control de calidad\n" .
+                "Certificados de control de calidad\n" .
+                "Fichas técnicas\n" .
+                "Demás documentos a requerir según la lista de entregables.\n" .
+                "Dossier de Calidad",
+            'altura_excel' => 112,
+        ];
+    }
+
+    return $secciones;
+}
+
 function enteroEnLetrasOfertaExcel(int $numero): string
 {
     $unidades = ['', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];

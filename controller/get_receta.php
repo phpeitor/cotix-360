@@ -23,6 +23,7 @@ try {
 
     $detalle = $recetaModel->obtenerDetallePorHash($hash);
     $cambiosPrecio = $recetaModel->obtenerCambiosPrecio((int)$receta['id']);
+    $categorias = $recetaModel->obtenerCategoriasParaEdicion((int)$receta['id']);
 
     $cliente = null;
     if (
@@ -61,6 +62,7 @@ try {
     echo json_encode([
         'receta' => $receta,
         'detalle' => $detalle,
+        'categorias' => $categorias,
         'cambios_precio' => $cambiosPrecio,
         'cliente' => $cliente
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

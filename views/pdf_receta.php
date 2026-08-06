@@ -64,13 +64,6 @@ function columnasOfertaSubcatPdf(array $ofertaGroupCols, string $subcat): array 
     return ['descripcion', 'marca'];
 }
 
-function agregarSeccionOfertaPdf(array &$secciones, string $titulo, string $contenido): void {
-    $secciones[] = [
-        'titulo' => $titulo,
-        'contenido' => $contenido,
-    ];
-}
-
 /*ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -207,13 +200,7 @@ if ($esOferta && !empty($ofertaItemIds)) {
     }));
 }
 $detalleOfertaAgrupado = $esOferta ? agruparOfertaExcel($detalleOfertaVisible) : [];
-$subcatsPresentesOferta = [];
-foreach ($detalleOfertaVisible as $itemOferta) {
-    $subcatNormalizadaOferta = normalizarSubcatOfertaExcel($itemOferta['sub_cat_1'] ?? '');
-    if ($subcatNormalizadaOferta !== '') {
-        $subcatsPresentesOferta[$subcatNormalizadaOferta] = true;
-    }
-}
+$seccionesCondicionalesOferta = $esOferta ? seccionesCondicionalesOfertaExcel($detalleOfertaVisible) : [];
 ob_start();
 ?>
 <!doctype html>
@@ -401,23 +388,6 @@ ob_start();
             $tiempoEntregaTextoOferta = $tiempoEntregaDiasOferta > 0 ? $tiempoEntregaDiasOferta . ' días' : 'TIEMPO DE ENTREGA';
             $descripcionRecetaOferta = textoOfertaExcel($receta['cliente_descripcion'] ?? '');
             $cantidadItemsOferta = (int)($receta['cliente_cantidad_items'] ?? 0);
-            $seccionesOfertaPdf = [];
-
-            if (detalleTieneSubcatOfertaExcel($subcatsPresentesOferta, ['PERNERIA', 'CONSUMIBLE', 'EMBALAJE'])) {
-                agregarSeccionOfertaPdf($seccionesOfertaPdf, 'PERNERIA, SOPORTES, ACCESORIOS Y EMBALAJE', "* Conjunto de pernería y soporteria estructural, compuesto por pernos, tuercas, arandelas planas y de presión, espárragos, rieles y soportes metálicos, fabricados en acero galvanizado para garantizar resistencia mecánica y protección contra la corrosión.\n\n* Consumibles para ensamblaje, comprendiendo todos los materiales menores necesarios para la correcta instalación y conexionado de los componentes internos. Esto incluye terminales de compresión, punteras, tubos termoencogibles, cintas, bridas plásticas, marcadores, asegurando una conexión segura, duradera y correctamente identificada de los conductores y equipos del tablero.\n\n* Embalaje estándar para tablero. incluye film plástico, esquineros de cartón y base de madera, garantizando protección contra polvo, humedad y golpes durante transporte y manejo.");
-            }
-
-            if (detalleTieneSubcatOfertaExcel($subcatsPresentesOferta, ['TRABAJADOR'])) {
-                agregarSeccionOfertaPdf($seccionesOfertaPdf, 'SERVICIOS DE INGENIERÍA Y PRUEBAS', "El alcance de los servicios comprende la ejecución de trabajos de ingeniería de detalle, configuración y/o programación FAT, pruebas de aceptación en fábrica FAT, como se detalla a continuación\n\nPruebas FAT-Factory Acceptance Test Comprenden las siguientes actividades según apliquen para cada producto:-Timbrado de las tablas de conexión.-Amarillado sobre los planos esquemáticos.-Energización de todos los equipos de control, protección y medida.-Prueba de medición de continuidad y Megado-Pruebas de mandos de equipos de maniobra.-Parametrización básica de los equipos-Pruebas de verificación de lecturas en equipos-Elaboración de protocolos de prueba");
-            }
-
-            if (detalleTieneSubcatOfertaExcel($subcatsPresentesOferta, ['INGENIERIA AL DETALLE'])) {
-                agregarSeccionOfertaPdf($seccionesOfertaPdf, 'INGENIERÍA DE DETALLE', "Planos mecánicos de distribución de equipos.\nFichas de conexionado interno.\nPlanos / Esquemas eléctrico del Tablero\nPlanos unifilares\nPlanos mecánicos de distribución de equipos\nHojas técnicas del tablero.\nLista de señales de entrada y salida (de ser el caso)\nPlano de integración entre tablero, grupos y celdas del cliente. Indicando lista de cables a utilizar para el cableado externo.\nProtocolos de pruebas\nFilosofía de control\nPlano de arquitectura de tablero");
-            }
-
-            if (detalleTieneSubcatOfertaExcel($subcatsPresentesOferta, ['DOCUMENTACION DE CALIDAD'])) {
-                agregarSeccionOfertaPdf($seccionesOfertaPdf, 'CALIDAD', "Procedimiento de fabricación.\nHojas técnicas del tablero.\nPlan de Puntos de Inspección (PPI)\nPlan y formatos de control de calidad\nCertificados de control de calidad\nFichas técnicas\nDemás documentos a requerir según la lista de entregables.\nDossier de Calidad");
-            }
         ?>
         <table class="offer-excel-table">
             <thead>
@@ -461,7 +431,7 @@ ob_start();
                         </tr>
                     <?php endforeach; ?>
                 <?php endforeach; ?>
-                <?php foreach ($seccionesOfertaPdf as $seccionOfertaPdf): ?>
+                <?php foreach ($seccionesCondicionalesOferta as $seccionOfertaPdf): ?>
                     <tr class="offer-pdf-group-row">
                         <td colspan="5"><?= escaparPdf($seccionOfertaPdf['titulo']) ?></td>
                     </tr>

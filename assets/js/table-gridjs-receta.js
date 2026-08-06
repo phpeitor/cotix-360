@@ -425,6 +425,86 @@ document.addEventListener("DOMContentLoaded", () => {
         return groupCols;
     }
 
+    function validarDatosOferta(json, tipoDocumento) {
+        const cliente = json.cliente || {};
+        const campos = [
+            ["razon_social_empresa", "Razón social"],
+            ["direccion", "Dirección"],
+            ["ruc", "RUC"],
+            ["nombre_completo", "Contacto"],
+            ["correo", "Correo"],
+            ["celular", "Celular"],
+            ["motivo", "Motivo"],
+            ["tiempo_entrega", "Tiempo de entrega"],
+            ["condiciones_pago", "Condiciones de pago"],
+            ["vendedor", "Vendedor"],
+            ["vendedor_correo", "Email vendedor"],
+            ["vendedor_telefono", "Teléfono vendedor"],
+            ["condiciones_economicas_dias", "Días de suspensión"]
+        ];
+
+        const faltantes = campos
+            .filter(([key]) => String(cliente[key] ?? "").trim() === "")
+            .map(([, label]) => label);
+
+        if (faltantes.length) {
+            alertify.alert(
+                "Datos incompletos",
+                `Para emitir la oferta ${tipoDocumento} complete datos de cliente y comerciales:<br><br>${faltantes.map(campo => `- ${escapeHtml(campo)}`).join("<br>")}`
+            );
+            return false;
+        }
+
+        const itemsPrecioCero = (Array.isArray(json.detalle) ? json.detalle : []).filter(item => {
+            const precio = Number(String(item.precio ?? "0").replace(/,/g, "."));
+            return !Number.isFinite(precio) || precio <= 0;
+        });
+
+        if (itemsPrecioCero.length) {
+            const itemsHtml = itemsPrecioCero
+                .slice(0, 12)
+                .map(item => `- ${escapeHtml(item.nombre || item.modelo || "Item sin nombre")}`)
+                .join("<br>");
+            const extra = itemsPrecioCero.length > 12 ? `<br>... y ${itemsPrecioCero.length - 12} más` : "";
+
+            alertify.alert(
+                "Precios incompletos",
+                `Para emitir la oferta ${tipoDocumento}, todos los items deben tener precio mayor a 0.<br><br>${itemsHtml}${extra}`
+            );
+            return false;
+        }
+
+        const categorias = Array.isArray(json.categorias?.rows) ? json.categorias.rows : [];
+        if (!categorias.length) {
+            alertify.alert(
+                "Márgenes incompletos",
+                `Para emitir la oferta ${tipoDocumento}, primero registre los márgenes por categoría.`
+            );
+            return false;
+        }
+
+        const categoriasSinMargen = categorias.filter(categoria => {
+            const margen = Number(String(categoria.margen ?? "0").replace(/,/g, "."));
+            return !Number.isFinite(margen) || margen <= 0;
+        });
+
+        if (categoriasSinMargen.length) {
+            const categoriasHtml = categoriasSinMargen
+                .slice(0, 12)
+                .map(categoria => `- ${escapeHtml(categoria.sub_cat_1 || categoria.tipo || "Categoría sin nombre")}`)
+                .join("<br>");
+            const extra = categoriasSinMargen.length > 12 ? `<br>... y ${categoriasSinMargen.length - 12} más` : "";
+
+            alertify.alert(
+                "Márgenes incompletos",
+                `Para emitir la oferta ${tipoDocumento}, todas las categorías deben tener margen mayor a 0.<br><br>${categoriasHtml}${extra}`
+            );
+            return false;
+        }
+
+        return true;
+    }
+
     async function abrirOfertaPdfSeleccionada() {
         const selectedItems = Array.from(document.querySelectorAll(".oferta-item-check:checked"))
             .map(check => check.value)
@@ -776,32 +856,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                const cliente = json.cliente || {};
-                const campos = [
-                    ["razon_social_empresa", "Razón social"],
-                    ["direccion", "Dirección"],
-                    ["ruc", "RUC"],
-                    ["nombre_completo", "Contacto"],
-                    ["correo", "Correo"],
-                    ["celular", "Celular"],
-                    ["motivo", "Motivo"],
-                    ["tiempo_entrega", "Tiempo de entrega"],
-                    ["condiciones_pago", "Condiciones de pago"],
-                    ["vendedor", "Vendedor"],
-                    ["vendedor_correo", "Email vendedor"],
-                    ["vendedor_telefono", "Teléfono vendedor"],
-                    ["condiciones_economicas_dias", "Días de suspensión"]
-                ];
-
-                const faltantes = campos
-                    .filter(([key]) => String(cliente[key] ?? "").trim() === "")
-                    .map(([, label]) => label);
-
-                if (faltantes.length) {
-                    alertify.alert(
-                        "Datos incompletos",
-                        `Para emitir la oferta Excel complete datos de cliente y comerciales:<br><br>${faltantes.map(campo => `- ${escapeHtml(campo)}`).join("<br>")}`
-                    );
+                if (!validarDatosOferta(json, "Excel")) {
                     return;
                 }
 
@@ -838,32 +893,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const cliente = json.cliente || {};
-            const campos = [
-                ["razon_social_empresa", "Razón social"],
-                ["direccion", "Dirección"],
-                ["ruc", "RUC"],
-                ["nombre_completo", "Contacto"],
-                ["correo", "Correo"],
-                ["celular", "Celular"],
-                ["motivo", "Motivo"],
-                ["tiempo_entrega", "Tiempo de entrega"],
-                ["condiciones_pago", "Condiciones de pago"],
-                ["vendedor", "Vendedor"],
-                ["vendedor_correo", "Email vendedor"],
-                ["vendedor_telefono", "Teléfono vendedor"],
-                ["condiciones_economicas_dias", "Días de suspensión"]
-            ];
-
-            const faltantes = campos
-                .filter(([key]) => String(cliente[key] ?? "").trim() === "")
-                .map(([, label]) => label);
-
-            if (faltantes.length) {
-                alertify.alert(
-                    "Datos incompletos",
-                    `Para emitir la oferta PDF complete datos de cliente y comerciales:<br><br>${faltantes.map(campo => `- ${escapeHtml(campo)}`).join("<br>")}`
-                );
+            if (!validarDatosOferta(json, "PDF")) {
                 return;
             }
 
