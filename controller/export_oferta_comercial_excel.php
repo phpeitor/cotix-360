@@ -65,6 +65,25 @@ function agruparOfertaExcel(array $detalle): array
     return $grupos;
 }
 
+function totalOfertaConMargenExcel(array $categorias): float
+{
+    $total = 0.0;
+
+    foreach ($categorias as $categoria) {
+        $subtotal = (float)($categoria['subtotal'] ?? 0);
+        $margen = max(0, min(100, (float)($categoria['margen'] ?? 0)));
+        $margenDecimal = $margen / 100;
+
+        if ($subtotal <= 0 || $margenDecimal >= 1) {
+            continue;
+        }
+
+        $total += $subtotal / (1 - $margenDecimal);
+    }
+
+    return $total;
+}
+
 try {
     $hash = $_REQUEST['id'] ?? null;
     if (!$hash) {
@@ -104,6 +123,8 @@ try {
         }
     }
     $detalleAgrupado = agruparOfertaExcel($detalle);
+    $categoriasReceta = $recetaModel->obtenerCategoriasParaEdicion((int)$receta['id']);
+    $totalConMargenReceta = totalOfertaConMargenExcel($categoriasReceta['rows'] ?? []);
 
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
@@ -119,8 +140,8 @@ try {
             'E' => 22,
             'F' => 26,
             'G' => 8,
-            'H' => 12,
-            'I' => 3,
+            'H' => 18,
+            'I' => 4,
             'J' => 25,
             'K' => 13,
             'L' => 15,
@@ -132,6 +153,7 @@ try {
         $sheet->getRowDimension($row)->setRowHeight($row === 20 || $row === 21 ? 20 : 18);
     }
 
+    $spreadsheet->getDefaultStyle()->getFont()->setName('Consolas')->setSize(10);
     $sheet->getStyle('A1:L21')->getFont()->setName('Consolas')->setSize(10);
     $sheet->getStyle('A1:L21')->getAlignment()
         ->setVertical(Alignment::VERTICAL_CENTER)
@@ -161,7 +183,7 @@ try {
         $drawing->setCoordinates('A3');
         $drawing->setOffsetX(10);
         $drawing->setOffsetY(6);
-        $drawing->setWidth(230);
+        $drawing->setWidth(220);
         $drawing->setWorksheet($sheet);
     }
 
@@ -271,6 +293,23 @@ try {
     $itemNumber = 1;
     $tiempoEntregaDias = (int)preg_replace('/\D+/', '', (string)($receta['cliente_tiempo_entrega'] ?? ''));
     $tiempoEntregaTexto = $tiempoEntregaDias > 0 ? $tiempoEntregaDias . ' días' : 'TIEMPO DE ENTREGA';
+    $descripcionReceta = textoOfertaExcel($receta['cliente_descripcion'] ?? '');
+    $cantidadItemsReceta = (int)($receta['cliente_cantidad_items'] ?? 0);
+
+    $sheet->mergeCells('C' . $row . ':F' . $row);
+    $sheet->mergeCells('H' . $row . ':I' . $row);
+    $sheet->mergeCells('K' . $row . ':L' . $row);
+    $sheet->setCellValue('C' . $row, $descripcionReceta);
+    $sheet->setCellValue('H' . $row, $tiempoEntregaTexto);
+    $sheet->setCellValue('J' . $row, $cantidadItemsReceta > 0 ? $cantidadItemsReceta : '');
+    $sheet->setCellValue('K' . $row, $totalConMargenReceta);
+    $sheet->getStyle('K' . $row)->getNumberFormat()->setFormatCode('$ #,##0.00');
+    $sheet->getRowDimension($row)->setRowHeight(48);
+    $sheet->getStyle('A' . $row . ':L' . $row)->getAlignment()
+        ->setVertical(Alignment::VERTICAL_CENTER)
+        ->setWrapText(true);
+    $sheet->getStyle('C' . $row . ':L' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    $row++;
 
     foreach ($detalleAgrupado as $subcat => $itemsGrupo) {
         $sheet->mergeCells('A' . $row . ':L' . $row);
@@ -284,9 +323,8 @@ try {
             $nombre = textoOfertaExcel($item['nombre'] ?? 'SIN NOMBRE');
             $descripcion = textoOfertaExcel($item['descripcion'] ?? '');
             $marca = textoOfertaExcel($item['marca'] ?? '');
-            $cantidad = (int)($item['cantidad'] ?? 0);
             $descripcionCelda = $nombre;
-            $colsGrupo = $ofertaGroupCols[$subcat] ?? ['descripcion', 'marca'];
+            $colsGrupo = $ofertaGroupCols[$subcat] ?? [];
             $mostrarDescripcion = in_array('descripcion', $colsGrupo, true);
             $mostrarMarca = in_array('marca', $colsGrupo, true);
 
@@ -300,10 +338,7 @@ try {
             $sheet->setCellValue('A' . $row, str_pad((string)$itemNumber, 2, '0', STR_PAD_LEFT));
             $sheet->setCellValue('C' . $row, $descripcionCelda);
             $sheet->setCellValue('G' . $row, $mostrarMarca ? $marca : '');
-            $sheet->setCellValue('H' . $row, $tiempoEntregaTexto);
-            $sheet->setCellValue('J' . $row, $cantidad);
-            $sheet->setCellValue('K' . $row, 'TOTAL RECETA +MARGEN');
-            $sheet->getRowDimension($row)->setRowHeight(96);
+            $sheet->getRowDimension($row)->setRowHeight($mostrarDescripcion ? 44 : 28);
             $sheet->getStyle('A' . $row . ':L' . $row)->getAlignment()
                 ->setVertical(Alignment::VERTICAL_CENTER)
                 ->setWrapText(true);

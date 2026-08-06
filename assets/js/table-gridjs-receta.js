@@ -367,11 +367,11 @@ document.addEventListener("DOMContentLoaded", () => {
                             </div>
                             <div class="d-flex flex-wrap gap-3 align-items-center">
                                 <div class="form-check form-switch mb-0">
-                                    <input class="form-check-input oferta-grupo-col-check" type="checkbox" id="${groupId}-descripcion" data-subcat="${escapeHtml(subcat)}" value="descripcion" checked>
+                                    <input class="form-check-input oferta-grupo-col-check" type="checkbox" id="${groupId}-descripcion" data-subcat="${escapeHtml(subcat)}" value="descripcion">
                                     <label class="form-check-label" for="${groupId}-descripcion">Descripcion</label>
                                 </div>
                                 <div class="form-check form-switch mb-0">
-                                    <input class="form-check-input oferta-grupo-col-check" type="checkbox" id="${groupId}-marca" data-subcat="${escapeHtml(subcat)}" value="marca" checked>
+                                    <input class="form-check-input oferta-grupo-col-check" type="checkbox" id="${groupId}-marca" data-subcat="${escapeHtml(subcat)}" value="marca">
                                     <label class="form-check-label" for="${groupId}-marca">Marca</label>
                                 </div>
                                 <span class="badge bg-primary-subtle text-primary">${items.length} items</span>
@@ -384,7 +384,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     const inputId = `oferta-item-${itemId}`;
                     const descripcion = String(item.descripcion || "-").trim() || "-";
                     const marca = String(item.marca || "-").trim() || "-";
-                    const cantidad = String(item.cantidad || "0").trim() || "0";
 
                     html += `
                         <label class="list-group-item d-flex gap-3 align-items-start">
@@ -392,7 +391,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <span class="flex-grow-1">
                                 <span class="fw-semibold d-block">${escapeHtml(item.nombre || "SIN NOMBRE")}</span>
                                 <span class="text-muted small d-block">${escapeHtml(descripcion)}</span>
-                                <span class="text-muted small">Marca: ${escapeHtml(marca)} · Cant.: ${escapeHtml(cantidad)}</span>
+                                <span class="text-muted small">Marca: ${escapeHtml(marca)}</span>
                             </span>
                         </label>`;
                 });
