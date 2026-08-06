@@ -45,6 +45,13 @@ try {
             'motivo' => $receta['cliente_motivo'] ?? '',
             'descripcion' => $receta['cliente_descripcion'] ?? '',
             'cantidad_items' => $receta['cliente_cantidad_items'] ?? '',
+            'tiempo_entrega' => $receta['cliente_tiempo_entrega'] ?? '',
+            'condiciones_pago' => $receta['cliente_condiciones_pago'] ?? '',
+            'vendedor' => $receta['cliente_vendedor'] ?? '',
+            'vendedor_correo' => $receta['cliente_vendedor_correo'] ?? '',
+            'vendedor_telefono' => $receta['cliente_vendedor_telefono'] ?? '',
+            'condiciones_economicas_dias' => $receta['cliente_condiciones_economicas_dias'] ?? '',
+            'condiciones_economicas_visible' => $receta['cliente_condiciones_economicas_visible'] ?? 0,
         ];
     }
 
