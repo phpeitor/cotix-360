@@ -1,8 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById("filterDate");
+    const tableContainer = document.getElementById("table-gridjs");
     const today = new Date();
     const pastDate = new Date();
     pastDate.setDate(today.getDate() - 30);
+
+    function initTooltips() {
+        document.querySelectorAll('[data-bs-toggle="tooltip"], .btn-tooltip').forEach(el => {
+            if (!bootstrap.Tooltip.getInstance(el)) {
+                new bootstrap.Tooltip(el);
+            }
+        });
+    }
+
+    const observer = new MutationObserver(() => {
+        initTooltips();
+    });
+
+    observer.observe(tableContainer, {
+        childList: true,
+        subtree: true
+    });
 
     const formatISO = (d) => d.toISOString().split("T")[0];
     const formatFlatpickr = (d) =>
@@ -38,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 id: "estado",
                 name: "Estado",
                 width: "110px",
-                formatter: (cell) => gridjs.html(`<span class="badge badge-outline-success">${escapeHtml(cell || "GANADO")}</span>`)
+                formatter: (cell) => renderEstado(cell)
             },
             {
                 id: "items",
@@ -48,14 +66,26 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             { id: "total_items", name: "", hidden: true },
             { id: "created_at", name: "Fecha", width: "170px" },
+            { id: "historial_count", name: "", hidden: true },
             {
                 id: "acciones",
                 name: "Opciones",
-                width: "100px",
+                width: "140px",
                 sort: false,
                 formatter: (_, row) => {
                     const id = row?.cells?.[0]?.data;
+                    const estado = String(row?.cells?.[7]?.data ?? "");
+                    const historialCount = Number(row?.cells?.[11]?.data ?? 0);
                     const hashId = typeof md5 === "function" ? md5(String(id)) : String(id);
+                    const approveButton = estado !== "Aprobada" && historialCount > 0
+                        ? `<button type="button"
+                                   class="btn btn-soft-success btn-icon btn-sm rounded-circle ms-1"
+                                   data-aprobar-ingenieria="${escapeHtml(id)}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-title="Aprobar">
+                               <i class="ti ti-check"></i>
+                           </button>`
+                        : "";
 
                     return gridjs.html(`
                         <a href="ingenieria_form.php?id=${hashId}"
@@ -64,6 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
                            data-bs-title="Ver">
                             <i class="ti ti-eye"></i>
                         </a>
+                        ${approveButton}
                     `);
                 }
             }
@@ -79,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         sort: true,
         search: true
-    }).render(document.getElementById("table-gridjs"));
+    }).render(tableContainer);
 
     document.getElementById("btn_buscar").addEventListener("click", () => {
         grid.updateConfig({
@@ -92,6 +123,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.addEventListener("click", (e) => {
+        const approveBtn = e.target.closest("[data-aprobar-ingenieria]");
+        if (approveBtn) {
+            e.preventDefault();
+            aprobarIngenieria(approveBtn.dataset.aprobarIngenieria, approveBtn);
+            return;
+        }
+
         const btn = e.target.closest("[data-ingenieria-items-toggle]");
         if (!btn) return;
 
@@ -116,6 +154,47 @@ document.addEventListener("DOMContentLoaded", () => {
         return "controller/table_ingenieria.php?" + new URLSearchParams({ fec_ini, fec_fin });
     }
 
+    function aprobarIngenieria(id, button) {
+        if (!id) return;
+
+        alertify.confirm(
+            "Aprobar ingeniería",
+            "La ingeniería se aprobará y se enviará a compras. ¿Desea continuar?",
+            () => {
+                button.disabled = true;
+                const formData = new FormData();
+                formData.append("id", id);
+
+                fetch("controller/aprobar_ingenieria.php", {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(async response => {
+                        const data = await response.json().catch(() => ({}));
+                        if (!response.ok || data.success === false) {
+                            throw new Error(data.message || "No se pudo aprobar la ingeniería");
+                        }
+                        return data;
+                    })
+                    .then(() => {
+                        alertify.success("Ingeniería aprobada y enviada a compras");
+                        grid.updateConfig({
+                            server: {
+                                url: buildUrl(),
+                                method: "GET",
+                                then: res => res.data
+                            }
+                        }).forceRender();
+                    })
+                    .catch(error => {
+                        button.disabled = false;
+                        alertify.error(error.message || "No se pudo aprobar la ingeniería");
+                    });
+            },
+            () => {}
+        );
+    }
+
     function escapeHtml(value) {
         return String(value ?? "")
             .replace(/&/g, "&amp;")
@@ -123,6 +202,17 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#39;");
+    }
+
+    function renderEstado(value) {
+        const estado = String(value || "GANADO").trim();
+        const badgeClass = estado === "Aprobada"
+            ? "badge-outline-success"
+            : estado === "GANADO"
+                ? "badge-outline-info"
+                : "badge-outline-primary";
+
+        return gridjs.html(`<span class="badge ${badgeClass}">${escapeHtml(estado)}</span>`);
     }
 
     function renderRecetaCliente(nombre, row) {

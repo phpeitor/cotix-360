@@ -1,0 +1,40 @@
+CREATE TABLE IF NOT EXISTS receta_compras (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    ingenieria_id BIGINT UNSIGNED NOT NULL,
+    id_receta_duplicada INT NULL DEFAULT NULL,
+    usuario_id BIGINT UNSIGNED NOT NULL,
+    estado ENUM('Pendiente','Aprobada','Anulada') NULL DEFAULT 'Pendiente',
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    usuario_upd INT NULL DEFAULT NULL,
+    tipo_cambio DECIMAL(7,3) NULL DEFAULT NULL,
+    nombre VARCHAR(100) NULL DEFAULT NULL,
+    observacion VARCHAR(300) NOT NULL DEFAULT '',
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_receta_compras_ingenieria (ingenieria_id),
+    KEY idx_receta_compras_origen (id_receta_duplicada),
+    KEY idx_receta_compras_estado (estado)
+);
+
+CREATE TABLE IF NOT EXISTS detalle_compras (
+    id INT NOT NULL AUTO_INCREMENT,
+    compra_id BIGINT UNSIGNED NOT NULL,
+    ingenieria_detalle_id INT NULL DEFAULT NULL,
+    item_id INT NULL DEFAULT NULL,
+    categoria VARCHAR(255) NULL DEFAULT NULL,
+    sub_cat_1 VARCHAR(255) NULL DEFAULT NULL,
+    sub_cat_2 VARCHAR(255) NULL DEFAULT NULL,
+    marca VARCHAR(255) NULL DEFAULT NULL,
+    modelo VARCHAR(255) NULL DEFAULT NULL,
+    nombre VARCHAR(255) NULL DEFAULT NULL,
+    descripcion VARCHAR(500) NULL DEFAULT NULL,
+    uni_medida VARCHAR(50) NULL DEFAULT NULL,
+    precio DECIMAL(15,2) NULL DEFAULT NULL,
+    moneda VARCHAR(20) NULL DEFAULT NULL,
+    tipo VARCHAR(50) NULL DEFAULT NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    cantidad INT NULL DEFAULT NULL,
+    PRIMARY KEY (id),
+    KEY idx_detalle_compras_compra (compra_id),
+    KEY idx_detalle_compras_item (item_id)
+);

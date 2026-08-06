@@ -322,6 +322,8 @@ class Receta {
 
     public function tableIngenieria(string $fec_ini, string $fec_fin): array
     {
+        $this->crearTablaHistorialIngenieria();
+
         $sql = "
             SELECT
                 c.id,
@@ -335,6 +337,7 @@ class Receta {
                 c.created_at,
                 c.updated_at,
                 COALESCE(SUM(cd.cantidad), 0) AS total_items,
+                COALESCE(h.historial_count, 0) AS historial_count,
                 GROUP_CONCAT(
                     CONCAT(cd.nombre, ' x ', COALESCE(cd.cantidad, 0))
                     ORDER BY cd.nombre
@@ -342,6 +345,11 @@ class Receta {
                 ) AS items
             FROM recetas_ingenieria c
             LEFT JOIN detalle_ingenieria cd ON cd.receta_id = c.id
+            LEFT JOIN (
+                SELECT ingenieria_id, COUNT(*) AS historial_count
+                FROM ingenieria_historial
+                GROUP BY ingenieria_id
+            ) h ON h.ingenieria_id = c.id
             LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
             LEFT JOIN personal p2 ON p2.IDPERSONAL = c.usuario_upd
             LEFT JOIN receta_cliente rc ON rc.id_receta = c.id_receta_duplicada
@@ -356,7 +364,8 @@ class Receta {
                 rc.razon_social_empresa,
                 c.estado,
                 c.created_at,
-                c.updated_at
+                c.updated_at,
+                h.historial_count
             ORDER BY c.id DESC
         ";
 
@@ -419,6 +428,131 @@ class Receta {
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function prepararTablasComprasIngenieria(): void
+    {
+        $this->crearTablaCompras();
+        $this->crearTablaHistorialIngenieria();
+    }
+
+    public function aprobarIngenieriaParaCompras(int $ingenieriaId, int $usuarioId): int
+    {
+        $stmtHistorial = $this->conn->prepare("SELECT COUNT(*) FROM ingenieria_historial WHERE ingenieria_id = :ingenieria_id");
+        $stmtHistorial->bindValue(':ingenieria_id', $ingenieriaId, PDO::PARAM_INT);
+        $stmtHistorial->execute();
+
+        if ((int)$stmtHistorial->fetchColumn() <= 0) {
+            throw new RuntimeException('No se puede aprobar ingeniería porque no tiene historial registrado');
+        }
+
+        $stmtIngenieria = $this->conn->prepare("SELECT * FROM recetas_ingenieria WHERE id = :id LIMIT 1");
+        $stmtIngenieria->bindValue(':id', $ingenieriaId, PDO::PARAM_INT);
+        $stmtIngenieria->execute();
+        $ingenieria = $stmtIngenieria->fetch(PDO::FETCH_ASSOC);
+
+        if (!$ingenieria) {
+            throw new RuntimeException('Ingeniería no encontrada');
+        }
+
+        if (($ingenieria['estado'] ?? '') !== 'Aprobada') {
+            $stmtEstado = $this->conn->prepare("UPDATE recetas_ingenieria
+                                                SET estado = 'Aprobada', updated_at = :updated_at, usuario_upd = :usuario_upd
+                                                WHERE id = :id");
+            $stmtEstado->bindValue(':updated_at', $this->nowLima);
+            $stmtEstado->bindValue(':usuario_upd', $usuarioId, PDO::PARAM_INT);
+            $stmtEstado->bindValue(':id', $ingenieriaId, PDO::PARAM_INT);
+            $stmtEstado->execute();
+        }
+
+        $stmtCompra = $this->conn->prepare("SELECT id FROM receta_compras WHERE ingenieria_id = :ingenieria_id LIMIT 1");
+        $stmtCompra->bindValue(':ingenieria_id', $ingenieriaId, PDO::PARAM_INT);
+        $stmtCompra->execute();
+        $compraId = (int)($stmtCompra->fetchColumn() ?: 0);
+
+        if ($compraId > 0) {
+            return $compraId;
+        }
+
+        $sqlCabecera = "INSERT INTO receta_compras (
+                            ingenieria_id,
+                            id_receta_duplicada,
+                            usuario_id,
+                            estado,
+                            created_at,
+                            updated_at,
+                            usuario_upd,
+                            tipo_cambio,
+                            nombre,
+                            observacion
+                        ) SELECT
+                            id,
+                            id_receta_duplicada,
+                            usuario_id,
+                            'Pendiente',
+                            :created_at,
+                            :updated_at,
+                            :usuario_upd,
+                            tipo_cambio,
+                            nombre,
+                            observacion
+                        FROM recetas_ingenieria
+                        WHERE id = :ingenieria_id";
+        $stmtCabecera = $this->conn->prepare($sqlCabecera);
+        $stmtCabecera->bindValue(':created_at', $this->nowLima);
+        $stmtCabecera->bindValue(':updated_at', $this->nowLima);
+        $stmtCabecera->bindValue(':usuario_upd', $usuarioId, PDO::PARAM_INT);
+        $stmtCabecera->bindValue(':ingenieria_id', $ingenieriaId, PDO::PARAM_INT);
+        $stmtCabecera->execute();
+
+        $compraId = (int)$this->conn->lastInsertId();
+        if ($compraId <= 0) {
+            throw new RuntimeException('No se pudo crear la receta de compras');
+        }
+
+        $sqlDetalle = "INSERT INTO detalle_compras (
+                           compra_id,
+                           ingenieria_detalle_id,
+                           item_id,
+                           categoria,
+                           sub_cat_1,
+                           sub_cat_2,
+                           marca,
+                           modelo,
+                           nombre,
+                           descripcion,
+                           uni_medida,
+                           precio,
+                           moneda,
+                           tipo,
+                           created_at,
+                           cantidad
+                       ) SELECT
+                           :compra_id,
+                           id,
+                           item_id,
+                           categoria,
+                           sub_cat_1,
+                           sub_cat_2,
+                           marca,
+                           modelo,
+                           nombre,
+                           descripcion,
+                           uni_medida,
+                           precio,
+                           moneda,
+                           tipo,
+                           :created_at,
+                           cantidad
+                       FROM detalle_ingenieria
+                       WHERE receta_id = :ingenieria_id";
+        $stmtDetalle = $this->conn->prepare($sqlDetalle);
+        $stmtDetalle->bindValue(':compra_id', $compraId, PDO::PARAM_INT);
+        $stmtDetalle->bindValue(':created_at', $this->nowLima);
+        $stmtDetalle->bindValue(':ingenieria_id', $ingenieriaId, PDO::PARAM_INT);
+        $stmtDetalle->execute();
+
+        return $compraId;
     }
 
     public function actualizarNombreIngenieria(string $hash, string $nombre): bool
@@ -618,6 +752,52 @@ class Receta {
                     KEY idx_ingenieria_historial_accion (accion)
                 )";
         $this->conn->exec($sql);
+    }
+
+    private function crearTablaCompras(): void
+    {
+        $sqlCabecera = "CREATE TABLE IF NOT EXISTS receta_compras (
+                            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                            ingenieria_id BIGINT UNSIGNED NOT NULL,
+                            id_receta_duplicada INT NULL DEFAULT NULL,
+                            usuario_id BIGINT UNSIGNED NOT NULL,
+                            estado ENUM('Pendiente','Aprobada','Anulada') NULL DEFAULT 'Pendiente',
+                            created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+                            updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                            usuario_upd INT NULL DEFAULT NULL,
+                            tipo_cambio DECIMAL(7,3) NULL DEFAULT NULL,
+                            nombre VARCHAR(100) NULL DEFAULT NULL,
+                            observacion VARCHAR(300) NOT NULL DEFAULT '',
+                            PRIMARY KEY (id),
+                            UNIQUE KEY uq_receta_compras_ingenieria (ingenieria_id),
+                            KEY idx_receta_compras_origen (id_receta_duplicada),
+                            KEY idx_receta_compras_estado (estado)
+                        )";
+        $this->conn->exec($sqlCabecera);
+
+        $sqlDetalle = "CREATE TABLE IF NOT EXISTS detalle_compras (
+                           id INT NOT NULL AUTO_INCREMENT,
+                           compra_id BIGINT UNSIGNED NOT NULL,
+                           ingenieria_detalle_id INT NULL DEFAULT NULL,
+                           item_id INT NULL DEFAULT NULL,
+                           categoria VARCHAR(255) NULL DEFAULT NULL,
+                           sub_cat_1 VARCHAR(255) NULL DEFAULT NULL,
+                           sub_cat_2 VARCHAR(255) NULL DEFAULT NULL,
+                           marca VARCHAR(255) NULL DEFAULT NULL,
+                           modelo VARCHAR(255) NULL DEFAULT NULL,
+                           nombre VARCHAR(255) NULL DEFAULT NULL,
+                           descripcion VARCHAR(500) NULL DEFAULT NULL,
+                           uni_medida VARCHAR(50) NULL DEFAULT NULL,
+                           precio DECIMAL(15,2) NULL DEFAULT NULL,
+                           moneda VARCHAR(20) NULL DEFAULT NULL,
+                           tipo VARCHAR(50) NULL DEFAULT NULL,
+                           created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+                           cantidad INT NULL DEFAULT NULL,
+                           PRIMARY KEY (id),
+                           KEY idx_detalle_compras_compra (compra_id),
+                           KEY idx_detalle_compras_item (item_id)
+                       )";
+        $this->conn->exec($sqlDetalle);
     }
 
     public function listarHistorialIngenieriaPorHash(string $hash, int $page = 1, int $perPage = 10): array
