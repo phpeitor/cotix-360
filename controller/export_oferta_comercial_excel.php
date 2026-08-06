@@ -84,6 +84,81 @@ function totalOfertaConMargenExcel(array $categorias): float
     return $total;
 }
 
+function normalizarSubcatOfertaExcel($value): string
+{
+    $text = mb_strtoupper(textoOfertaExcel($value), 'UTF-8');
+    return strtr($text, [
+        'Á' => 'A',
+        'É' => 'E',
+        'Í' => 'I',
+        'Ó' => 'O',
+        'Ú' => 'U',
+        'Ü' => 'U',
+        'Ñ' => 'N',
+    ]);
+}
+
+function detalleTieneSubcatOfertaExcel(array $subcatsPresentes, array $subcatsBuscadas): bool
+{
+    foreach ($subcatsBuscadas as $subcat) {
+        if (isset($subcatsPresentes[normalizarSubcatOfertaExcel($subcat)])) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function enteroEnLetrasOfertaExcel(int $numero): string
+{
+    $unidades = ['', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
+    $especiales = [10 => 'DIEZ', 11 => 'ONCE', 12 => 'DOCE', 13 => 'TRECE', 14 => 'CATORCE', 15 => 'QUINCE', 20 => 'VEINTE'];
+    $decenas = [2 => 'VEINTI', 3 => 'TREINTA', 4 => 'CUARENTA', 5 => 'CINCUENTA', 6 => 'SESENTA', 7 => 'SETENTA', 8 => 'OCHENTA', 9 => 'NOVENTA'];
+    $centenas = [1 => 'CIENTO', 2 => 'DOSCIENTOS', 3 => 'TRESCIENTOS', 4 => 'CUATROCIENTOS', 5 => 'QUINIENTOS', 6 => 'SEISCIENTOS', 7 => 'SETECIENTOS', 8 => 'OCHOCIENTOS', 9 => 'NOVECIENTOS'];
+
+    if ($numero === 0) return 'CERO';
+    if ($numero === 100) return 'CIEN';
+    if ($numero < 10) return $unidades[$numero];
+    if (isset($especiales[$numero])) return $especiales[$numero];
+    if ($numero < 20) return 'DIECI' . strtolower($unidades[$numero - 10]);
+    if ($numero < 30) return $numero === 20 ? 'VEINTE' : 'VEINTI' . strtolower($unidades[$numero - 20]);
+    if ($numero < 100) {
+        $decena = intdiv($numero, 10);
+        $unidad = $numero % 10;
+        return $decenas[$decena] . ($unidad > 0 ? ' Y ' . $unidades[$unidad] : '');
+    }
+    if ($numero < 1000) {
+        $centena = intdiv($numero, 100);
+        $resto = $numero % 100;
+        return $centenas[$centena] . ($resto > 0 ? ' ' . enteroEnLetrasOfertaExcel($resto) : '');
+    }
+    if ($numero < 1000000) {
+        $miles = intdiv($numero, 1000);
+        $resto = $numero % 1000;
+        $textoMiles = $miles === 1 ? 'MIL' : enteroEnLetrasOfertaExcel($miles) . ' MIL';
+        return $textoMiles . ($resto > 0 ? ' ' . enteroEnLetrasOfertaExcel($resto) : '');
+    }
+
+    $millones = intdiv($numero, 1000000);
+    $resto = $numero % 1000000;
+    $textoMillones = $millones === 1 ? 'UN MILLON' : enteroEnLetrasOfertaExcel($millones) . ' MILLONES';
+    return $textoMillones . ($resto > 0 ? ' ' . enteroEnLetrasOfertaExcel($resto) : '');
+}
+
+function totalEnLetrasOfertaExcel(float $monto): string
+{
+    $monto = round($monto, 2);
+    $entero = (int)floor($monto);
+    $centimos = (int)round(($monto - $entero) * 100);
+
+    if ($centimos === 100) {
+        $entero++;
+        $centimos = 0;
+    }
+
+    return mb_strtoupper(enteroEnLetrasOfertaExcel($entero), 'UTF-8') . ' Y ' . str_pad((string)$centimos, 2, '0', STR_PAD_LEFT) . '/100 DÓLARES';
+}
+
 try {
     $hash = $_REQUEST['id'] ?? null;
     if (!$hash) {
@@ -123,6 +198,13 @@ try {
         }
     }
     $detalleAgrupado = agruparOfertaExcel($detalle);
+    $subcatsPresentes = [];
+    foreach ($detalle as $item) {
+        $subcatNormalizada = normalizarSubcatOfertaExcel($item['sub_cat_1'] ?? '');
+        if ($subcatNormalizada !== '') {
+            $subcatsPresentes[$subcatNormalizada] = true;
+        }
+    }
     $categoriasReceta = $recetaModel->obtenerCategoriasParaEdicion((int)$receta['id']);
     $totalConMargenReceta = totalOfertaConMargenExcel($categoriasReceta['rows'] ?? []);
 
@@ -348,6 +430,146 @@ try {
             $row++;
         }
     }
+
+    $agregarSeccionOferta = function (string $titulo, string $contenido, int $altura = 96) use ($sheet, &$row): void {
+        $sheet->mergeCells('A' . $row . ':L' . $row);
+        $sheet->setCellValue('A' . $row, $titulo);
+        $sheet->getRowDimension($row)->setRowHeight(18);
+        $sheet->getStyle('A' . $row . ':L' . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFFF00');
+        $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $row++;
+
+        $sheet->mergeCells('C' . $row . ':G' . $row);
+        $sheet->mergeCells('K' . $row . ':L' . $row);
+        $sheet->setCellValue('C' . $row, $contenido);
+        $sheet->getRowDimension($row)->setRowHeight($altura);
+        $sheet->getStyle('A' . $row . ':L' . $row)->getAlignment()
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setWrapText(true);
+        $sheet->getStyle('C' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $row++;
+    };
+
+    if (detalleTieneSubcatOfertaExcel($subcatsPresentes, ['PERNERIA', 'CONSUMIBLE', 'EMBALAJE'])) {
+        $agregarSeccionOferta(
+            'PERNERIA, SOPORTES, ACCESORIOS Y EMBALAJE',
+            "* Conjunto de pernería y soporteria estructural, compuesto por pernos, tuercas, arandelas planas y de presión, espárragos, rieles y soportes metálicos, fabricados en acero galvanizado para garantizar resistencia mecánica y protección contra la corrosión.\n\n" .
+            "* Consumibles para ensamblaje, comprendiendo todos los materiales menores necesarios para la correcta instalación y conexionado de los componentes internos. Esto incluye terminales de compresión, punteras, tubos termoencogibles, cintas, bridas plásticas, marcadores, asegurando una conexión segura, duradera y correctamente identificada de los conductores y equipos del tablero.\n\n" .
+            "* Embalaje estándar para tablero. incluye film plástico, esquineros de cartón y base de madera, garantizando protección contra polvo, humedad y golpes durante transporte y manejo.",
+            180
+        );
+    }
+
+    if (detalleTieneSubcatOfertaExcel($subcatsPresentes, ['TRABAJADOR'])) {
+        $agregarSeccionOferta(
+            'SERVICIOS DE INGENIERÍA Y PRUEBAS',
+            "El alcance de los servicios comprende la ejecución de trabajos de ingeniería de detalle, configuración y/o programación FAT, pruebas de aceptación en fábrica FAT, como se detalla a continuación\n\n" .
+            "Pruebas FAT-Factory Acceptance Test Comprenden las siguientes actividades según apliquen para cada producto:-Timbrado de las tablas de conexión.-Amarillado sobre los planos esquemáticos.-Energización de todos los equipos de control, protección y medida.-Prueba de medición de continuidad y Megado-Pruebas de mandos de equipos de maniobra.-Parametrización básica de los equipos-Pruebas de verificación de lecturas en equipos-Elaboración de protocolos de prueba",
+            132
+        );
+    }
+
+    if (detalleTieneSubcatOfertaExcel($subcatsPresentes, ['INGENIERIA AL DETALLE'])) {
+        $agregarSeccionOferta(
+            'INGENIERÍA DE DETALLE',
+            "Planos mecánicos de distribución de equipos.\n" .
+            "Fichas de conexionado interno.\n" .
+            "Planos / Esquemas eléctrico del Tablero\n" .
+            "Planos unifilares\n" .
+            "Planos mecánicos de distribución de equipos\n" .
+            "Hojas técnicas del tablero.\n" .
+            "Lista de señales de entrada y salida (de ser el caso)\n" .
+            "Plano de integración entre tablero, grupos y celdas del cliente. Indicando lista de cables a utilizar para el cableado externo.\n" .
+            "Protocolos de pruebas\n" .
+            "Filosofía de control\n" .
+            "Plano de arquitectura de tablero",
+            132
+        );
+    }
+
+    if (detalleTieneSubcatOfertaExcel($subcatsPresentes, ['DOCUMENTACION DE CALIDAD'])) {
+        $agregarSeccionOferta(
+            'CALIDAD',
+            "Procedimiento de fabricación.\n" .
+            "Hojas técnicas del tablero.\n" .
+            "Plan de Puntos de Inspección (PPI)\n" .
+            "Plan y formatos de control de calidad\n" .
+            "Certificados de control de calidad\n" .
+            "Fichas técnicas\n" .
+            "Demás documentos a requerir según la lista de entregables.\n" .
+            "Dossier de Calidad",
+            112
+        );
+    }
+
+    $subtotalOferta = round($totalConMargenReceta, 2);
+    $igvOferta = round($subtotalOferta * 0.18, 2);
+    $totalOferta = round($subtotalOferta + $igvOferta, 2);
+
+    $sheet->mergeCells('A' . $row . ':G' . $row);
+    $sheet->setCellValue('A' . $row, 'Observaciones:');
+    $sheet->getRowDimension($row)->setRowHeight(18);
+    $sheet->getStyle('A' . $row . ':G' . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF92D050');
+    $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+    $row++;
+
+    $observacionesStartRow = $row;
+    $sheet->mergeCells('A' . $row . ':G' . ($row + 2));
+    $sheet->setCellValue('K' . $row, 'SUBTOTAL_1');
+    $sheet->setCellValue('L' . $row, $subtotalOferta);
+    $sheet->setCellValue('K' . ($row + 1), 'IGV 18%');
+    $sheet->setCellValue('L' . ($row + 1), $igvOferta);
+    $sheet->setCellValue('K' . ($row + 2), 'TOTAL US$');
+    $sheet->setCellValue('L' . ($row + 2), $totalOferta);
+    $sheet->getStyle('K' . $row . ':K' . ($row + 2))->getFont()->setBold(true);
+    $sheet->getStyle('L' . $row . ':L' . ($row + 2))->getNumberFormat()->setFormatCode('#,##0.00');
+    $sheet->getStyle('K' . $row . ':L' . ($row + 2))->applyFromArray($thinBorder);
+    $row += 3;
+
+    $sheet->setCellValue('A' . $row, 'SON:');
+    $sheet->mergeCells('B' . $row . ':G' . $row);
+    $sheet->setCellValue('B' . $row, totalEnLetrasOfertaExcel($totalOferta));
+    $row += 2;
+
+    $sheet->mergeCells('A' . $row . ':L' . $row);
+    $sheet->setCellValue('A' . $row, 'CONDICIONES COMERCIALES');
+    $sheet->getRowDimension($row)->setRowHeight(18);
+    $sheet->getStyle('A' . $row . ':L' . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF92D050');
+    $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+    $row++;
+
+    $condicionesPagoOferta = textoOfertaExcel($receta['cliente_condiciones_pago'] ?? '');
+    $condicionesRows = [
+        ['MONEDA', 'DOLARES AMERICANOS', ''],
+        ['PLAZO DE ENTREGA', 'Ver detalle columna Stock; puesta y confirmada OC. (Sujeto a venta previa o disponibilidad)', ''],
+        ['CONDICIONES DE PAGO', $condicionesPagoOferta !== '' ? $condicionesPagoOferta : 'Factura a 15 días.', ''],
+        ['FORMA DE PAGO', 'Abono en cuenta corriente US$ Dólares y/o cuenta corriente soles, según moneda cotizada.', ''],
+        ['CTA. CORRIENTE BCP', '193-2015964-1-81 / DOLARES', 'CCI 002-193-002015964181-18'],
+        ['CTA. CORRIENTE BCP', '193-2006583-0-14 / SOLES', 'CCI 002-193-002006583014-11'],
+        ['CTA. CORRIENTE BBVA', '0011-0194-0100112155-85 / DOLARES', 'CCI 011-194-000100112155-85'],
+        ['VALIDEZ DE COTIZACION', '30 días', ''],
+        ['LUGAR DE ENTREGA', 'Almacenes de MG INDUSOL SAC', ''],
+        ['Garantía de Producto', 'Según fabricante por defectos de fabricacion o diseño.', ''],
+        ['Garantía del Servicio', 'A convenir', ''],
+    ];
+
+    foreach ($condicionesRows as [$label, $value, $extra]) {
+        $sheet->setCellValue('A' . $row, $label);
+        $sheet->setCellValue('B' . $row, ':');
+        $sheet->mergeCells('C' . $row . ':G' . $row);
+        $sheet->setCellValue('C' . $row, $value);
+        if ($extra !== '') {
+            $sheet->mergeCells('H' . $row . ':L' . $row);
+            $sheet->setCellValue('H' . $row, $extra);
+        }
+        $row++;
+    }
+
+    $sheet->getStyle('A' . $observacionesStartRow . ':L' . ($row - 1))->getAlignment()
+        ->setVertical(Alignment::VERTICAL_CENTER)
+        ->setWrapText(true);
+    $sheet->getStyle('A' . $observacionesStartRow . ':L' . ($row - 1))->applyFromArray($thinBorder);
 
     $tableEndRow = max($row - 1, $tableHeaderRow);
     $sheet->getStyle('A' . $tableHeaderRow . ':L' . $tableEndRow)->applyFromArray($thinBorder);
