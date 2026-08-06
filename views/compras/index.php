@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../config/bootstrap.php';
 require_once ROOT . '/controller/check_session.php';
 ?>
 <!DOCTYPE html>
