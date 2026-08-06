@@ -302,38 +302,82 @@ ob_start();
             }
         }
     ?>
-    <table class="hero">
-        <tr>
-            <td class="hero-left">
-                <?php if ($logoDataUri): ?>
-                    <img src="<?= $logoDataUri ?>" alt="Logo" class="hero-logo" style="width: 45mm; height: auto;" />
-                <?php else: ?>
-                    <div style="width: 45mm; height: 13mm; background: #f0f0f0;"></div>
-                <?php endif; ?>
-            </td>
-            <td class="hero-right">
-                <?php if (!$esOferta): ?>
-                    <div class="title"><?= escaparPdf(trim($tituloDocumento) !== '' ? mb_strtoupper(trim($tituloDocumento), 'UTF-8') : 'RECETA') ?></div>
-                <?php endif; ?>
-            </td>
-        </tr>
-    </table>
-
-    <table class="panels">
-        <tr>
-            <td class="panel" style="padding-right: 6mm;">
-                <div class="panel-title">
-                    <?= $esOferta ? 'OFERTA ' . escaparPdf($numeroReceta) : 'RECETA' ?>
-                </div>
-                <?php if ($esOferta): ?>
-                    <?php if (!empty($clienteLineasOferta)): ?>
-                        <?php foreach ($clienteLineasOferta as $lineaOferta): ?>
-                            <p class="panel-line"><?= escaparPdf($lineaOferta) ?></p>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <p class="panel-line">Datos de cliente pendientes</p>
+    <?php if ($esOferta): ?>
+        <?php
+            $clienteHeaderRows = [
+                ['Cliente', textoOfertaExcel($receta['cliente_razon_social_empresa'] ?? '')],
+                ['Dirección', textoOfertaExcel($receta['cliente_direccion'] ?? '')],
+                ['Ruc', textoOfertaExcel($receta['cliente_ruc'] ?? '')],
+                ['Nombre', textoOfertaExcel($receta['cliente_nombre_completo'] ?? '')],
+                ['E-mail', textoOfertaExcel($receta['cliente_correo'] ?? '')],
+                ['Teléfonos', textoOfertaExcel($receta['cliente_celular'] ?? '')],
+                ['Motivo', textoOfertaExcel($receta['cliente_motivo'] ?? '')],
+            ];
+            $comercialHeaderRows = [
+                ['Empresa', 'MG INDUSTRIAL SOLUTIONS SAC-MG INDUSOL SAC'],
+                ['RUC', '20548328854'],
+                ['Dirección', 'Calle Brea y Pariñas N°102 , Ofic. 704,Piso 7'],
+                ['', 'Santiago de Surco'],
+                ['Vendedor', textoOfertaExcel($receta['cliente_vendedor'] ?? '')],
+                ['E-mail', textoOfertaExcel($receta['cliente_vendedor_correo'] ?? '')],
+                ['Teléfonos', '(01) 3048091, Cel. ' . textoOfertaExcel($receta['cliente_vendedor_telefono'] ?? '')],
+            ];
+        ?>
+        <table class="offer-header-table">
+            <tr>
+                <td rowspan="7" class="offer-logo-cell">
+                    <?php if ($logoDataUri): ?>
+                        <img src="<?= $logoDataUri ?>" alt="Logo" class="offer-logo" />
                     <?php endif; ?>
-                <?php else: ?>
+                </td>
+                <td colspan="3"><strong>MG INDUSTRIAL SOLUTION S.A.C.</strong></td>
+                <td colspan="3" class="offer-quote-title" rowspan="2">Cotización<br>N° <?= escaparPdf(numeroOfertaExcel($receta)) ?></td>
+            </tr>
+            <tr><td colspan="3"><strong>MG INDUSOL SAC</strong></td></tr>
+            <tr><td colspan="3"><strong>RUC:20548328854</strong></td><td colspan="3"></td></tr>
+            <tr><td colspan="3"><strong>Calle Brea y Pariñas 102, of 704, Stgo de Surco.</strong></td><td colspan="3"></td></tr>
+            <tr><td colspan="3"><strong>Central Telf. (01)3048091</strong></td><td colspan="3"></td></tr>
+            <tr><td colspan="3"><strong>E-mail: ventas@mgindusol.com /contacto@mgindusol.com</strong></td><td colspan="3"></td></tr>
+            <tr><td colspan="3"><strong>Página Web. www.mgindusol.com</strong></td><td colspan="3" class="center"><?= escaparPdf(fechaOfertaExcel($receta['updated_at'] ?? $receta['created_at'] ?? null)) ?></td></tr>
+            <tr><td colspan="7" class="offer-spacer"></td></tr>
+            <tr>
+                <td colspan="3" class="offer-header-title">Cotización realizada para:</td>
+                <td colspan="4" class="offer-header-title">Cotización realizada por:</td>
+            </tr>
+            <?php for ($idxHeader = 0; $idxHeader < 7; $idxHeader++): ?>
+                <tr>
+                    <td class="offer-label"><?= escaparPdf($clienteHeaderRows[$idxHeader][0]) ?></td>
+                    <td class="center">:</td>
+                    <td><?= escaparPdf($clienteHeaderRows[$idxHeader][1]) ?></td>
+                    <td class="offer-label"><?= escaparPdf($comercialHeaderRows[$idxHeader][0]) ?></td>
+                    <td class="center"><?= $comercialHeaderRows[$idxHeader][0] !== '' ? ':' : '' ?></td>
+                    <td colspan="2"><?= escaparPdf($comercialHeaderRows[$idxHeader][1]) ?></td>
+                </tr>
+            <?php endfor; ?>
+            <tr>
+                <td colspan="7" class="offer-intro">Estimado/a, en respuesta a su solicitud de cotización sobre los precios de los productos de nuestra compañía. A continuación le brindamos nuestra oferta:</td>
+            </tr>
+        </table>
+    <?php else: ?>
+        <table class="hero">
+            <tr>
+                <td class="hero-left">
+                    <?php if ($logoDataUri): ?>
+                        <img src="<?= $logoDataUri ?>" alt="Logo" class="hero-logo" style="width: 45mm; height: auto;" />
+                    <?php else: ?>
+                        <div style="width: 45mm; height: 13mm; background: #f0f0f0;"></div>
+                    <?php endif; ?>
+                </td>
+                <td class="hero-right">
+                    <div class="title"><?= escaparPdf(trim($tituloDocumento) !== '' ? mb_strtoupper(trim($tituloDocumento), 'UTF-8') : 'RECETA') ?></div>
+                </td>
+            </tr>
+        </table>
+
+        <table class="panels">
+            <tr>
+                <td class="panel" style="padding-right: 6mm;">
+                    <div class="panel-title">RECETA</div>
                     <div class="panel-name"><?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Sin responsable') ?></div>
                     <p class="panel-line">Usuario registro: <?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Desconocido') ?></p>
                     <p class="panel-line">Fecha creación: <?= escaparPdf($fechaReceta !== '' ? $fechaReceta : 'N/D') ?></p>
@@ -341,15 +385,15 @@ ob_start();
                     <?php if ($fechaAprobacion !== ''): ?>
                         <p class="panel-line">Fecha aprobación: <?= escaparPdf($fechaAprobacion) ?></p>
                     <?php endif; ?>
-                <?php endif; ?>
-            </td>
-            <td class="panel" style="padding-left: 6mm; text-align: right;">
-                <div class="panel-title">MG INDUSOL</div>
-                <p class="panel-line"><?= escaparPdf($empresaLinea1) ?></p>
-                <p class="panel-line"><?= escaparPdf($empresaLinea2) ?></p>
-            </td>
-        </tr>
-    </table>
+                </td>
+                <td class="panel" style="padding-left: 6mm; text-align: right;">
+                    <div class="panel-title">MG INDUSOL</div>
+                    <p class="panel-line"><?= escaparPdf($empresaLinea1) ?></p>
+                    <p class="panel-line"><?= escaparPdf($empresaLinea2) ?></p>
+                </td>
+            </tr>
+        </table>
+    <?php endif; ?>
 
     <?php if ($mostrarDetalle && $esOferta): ?>
         <?php
@@ -403,16 +447,14 @@ ob_start();
                             $descripcion = normalizarTextoDetallePdf($i['descripcion'] ?? '');
                             $marca = trim((string)($i['marca'] ?? ''));
                             $lineasItemOferta = [textoOfertaExcel($i['nombre'] ?? 'SIN NOMBRE')];
+                            $mostrarMarcaItemOferta = in_array('marca', $columnasSubcatOferta, true);
                             if (in_array('descripcion', $columnasSubcatOferta, true) && $descripcion !== '') {
                                 $lineasItemOferta[] = $descripcion;
-                            }
-                            if (in_array('marca', $columnasSubcatOferta, true) && $marca !== '') {
-                                $lineasItemOferta[] = 'Marca: ' . $marca;
                             }
                         ?>
                         <tr>
                             <td><?= nl2br(escaparPdf(implode("\n", $lineasItemOferta))) ?></td>
-                            <td></td>
+                            <td><?= $mostrarMarcaItemOferta ? escaparPdf($marca) : '' ?></td>
                             <td></td>
                             <td></td>
                             <td></td>

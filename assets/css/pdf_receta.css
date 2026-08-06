@@ -404,6 +404,58 @@ table {
     line-height: 1.25;
 }
 
+.offer-pdf .offer-header-table {
+    font-family: DejaVu Sans Mono, monospace;
+    font-size: 8.4px;
+    color: #000;
+    margin-top: 0;
+    margin-bottom: 3mm;
+}
+
+.offer-pdf .offer-header-table td {
+    border: 0.18mm solid #7f7f7f;
+    padding: 0.9mm 1mm;
+    vertical-align: middle;
+    line-height: 1.2;
+}
+
+.offer-pdf .offer-logo-cell {
+    width: 20%;
+    text-align: center;
+}
+
+.offer-pdf .offer-logo {
+    width: 36mm;
+    height: auto;
+}
+
+.offer-pdf .offer-quote-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 1.25;
+}
+
+.offer-pdf .offer-spacer {
+    height: 4mm;
+    padding: 0;
+}
+
+.offer-pdf .offer-header-title {
+    font-weight: bold;
+    border-top: 0.35mm solid #666;
+    border-bottom: 0.35mm solid #666;
+}
+
+.offer-pdf .offer-label {
+    width: 12%;
+    font-weight: bold;
+}
+
+.offer-pdf .offer-intro {
+    padding: 1.4mm 1mm;
+}
+
 .offer-pdf .section-table {
     margin-top: 2mm;
 }
