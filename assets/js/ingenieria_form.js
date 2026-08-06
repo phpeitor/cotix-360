@@ -34,6 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
         tipoCambio: document.getElementById("tipo_cambio_sunat"),
         tipoCambioInput: document.getElementById("tipo_cambio_input"),
         btnTipoCambio: document.getElementById("btnEditTipoCambio"),
+        btnBuscarItems: document.querySelector('[data-bs-target="#info-header-modal"]'),
+        btnGuardarIngenieria: document.getElementById("btnGuardarIngenieria"),
         clienteRuc: document.getElementById("clienteRuc"),
         clienteRazonSocial: document.getElementById("clienteRazonSocial"),
         clienteNombreCompleto: document.getElementById("clienteNombreCompleto"),
@@ -62,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const esCargoIngenieria = userCargo === 6;
     const HISTORIAL_PAGE_SIZE = 10;
     let historialPage = 1;
+    const cantidadTimers = new Map();
 
     if (!hash) {
         alertify.error("ID inválido");
@@ -118,7 +121,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const qtyBtn = event.target.closest("[data-qty-detalle]");
             if (qtyBtn) {
-                cambiarCantidad(Number(qtyBtn.dataset.qtyDetalle || 0), Number(qtyBtn.dataset.delta || 0));
+                const wrapper = qtyBtn.closest(".input-step");
+                const input = wrapper?.querySelector("[data-qty-input-detalle]");
+                const next = clampCantidad(Number(input?.value || 1) + Number(qtyBtn.dataset.delta || 0));
+                if (input) input.value = String(next);
+                cambiarCantidad(Number(qtyBtn.dataset.qtyDetalle || 0), next);
                 return;
             }
 
@@ -128,6 +135,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 const qtyInput = row?.querySelector(".qty-input, .item-cantidad");
                 agregarItem(Number(addBtn.dataset.addItem || 0), clampCantidad(qtyInput?.value || 1));
             }
+        });
+
+        document.addEventListener("input", event => {
+            const input = event.target.closest("[data-qty-input-detalle]");
+            if (!input) return;
+            if (Number(input.value) > MAX_CANTIDAD) input.value = String(MAX_CANTIDAD);
+            if (input.value === "") return;
+            cambiarCantidad(Number(input.dataset.qtyInputDetalle || 0), input.value);
+        });
+
+        document.addEventListener("change", event => {
+            const input = event.target.closest("[data-qty-input-detalle]");
+            if (!input) return;
+            input.value = String(clampCantidad(input.value));
+            cambiarCantidad(Number(input.dataset.qtyInputDetalle || 0), input.value);
+        });
+
+        document.addEventListener("keydown", event => {
+            const input = event.target.closest("[data-qty-input-detalle]");
+            if (!input || event.key !== "Enter") return;
+            event.preventDefault();
+            input.value = String(clampCantidad(input.value));
+            cambiarCantidad(Number(input.dataset.qtyInputDetalle || 0), input.value, true);
         });
     }
 
@@ -186,6 +216,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const parsed = Number.parseInt(String(value ?? "1"), 10);
         if (!Number.isFinite(parsed)) return 1;
         return Math.min(MAX_CANTIDAD, Math.max(1, parsed));
+    }
+
+    function isIngenieriaAprobada() {
+        return String(receta?.estado || "").trim().toLowerCase() === "aprobada";
+    }
+
+    function validarIngenieriaEditable() {
+        if (!isIngenieriaAprobada()) return true;
+        alertify.error("La ingeniería aprobada no permite modificar items");
+        return false;
     }
 
     function normalizarTextoDetalle(valor) {
@@ -333,6 +373,18 @@ document.addEventListener("DOMContentLoaded", () => {
         setText(fields.fecha, receta.created_at);
         setText(fields.tipoCambio, Number(receta.tipo_cambio || 0).toFixed(3));
 
+        if (fields.btnBuscarItems) {
+            fields.btnBuscarItems.disabled = isIngenieriaAprobada();
+            fields.btnBuscarItems.classList.toggle("disabled", isIngenieriaAprobada());
+            fields.btnBuscarItems.setAttribute("aria-disabled", isIngenieriaAprobada() ? "true" : "false");
+        }
+
+        if (fields.btnGuardarIngenieria) {
+            fields.btnGuardarIngenieria.disabled = isIngenieriaAprobada();
+            fields.btnGuardarIngenieria.classList.toggle("disabled", isIngenieriaAprobada());
+            fields.btnGuardarIngenieria.setAttribute("aria-disabled", isIngenieriaAprobada() ? "true" : "false");
+        }
+
         fields.clienteRuc.value = cliente?.ruc || "";
         fields.clienteRazonSocial.value = cliente?.razon_social_empresa || "";
         fields.clienteNombreCompleto.value = cliente?.nombre_completo || "";
@@ -423,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const tipoColor = tipo === "PRODUCTO" ? "text-success" : "text-info";
 
             return `
-                <tr>
+                <tr data-detalle-id="${item.id}">
                     <td>
                         <div class="d-flex align-items-center">
                             <div class="avatar-md flex-shrink-0 me-2">
@@ -450,9 +502,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                     <td class="text-center">
                         <div class="input-step border bg-body-secondary px-1 py-0 rounded-pill d-inline-flex align-items-center overflow-visible" style="height:30px;">
-                            <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:22px;min-width:22px;height:22px;" data-qty-detalle="${item.id}" data-delta="-1">-</button>
-                            <span class="text-dark text-center border-0 bg-body-secondary rounded h-100 fw-semibold d-inline-flex align-items-center justify-content-center" style="width:46px;font-size:12px;">${cantidad}</span>
-                            <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:22px;min-width:22px;height:22px;" data-qty-detalle="${item.id}" data-delta="1">+</button>
+                            <button type="button" class="minus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:22px;min-width:22px;height:22px;" data-qty-detalle="${item.id}" data-delta="-1" ${isIngenieriaAprobada() ? "disabled" : ""}>-</button>
+                            <input type="number" class="text-dark text-center border-0 bg-body-secondary rounded h-100 fw-semibold" style="width:46px;font-size:12px;" value="${cantidad}" min="1" max="${MAX_CANTIDAD}" step="1" inputmode="numeric" pattern="[0-9]*" data-qty-input-detalle="${item.id}" ${isIngenieriaAprobada() ? "disabled" : ""}>
+                            <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:22px;min-width:22px;height:22px;" data-qty-detalle="${item.id}" data-delta="1" ${isIngenieriaAprobada() ? "disabled" : ""}>+</button>
                         </div>
                     </td>
                     ${esCargoIngenieria ? "" : `
@@ -462,11 +514,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         </td>
                         <td class="text-end">
                             <span class="text-muted fs-12">${simbolo}</span>
-                            <h5 class="fs-14 mt-1 fw-normal mb-0">${money(total)}</h5>
+                            <h5 class="fs-14 mt-1 fw-normal mb-0 item-total-value">${money(total)}</h5>
                         </td>
                     `}
                     <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-danger" data-delete-detalle="${item.id}" data-bs-toggle="tooltip" data-bs-title="Eliminar">
+                        <button type="button" class="btn btn-sm btn-danger" data-delete-detalle="${item.id}" data-bs-toggle="tooltip" data-bs-title="Eliminar" ${isIngenieriaAprobada() ? "disabled" : ""}>
                             <i class="ti ti-trash"></i>
                         </button>
                     </td>
@@ -477,6 +529,45 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!detalle.length) {
             tbody.innerHTML = `<tr><td colspan="${esCargoIngenieria ? 5 : 7}" class="text-center text-muted py-4">Sin detalle registrado</td></tr>`;
         }
+
+        setText(fields.totalItem, String(totalItems));
+        setText(fields.totalSoles, money(totalSoles));
+        setText(fields.totalDolares, money(totalDolares));
+
+        const tipoCambio = Number(receta?.tipo_cambio) || 1;
+        const totalPE = totalSoles + (totalDolares * tipoCambio);
+        const totalPEDolares = tipoCambio > 0 ? totalPE / tipoCambio : 0;
+
+        setText(fields.totalPeru, money(totalPE));
+        setText(fields.totalPeruDolares, money(totalPEDolares));
+    }
+
+    function actualizarFilaCantidad(detalleId, cantidad) {
+        const row = tbody.querySelector(`tr[data-detalle-id="${CSS.escape(String(detalleId))}"]`);
+        if (!row) return;
+
+        const item = detalle.find(rowItem => Number(rowItem.id) === Number(detalleId));
+        if (!item) return;
+
+        const input = row.querySelector("[data-qty-input-detalle]");
+        if (input && document.activeElement !== input) input.value = String(cantidad);
+
+        const totalEl = row.querySelector(".item-total-value");
+        if (totalEl) totalEl.textContent = money(Number(item.precio || 0) * cantidad);
+    }
+
+    function actualizarTotalesDetalle() {
+        let totalSoles = 0;
+        let totalDolares = 0;
+        let totalItems = 0;
+
+        detalle.forEach(item => {
+            const cantidad = Number(item.cantidad || 0);
+            const total = cantidad * Number(item.precio || 0);
+            totalItems += cantidad;
+            if (String(item.moneda || "").toUpperCase() === "DOLLAR") totalDolares += total;
+            else totalSoles += total;
+        });
 
         setText(fields.totalItem, String(totalItems));
         setText(fields.totalSoles, money(totalSoles));
@@ -502,6 +593,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function guardarIngenieria() {
+        if (!validarIngenieriaEditable()) return;
         try {
             await post("controller/guardar_ingenieria.php", { hash });
             alertify.success("Receta ingeniería guardada");
@@ -583,6 +675,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function eliminarDetalle(detalleId) {
         if (!detalleId) return;
+        if (!validarIngenieriaEditable()) return;
         alertify.confirm("Eliminar", "¿Deseas eliminar este item?", async () => {
             try {
                 await post("controller/upd_ingenieria_detalle.php", { hash, accion: "eliminar", detalle_id: String(detalleId) });
@@ -595,22 +688,46 @@ document.addEventListener("DOMContentLoaded", () => {
         }, () => {});
     }
 
-    async function cambiarCantidad(detalleId, delta) {
+    function cambiarCantidad(detalleId, cantidad, guardarAhora = false) {
+        if (!validarIngenieriaEditable()) return;
         const item = detalle.find(row => Number(row.id) === detalleId);
         if (!item) return;
-        const next = Math.max(1, Number(item.cantidad || 1) + delta);
+
+        const next = clampCantidad(cantidad);
+        if (Number(item.cantidad || 0) === next) return;
+
+        item.cantidad = next;
+        actualizarFilaCantidad(detalleId, next);
+        actualizarTotalesDetalle();
+
+        if (cantidadTimers.has(detalleId)) {
+            clearTimeout(cantidadTimers.get(detalleId));
+        }
+
+        const guardar = () => guardarCantidad(detalleId, next);
+        if (guardarAhora) {
+            guardar();
+            return;
+        }
+
+        cantidadTimers.set(detalleId, setTimeout(guardar, 550));
+    }
+
+    async function guardarCantidad(detalleId, cantidad) {
+        cantidadTimers.delete(detalleId);
         try {
-            await post("controller/upd_ingenieria_detalle.php", { hash, accion: "cantidad", detalle_id: String(detalleId), cantidad: String(next) });
-            item.cantidad = next;
-            renderDetalle();
+            await post("controller/upd_ingenieria_detalle.php", { hash, accion: "cantidad", detalle_id: String(detalleId), cantidad: String(cantidad) });
             await cargarHistorialIngenieria(1);
         } catch (error) {
             alertify.error(error.message);
+            await loadIngenieria();
+            await cargarHistorialIngenieria(1);
         }
     }
 
     async function agregarItem(itemId, cantidad) {
         if (!itemId) return;
+        if (!validarIngenieriaEditable()) return;
 
         const existente = detalle.some(row => Number(row.item_id || row.id_item || 0) === Number(itemId));
         if (existente) {
@@ -788,7 +905,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     </td>
                     ${esCargoIngenieria ? "" : `<td class="text-end">${simbolo} ${money(item.precio)}</td>`}
-                    <td class="text-center"><button type="button" class="btn btn-sm btn-primary" data-add-item="${item.id}"><i class="ti ti-plus"></i></button></td>
+                    <td class="text-center"><button type="button" class="btn btn-sm btn-primary" data-add-item="${item.id}" ${isIngenieriaAprobada() ? "disabled" : ""}><i class="ti ti-plus"></i></button></td>
                 </tr>
             `;
         }).join("");

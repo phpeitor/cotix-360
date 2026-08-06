@@ -620,7 +620,7 @@ class Receta {
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':created_at', $this->nowLima);
-        $stmt->bindValue(':cantidad', max(1, $cantidad), PDO::PARAM_INT);
+        $stmt->bindValue(':cantidad', min(5000, max(1, $cantidad)), PDO::PARAM_INT);
         $stmt->bindValue(':item_id', $itemId, PDO::PARAM_INT);
         $stmt->bindValue(':hash', $hash);
         $stmt->execute();
@@ -650,7 +650,7 @@ class Receta {
                 WHERE MD5(r.id) = :hash
                   AND d.id = :detalle_id";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':cantidad', max(1, $cantidad), PDO::PARAM_INT);
+        $stmt->bindValue(':cantidad', min(5000, max(1, $cantidad)), PDO::PARAM_INT);
         $stmt->bindValue(':hash', $hash);
         $stmt->bindValue(':detalle_id', $detalleId, PDO::PARAM_INT);
         return $stmt->execute();

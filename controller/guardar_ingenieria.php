@@ -28,6 +28,9 @@ try {
     if (!$ingenieria) {
         throw new Exception('Receta de ingeniería no encontrada');
     }
+    if (strcasecmp(trim((string)($ingenieria['estado'] ?? '')), 'Aprobada') === 0) {
+        throw new Exception('La ingeniería aprobada no permite guardar cambios');
+    }
 
     $totalIngenieria = $receta->totalIngenieriaDolaresPorHash($hash);
     $totalOrigen = $receta->totalRecetaOrigenDolares((int)($ingenieria['id_receta_duplicada'] ?? 0));

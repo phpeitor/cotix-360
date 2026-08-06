@@ -146,7 +146,7 @@ $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
                                     </div>
                                 </div>
                                 <div class="card-footer border-0 text-end">
-                                    <button type="submit" class="btn btn-success btn-icon" data-bs-toggle="tooltip" data-bs-title="Guardar receta">
+                                    <button type="submit" class="btn btn-success btn-icon" id="btnGuardarIngenieria" data-bs-toggle="tooltip" data-bs-title="Guardar receta">
                                         <i class="ti ti-device-floppy"></i>
                                     </button>
                                 </div>
@@ -381,6 +381,6 @@ $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="./assets/js/ingenieria_form.js?v=1.6"></script>
+    <script src="./assets/js/ingenieria_form.js?v=1.9"></script>
 </body>
 </html>

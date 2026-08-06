@@ -30,6 +30,9 @@ try {
     if (!$ingenieria) {
         throw new Exception('Receta de ingeniería no encontrada');
     }
+    if (strcasecmp(trim((string)($ingenieria['estado'] ?? '')), 'Aprobada') === 0) {
+        throw new Exception('La ingeniería aprobada no permite modificar items');
+    }
     $usuarioId = (int)$_SESSION['session_id'];
     $receta->begin();
     $historial = null;
@@ -39,6 +42,9 @@ try {
         $cantidad = (int)($_POST['cantidad'] ?? 1);
         if ($itemId <= 0) {
             throw new Exception('Item inválido');
+        }
+        if ($cantidad < 1 || $cantidad > 5000) {
+            throw new Exception('La cantidad debe estar entre 1 y 5000');
         }
 
         $detalleActual = $receta->obtenerDetalleIngenieriaPorHash($hash);
@@ -62,6 +68,9 @@ try {
         $detalleId = (int)($_POST['detalle_id'] ?? 0);
         if ($detalleId <= 0) {
             throw new Exception('Detalle inválido');
+        }
+        if ($cantidad < 1 || $cantidad > 5000) {
+            throw new Exception('La cantidad debe estar entre 1 y 5000');
         }
         $detalleActual = $receta->obtenerDetalleIngenieriaPorHash($hash);
         $antes = [];
