@@ -7,6 +7,7 @@ use Dompdf\Dompdf;
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once ROOT . '/model/receta.php';
 require_once ROOT . '/model/item.php';
+require_once ROOT . '/controller/oferta_comercial_helpers.php';
 
 // Helpers para formateo y seguridad en el PDF
 function escaparPdf($value) {
@@ -55,36 +56,19 @@ function formatearRutaDetallePdf(array $partes) {
     return implode(' / ', $clean);
 }
 
-function agruparOfertaPorSubcat1Pdf(array $detalle): array {
-    $grupos = [
-        'PRODUCTO' => [],
-        'SERVICIO' => [],
+function columnasOfertaSubcatPdf(array $ofertaGroupCols, string $subcat): array {
+    if (array_key_exists($subcat, $ofertaGroupCols)) {
+        return array_values(array_intersect($ofertaGroupCols[$subcat], ['descripcion', 'marca']));
+    }
+
+    return ['descripcion', 'marca'];
+}
+
+function agregarSeccionOfertaPdf(array &$secciones, string $titulo, string $contenido): void {
+    $secciones[] = [
+        'titulo' => $titulo,
+        'contenido' => $contenido,
     ];
-
-    foreach ($detalle as $item) {
-        $tipo = strtoupper(trim((string)($item['tipo'] ?? '')));
-        $tipo = $tipo === 'PRODUCTO' ? 'PRODUCTO' : 'SERVICIO';
-        $subcat = trim((string)($item['sub_cat_1'] ?? ''));
-        $subcat = $subcat !== '' ? $subcat : 'Sin subcategoria';
-
-        if (!isset($grupos[$tipo][$subcat])) {
-            $grupos[$tipo][$subcat] = [];
-        }
-
-        $grupos[$tipo][$subcat][] = $item;
-    }
-
-    foreach ($grupos as &$tipoGrupos) {
-        foreach ($tipoGrupos as &$itemsGrupo) {
-            usort($itemsGrupo, function ($a, $b) {
-                return strcasecmp((string)($a['nombre'] ?? ''), (string)($b['nombre'] ?? ''));
-            });
-        }
-        unset($itemsGrupo);
-    }
-    unset($tipoGrupos);
-
-    return $grupos;
 }
 
 /*ini_set('display_errors', 1);
@@ -106,6 +90,7 @@ $items      = new Item();
 $receta = $recetaModel->obtenerPorHash($hash);
 $detalle    = $recetaModel->obtenerDetallePorHash($hash);
 $categorias = $recetaModel->obtenerCategoriasParaEdicion((int)$receta['id']);
+$totalesOfertaComercial = totalesOfertaExcel($categorias['rows'] ?? []);
 
 $isAdmin = isset($_SESSION['session_cargo']) && $_SESSION['session_cargo'] == 1;
 $esTecnico = isset($_SESSION['session_cargo']) && (int)$_SESSION['session_cargo'] === 4;
@@ -202,10 +187,18 @@ $ofertaItemsParam = trim((string)($_REQUEST['oferta_items'] ?? ''));
 $ofertaItemIds = $ofertaItemsParam !== ''
     ? array_filter(array_map('intval', explode(',', $ofertaItemsParam)), fn($id) => $id > 0)
     : [];
-$ofertaColsParam = trim((string)($_REQUEST['oferta_cols'] ?? ''));
-$ofertaCols = array_key_exists('oferta_cols', $_REQUEST)
-    ? array_values(array_intersect(array_filter(explode(',', $ofertaColsParam)), ['descripcion', 'marca', 'cantidad']))
-    : ['descripcion', 'marca', 'cantidad'];
+$ofertaGroupCols = [];
+$ofertaGroupColsJson = trim((string)($_REQUEST['oferta_group_cols'] ?? ''));
+if ($ofertaGroupColsJson !== '') {
+    $decodedGroupCols = json_decode($ofertaGroupColsJson, true);
+    if (is_array($decodedGroupCols)) {
+        foreach ($decodedGroupCols as $subcat => $cols) {
+            if (is_array($cols)) {
+                $ofertaGroupCols[(string)$subcat] = array_values(array_intersect($cols, ['descripcion', 'marca']));
+            }
+        }
+    }
+}
 $detalleOfertaVisible = $detalle;
 if ($esOferta && !empty($ofertaItemIds)) {
     $idsPermitidos = array_flip($ofertaItemIds);
@@ -213,12 +206,14 @@ if ($esOferta && !empty($ofertaItemIds)) {
         return isset($idsPermitidos[(int)($item['id'] ?? 0)]);
     }));
 }
-$detalleOfertaAgrupado = $esOferta ? agruparOfertaPorSubcat1Pdf($detalleOfertaVisible) : [];
-$ofertaMostrarDescripcion = in_array('descripcion', $ofertaCols, true);
-$ofertaMostrarMarca = in_array('marca', $ofertaCols, true);
-$ofertaMostrarCantidad = in_array('cantidad', $ofertaCols, true);
-$ofertaColspan = 1 + ($ofertaMostrarDescripcion ? 1 : 0) + ($ofertaMostrarMarca ? 1 : 0) + ($ofertaMostrarCantidad ? 1 : 0);
-
+$detalleOfertaAgrupado = $esOferta ? agruparOfertaExcel($detalleOfertaVisible) : [];
+$subcatsPresentesOferta = [];
+foreach ($detalleOfertaVisible as $itemOferta) {
+    $subcatNormalizadaOferta = normalizarSubcatOfertaExcel($itemOferta['sub_cat_1'] ?? '');
+    if ($subcatNormalizadaOferta !== '') {
+        $subcatsPresentesOferta[$subcatNormalizadaOferta] = true;
+    }
+}
 ob_start();
 ?>
 <!doctype html>
@@ -287,7 +282,7 @@ ob_start();
     $empresaLinea1 = 'Sistema interno';
     $empresaLinea2 = 'Lima, Perú';
     $condicionesEconomicasDias = (int)($receta['cliente_condiciones_economicas_dias'] ?? 0);
-    $textoCondicionesEconomicas = 'En caso de que el servicio sea pausado o suspendido por un periodo superior a ' . $condicionesEconomicasDias . ' días, debido a causas no imputables a nuestra empresa, y en concordancia con los principios generales establecidos, la propuesta inicial comercial perderá su vigencia. La reanudación del servicio estará sujeta a una reformulación de la oferta comercial que reconozca los costos directos e indirectos derivados de la postergación, tales como la reposición, adquisición o sustitución de materiales y componentes afectados por deterioro o caducidad, así como los costos de renovación de acreditaciones, homologaciones e inducciones del personal y demás requisitos técnicos o administrativos exigidos para la operatividad del proyecto.';
+    $condicionesEconomicasVisible = (int)($receta['cliente_condiciones_economicas_visible'] ?? 0) === 1;
 ?>
 
 <div class="top-band"></div>
@@ -357,51 +352,80 @@ ob_start();
     </table>
 
     <?php if ($mostrarDetalle && $esOferta): ?>
-        <table class="section-table">
+        <?php
+            $tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['cliente_tiempo_entrega'] ?? ''));
+            $tiempoEntregaTextoOferta = $tiempoEntregaDiasOferta > 0 ? $tiempoEntregaDiasOferta . ' días' : 'TIEMPO DE ENTREGA';
+            $descripcionRecetaOferta = textoOfertaExcel($receta['cliente_descripcion'] ?? '');
+            $cantidadItemsOferta = (int)($receta['cliente_cantidad_items'] ?? 0);
+            $seccionesOfertaPdf = [];
+
+            if (detalleTieneSubcatOfertaExcel($subcatsPresentesOferta, ['PERNERIA', 'CONSUMIBLE', 'EMBALAJE'])) {
+                agregarSeccionOfertaPdf($seccionesOfertaPdf, 'PERNERIA, SOPORTES, ACCESORIOS Y EMBALAJE', "* Conjunto de pernería y soporteria estructural, compuesto por pernos, tuercas, arandelas planas y de presión, espárragos, rieles y soportes metálicos, fabricados en acero galvanizado para garantizar resistencia mecánica y protección contra la corrosión.\n\n* Consumibles para ensamblaje, comprendiendo todos los materiales menores necesarios para la correcta instalación y conexionado de los componentes internos. Esto incluye terminales de compresión, punteras, tubos termoencogibles, cintas, bridas plásticas, marcadores, asegurando una conexión segura, duradera y correctamente identificada de los conductores y equipos del tablero.\n\n* Embalaje estándar para tablero. incluye film plástico, esquineros de cartón y base de madera, garantizando protección contra polvo, humedad y golpes durante transporte y manejo.");
+            }
+
+            if (detalleTieneSubcatOfertaExcel($subcatsPresentesOferta, ['TRABAJADOR'])) {
+                agregarSeccionOfertaPdf($seccionesOfertaPdf, 'SERVICIOS DE INGENIERÍA Y PRUEBAS', "El alcance de los servicios comprende la ejecución de trabajos de ingeniería de detalle, configuración y/o programación FAT, pruebas de aceptación en fábrica FAT, como se detalla a continuación\n\nPruebas FAT-Factory Acceptance Test Comprenden las siguientes actividades según apliquen para cada producto:-Timbrado de las tablas de conexión.-Amarillado sobre los planos esquemáticos.-Energización de todos los equipos de control, protección y medida.-Prueba de medición de continuidad y Megado-Pruebas de mandos de equipos de maniobra.-Parametrización básica de los equipos-Pruebas de verificación de lecturas en equipos-Elaboración de protocolos de prueba");
+            }
+
+            if (detalleTieneSubcatOfertaExcel($subcatsPresentesOferta, ['INGENIERIA AL DETALLE'])) {
+                agregarSeccionOfertaPdf($seccionesOfertaPdf, 'INGENIERÍA DE DETALLE', "Planos mecánicos de distribución de equipos.\nFichas de conexionado interno.\nPlanos / Esquemas eléctrico del Tablero\nPlanos unifilares\nPlanos mecánicos de distribución de equipos\nHojas técnicas del tablero.\nLista de señales de entrada y salida (de ser el caso)\nPlano de integración entre tablero, grupos y celdas del cliente. Indicando lista de cables a utilizar para el cableado externo.\nProtocolos de pruebas\nFilosofía de control\nPlano de arquitectura de tablero");
+            }
+
+            if (detalleTieneSubcatOfertaExcel($subcatsPresentesOferta, ['DOCUMENTACION DE CALIDAD'])) {
+                agregarSeccionOfertaPdf($seccionesOfertaPdf, 'CALIDAD', "Procedimiento de fabricación.\nHojas técnicas del tablero.\nPlan de Puntos de Inspección (PPI)\nPlan y formatos de control de calidad\nCertificados de control de calidad\nFichas técnicas\nDemás documentos a requerir según la lista de entregables.\nDossier de Calidad");
+            }
+        ?>
+        <table class="offer-excel-table">
             <thead>
-                <tr class="section-head">
-                    <th>NOMBRE</th>
-                    <?php if ($ofertaMostrarDescripcion): ?>
-                        <th>DESCRIPCIÓN</th>
-                    <?php endif; ?>
-                    <?php if ($ofertaMostrarMarca): ?>
-                        <th>MARCA</th>
-                    <?php endif; ?>
-                    <?php if ($ofertaMostrarCantidad): ?>
-                        <th>CANT.</th>
-                    <?php endif; ?>
+                <tr>
+                    <th style="width:45%;">DESCRIPCION</th>
+                    <th style="width:13%;">MARCA</th>
+                    <th style="width:17%;">TIEMPO DE ENTREGA</th>
+                    <th style="width:8%;">CANT.</th>
+                    <th style="width:17%;">VALOR TOTAL</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach (['PRODUCTO' => 'PRODUCTOS', 'SERVICIO' => 'SERVICIOS'] as $tipoOferta => $tituloTipo): ?>
-                    <?php if (empty($detalleOfertaAgrupado[$tipoOferta])) continue; ?>
-                    <tr class="offer-type-row">
-                        <td colspan="<?= $ofertaColspan ?>"><?= escaparPdf($tituloTipo) ?></td>
+                <tr>
+                    <td><?= escaparPdf($descripcionRecetaOferta) ?></td>
+                    <td></td>
+                    <td class="center"><?= escaparPdf($tiempoEntregaTextoOferta) ?></td>
+                    <td class="center"><?= $cantidadItemsOferta > 0 ? (int)$cantidadItemsOferta : '' ?></td>
+                    <td class="money">$ <?= number_format($totalesOfertaComercial['subtotal'], 2) ?></td>
+                </tr>
+                <?php foreach ($detalleOfertaAgrupado as $subcat => $itemsGrupo): ?>
+                    <tr class="offer-pdf-group-row">
+                        <td colspan="5"><?= escaparPdf(mb_strtoupper((string)$subcat, 'UTF-8')) ?></td>
                     </tr>
-                    <?php foreach ($detalleOfertaAgrupado[$tipoOferta] as $subcat => $itemsGrupo): ?>
-                        <tr class="offer-group-row">
-                            <td colspan="<?= $ofertaColspan ?>"><?= escaparPdf($subcat) ?></td>
+                    <?php $columnasSubcatOferta = columnasOfertaSubcatPdf($ofertaGroupCols, (string)$subcat); ?>
+                    <?php foreach ($itemsGrupo as $i): ?>
+                        <?php
+                            $descripcion = normalizarTextoDetallePdf($i['descripcion'] ?? '');
+                            $marca = trim((string)($i['marca'] ?? ''));
+                            $lineasItemOferta = [textoOfertaExcel($i['nombre'] ?? 'SIN NOMBRE')];
+                            if (in_array('descripcion', $columnasSubcatOferta, true) && $descripcion !== '') {
+                                $lineasItemOferta[] = $descripcion;
+                            }
+                            if (in_array('marca', $columnasSubcatOferta, true) && $marca !== '') {
+                                $lineasItemOferta[] = 'Marca: ' . $marca;
+                            }
+                        ?>
+                        <tr>
+                            <td><?= nl2br(escaparPdf(implode("\n", $lineasItemOferta))) ?></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         </tr>
-                        <?php foreach ($itemsGrupo as $i): ?>
-                            <?php
-                                $descripcion = normalizarTextoDetallePdf($i['descripcion'] ?? '');
-                                $marca = trim((string)($i['marca'] ?? ''));
-                                $cantidad = (int)($i['cantidad'] ?? 0);
-                            ?>
-                            <tr class="item-row">
-                                <td><div class="item-description"><?= escaparPdf((string)($i['nombre'] ?? 'SIN NOMBRE')) ?></div></td>
-                                <?php if ($ofertaMostrarDescripcion): ?>
-                                    <td><div class="item-subline"><?= escaparPdf($descripcion !== '' ? $descripcion : '-') ?></div></td>
-                                <?php endif; ?>
-                                <?php if ($ofertaMostrarMarca): ?>
-                                    <td><div class="item-subline"><?= escaparPdf($marca !== '' ? $marca : '-') ?></div></td>
-                                <?php endif; ?>
-                                <?php if ($ofertaMostrarCantidad): ?>
-                                    <td class="item-qty"><?= (int)$cantidad ?></td>
-                                <?php endif; ?>
-                            </tr>
-                        <?php endforeach; ?>
                     <?php endforeach; ?>
+                <?php endforeach; ?>
+                <?php foreach ($seccionesOfertaPdf as $seccionOfertaPdf): ?>
+                    <tr class="offer-pdf-group-row">
+                        <td colspan="5"><?= escaparPdf($seccionOfertaPdf['titulo']) ?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="5"><?= nl2br(escaparPdf($seccionOfertaPdf['contenido'])) ?></td>
+                    </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
@@ -459,8 +483,65 @@ ob_start();
         </table>
     <?php endif; ?>
 
+    <?php if ($esOferta): ?>
+        <table class="offer-summary-table">
+            <tr>
+                <td class="offer-green" style="width: 70%;">Observaciones:</td>
+                <td style="width: 15%;"><strong>SUBTOTAL_1</strong></td>
+                <td class="money" style="width: 15%;">$ <?= number_format($totalesOfertaComercial['subtotal'], 2) ?></td>
+            </tr>
+            <tr>
+                <td rowspan="2"></td>
+                <td><strong>IGV 18%</strong></td>
+                <td class="money">$ <?= number_format($totalesOfertaComercial['igv'], 2) ?></td>
+            </tr>
+            <tr>
+                <td><strong>TOTAL US$</strong></td>
+                <td class="money">$ <?= number_format($totalesOfertaComercial['total'], 2) ?></td>
+            </tr>
+            <tr>
+                <td colspan="3"><strong>SON:</strong> <?= escaparPdf(totalEnLetrasOfertaExcel($totalesOfertaComercial['total'])) ?></td>
+            </tr>
+        </table>
+
+        <div class="offer-block-title">CONDICIONES COMERCIALES</div>
+        <?php
+            $condicionesPagoOferta = textoOfertaExcel($receta['cliente_condiciones_pago'] ?? '');
+            $condicionesRowsOferta = [
+                ['MONEDA', 'DOLARES AMERICANOS', ''],
+                ['PLAZO DE ENTREGA', 'Ver detalle columna Stock; puesta y confirmada OC. (Sujeto a venta previa o disponibilidad)', ''],
+                ['CONDICIONES DE PAGO', $condicionesPagoOferta !== '' ? $condicionesPagoOferta : 'Factura a 15 días.', ''],
+                ['FORMA DE PAGO', 'Abono en cuenta corriente US$ Dólares y/o cuenta corriente soles, según moneda cotizada.', ''],
+                ['CTA. CORRIENTE BCP', '193-2015964-1-81 / DOLARES', 'CCI 002-193-002015964181-18'],
+                ['CTA. CORRIENTE BCP', '193-2006583-0-14 / SOLES', 'CCI 002-193-002006583014-11'],
+                ['CTA. CORRIENTE BBVA', '0011-0194-0100112155-85 / DOLARES', 'CCI 011-194-000100112155-85'],
+                ['VALIDEZ DE COTIZACION', '30 días', ''],
+                ['LUGAR DE ENTREGA', 'Almacenes de MG INDUSOL SAC', ''],
+                ['Garantía de Producto', 'Según fabricante por defectos de fabricacion o diseño.', ''],
+                ['Garantía del Servicio', 'A convenir', ''],
+            ];
+        ?>
+        <table class="offer-conditions-table">
+            <?php foreach ($condicionesRowsOferta as [$label, $value, $extra]): ?>
+                <tr>
+                    <td style="width: 22%;"><strong><?= escaparPdf($label) ?></strong></td>
+                    <td style="width: 2%;">:</td>
+                    <td style="width: 46%;"><?= escaparPdf($value) ?></td>
+                    <td style="width: 30%;"><?= escaparPdf($extra) ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+
+        <div class="offer-block-title">TERMINOS Y CONDICIONES DE VENTA</div>
+        <div class="offer-terms">
+            <?php foreach (terminosCondicionesVentaOferta($condicionesEconomicasDias, $condicionesEconomicasVisible) as $terminoOferta): ?>
+                <?php $isTitleTermino = (bool)preg_match('/^\d+\.\s+(Sobre|Condiciones)\s+/u', $terminoOferta); ?>
+                <p class="<?= $isTitleTermino ? 'term-title' : 'term-text' ?>"><?= escaparPdf($terminoOferta) ?></p>
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
     <table style="width: 100%; margin-top: 2mm;">
-        <?php if ($esTecnico && !$esOferta): ?>
+        <?php if ($esTecnico): ?>
             <tr>
                 <td style="background: transparent; padding: 2mm 3mm; border-bottom: 0.35mm solid #4f4f4f;">
                     <strong>Total Items:</strong> <?= $totalItems ?>
@@ -483,6 +564,7 @@ ob_start();
             </tr>
         <?php endif; ?>
     </table>
+    <?php endif; ?>
     
     <?php if (trim((string)($receta['observacion'] ?? '')) !== ''): ?>
         <div style="margin-top: 6mm; margin-bottom: 6mm;">
@@ -490,13 +572,6 @@ ob_start();
                 <div style="font-weight: 700; margin-bottom: 2mm;">Observación</div>
                 <div style="font-size: 11px; line-height: 1.2;"><?= nl2br(escaparPdf($receta['observacion'])) ?></div>
             </div>
-        </div>
-    <?php endif; ?>
-
-    <?php if ($esOferta && $condicionesEconomicasDias > 0): ?>
-        <div class="economic-conditions">
-            <div class="economic-conditions-title">Condiciones Económicas por Suspensión de Servicio:</div>
-            <div class="economic-conditions-text"><?= escaparPdf($textoCondicionesEconomicas) ?></div>
         </div>
     <?php endif; ?>
 

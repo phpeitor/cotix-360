@@ -65,6 +65,19 @@ function totalOfertaConMargenExcel(array $categorias): float
     return $total;
 }
 
+function totalesOfertaExcel(array $categorias): array
+{
+    $subtotal = round(totalOfertaConMargenExcel($categorias), 2, PHP_ROUND_HALF_UP);
+    $igv = round($subtotal * 0.18, 2, PHP_ROUND_HALF_UP);
+    $total = round($subtotal + $igv, 2, PHP_ROUND_HALF_UP);
+
+    return [
+        'subtotal' => $subtotal,
+        'igv' => $igv,
+        'total' => $total,
+    ];
+}
+
 function normalizarSubcatOfertaExcel($value): string
 {
     $text = mb_strtoupper(textoOfertaExcel($value), 'UTF-8');

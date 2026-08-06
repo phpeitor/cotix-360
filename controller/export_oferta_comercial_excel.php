@@ -67,7 +67,8 @@ try {
         }
     }
     $categoriasReceta = $recetaModel->obtenerCategoriasParaEdicion((int)$receta['id']);
-    $totalConMargenReceta = totalOfertaConMargenExcel($categoriasReceta['rows'] ?? []);
+    $totalesOfertaReceta = totalesOfertaExcel($categoriasReceta['rows'] ?? []);
+    $totalConMargenReceta = $totalesOfertaReceta['subtotal'];
 
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
@@ -364,9 +365,9 @@ try {
         );
     }
 
-    $subtotalOferta = round($totalConMargenReceta, 2);
-    $igvOferta = round($subtotalOferta * 0.18, 2);
-    $totalOferta = round($subtotalOferta + $igvOferta, 2);
+    $subtotalOferta = $totalesOfertaReceta['subtotal'];
+    $igvOferta = $totalesOfertaReceta['igv'];
+    $totalOferta = $totalesOfertaReceta['total'];
 
     $sheet->mergeCells('A' . $row . ':G' . $row);
     $sheet->setCellValue('A' . $row, 'Observaciones:');

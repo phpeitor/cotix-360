@@ -367,11 +367,11 @@ document.addEventListener("DOMContentLoaded", () => {
                             </div>
                             <div class="d-flex flex-wrap gap-3 align-items-center">
                                 <div class="form-check form-switch mb-0">
-                                    <input class="form-check-input oferta-grupo-col-check" type="checkbox" id="${groupId}-descripcion" data-subcat="${escapeHtml(subcat)}" value="descripcion">
+                                    <input class="form-check-input oferta-grupo-col-check" type="checkbox" id="${groupId}-descripcion" data-subcat="${escapeHtml(subcat)}" value="descripcion" checked>
                                     <label class="form-check-label" for="${groupId}-descripcion">Descripcion</label>
                                 </div>
                                 <div class="form-check form-switch mb-0">
-                                    <input class="form-check-input oferta-grupo-col-check" type="checkbox" id="${groupId}-marca" data-subcat="${escapeHtml(subcat)}" value="marca">
+                                    <input class="form-check-input oferta-grupo-col-check" type="checkbox" id="${groupId}-marca" data-subcat="${escapeHtml(subcat)}" value="marca" checked>
                                     <label class="form-check-label" for="${groupId}-marca">Marca</label>
                                 </div>
                                 <span class="badge bg-primary-subtle text-primary">${items.length} items</span>
@@ -425,14 +425,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return groupCols;
     }
 
-    function getOfertaColsUnion() {
-        const cols = new Set(["cantidad"]);
-        Object.values(getOfertaGroupCols()).forEach(groupCols => {
-            groupCols.forEach(col => cols.add(col));
-        });
-        return Array.from(cols);
-    }
-
     async function abrirOfertaPdfSeleccionada() {
         const selectedItems = Array.from(document.querySelectorAll(".oferta-item-check:checked"))
             .map(check => check.value)
@@ -443,7 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const selectedCols = getOfertaColsUnion();
+        const groupCols = getOfertaGroupCols();
 
         try {
             if (btnGenerarOfertaPdf) {
@@ -480,7 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ["id", ofertaActualHash],
             ["oferta", "1"],
             ["oferta_items", selectedItems.join(",")],
-            ["oferta_cols", selectedCols.join(",")]
+            ["oferta_group_cols", JSON.stringify(groupCols)]
         ].forEach(([name, value]) => {
             const input = document.createElement("input");
             input.type = "hidden";

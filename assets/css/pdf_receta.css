@@ -450,6 +450,74 @@ table {
     font-weight: bold;
 }
 
+.offer-pdf .offer-excel-table,
+.offer-pdf .offer-summary-table,
+.offer-pdf .offer-conditions-table {
+    font-family: DejaVu Sans Mono, monospace;
+    font-size: 8.2px;
+    color: #000;
+    margin-top: 2mm;
+}
+
+.offer-pdf .offer-excel-table th,
+.offer-pdf .offer-excel-table td,
+.offer-pdf .offer-summary-table td,
+.offer-pdf .offer-conditions-table td {
+    border: 0.18mm solid #7f7f7f;
+    padding: 1mm 1.2mm;
+    vertical-align: middle;
+    line-height: 1.28;
+}
+
+.offer-pdf .offer-excel-table th,
+.offer-pdf .offer-green,
+.offer-pdf .offer-block-title,
+.offer-pdf .offer-pdf-group-row td {
+    background: #92d050;
+    font-weight: bold;
+}
+
+.offer-pdf .offer-excel-table th {
+    text-align: center;
+}
+
+.offer-pdf .offer-pdf-group-row td {
+    text-align: center;
+}
+
+.offer-pdf .money {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.offer-pdf .offer-block-title {
+    border: 0.18mm solid #7f7f7f;
+    font-family: DejaVu Sans Mono, monospace;
+    font-size: 8.6px;
+    padding: 1mm 1.2mm;
+    margin-top: 2mm;
+}
+
+.offer-pdf .offer-terms {
+    border: 0.18mm solid #7f7f7f;
+    border-top: 0;
+    font-family: DejaVu Sans Mono, monospace;
+    font-size: 7.4px;
+    line-height: 1.25;
+    padding: 1mm 1.2mm;
+    color: #000;
+}
+
+.offer-pdf .offer-terms p {
+    margin: 0 0 1mm 0;
+}
+
+.offer-pdf .offer-terms .term-title {
+    font-weight: bold;
+    text-decoration: underline;
+    margin-top: 1.5mm;
+}
+
 .offer-pdf .pdf-footer {
     bottom: 8mm;
     color: #44514e;
