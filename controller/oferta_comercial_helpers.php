@@ -224,7 +224,7 @@ function totalEnLetrasOfertaExcel(float $monto): string
         $centimos = 0;
     }
 
-    return mb_strtoupper(enteroEnLetrasOfertaExcel($entero), 'UTF-8') . ' Y ' . str_pad((string)$centimos, 2, '0', STR_PAD_LEFT) . '/100 DÓLARES';
+    return mb_strtoupper(enteroEnLetrasOfertaExcel($entero), 'UTF-8') . ' Y ' . str_pad((string)$centimos, 2, '0', STR_PAD_LEFT) . '/100 DOLARES AMERICANOS';
 }
 
 function terminosCondicionesVentaOferta(int $condicionesEconomicasDias = 0, bool $mostrarCondicionesEconomicas = false): array
