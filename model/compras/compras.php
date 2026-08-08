@@ -300,6 +300,107 @@ class Compras
         ];
     }
 
+    public function datosGraficosPorHash(string $hash): array
+    {
+        $sql = "SELECT c.id, c.tipo_cambio, c.ingenieria_id
+                FROM receta_compras c
+                WHERE MD5(c.id) = :hash
+                LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+        $compra = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        $tipoCambio = (float)($compra['tipo_cambio'] ?? 0);
+        $tipoCambio = $tipoCambio > 0 ? $tipoCambio : 1;
+        $ingenieriaId = (int)($compra['ingenieria_id'] ?? 0);
+
+        $sql = "SELECT d.sub_cat_1, d.nombre, d.tipo, d.precio, d.moneda, d.cantidad
+                FROM detalle_compras d
+                INNER JOIN receta_compras c ON c.id = d.compra_id
+                WHERE MD5(c.id) = :hash
+                ORDER BY d.id ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+        $detalle = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        $montoUsd = static function (array $row) use ($tipoCambio): float {
+            $moneda = strtoupper((string)($row['moneda'] ?? ''));
+            $monto = (float)($row['precio'] ?? 0) * (float)($row['cantidad'] ?? 1);
+            if ($moneda === 'DOLLAR') {
+                return $monto;
+            }
+            return $monto / $tipoCambio;
+        };
+
+        $porCategoria = [];
+        $porTipo = [];
+        $porItem = [];
+        $scatter = [];
+
+        foreach ($detalle as $row) {
+            $monto = $montoUsd($row);
+
+            $precioUsd = (float)($row['precio'] ?? 0);
+            if (strtoupper((string)($row['moneda'] ?? '')) !== 'DOLLAR') {
+                $precioUsd = $precioUsd / $tipoCambio;
+            }
+
+            $categoria = trim((string)($row['sub_cat_1'] ?? ''));
+            $categoria = $categoria === '' ? 'Sin categoría' : $categoria;
+            $porCategoria[$categoria] = ($porCategoria[$categoria] ?? 0) + $monto;
+
+            $tipo = trim((string)($row['tipo'] ?? ''));
+            $tipo = $tipo === '' ? 'Otros' : $tipo;
+            $porTipo[$tipo][] = [
+                'x' => round($precioUsd, 2),
+                'y' => (int)($row['cantidad'] ?? 1),
+            ];
+
+            $nombre = trim((string)($row['nombre'] ?? ''));
+            $nombre = $nombre === '' ? 'Item sin nombre' : $nombre;
+            $porItem[$nombre] = ($porItem[$nombre] ?? 0) + $monto;
+
+            $scatter[] = [
+                'x' => round($precioUsd, 2),
+                'y' => (int)($row['cantidad'] ?? 1),
+                'name' => $nombre,
+            ];
+        }
+
+        uasort($porCategoria, static fn($a, $b) => $b <=> $a);
+
+        $totalCompra = $this->totalCompraDolaresPorHash($hash);
+        $totalIngenieria = $ingenieriaId > 0 ? $this->totalIngenieriaDolaresPorId($ingenieriaId) : 0;
+
+        return [
+            'radar' => [
+                'labels' => array_keys($porCategoria),
+                'series' => array_values(array_map(static fn($v) => round($v, 2), $porCategoria)),
+            ],
+            'scatter' => [
+                'series' => array_map(
+                    static fn($tipo, $puntos) => ['name' => $tipo, 'data' => $puntos],
+                    array_keys($porTipo),
+                    array_values($porTipo)
+                ),
+                'items' => $scatter,
+            ],
+            'radialbar' => [
+                'ingenieria' => round($totalIngenieria, 2),
+                'compra' => round($totalCompra, 2),
+            ],
+            'treemap' => [
+                'data' => array_map(
+                    static fn($nombre, $monto) => ['x' => $nombre, 'y' => round($monto, 2)],
+                    array_keys($porItem),
+                    array_values($porItem)
+                ),
+            ],
+        ];
+    }
+
     public function agregarDetalleDesdeItem(string $hash, int $itemId, int $cantidad): bool
     {
         $sql = "INSERT INTO detalle_compras (

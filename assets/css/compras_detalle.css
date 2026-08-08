@@ -47,14 +47,27 @@
     opacity: .9;
 }
 
-.compras-precio-input {
-    width: 110px;
-    text-align: right;
-    font-size: 13px;
+.form-compras .table-custom td .d-inline-flex.gap-1 {
+    justify-content: flex-end;
+    width: 100%;
+    max-width: 100%;
 }
 
-.compras-moneda-select {
-    width: 84px;
+.form-compras .compras-moneda-select {
+    width: 74px;
+    min-width: 74px;
+    font-size: 12px;
+    padding-top: .25rem;
+    padding-bottom: .25rem;
+    flex-shrink: 0;
+}
+
+.form-compras .compras-precio-input {
+    width: 110px;
+    min-width: 0;
+    max-width: 100%;
+    text-align: right;
     font-size: 13px;
-    display: inline-block;
+    padding-top: .3rem;
+    padding-bottom: .3rem;
 }

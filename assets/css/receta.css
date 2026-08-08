@@ -103,6 +103,10 @@
     table-layout: fixed;
 }
 
+.form-compras .table-custom {
+    min-width: 1320px;
+}
+
 .form-ingenieria .table-custom th:nth-child(1),
 .form-ingenieria .table-custom td:nth-child(1),
 .form-compras .table-custom th:nth-child(1),
@@ -147,6 +151,23 @@
 .form-compras .table-custom th:nth-child(7),
 .form-compras .table-custom td:nth-child(7) {
     width: 5%;
+}
+
+.form-compras .table-custom th:nth-child(1),
+.form-compras .table-custom td:nth-child(1) {
+    width: 30%;
+}
+
+.form-compras .table-custom th:nth-child(2),
+.form-compras .table-custom td:nth-child(2) {
+    width: 16%;
+}
+
+.form-compras .table-custom th:nth-child(5),
+.form-compras .table-custom td:nth-child(5),
+.form-compras .table-custom th:nth-child(6),
+.form-compras .table-custom td:nth-child(6) {
+    width: 15%;
 }
 
 .form-ingenieria .table-custom td:nth-child(2) span,
