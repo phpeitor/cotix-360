@@ -37,6 +37,11 @@ Aplicación web para gestión de usuarios, carga de ítems y generación de coti
 	- Restricción de stream: el canal en tiempo real solo permanece activo en estado `Enviada`; en otros estados se detiene para reducir consumo.
 	- Aprobación/anulación de receta.
 	- Exportación de receta a PDF con totales por moneda y total Perú.
+- Módulo de compras:
+	- Listado de compras generadas al aprobar ingenierías, con filtro por rango de fechas.
+	- Detalle de compra con semáforo comparativo contra la ingeniería aprobada.
+	- Semáforo: verde si los costos mejoran la cotización, naranja si se mantienen en un rango promedio aceptable, rojo si superan significativamente lo cotizado.
+	- Edición del detalle para cargos `administrador` (1), `supervisor` (3) y `compras` (5): agregar items desde el catálogo, cambiar cantidad, precio y moneda, y eliminar items, solo mientras la compra esté en estado `Pendiente`.
 
 ## Stack técnico
 
@@ -154,6 +159,9 @@ cotix/
 - Recargar precios de receta: controller/reload_receta_precios.php
 - Stream de cambios de precio (SSE): controller/stream_receta_cambios.php
 - Actualizar estado receta: controller/upd_estado_receta.php
+- Compras (tabla): controller/compras/table_compras.php
+- Compras (detalle): controller/compras/get_compra.php
+- Actualizar detalle compra (agregar item, precio, cantidad, eliminar): controller/compras/upd_compra_detalle.php
 
 ## Tiempo real (SSE) en recetas
 

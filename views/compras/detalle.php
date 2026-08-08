@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/../../config/bootstrap.php';
 require_once ROOT . '/controller/check_session.php';
+$cargo = (int)($_SESSION['session_cargo'] ?? 0);
+$puedeEditar = in_array($cargo, [1, 3, 5], true);
+$verMontos = in_array($cargo, [1, 3, 5], true);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -16,7 +19,8 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/receta.css?v=1.2" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/receta.css?v=1.4" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/compras_detalle.css?v=1.0" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -89,32 +93,58 @@ require_once ROOT . '/controller/check_session.php';
 
                                 <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end receta-header-actions">
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#cliente-modal" data-bs-title="Cliente" data-bs-placement="bottom"><i class="ti ti-user-circle fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#condiciones-modal" data-bs-title="Datos comerciales" data-bs-placement="bottom"><i class="ti ti-clipboard-text fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom" id="btnBuscarItems"><i class="ti ti-search fs-18"></i></button>
                                     <a href="compras.php" class="btn btn-dark btn-icon" data-bs-toggle="tooltip" data-bs-title="Volver" data-bs-placement="bottom"><i class="ti ti-corner-up-left-double fs-18"></i></a>
                                 </div>
                             </div>
 
-                            <div class="card-body p-0">
-                                <div class="bg-warning bg-opacity-10 py-1 text-center">
-                                    <p class="m-0"><b id="total_item">0</b> item(s) en compras</p>
+                            <form class="form-compras" novalidate data-user-cargo="<?= $cargo ?>" data-puede-editar="<?= $puedeEditar ? '1' : '0' ?>">
+                                <div class="card-body p-0">
+                                    <div id="semaforo-wrap" class="py-1 text-center d-none"></div>
+                                    <div class="bg-warning bg-opacity-10 py-1 text-center">
+                                        <p class="m-0"><b id="total_item">0</b> item(s) en compras</p>
+                                    </div>
+                                    <div class="border border-dashed p-2 rounded text-center">
+                                        <div class="row align-items-center">
+                                            <div class="col-lg-3 col-6 border-end">
+                                                <p class="text-muted fw-medium fs-14 mb-0"><span class="text-dark">SubTotal S/. </span> <span id="total_soles">0.00</span></p>
+                                            </div>
+                                            <div class="col-lg-3 col-6 border-end">
+                                                <p class="text-muted fw-medium fs-14 mb-0"><span class="text-dark">SubTotal $ </span> <span id="total_dolares">0.00</span></p>
+                                            </div>
+                                            <div class="col-lg-3 col-12 border-end">
+                                                <p class="text-muted fw-medium fs-12 mb-1">
+                                                    <span class="tipo-cambio-label">Tipo de Cambio SUNAT (Venta)</span>
+                                                    <span id="tipo_cambio_sunat" class="external-event fc-event bg-warning-subtle text-warning-emphasis">0.000</span>
+                                                </p>
+                                            </div>
+                                            <div class="col-lg-3 col-12">
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total S/.</span> <span id="total_peru">0.00</span></p>
+                                                <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-minimalistic-outline" class="text-success"></iconify-icon> <span class="text-dark">Total $</span> <span id="total_peru_dolares">0.00</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Item</th>
+                                                    <th>Detalle</th>
+                                                    <th>Tipo</th>
+                                                    <th class="text-center">Cant.</th>
+                                                    <th class="text-end <?= $verMontos ? '' : 'd-none' ?>">Precio</th>
+                                                    <th class="text-end <?= $verMontos ? '' : 'd-none' ?>">Total</th>
+                                                    <th class="text-center">Acción</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="comprasDetalleBody">
+                                                <tr><td colspan="7" class="text-center text-muted py-4">Cargando detalle...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                                <div class="table-responsive">
-                                    <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Item</th>
-                                                <th>Detalle</th>
-                                                <th>Tipo</th>
-                                                <th class="text-center">Cant.</th>
-                                                <th class="text-end">Precio</th>
-                                                <th class="text-end">Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="comprasDetalleBody">
-                                            <tr><td colspan="6" class="text-center text-muted py-4">Cargando detalle...</td></tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -123,21 +153,176 @@ require_once ROOT . '/controller/check_session.php';
         </div>
     </div>
 
-    <div id="cliente-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+    <div id="cliente-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="cliente-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header text-bg-primary border-0">
-                    <h4 class="modal-title">Cliente</h4>
+                    <h4 class="modal-title" id="cliente-modalLabel">Información del cliente</h4>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="row g-2">
-                        <div class="col-12"><strong>RUC:</strong> <span id="clienteRuc">-</span></div>
-                        <div class="col-12"><strong>Razón social:</strong> <span id="clienteRazonSocial">-</span></div>
-                        <div class="col-12"><strong>Dirección:</strong> <span id="clienteDireccion">-</span></div>
-                        <div class="col-12"><strong>Contacto:</strong> <span id="clienteNombreCompleto">-</span></div>
-                        <div class="col-12"><strong>Correo:</strong> <span id="clienteCorreo">-</span></div>
-                        <div class="col-12"><strong>Celular:</strong> <span id="clienteCelular">-</span></div>
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <label class="form-label">RUC</label>
+                            <input type="text" class="form-control" id="clienteRuc" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Nombre (Razón Social de la Empresa)</label>
+                            <input type="text" class="form-control" id="clienteRazonSocial" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Nombre completo</label>
+                            <input type="text" class="form-control" id="clienteNombreCompleto" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Correo</label>
+                            <input type="email" class="form-control" id="clienteCorreo" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Celular</label>
+                            <input type="text" class="form-control" id="clienteCelular" readonly>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Motivo</label>
+                            <input type="text" class="form-control" id="clienteMotivo" readonly>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Dirección</label>
+                            <textarea class="form-control" id="clienteDireccion" rows="3" readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="condiciones-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="condiciones-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header text-bg-secondary border-0">
+                    <h4 class="modal-title" id="condiciones-modalLabel">Datos comerciales</h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-lg-4">
+                            <label class="form-label" for="vendedor">Vendedor</label>
+                            <input type="text" class="form-control" id="vendedor" maxlength="150" placeholder="Nombre del vendedor" <?= $verMontos ? '' : 'readonly' ?>>
+                        </div>
+                        <div class="col-lg-4">
+                            <label class="form-label" for="vendedorCorreo">Email vendedor</label>
+                            <input type="email" class="form-control" id="vendedorCorreo" maxlength="150" placeholder="correo@empresa.com" <?= $verMontos ? '' : 'readonly' ?>>
+                        </div>
+                        <div class="col-lg-4">
+                            <label class="form-label" for="vendedorTelefono">Teléfono vendedor</label>
+                            <input type="text" class="form-control" id="vendedorTelefono" maxlength="50" placeholder="Ej. 987654321" <?= $verMontos ? '' : 'readonly' ?>>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label" for="tiempoEntrega">Tiempo de entrega</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="tiempoEntrega" min="1" max="999" step="1" placeholder="Ej. 15" <?= $verMontos ? '' : 'readonly' ?>>
+                                <span class="input-group-text">días</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label" for="cantidadItemsReceta">Cantidad</label>
+                            <input type="number" class="form-control" id="cantidadItemsReceta" min="1" max="5000" step="1" placeholder="Ej. 10" <?= $verMontos ? '' : 'readonly' ?>>
+                        </div>
+                        <div class="col-lg-12">
+                            <label class="form-label" for="descripcionReceta">Descripcion</label>
+                            <textarea class="form-control" id="descripcionReceta" maxlength="500" rows="3" placeholder="Descripcion de la receta" <?= $verMontos ? '' : 'readonly' ?>></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="condicionesPago">Condiciones de pago</label>
+                            <textarea class="form-control" id="condicionesPago" rows="3" maxlength="200" placeholder="Ej. 50% adelanto, 50% contra entrega" <?= $verMontos ? '' : 'readonly' ?>></textarea>
+                        </div>
+                        <div class="col-12">
+                            <div class="commercial-conditions-box">
+                                <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2">
+                                    <div class="commercial-conditions-title mb-0">Condiciones Económicas por Suspensión de Servicio:</div>
+                                    <div class="form-check form-switch mb-0">
+                                        <input class="form-check-input" type="checkbox" id="condicionesEconomicasVisible" <?= $verMontos ? '' : 'disabled' ?>>
+                                        <label class="form-check-label" for="condicionesEconomicasVisible">Mostrar en oferta</label>
+                                    </div>
+                                </div>
+                                <p class="commercial-conditions-text">
+                                    En caso de que el servicio sea pausado o suspendido por un periodo superior a
+                                    <span class="commercial-days-input">
+                                        <input type="number" class="form-control form-control-sm" id="condicionesEconomicasDias" min="1" max="999" step="1" placeholder="10" <?= $verMontos ? '' : 'readonly' ?>>
+                                        <span>días</span>
+                                    </span>, debido a causas no imputables a nuestra empresa, y en concordancia con los principios generales establecidos, la propuesta inicial comercial perderá su vigencia. La reanudación del servicio estará sujeta a una reformulación de la oferta comercial que reconozca los costos directos e indirectos derivados de la postergación, tales como la reposición, adquisición o sustitución de materiales y componentes afectados por deterioro o caducidad, así como los costos de renovación de acreditaciones, homologaciones e inducciones del personal y demás requisitos técnicos o administrativos exigidos para la operatividad del proyecto.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-secondary" id="btnGuardarCondiciones" <?= $verMontos ? '' : 'disabled' ?>>Guardar datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="max-width: 840px;">
+            <div class="modal-content">
+                <div class="modal-header text-bg-info border-0">
+                    <h4 class="modal-title" id="info-header-modalLabel">Buscar item para agregar a la compra</h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Base</label>
+                            <select id="filterBase" class="form-select"><option value="">-- Seleccione --</option></select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Categoria</label>
+                            <select id="categoria" class="form-select" disabled><option value="">-- Seleccione --</option></select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Sub Categoria 1</label>
+                            <select id="subCat1" class="form-select" disabled><option value="">-- Seleccione --</option></select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Sub Categoria 2</label>
+                            <select id="subCat2" class="form-select" disabled><option value="">-- Seleccione --</option></select>
+                        </div>
+                        <div class="col-12">
+                            <div id="productoFiltersWrap" class="row d-none">
+                                <div class="col-md-6 mb-1">
+                                    <select id="filterMarca" class="form-select" disabled data-choices data-search-enabled="true" data-search-placeholder-value="Buscar marca..."><option value="">-- Seleccione Marca --</option></select>
+                                </div>
+                                <div class="col-md-6 mb-1">
+                                    <select id="filterModelo" class="form-select" disabled data-choices data-search-enabled="true" data-search-placeholder-value="Buscar modelo..."><option value="">-- Seleccione Modelo --</option></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                                <div>
+                                    <label class="form-label mb-0">Items disponibles</label>
+                                    <span class="text-muted fs-12 d-block">Selecciona un item desde la tabla para agregarlo a la compra.</span>
+                                </div>
+                                <span class="badge bg-light text-dark" id="itemsResultCount">0 resultados</span>
+                            </div>
+                            <div class="table-responsive receta-items-table-wrap">
+                                <table class="table table-sm table-hover align-middle mb-0 receta-items-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Item</th>
+                                            <th class="text-center">Cant.</th>
+                                            <th class="text-end <?= $verMontos ? '' : 'd-none' ?>">Precio</th>
+                                            <th class="text-center">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recetaItemsTableBody">
+                                        <tr><td colspan="4" class="text-center text-muted py-4">Selecciona Base, Categoria y Sub Categorias para cargar los items.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -148,7 +333,9 @@ require_once ROOT . '/controller/check_session.php';
 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
-    <script src="./assets/js/compras_detalle.js?v=1.0"></script>
+    <script src="./assets/js/gridjs.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
+    <script src="./assets/js/compras_detalle.js?v=2.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
 </html>

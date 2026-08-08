@@ -1,6 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById("filterDate");
     const tableContainer = document.getElementById("table-gridjs");
+    const userCargo = Number(tableContainer?.dataset?.userCargo || 0);
+    const esTecnico = userCargo === 4;
+    const totalItemsCellIndex = esTecnico ? 10 : 11;
     const today = new Date();
     const pastDate = new Date();
     pastDate.setDate(today.getDate() - 30);
@@ -56,6 +59,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 width: "110px",
                 formatter: (cell) => renderEstado(cell)
             },
+            ...(esTecnico ? [] : [{
+                id: "semaforo",
+                name: "Semáforo",
+                width: "150px",
+                sort: false,
+                formatter: (cell, row) => renderSemaforo(cell, row)
+            }]),
             {
                 id: "items",
                 name: "Items",
@@ -152,6 +162,34 @@ document.addEventListener("DOMContentLoaded", () => {
         return gridjs.html(`<span class="badge ${badgeClass}">${escapeHtml(estado)}</span>`);
     }
 
+    function renderSemaforo(value, row) {
+        const semaforo = (typeof value === "object" && value !== null) ? value : {};
+        const nivel = String(semaforo.nivel || "gris").trim();
+        if (nivel === "gris") {
+            return gridjs.html(`<span class="text-muted">-</span>`);
+        }
+
+        const map = {
+            verde: "bg-success",
+            naranja: "bg-warning",
+            rojo: "bg-danger"
+        };
+
+        const totalCompra = Number(semaforo.total_compra_dolares ?? 0);
+        const totalOrigen = Number(semaforo.total_origen_dolares ?? 0);
+        const diff = totalOrigen > 0
+            ? ((totalCompra / totalOrigen - 1) * 100).toFixed(1)
+            : null;
+
+        return gridjs.html(`
+            <span class="badge ${map[nivel] || "bg-secondary"}">
+                <i class="ti ti-circle-filled fs-10 me-1"></i>
+                ${escapeHtml(String(semaforo.mensaje || nivel))}
+                ${diff !== null ? ` <small class="opacity-75">(${diff}%)</small>` : ""}
+            </span>
+        `);
+    }
+
     function renderRecetaCliente(nombre, row) {
         const recetaNombre = String(nombre ?? "").trim().replace(/\s*-\s*\d+$/, "").trim();
         const ruc = String(row?.cells?.[6]?.data ?? "").trim();
@@ -170,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!items) return "";
 
         const arr = String(items).split("|").map(i => i.trim()).filter(Boolean);
-        const total = Number(row?.cells?.[10]?.data ?? arr.length);
+        const total = Number(row?.cells?.[totalItemsCellIndex]?.data ?? arr.length);
         const id = String(row?.cells?.[0]?.data ?? "").trim();
 
         if (arr.length <= 4) {

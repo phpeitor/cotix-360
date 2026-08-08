@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../config/bootstrap.php';
 require_once ROOT . '/controller/check_session.php';
+$cargo = (int)($_SESSION['session_cargo'] ?? 0);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -76,7 +77,7 @@ require_once ROOT . '/controller/check_session.php';
                             </div>
 
                             <div class="card-body">
-                                <div id="table-gridjs"></div>
+                                <div id="table-gridjs" data-user-cargo="<?= $cargo ?>"></div>
                             </div>
                         </div>
                     </div>

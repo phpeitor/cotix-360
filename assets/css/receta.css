@@ -82,12 +82,14 @@
 }
 
 .form-receta .table-custom td:first-child,
-.form-ingenieria .table-custom td:first-child {
+.form-ingenieria .table-custom td:first-child,
+.form-compras .table-custom td:first-child {
     max-width: 560px;
 }
 
 .form-receta .item-description,
-.form-ingenieria .item-description {
+.form-ingenieria .item-description,
+.form-compras .item-description {
     white-space: normal;
     overflow-wrap: anywhere;
     word-break: break-word;
@@ -95,45 +97,62 @@
     margin-bottom: 0;
 }
 
-.form-ingenieria .table-custom {
+.form-ingenieria .table-custom,
+.form-compras .table-custom {
     min-width: 1120px;
     table-layout: fixed;
 }
 
 .form-ingenieria .table-custom th:nth-child(1),
-.form-ingenieria .table-custom td:nth-child(1) {
+.form-ingenieria .table-custom td:nth-child(1),
+.form-compras .table-custom th:nth-child(1),
+.form-compras .table-custom td:nth-child(1) {
     width: 38%;
 }
 
 .form-ingenieria .table-custom th:nth-child(2),
-.form-ingenieria .table-custom td:nth-child(2) {
+.form-ingenieria .table-custom td:nth-child(2),
+.form-compras .table-custom th:nth-child(2),
+.form-compras .table-custom td:nth-child(2) {
     width: 24%;
 }
 
 .form-ingenieria .table-custom th:nth-child(3),
-.form-ingenieria .table-custom td:nth-child(3) {
+.form-ingenieria .table-custom td:nth-child(3),
+.form-compras .table-custom th:nth-child(3),
+.form-compras .table-custom td:nth-child(3) {
     width: 10%;
 }
 
 .form-ingenieria .table-custom th:nth-child(4),
-.form-ingenieria .table-custom td:nth-child(4) {
+.form-ingenieria .table-custom td:nth-child(4),
+.form-compras .table-custom th:nth-child(4),
+.form-compras .table-custom td:nth-child(4) {
     width: 9%;
 }
 
 .form-ingenieria .table-custom th:nth-child(5),
 .form-ingenieria .table-custom td:nth-child(5),
 .form-ingenieria .table-custom th:nth-child(6),
-.form-ingenieria .table-custom td:nth-child(6) {
+.form-ingenieria .table-custom td:nth-child(6),
+.form-compras .table-custom th:nth-child(5),
+.form-compras .table-custom td:nth-child(5),
+.form-compras .table-custom th:nth-child(6),
+.form-compras .table-custom td:nth-child(6) {
     width: 7%;
 }
 
 .form-ingenieria .table-custom th:nth-child(7),
-.form-ingenieria .table-custom td:nth-child(7) {
+.form-ingenieria .table-custom td:nth-child(7),
+.form-compras .table-custom th:nth-child(7),
+.form-compras .table-custom td:nth-child(7) {
     width: 5%;
 }
 
 .form-ingenieria .table-custom td:nth-child(2) span,
-.form-ingenieria .table-custom td:nth-child(2) h5 {
+.form-ingenieria .table-custom td:nth-child(2) h5,
+.form-compras .table-custom td:nth-child(2) span,
+.form-compras .table-custom td:nth-child(2) h5 {
     white-space: normal;
     overflow-wrap: anywhere;
     word-break: break-word;

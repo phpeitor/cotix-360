@@ -19,9 +19,19 @@ try {
     }
 
     $compras = new Compras();
+    $data = $compras->tableCompras($fecIni, $fecFin);
+
+    $cargo = (int)($_SESSION['session_cargo'] ?? 0);
+    if (!in_array($cargo, Compras::CARGOS_VER_MONTOS, true)) {
+        foreach ($data as &$row) {
+            unset($row['total_compra_dolares'], $row['total_origen_dolares'], $row['semaforo']);
+        }
+        unset($row);
+    }
+
     echo json_encode([
         'error' => false,
-        'data' => $compras->tableCompras($fecIni, $fecFin),
+        'data' => $data,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
     http_response_code(400);
