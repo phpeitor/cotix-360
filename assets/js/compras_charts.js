@@ -12,12 +12,21 @@ document.addEventListener("DOMContentLoaded", () => {
         wrap.classList.toggle("d-none");
         const oculto = wrap.classList.contains("d-none");
         btn.classList.toggle("active", !oculto);
-        btn.innerHTML = oculto
-            ? '<i class="ti ti-chart-arcs me-1"></i>Ver gráficos'
-            : '<i class="ti ti-chart-arcs me-1"></i>Ocultar gráficos';
+
+        const titulo = oculto ? "Ver gráficos" : "Ocultar gráficos";
+        btn.dataset.bsTitle = titulo;
+        const tip = bootstrap?.Tooltip?.getInstance(btn);
+        if (tip) {
+            tip.hide();
+            tip.setContent({ ".tooltip-inner": titulo });
+        }
+
         if (!cargado && !oculto) {
             cargado = true;
             await cargarCharts();
+        }
+        if (!oculto) {
+            section.scrollIntoView({ behavior: "smooth", block: "start" });
         }
     });
 
@@ -64,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const colors = dataColors("chart-radar-subcat", ["#39afd1"]);
         new ApexCharts(el, {
-            chart: { height: 350, type: "radar" },
+            chart: { height: 350, type: "radar", toolbar: { show: false } },
             series: [{ name: "Monto ($)", data: series }],
             colors: colors,
             labels: labels,
@@ -91,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         new ApexCharts(el, {
-            chart: { height: 340, type: "radialBar" },
+            chart: { height: 350, type: "radialBar", toolbar: { show: false } },
             plotOptions: {
                 radialBar: {
                     offsetY: -10,
@@ -130,14 +139,25 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         new ApexCharts(el, {
-            chart: { height: 350, type: "scatter", zoom: { enabled: false } },
+            chart: { height: 350, type: "scatter", zoom: { enabled: false }, toolbar: { show: false } },
             series: series,
             colors: dataColors("chart-scatter-items", ["#39afd1", "#ce7e7e", "#ffbc00", "#6ac75a"]),
             xaxis: { title: { text: "Precio unitario (USD)" } },
             yaxis: { title: { text: "Cantidad" } },
             grid: { borderColor: "#f1f3fa", padding: { bottom: 5 } },
             legend: { offsetY: 7 },
-            tooltip: { x: { formatter: val => "$ " + formatNumber(val) } }
+            tooltip: {
+                custom: ({ seriesIndex, dataPointIndex, w }) => {
+                    const point = (w.config.series[seriesIndex]?.data || [])[dataPointIndex] || {};
+                    const nombre = point.name || "Item";
+                    return `
+                        <div style="padding:8px 12px;line-height:1.45;">
+                            <div style="font-weight:600;font-size:12px;">${escapeHtml(nombre)}</div>
+                            <div style="font-size:11px;opacity:.85;">Precio: $ ${formatNumber(point.x)}</div>
+                            <div style="font-size:11px;opacity:.85;">Cantidad: ${formatNumber(point.y)}</div>
+                        </div>`;
+                }
+            }
         }).render();
     }
 
@@ -159,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
         new ApexCharts(el, {
             series: [{ data: data }],
             legend: { show: false },
-            chart: { height: 350, type: "treemap" },
+            chart: { height: 350, type: "treemap", toolbar: { show: false } },
             colors: dataColors("chart-treemap-items", ["#ce7e7e", "#6ac75a", "#fa5c7c", "#6c757d", "#39afd1", "#ffc35a"]),
             plotOptions: { treemap: { distributed: true, enableShades: true } },
             dataLabels: {
@@ -175,5 +195,14 @@ document.addEventListener("DOMContentLoaded", () => {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
     }
 });

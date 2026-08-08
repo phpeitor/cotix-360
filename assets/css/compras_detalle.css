@@ -63,9 +63,10 @@
 }
 
 .form-compras .compras-precio-input {
-    width: 110px;
-    min-width: 0;
-    max-width: 100%;
+    flex: 1 1 90px;
+    min-width: 70px;
+    max-width: 170px;
+    width: auto;
     text-align: right;
     font-size: 13px;
     padding-top: .3rem;

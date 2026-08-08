@@ -351,15 +351,17 @@ class Compras
             $categoria = $categoria === '' ? 'Sin categoría' : $categoria;
             $porCategoria[$categoria] = ($porCategoria[$categoria] ?? 0) + $monto;
 
+            $nombre = trim((string)($row['nombre'] ?? ''));
+            $nombre = $nombre === '' ? 'Item sin nombre' : $nombre;
+
             $tipo = trim((string)($row['tipo'] ?? ''));
             $tipo = $tipo === '' ? 'Otros' : $tipo;
             $porTipo[$tipo][] = [
                 'x' => round($precioUsd, 2),
                 'y' => (int)($row['cantidad'] ?? 1),
+                'name' => $nombre,
             ];
 
-            $nombre = trim((string)($row['nombre'] ?? ''));
-            $nombre = $nombre === '' ? 'Item sin nombre' : $nombre;
             $porItem[$nombre] = ($porItem[$nombre] ?? 0) + $monto;
 
             $scatter[] = [

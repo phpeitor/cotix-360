@@ -358,7 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                min="0" step="0.01" inputmode="decimal" data-precio-input-detalle="${item.id}">
                     </div>
                 `
-                : `<span class="text-muted fs-12">${simbolo}</span> <span class="fw-medium">${money(precio)}</span>`;
+                : `<span class="text-muted fs-12">${simbolo}</span> <h5 class="fs-14 mt-1 fw-normal mb-0">${money(precio)}</h5>`;
 
             const cantidadHtml = editable
                 ? `
@@ -405,7 +405,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                     <td class="text-center">${cantidadHtml}</td>
                     <td class="text-end">${verMontos() ? precioHtml : '<span class="text-muted">-</span>'}</td>
-                    <td class="text-end item-total-value">${verMontos() ? `${simbolo} ${money(total)}` : "-"}</td>
+                    <td class="text-end item-total-value">${verMontos() ? `<span class="text-muted fs-12">${simbolo}</span> <h5 class="fs-14 mt-1 fw-normal mb-0">${money(total)}</h5>` : "-"}</td>
                     <td class="text-center">${accionHtml}</td>
                 </tr>
             `;

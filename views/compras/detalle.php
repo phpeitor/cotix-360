@@ -94,6 +94,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                 <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end receta-header-actions">
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#cliente-modal" data-bs-title="Cliente" data-bs-placement="bottom"><i class="ti ti-user-circle fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#condiciones-modal" data-bs-title="Datos comerciales" data-bs-placement="bottom"><i class="ti ti-clipboard-text fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon <?= $verMontos ? '' : 'd-none' ?>" id="btnToggleCharts" data-bs-toggle="tooltip" data-bs-title="Ver gráficos" data-bs-placement="bottom"><i class="ti ti-chart-arcs fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom" id="btnBuscarItems"><i class="ti ti-search fs-18"></i></button>
                                     <a href="compras.php" class="btn btn-dark btn-icon" data-bs-toggle="tooltip" data-bs-title="Volver" data-bs-placement="bottom"><i class="ti ti-corner-up-left-double fs-18"></i></a>
                                 </div>
@@ -150,12 +151,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
 
             <div class="row <?= $verMontos ? '' : 'd-none' ?>" id="charts-section">
                 <div class="col-12 mb-2">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                        <h4 class="header-title mb-0">Análisis gráfico de la compra</h4>
-                        <button type="button" class="btn btn-sm btn-dark" id="btnToggleCharts">
-                            <i class="ti ti-chart-arcs me-1"></i>Ver gráficos
-                        </button>
-                    </div>
+                    <h4 class="header-title mb-0">Análisis gráfico de la compra</h4>
                 </div>
                 <div class="col-12 d-none" id="charts-wrap">
                     <div class="row g-3">
