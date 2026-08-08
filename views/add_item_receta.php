@@ -109,9 +109,9 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2($defaultTipo);
                                             <div class="invalid-feedback">Please provide a nombre.</div>
                                         </div>
 
-                                        <div class="col-md-3 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label" for="descripcion">Descripcion</label>
-                                            <input type="text" class="form-control" id="descripcion" name="descripcion" placeholder="ZB H 50PPR DUAL CHNL" maxlength="350">
+                                            <textarea class="form-control" rows="5" id="descripcion" name="descripcion" required="" placeholder="ZB H 50PPR DUAL CHNL" maxlength="900"></textarea>
                                             <div class="invalid-feedback">Please provide a descripcion.</div>
                                         </div>
 
