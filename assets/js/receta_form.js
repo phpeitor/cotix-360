@@ -704,9 +704,6 @@ document.addEventListener("DOMContentLoaded", () => {
             clienteData.correo,
             clienteData.celular,
             clienteData.motivo,
-            clienteData.vendedor_correo,
-            clienteData.vendedor_telefono,
-            clienteData.condiciones_economicas_dias,
         ].every(value => String(value ?? "").trim() !== "");
     }
 
