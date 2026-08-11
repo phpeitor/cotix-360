@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const condicionesModalEl = document.getElementById("condiciones-modal");
     const btnGuardarCondiciones = document.getElementById("btnGuardarCondiciones");
     const tiempoEntregaEl = document.getElementById("tiempoEntrega");
+    const tiempoEntregaUnidadEl = document.getElementById("tiempoEntregaUnidad");
     const condicionesPagoEl = document.getElementById("condicionesPago");
     const vendedorEl = document.getElementById("vendedor");
     const vendedorCorreoEl = document.getElementById("vendedorCorreo");
@@ -49,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cantidadItemsRecetaEl = document.getElementById("cantidadItemsReceta");
     const condicionesEconomicasDiasEl = document.getElementById("condicionesEconomicasDias");
     const condicionesEconomicasVisibleEl = document.getElementById("condicionesEconomicasVisible");
+    const observacionesComercialesEl = document.getElementById("observacionesComerciales");
 
     const baseSelect = document.getElementById("filterBase");
     const categoriaSelect = document.getElementById("categoria");
@@ -606,6 +608,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = cliente || {};
 
         if (tiempoEntregaEl) tiempoEntregaEl.value = String(data.tiempo_entrega || "").replace(/\D/g, "");
+        if (tiempoEntregaUnidadEl) tiempoEntregaUnidadEl.value = ["dias", "semanas"].includes(String(data.tiempo_entrega_unidad || "dias")) ? data.tiempo_entrega_unidad : "dias";
         if (condicionesPagoEl) condicionesPagoEl.value = data.condiciones_pago || "";
         if (vendedorEl) vendedorEl.value = data.vendedor || "";
         if (vendedorCorreoEl) vendedorCorreoEl.value = data.vendedor_correo || "";
@@ -614,6 +617,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (cantidadItemsRecetaEl) cantidadItemsRecetaEl.value = data.cantidad_items || "";
         if (condicionesEconomicasDiasEl) condicionesEconomicasDiasEl.value = data.condiciones_economicas_dias || "";
         if (condicionesEconomicasVisibleEl) condicionesEconomicasVisibleEl.checked = String(data.condiciones_economicas_visible || "0") === "1";
+        if (observacionesComercialesEl) observacionesComercialesEl.value = data.observaciones || "";
     }
 
     function getClienteModalPayload() {
@@ -630,7 +634,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getCondicionesPayload() {
         return {
-            tiempo_entrega: String(tiempoEntregaEl?.value || "").replace(/\D/g, "").trim(),
+tiempo_entrega: String(tiempoEntregaEl?.value || "").replace(/\D/g, "").trim(),
+            tiempo_entrega_unidad: String(tiempoEntregaUnidadEl?.value || "dias").trim(),
             condiciones_pago: String(condicionesPagoEl?.value || "").trim(),
             vendedor: String(vendedorEl?.value || "").trim(),
             vendedor_correo: String(vendedorCorreoEl?.value || "").trim(),
@@ -639,6 +644,7 @@ document.addEventListener("DOMContentLoaded", () => {
             cantidad_items: String(cantidadItemsRecetaEl?.value || "").replace(/\D/g, "").trim(),
             condiciones_economicas_dias: String(condicionesEconomicasDiasEl?.value || "").replace(/\D/g, "").trim(),
             condiciones_economicas_visible: condicionesEconomicasVisibleEl?.checked ? "1" : "0",
+            observaciones: String(observacionesComercialesEl?.value || "").trim(),
         };
     }
 
@@ -666,8 +672,10 @@ document.addEventListener("DOMContentLoaded", () => {
             fd.append("vendedor_telefono", payload.vendedor_telefono);
             fd.append("descripcion", payload.descripcion);
             fd.append("cantidad_items", payload.cantidad_items);
-            fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
+fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
             fd.append("condiciones_economicas_visible", payload.condiciones_economicas_visible);
+            fd.append("tiempo_entrega_unidad", payload.tiempo_entrega_unidad);
+            fd.append("observaciones", payload.observaciones);
 
             const res = await fetch("controller/upd_receta_condiciones.php", {
                 method: "POST",

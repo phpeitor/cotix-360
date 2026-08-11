@@ -31,6 +31,12 @@ try {
     $cantidadItems = isset($_POST['cantidad_items']) ? (int)$_POST['cantidad_items'] : 0;
     $condicionesEconomicasDias = isset($_POST['condiciones_economicas_dias']) ? (int)$_POST['condiciones_economicas_dias'] : 0;
     $condicionesEconomicasVisible = isset($_POST['condiciones_economicas_visible']) ? (int)$_POST['condiciones_economicas_visible'] : 0;
+    $tiempoEntregaUnidad = trim((string)($_POST['tiempo_entrega_unidad'] ?? 'dias'));
+    $observaciones = trim((string)($_POST['observaciones'] ?? ''));
+
+    if (!in_array($tiempoEntregaUnidad, ['dias', 'semanas'], true)) {
+        $tiempoEntregaUnidad = 'dias';
+    }
 
     if ($recetaId <= 0) {
         throw new Exception('Receta inválida');
@@ -56,6 +62,8 @@ try {
         'cantidad_items' => $cantidadItems,
         'condiciones_economicas_dias' => $condicionesEconomicasDias,
         'condiciones_economicas_visible' => $condicionesEconomicasVisible === 1 ? 1 : 0,
+        'tiempo_entrega_unidad' => $tiempoEntregaUnidad,
+        'observaciones' => $observaciones,
     ]);
 
     if (!$ok) {
@@ -74,6 +82,8 @@ try {
             'cantidad_items' => $cantidadItems,
             'condiciones_economicas_dias' => $condicionesEconomicasDias,
             'condiciones_economicas_visible' => $condicionesEconomicasVisible === 1 ? 1 : 0,
+            'tiempo_entrega_unidad' => $tiempoEntregaUnidad,
+            'observaciones' => $observaciones,
         ]
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {

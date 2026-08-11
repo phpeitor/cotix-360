@@ -384,10 +384,14 @@ ob_start();
 
     <?php if ($mostrarDetalle && $esOferta): ?>
         <?php
-            $tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['cliente_tiempo_entrega'] ?? ''));
-            $tiempoEntregaTextoOferta = $tiempoEntregaDiasOferta > 0 ? $tiempoEntregaDiasOferta . ' días' : 'TIEMPO DE ENTREGA';
+$tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['cliente_tiempo_entrega'] ?? ''));
+            $tiempoEntregaUnidadOferta = strtolower((string)($receta['cliente_tiempo_entrega_unidad'] ?? 'dias'));
+            $tiempoEntregaTextoOferta = $tiempoEntregaDiasOferta > 0
+                ? $tiempoEntregaDiasOferta . ($tiempoEntregaUnidadOferta === 'semanas' ? ' semanas' : ' días')
+                : 'TIEMPO DE ENTREGA';
             $descripcionRecetaOferta = textoOfertaExcel($receta['cliente_descripcion'] ?? '');
             $cantidadItemsOferta = (int)($receta['cliente_cantidad_items'] ?? 0);
+            $observacionesComercialesOferta = textoOfertaExcel($receta['cliente_observaciones'] ?? '');
         ?>
         <table class="offer-excel-table">
             <thead>
@@ -496,9 +500,10 @@ ob_start();
     <?php endif; ?>
 
     <?php if ($esOferta): ?>
+        <?php $observacionesComercialesOferta = $observacionesComercialesOferta ?? textoOfertaExcel($receta['cliente_observaciones'] ?? ''); ?>
         <table class="offer-summary-table">
             <tr>
-                <td class="offer-green" style="width: 70%;">Observaciones:</td>
+                <td class="offer-green" style="width: 70%;">Observaciones:<?= $observacionesComercialesOferta !== '' ? ' ' . nl2br(escaparPdf($observacionesComercialesOferta)) : '' ?></td>
                 <td style="width: 15%;"><strong>SUBTOTAL_1</strong></td>
                 <td class="money" style="width: 15%;">$ <?= number_format($totalesOfertaComercial['subtotal'], 2) ?></td>
             </tr>

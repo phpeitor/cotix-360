@@ -230,9 +230,13 @@ try {
     $row = $tableHeaderRow + 1;
     $itemNumber = 1;
     $tiempoEntregaDias = (int)preg_replace('/\D+/', '', (string)($receta['cliente_tiempo_entrega'] ?? ''));
-    $tiempoEntregaTexto = $tiempoEntregaDias > 0 ? $tiempoEntregaDias . ' días' : 'TIEMPO DE ENTREGA';
+    $tiempoEntregaUnidad = strtolower((string)($receta['cliente_tiempo_entrega_unidad'] ?? 'dias'));
+    $tiempoEntregaTexto = $tiempoEntregaDias > 0
+        ? $tiempoEntregaDias . ($tiempoEntregaUnidad === 'semanas' ? ' semanas' : ' días')
+        : 'TIEMPO DE ENTREGA';
     $descripcionReceta = textoOfertaExcel($receta['cliente_descripcion'] ?? '');
     $cantidadItemsReceta = (int)($receta['cliente_cantidad_items'] ?? 0);
+    $observacionesComerciales = textoOfertaExcel($receta['cliente_observaciones'] ?? '');
 
     $sheet->mergeCells('C' . $row . ':F' . $row);
     $sheet->mergeCells('H' . $row . ':I' . $row);
@@ -320,7 +324,7 @@ try {
     $totalOferta = $totalesOfertaReceta['total'];
 
     $sheet->mergeCells('A' . $row . ':G' . $row);
-    $sheet->setCellValue('A' . $row, 'Observaciones:');
+    $sheet->setCellValue('A' . $row, 'Observaciones:' . ($observacionesComerciales !== '' ? ' ' . $observacionesComerciales : ''));
     $sheet->getRowDimension($row)->setRowHeight(18);
     $sheet->getStyle('A' . $row . ':G' . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF92D050');
     $sheet->getStyle('A' . $row)->getFont()->setBold(true);

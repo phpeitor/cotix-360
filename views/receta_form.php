@@ -131,9 +131,9 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
                                 </div>
 
                                 <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end receta-header-actions">
+                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#cliente-modal" data-bs-title="Cliente" data-bs-placement="bottom"><i class="ti ti-user-circle fs-18"></i></button>
                                     <?php if ($puedeGestionarDatosCliente): ?>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-categoria-modal" data-bs-title="Márgen" data-bs-placement="bottom"><i class="ti ti-box fs-18"></i></button>
-                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#cliente-modal" data-bs-title="Cliente" data-bs-placement="bottom"><i class="ti ti-user-circle fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#condiciones-modal" data-bs-title="Datos comerciales" data-bs-placement="bottom"><i class="ti ti-clipboard-text fs-18"></i></button>
                                     <?php endif; ?>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom"><i class="ti ti-search fs-18"></i></button>
@@ -342,53 +342,6 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
         </div>
     </div>
     
-    <?php if ($puedeGestionarDatosCliente): ?>
-    <div id="info-categoria-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-categoria-modalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header text-bg-warning border-0">
-                    <h4 class="modal-title" id="info-categoria-modalLabel">
-                        Márgenes por categoría
-                    </h4>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body">
-                    <div id="alertCategoriaReceta" class="alert alert-info d-none" role="alert"></div>
-
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Categoría</th>
-                                    <th class="text-end">Cantidad</th>
-                                    <th class="text-end">Subtotal</th>
-                                    <th class="text-end">Margen %</th>
-                                    <th class="text-end">Total Fórmula</th>
-                                    <th class="text-end">Markup</th>
-                                </tr>
-                            </thead>
-                            <tbody id="recetaCategoriaTableBody">
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">Abre el modal para cargar las categorías.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="modal-footer border-0">
-                    <div class="me-auto d-flex align-items-center gap-4 flex-wrap">
-                        <div class="small text-muted fw-semibold">Total + Margen $: <span id="totalFormulaDolares">0.00</span></div>
-                        <div class="small text-muted fw-semibold">Margen $: <span id="totalMargenFormulaDolares">0.00</span></div>
-                    </div>
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-warning" id="btnGuardarRecetaCategoria">Guardar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div id="cliente-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="cliente-modalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -438,6 +391,53 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
         </div>
     </div>
 
+    <?php if ($puedeGestionarDatosCliente): ?>
+    <div id="info-categoria-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-categoria-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-bg-warning border-0">
+                    <h4 class="modal-title" id="info-categoria-modalLabel">
+                        Márgenes por categoría
+                    </h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="alertCategoriaReceta" class="alert alert-info d-none" role="alert"></div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Categoría</th>
+                                    <th class="text-end">Cantidad</th>
+                                    <th class="text-end">Subtotal</th>
+                                    <th class="text-end">Margen %</th>
+                                    <th class="text-end">Total Fórmula</th>
+                                    <th class="text-end">Markup</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recetaCategoriaTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">Abre el modal para cargar las categorías.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0">
+                    <div class="me-auto d-flex align-items-center gap-4 flex-wrap">
+                        <div class="small text-muted fw-semibold">Total + Margen $: <span id="totalFormulaDolares">0.00</span></div>
+                        <div class="small text-muted fw-semibold">Margen $: <span id="totalMargenFormulaDolares">0.00</span></div>
+                    </div>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-warning" id="btnGuardarRecetaCategoria">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="condiciones-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="condiciones-modalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -464,21 +464,28 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
                             <label class="form-label" for="tiempoEntrega">Tiempo de entrega</label>
                             <div class="input-group">
                                 <input type="number" class="form-control" id="tiempoEntrega" min="1" max="999" step="1" placeholder="Ej. 15">
-                                <span class="input-group-text">días</span>
+                                <select class="form-select" id="tiempoEntregaUnidad" style="max-width:120px;">
+                                    <option value="dias">días</option>
+                                    <option value="semanas">semanas</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-lg-6">
-                            <label class="form-label" for="cantidadItemsReceta">Cantidad</label>
+                            <label class="form-label" for="cantidadItemsReceta">Cantidad Items</label>
                             <input type="number" class="form-control" id="cantidadItemsReceta" min="1" max="5000" step="1" placeholder="Ej. 10">
                         </div>
                         <div class="col-lg-12">
-                            <label class="form-label" for="descripcionReceta">Descripcion</label>
-                            <textarea class="form-control" id="descripcionReceta" maxlength="500" rows="3" placeholder="Descripcion de la receta"></textarea>
+                            <label class="form-label" for="descripcionReceta">Descripción</label>
+                            <textarea class="form-control" id="descripcionReceta" maxlength="500" rows="3" placeholder="Escriba la descripción de la receta"></textarea>
                         </div>
                         
                         <div class="col-12">
                             <label class="form-label" for="condicionesPago">Condiciones de pago</label>
                             <textarea class="form-control" id="condicionesPago" rows="3" maxlength="200" placeholder="Ej. 50% adelanto, 50% contra entrega"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="observacionesComerciales">Observaciones</label>
+                            <textarea class="form-control" id="observacionesComerciales" rows="3" maxlength="500" placeholder="Observaciones de la receta"></textarea>
                         </div>
                         <div class="col-12">
                             <div class="commercial-conditions-box">

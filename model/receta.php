@@ -141,7 +141,7 @@ class Receta {
                     correo,
                     celular,
                     motivo,
-                    descripcion,
+descripcion,
                     cantidad_items,
                     tiempo_entrega,
                     condiciones_pago,
@@ -150,6 +150,8 @@ class Receta {
                     vendedor_telefono,
                     condiciones_economicas_dias,
                     condiciones_economicas_visible,
+                    tiempo_entrega_unidad,
+                    observaciones,
                     created_at,
                     updated_at
                 ) VALUES (
@@ -170,6 +172,8 @@ class Receta {
                     :vendedor_telefono,
                     :condiciones_economicas_dias,
                     :condiciones_economicas_visible,
+                    :tiempo_entrega_unidad,
+                    :observaciones,
                     :created_at,
                     :updated_at
                 ) ON DUPLICATE KEY UPDATE
@@ -182,6 +186,8 @@ class Receta {
                     cantidad_items = VALUES(cantidad_items),
                     condiciones_economicas_dias = VALUES(condiciones_economicas_dias),
                     condiciones_economicas_visible = VALUES(condiciones_economicas_visible),
+                    tiempo_entrega_unidad = VALUES(tiempo_entrega_unidad),
+                    observaciones = VALUES(observaciones),
                     updated_at = VALUES(updated_at)";
 
         $stmt = $this->conn->prepare($sql);
@@ -193,8 +199,10 @@ class Receta {
         $stmt->bindValue(':vendedor_telefono', (string)($data['vendedor_telefono'] ?? ''));
         $stmt->bindValue(':descripcion', (string)($data['descripcion'] ?? ''));
         $stmt->bindValue(':cantidad_items', (int)($data['cantidad_items'] ?? 0), PDO::PARAM_INT);
-        $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_economicas_dias'] ?? 0), PDO::PARAM_INT);
+$stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_economicas_dias'] ?? 0), PDO::PARAM_INT);
         $stmt->bindValue(':condiciones_economicas_visible', (int)($data['condiciones_economicas_visible'] ?? 0), PDO::PARAM_INT);
+        $stmt->bindValue(':tiempo_entrega_unidad', (string)($data['tiempo_entrega_unidad'] ?? 'dias'));
+        $stmt->bindValue(':observaciones', (string)($data['observaciones'] ?? ''));
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->bindValue(':updated_at', $this->nowLima);
 
@@ -391,13 +399,15 @@ class Receta {
                         rc.motivo AS cliente_motivo,
                         rc.descripcion AS cliente_descripcion,
                         rc.cantidad_items AS cliente_cantidad_items,
-                        rc.tiempo_entrega AS cliente_tiempo_entrega,
-                        rc.condiciones_pago AS cliente_condiciones_pago,
-                         rc.vendedor AS cliente_vendedor,
-                         rc.vendedor_correo AS cliente_vendedor_correo,
-                         rc.vendedor_telefono AS cliente_vendedor_telefono,
-                          rc.condiciones_economicas_dias AS cliente_condiciones_economicas_dias,
-                          rc.condiciones_economicas_visible AS cliente_condiciones_economicas_visible
+rc.tiempo_entrega AS cliente_tiempo_entrega,
+                         rc.condiciones_pago AS cliente_condiciones_pago,
+                          rc.vendedor AS cliente_vendedor,
+                          rc.vendedor_correo AS cliente_vendedor_correo,
+                          rc.vendedor_telefono AS cliente_vendedor_telefono,
+                           rc.condiciones_economicas_dias AS cliente_condiciones_economicas_dias,
+                           rc.condiciones_economicas_visible AS cliente_condiciones_economicas_visible,
+                           rc.tiempo_entrega_unidad AS cliente_tiempo_entrega_unidad,
+                           rc.observaciones AS cliente_observaciones
                 FROM recetas_ingenieria c
                 LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
                 LEFT JOIN personal p2 ON p2.IDPERSONAL = c.usuario_upd
@@ -909,13 +919,15 @@ class Receta {
                         rc.motivo AS cliente_motivo,
                         rc.descripcion AS cliente_descripcion,
                         rc.cantidad_items AS cliente_cantidad_items,
-                        rc.tiempo_entrega AS cliente_tiempo_entrega,
+rc.tiempo_entrega AS cliente_tiempo_entrega,
                        rc.condiciones_pago AS cliente_condiciones_pago,
                        rc.vendedor AS cliente_vendedor,
                        rc.vendedor_correo AS cliente_vendedor_correo,
                        rc.vendedor_telefono AS cliente_vendedor_telefono,
                         rc.condiciones_economicas_dias AS cliente_condiciones_economicas_dias,
-                        rc.condiciones_economicas_visible AS cliente_condiciones_economicas_visible
+                        rc.condiciones_economicas_visible AS cliente_condiciones_economicas_visible,
+                        rc.tiempo_entrega_unidad AS cliente_tiempo_entrega_unidad,
+                        rc.observaciones AS cliente_observaciones
                 FROM recetas c
                 LEFT JOIN personal p on p.IDPERSONAL=c.usuario_id
                 LEFT JOIN personal p2 on p2.IDPERSONAL=c.usuario_upd
