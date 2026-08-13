@@ -33,8 +33,8 @@ try {
     if (!$compra) {
         throw new Exception('Compra no encontrada');
     }
-    if (strcasecmp(trim((string)($compra['estado'] ?? '')), 'Pendiente') !== 0) {
-        throw new Exception('Solo se pueden modificar compras en estado Pendiente');
+    if (!in_array(strtolower(trim((string)($compra['estado'] ?? ''))), ['pendiente', 'validado'], true)) {
+        throw new Exception('Solo se pueden modificar compras en estado Pendiente o Validado');
     }
 
     $accion = trim((string)($_POST['accion'] ?? ''));

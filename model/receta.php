@@ -506,7 +506,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                             id,
                             id_receta_duplicada,
                             usuario_id,
-                            'Pendiente',
+                            'Validado',
                             :created_at,
                             :updated_at,
                             :usuario_upd,
@@ -806,7 +806,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                             ingenieria_id BIGINT UNSIGNED NOT NULL,
                             id_receta_duplicada INT NULL DEFAULT NULL,
                             usuario_id BIGINT UNSIGNED NOT NULL,
-                            estado ENUM('Pendiente','Aprobada','Anulada') NULL DEFAULT 'Pendiente',
+                            estado ENUM('Pendiente','Validado','Aprobada','Anulada') NULL DEFAULT 'Validado',
                             created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
                             updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                             usuario_upd INT NULL DEFAULT NULL,
@@ -819,6 +819,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                             KEY idx_receta_compras_estado (estado)
                         )";
         $this->conn->exec($sqlCabecera);
+        $this->asegurarEstadoValidadoCompras();
 
         $sqlDetalle = "CREATE TABLE IF NOT EXISTS detalle_compras (
                            id INT NOT NULL AUTO_INCREMENT,
@@ -865,6 +866,15 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
         if (strpos((string)($row['Type'] ?? ''), "'Validado'") === false) {
             $this->conn->exec("ALTER TABLE recetas_ingenieria MODIFY estado ENUM('Borrador','Enviada','Aprobada','Validado','Rechazada','Anulada','GANADO') NULL DEFAULT 'GANADO'");
+        }
+    }
+
+    private function asegurarEstadoValidadoCompras(): void
+    {
+        $stmt = $this->conn->query("SHOW COLUMNS FROM receta_compras LIKE 'estado'");
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        if (strpos((string)($row['Type'] ?? ''), "'Validado'") === false) {
+            $this->conn->exec("ALTER TABLE receta_compras MODIFY estado ENUM('Pendiente','Validado','Aprobada','Anulada') NULL DEFAULT 'Validado'");
         }
     }
 

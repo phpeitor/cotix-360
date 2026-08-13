@@ -508,7 +508,7 @@ class Compras
             ingenieria_id BIGINT UNSIGNED NOT NULL,
             id_receta_duplicada INT NULL DEFAULT NULL,
             usuario_id BIGINT UNSIGNED NOT NULL,
-            estado ENUM('Pendiente','Aprobada','Anulada') NULL DEFAULT 'Pendiente',
+            estado ENUM('Pendiente','Validado','Aprobada','Anulada') NULL DEFAULT 'Validado',
             created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             usuario_upd INT NULL DEFAULT NULL,
@@ -520,6 +520,8 @@ class Compras
             KEY idx_receta_compras_origen (id_receta_duplicada),
             KEY idx_receta_compras_estado (estado)
         )");
+
+        $this->asegurarEstadoValidadoCompras();
 
         $this->conn->exec("CREATE TABLE IF NOT EXISTS detalle_compras (
             id INT NOT NULL AUTO_INCREMENT,
@@ -559,6 +561,15 @@ class Compras
         $stmt->execute();
         if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
             $this->conn->exec($alterSql);
+        }
+    }
+
+    private function asegurarEstadoValidadoCompras(): void
+    {
+        $stmt = $this->conn->query("SHOW COLUMNS FROM receta_compras LIKE 'estado'");
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        if (strpos((string)($row['Type'] ?? ''), "'Validado'") === false) {
+            $this->conn->exec("ALTER TABLE receta_compras MODIFY estado ENUM('Pendiente','Validado','Aprobada','Anulada') NULL DEFAULT 'Validado'");
         }
     }
 }

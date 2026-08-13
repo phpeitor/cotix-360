@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const tableContainer = document.getElementById("table-gridjs");
     const userCargo = Number(tableContainer?.dataset?.userCargo || 0);
     const esTecnico = userCargo === 4;
-    const totalItemsCellIndex = esTecnico ? 10 : 11;
+    const totalItemsCellIndex = esTecnico ? 9 : 10;
     const today = new Date();
     const pastDate = new Date();
     pastDate.setDate(today.getDate() - 30);
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ...(esTecnico ? [] : [{
                 id: "semaforo",
                 name: "Semáforo",
-                width: "150px",
+                width: "170px",
                 sort: false,
                 formatter: (cell, row) => renderSemaforo(cell, row)
             }]),
@@ -154,6 +154,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const estado = String(value || "Pendiente").trim();
         const badgeClass = estado === "Aprobada"
             ? "badge-outline-success"
+            : estado === "Validado"
+                ? "badge-outline-info"
             : estado === "Anulada"
                 ? "badge-outline-danger"
                 : "badge-outline-warning";
@@ -180,11 +182,17 @@ document.addEventListener("DOMContentLoaded", () => {
             ? ((totalCompra / totalOrigen - 1) * 100).toFixed(1)
             : null;
 
+        const label = nivel === "verde"
+            ? "Mejora"
+            : nivel === "rojo"
+                ? "Supera"
+                : "En rango";
+
         return gridjs.html(`
-            <span class="badge ${map[nivel] || "bg-secondary"}">
-                <i class="ti ti-circle-filled fs-10 me-1"></i>
-                ${escapeHtml(String(semaforo.mensaje || nivel))}
-                ${diff !== null ? ` <small class="opacity-75">(${diff}%)</small>` : ""}
+            <span class="badge ${map[nivel] || "bg-secondary"} compras-semaforo-badge"
+                  data-bs-toggle="tooltip"
+                  data-bs-title="${escapeHtml(String(semaforo.mensaje || nivel))}${diff !== null ? ` (${diff}%)` : ""}">
+                <i class="ti ti-circle-filled fs-10 me-1"></i>${label}${diff !== null ? ` ${diff}%` : ""}
             </span>
         `);
     }

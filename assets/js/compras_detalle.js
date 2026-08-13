@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let totales = null;
     let semaforo = null;
     let condiciones = {};
-    let permisos = { puede_editar: false, puede_ver_montos: true, estado: "Pendiente" };
+    let permisos = { puede_editar: false, puede_ver_montos: true, estado: "Validado" };
 
     const MAX_CANTIDAD = 5000;
     const cantidadTimers = new Map();
@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function puedeEditar() {
-        return Boolean(permisos.puede_editar) && String(compra?.estado || "").trim().toLowerCase() === "pendiente";
+        return Boolean(permisos.puede_editar) && ["pendiente", "validado"].includes(String(compra?.estado || "").trim().toLowerCase());
     }
 
     function verMontos() {
@@ -218,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fields.nombre.textContent = compra.nombre || "Sin nombre";
         fields.usuario.textContent = compra.usuario || "-";
         fields.aprobador.textContent = compra.usuario_aprobador || "-";
-        fields.estado.innerHTML = renderEstado(compra.estado || "Pendiente");
+        fields.estado.innerHTML = renderEstado(compra.estado || "Validado");
         fields.fecha.textContent = compra.created_at || "-";
         fields.tipoCambio.textContent = Number(totales?.tipo_cambio || compra.tipo_cambio || 0).toFixed(3);
 
@@ -315,9 +315,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         semaforoWrap.classList.remove("d-none");
         semaforoWrap.innerHTML = `
-            <span class="semaforo-badge semaforo-${escapeHtml(semaforo.nivel)}">
+            <span class="semaforo-badge semaforo-${escapeHtml(semaforo.nivel)}" data-bs-toggle="tooltip" data-bs-title="${escapeHtml(semaforo.mensaje)}">
                 <span class="semaforo-indicator"></span>
-                <span>${escapeHtml(semaforo.mensaje)}</span>
+                <span class="semaforo-main">${escapeHtml(resumenSemaforo(semaforo.nivel))}</span>
                 ${totalOrigen > 0 ? `
                     <span class="semaforo-diff">
                         Compra: $ ${formatNumber(totalCompra)} | Ingeniería: $ ${formatNumber(totalOrigen)}
@@ -325,6 +325,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 ` : ""}
             </span>
         `;
+    }
+
+    function resumenSemaforo(nivel) {
+        const map = {
+            verde: "Mejora económica",
+            naranja: "Dentro del rango",
+            rojo: "Supera ingeniería",
+            gris: "Sin referencia",
+        };
+        return map[String(nivel || "gris")] || "Sin referencia";
     }
 
     function renderTotales() {
@@ -810,7 +820,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderEstado(value) {
-        const estado = String(value || "Pendiente").trim();
+        const estado = String(value || "Validado").trim();
         const badgeClass = estado === "Aprobada"
             ? "badge-outline-success"
             : estado === "Anulada"

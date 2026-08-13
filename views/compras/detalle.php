@@ -20,7 +20,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta.css?v=1.4" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/compras_detalle.css?v=1.1" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/compras_detalle.css?v=2.0" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -150,47 +150,60 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                 </div>
             </div>
 
-            <div class="row <?= $verMontos ? '' : 'd-none' ?>" id="charts-section">
-                <div class="col-12 mb-2">
-                    <h4 class="header-title mb-0">Análisis gráfico de la compra</h4>
+            <div id="charts-section" class="<?= $verMontos ? '' : 'd-none' ?>"></div>
+        </div>
+    </div>
+    <?php include ROOT . '/layout/footer.html'; ?>
+
+        </div>
+    </div>
+
+    <div id="charts-modal" class="modal fade" tabindex="-1" aria-labelledby="charts-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-fullscreen-lg-down modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header text-bg-dark border-0">
+                    <h4 class="modal-title" id="charts-modalLabel">Análisis gráfico de la compra</h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="col-12 d-none" id="charts-wrap">
+                <div class="modal-body" id="charts-wrap">
                     <div class="row g-3">
-                        <div class="col-xl-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h4 class="header-title mb-3">Monto por Sub Categoría 1</h4>
-                                    <div dir="ltr">
+                        <div class="col-xl-6 d-flex">
+                            <div class="card compras-chart-card w-100">
+                                <div class="card-body d-flex flex-column">
+                                    <h4 class="header-title mb-3">Monto por Categoría</h4>
+                                    <div dir="ltr" class="radar-chart-wrap flex-grow-1">
                                         <div id="chart-radar-subcat" class="apex-charts" data-colors="#39afd1"></div>
+                                        <div id="radar-hover-layer" class="radar-hover-layer"></div>
+                                        <div id="radar-custom-tooltip" class="radar-custom-tooltip"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xl-6">
-                            <div class="card">
-                                <div class="card-body">
+                        <div class="col-xl-6 d-flex">
+                            <div class="card compras-chart-card w-100">
+                                <div class="card-body d-flex flex-column">
                                     <h4 class="header-title mb-3">Ingeniería vs Compras</h4>
-                                    <div dir="ltr">
+                                    <div dir="ltr" class="flex-grow-1">
                                         <div id="chart-radialbar-comparativo" class="apex-charts" data-colors="#6ac75a,#39afd1"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xl-6">
-                            <div class="card">
-                                <div class="card-body">
+                        <div class="col-12">
+                            <div class="card compras-chart-card compras-chart-card-wide">
+                                <div class="card-body d-flex flex-column">
                                     <h4 class="header-title mb-3">Items de la compra</h4>
-                                    <div dir="ltr">
+                                    <div dir="ltr" class="compras-scatter-scroll flex-grow-1">
                                         <div id="chart-scatter-items" class="apex-charts" data-colors="#39afd1,#ce7e7e,#ffbc00,#6ac75a"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xl-6">
-                            <div class="card">
-                                <div class="card-body">
+                        <div class="col-12">
+                            <div class="card compras-chart-card compras-chart-card-wide">
+                                <div class="card-body d-flex flex-column">
                                     <h4 class="header-title mb-3">Distribución del monto por item</h4>
-                                    <div dir="ltr">
+                                    <div dir="ltr" class="flex-grow-1">
                                         <div id="chart-treemap-items" class="apex-charts" data-colors="#ce7e7e,#6ac75a,#fa5c7c,#6c757d,#39afd1,#ffc35a"></div>
                                     </div>
                                 </div>
@@ -199,10 +212,6 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <?php include ROOT . '/layout/footer.html'; ?>
-
         </div>
     </div>
 
@@ -388,9 +397,9 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/compras_detalle.js?v=2.1"></script>
+    <script src="./assets/js/compras_detalle.js?v=2.3"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
-    <script src="./assets/js/compras_charts.js?v=1.0"></script>
+    <script src="./assets/js/compras_charts.js?v=2.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
 </html>

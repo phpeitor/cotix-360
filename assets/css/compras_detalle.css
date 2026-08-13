@@ -9,12 +9,13 @@
 .semaforo-badge {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 18px;
-    border-radius: 999px;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 14px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
     color: #fff;
+    max-width: min(100%, 760px);
 }
 
 .semaforo-indicator {
@@ -24,6 +25,10 @@
     border-radius: 50%;
     background: #fff;
     opacity: .9;
+}
+
+.semaforo-main {
+    white-space: nowrap;
 }
 
 .semaforo-badge.semaforo-verde {
@@ -45,6 +50,24 @@
 .semaforo-diff {
     font-weight: 400;
     opacity: .9;
+    font-size: 12px;
+}
+
+@media (max-width: 767.98px) {
+    .semaforo-badge {
+        align-items: flex-start;
+        border-radius: 12px;
+        flex-direction: column;
+        padding: 10px 12px;
+    }
+
+    .semaforo-indicator {
+        display: none;
+    }
+
+    .semaforo-main {
+        white-space: normal;
+    }
 }
 
 .form-compras .table-custom td .d-inline-flex.gap-1 {
@@ -87,9 +110,79 @@
     line-height: 1.35;
 }
 
+.compras-chart-card {
+    min-height: 460px;
+}
+
+.compras-chart-card .apex-charts {
+    min-height: 380px;
+}
+
+.compras-chart-card-wide {
+    min-height: 520px;
+}
+
+.compras-chart-card-wide .apex-charts {
+    min-height: 430px;
+}
+
+.compras-scatter-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 6px;
+}
+
+.compras-scatter-scroll #chart-scatter-items {
+    min-width: 1180px;
+}
+
+#charts-modal .apexcharts-tooltip {
+    z-index: 1065 !important;
+}
+
+.radar-chart-wrap {
+    min-height: 380px;
+    position: relative;
+}
+
+.radar-custom-tooltip {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, .16);
+    color: #313a46;
+    display: none;
+    font-size: 12px;
+    line-height: 1.35;
+    max-width: 260px;
+    padding: 8px 10px;
+    pointer-events: none;
+    position: absolute;
+    white-space: normal;
+    z-index: 1071;
+}
+
+.radar-custom-tooltip.show {
+    display: block;
+}
+
+.radar-hover-layer {
+    cursor: pointer;
+    display: block;
+    inset: 0 6% 0 6%;
+    pointer-events: auto;
+    position: absolute;
+    z-index: 1068;
+}
+
 @media (max-width: 991.98px) {
     .compras-detalle-table td,
     .compras-detalle-table th {
         min-width: 140px;
+    }
+
+    .compras-chart-card,
+    .compras-chart-card-wide {
+        min-height: 420px;
     }
 }

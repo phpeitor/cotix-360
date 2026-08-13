@@ -68,7 +68,7 @@ try {
         'permisos' => [
             'puede_editar' => in_array($cargo, Compras::CARGOS_EDITABLES, true),
             'puede_ver_montos' => $puedeVerMontos,
-            'estado' => $compra['estado'] ?? 'Pendiente',
+            'estado' => $compra['estado'] ?? 'Validado',
         ],
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
