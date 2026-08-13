@@ -42,8 +42,8 @@ document.addEventListener("DOMContentLoaded", () => {
         columns: [
             { id: "id", name: "ID", width: "70px" },
             { id: "id_receta_duplicada", name: "Origen", hidden: true },
-            { id: "usuario", name: "Usuario", width: "120px" },
-            { id: "usuario_aprobador", name: "Aprobado", width: "120px" },
+            { id: "usuario", name: "Enviado por", width: "120px" },
+            { id: "usuario_aprobador", name: "Validado por", width: "120px" },
             {
                 id: "nombre",
                 name: "Receta",
@@ -77,14 +77,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     const estado = String(row?.cells?.[7]?.data ?? "");
                     const historialCount = Number(row?.cells?.[11]?.data ?? 0);
                     const hashId = typeof md5 === "function" ? md5(String(id)) : String(id);
-                    const approveButton = estado !== "Aprobada" && historialCount > 0
+                    const estadoValidado = ["Aprobada", "Validado"].includes(estado);
+                    const approveButton = !estadoValidado && historialCount > 0
                         ? `<button type="button"
                                    class="btn btn-soft-success btn-icon btn-sm rounded-circle ms-1"
                                    data-aprobar-ingenieria="${escapeHtml(id)}"
                                    data-bs-toggle="tooltip"
-                                   data-bs-title="Aprobar">
-                               <i class="ti ti-check"></i>
-                           </button>`
+                                   data-bs-title="Validar">
+                                <i class="ti ti-check"></i>
+                            </button>`
                         : "";
 
                     return gridjs.html(`
@@ -158,8 +159,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!id) return;
 
         alertify.confirm(
-            "Aprobar ingeniería",
-            "La ingeniería se aprobará y se enviará a compras. ¿Desea continuar?",
+            "Validar ingeniería",
+            "La ingeniería se validará y se enviará a compras. ¿Desea continuar?",
             () => {
                 button.disabled = true;
                 const formData = new FormData();
@@ -172,12 +173,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     .then(async response => {
                         const data = await response.json().catch(() => ({}));
                         if (!response.ok || data.success === false) {
-                            throw new Error(data.message || "No se pudo aprobar la ingeniería");
+                            throw new Error(data.message || "No se pudo validar la ingeniería");
                         }
                         return data;
                     })
                     .then(() => {
-                        alertify.success("Ingeniería aprobada y enviada a compras");
+                        alertify.success("Ingeniería validada y enviada a compras");
                         grid.updateConfig({
                             server: {
                                 url: buildUrl(),
@@ -188,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     })
                     .catch(error => {
                         button.disabled = false;
-                        alertify.error(error.message || "No se pudo aprobar la ingeniería");
+                        alertify.error(error.message || "No se pudo validar la ingeniería");
                     });
             },
             () => {}
@@ -206,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderEstado(value) {
         const estado = String(value || "GANADO").trim();
-        const badgeClass = estado === "Aprobada"
+        const badgeClass = ["Aprobada", "Validado"].includes(estado)
             ? "badge-outline-success"
             : estado === "GANADO"
                 ? "badge-outline-info"

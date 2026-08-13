@@ -26,7 +26,7 @@ try {
 
     echo json_encode([
         'success' => true,
-        'estado' => 'Aprobada',
+        'estado' => 'Validado',
         'compra_id' => $compraId,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {

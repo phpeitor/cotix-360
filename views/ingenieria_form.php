@@ -420,6 +420,6 @@ $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="./assets/js/ingenieria_form.js?v=2.6"></script>
+    <script src="./assets/js/ingenieria_form.js?v=2.7"></script>
 </body>
 </html>

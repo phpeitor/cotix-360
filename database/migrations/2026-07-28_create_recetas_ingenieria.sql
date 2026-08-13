@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS recetas_ingenieria (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     id_receta_duplicada INT NULL DEFAULT NULL,
     usuario_id BIGINT UNSIGNED NOT NULL,
-    estado ENUM('Borrador','Enviada','Aprobada','Rechazada','Anulada','GANADO') NULL DEFAULT 'GANADO',
+    estado ENUM('Borrador','Enviada','Aprobada','Validado','Rechazada','Anulada','GANADO') NULL DEFAULT 'GANADO',
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     usuario_upd INT NULL DEFAULT NULL,

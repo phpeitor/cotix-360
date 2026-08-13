@@ -237,12 +237,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function isIngenieriaAprobada() {
-        return String(receta?.estado || "").trim().toLowerCase() === "aprobada";
+        return ["aprobada", "validado"].includes(String(receta?.estado || "").trim().toLowerCase());
     }
 
     function validarIngenieriaEditable() {
         if (!isIngenieriaAprobada()) return true;
-        alertify.error("La ingeniería aprobada no permite modificar items");
+        alertify.error("La ingeniería validada no permite modificar items");
         return false;
     }
 

@@ -28,8 +28,8 @@ try {
     if (!$ingenieria) {
         throw new Exception('Receta de ingeniería no encontrada');
     }
-    if (strcasecmp(trim((string)($ingenieria['estado'] ?? '')), 'Aprobada') === 0) {
-        throw new Exception('La ingeniería aprobada no permite guardar cambios');
+    if (in_array(strtolower(trim((string)($ingenieria['estado'] ?? ''))), ['aprobada', 'validado'], true)) {
+        throw new Exception('La ingeniería validada no permite guardar cambios');
     }
 
     $totalIngenieria = $receta->totalIngenieriaDolaresPorHash($hash);

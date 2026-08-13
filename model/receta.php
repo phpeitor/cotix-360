@@ -444,6 +444,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
 
     public function prepararTablasComprasIngenieria(): void
     {
+        $this->asegurarEstadoValidadoIngenieria();
         $this->crearTablaCompras();
         $this->crearTablaHistorialIngenieria();
         $this->asegurarColumnasAdicionalesIngenieria();
@@ -452,12 +453,14 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
 
     public function aprobarIngenieriaParaCompras(int $ingenieriaId, int $usuarioId): int
     {
+        $this->asegurarEstadoValidadoIngenieria();
+
         $stmtHistorial = $this->conn->prepare("SELECT COUNT(*) FROM ingenieria_historial WHERE ingenieria_id = :ingenieria_id");
         $stmtHistorial->bindValue(':ingenieria_id', $ingenieriaId, PDO::PARAM_INT);
         $stmtHistorial->execute();
 
         if ((int)$stmtHistorial->fetchColumn() <= 0) {
-            throw new RuntimeException('No se puede aprobar ingeniería porque no tiene historial registrado');
+            throw new RuntimeException('No se puede validar ingeniería porque no tiene historial registrado');
         }
 
         $stmtIngenieria = $this->conn->prepare("SELECT * FROM recetas_ingenieria WHERE id = :id LIMIT 1");
@@ -469,9 +472,9 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
             throw new RuntimeException('Ingeniería no encontrada');
         }
 
-        if (($ingenieria['estado'] ?? '') !== 'Aprobada') {
+        if (!in_array(($ingenieria['estado'] ?? ''), ['Aprobada', 'Validado'], true)) {
             $stmtEstado = $this->conn->prepare("UPDATE recetas_ingenieria
-                                                SET estado = 'Aprobada', updated_at = :updated_at, usuario_upd = :usuario_upd
+                                                SET estado = 'Validado', updated_at = :updated_at, usuario_upd = :usuario_upd
                                                 WHERE id = :id");
             $stmtEstado->bindValue(':updated_at', $this->nowLima);
             $stmtEstado->bindValue(':usuario_upd', $usuarioId, PDO::PARAM_INT);
@@ -854,6 +857,15 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     {
         $this->asegurarColumna('detalle_compras', 'es_adicional', "ALTER TABLE detalle_compras ADD COLUMN es_adicional TINYINT(1) NOT NULL DEFAULT 0 AFTER cantidad");
         $this->asegurarColumna('detalle_compras', 'adicional_signo', "ALTER TABLE detalle_compras ADD COLUMN adicional_signo ENUM('positivo','negativo') NULL DEFAULT NULL AFTER es_adicional");
+    }
+
+    private function asegurarEstadoValidadoIngenieria(): void
+    {
+        $stmt = $this->conn->query("SHOW COLUMNS FROM recetas_ingenieria LIKE 'estado'");
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        if (strpos((string)($row['Type'] ?? ''), "'Validado'") === false) {
+            $this->conn->exec("ALTER TABLE recetas_ingenieria MODIFY estado ENUM('Borrador','Enviada','Aprobada','Validado','Rechazada','Anulada','GANADO') NULL DEFAULT 'GANADO'");
+        }
     }
 
     private function asegurarColumna(string $tabla, string $columna, string $alterSql): void

@@ -41,10 +41,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const grid = new gridjs.Grid({
         columns: [
             { id: "id", name: "ID", width: "70px" },
-            { id: "ingenieria_id", name: "Ingeniería", width: "95px" },
             { id: "id_receta_duplicada", name: "Origen", hidden: true },
-            { id: "usuario", name: "Usuario", width: "120px" },
-            { id: "usuario_aprobador", name: "Aprobado", width: "120px" },
+            { id: "usuario", name: "Enviado por", width: "120px" },
+            { id: "usuario_aprobador", name: "Validado por", width: "120px" },
             {
                 id: "nombre",
                 name: "Receta",
