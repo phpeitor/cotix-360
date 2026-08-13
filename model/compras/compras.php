@@ -69,6 +69,7 @@ class Compras
                         FROM detalle_compras dc
                         INNER JOIN receta_compras cc ON cc.id = dc.compra_id
                         WHERE cc.id = c.id
+                          AND COALESCE(dc.es_adicional, 0) = 0
                     ), 0) AS total_compra_dolares,
                     COALESCE((
                         SELECT ROUND(SUM(
@@ -80,6 +81,7 @@ class Compras
                         FROM detalle_ingenieria di
                         INNER JOIN recetas_ingenieria ri ON ri.id = di.receta_id
                         WHERE ri.id = c.ingenieria_id
+                          AND COALESCE(di.es_adicional, 0) = 0
                     ), 0) AS total_origen_dolares
                 FROM receta_compras c
                 LEFT JOIN detalle_compras d ON d.compra_id = c.id
@@ -187,7 +189,8 @@ class Compras
                 ), 0), 2) AS total
                 FROM detalle_compras d
                 INNER JOIN receta_compras c ON c.id = d.compra_id
-                WHERE MD5(c.id) = :hash";
+                WHERE MD5(c.id) = :hash
+                  AND COALESCE(d.es_adicional, 0) = 0";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':hash', $hash);
         $stmt->execute();
@@ -223,7 +226,8 @@ class Compras
                 ), 0), 2) AS total
                 FROM detalle_ingenieria d
                 INNER JOIN recetas_ingenieria r ON r.id = d.receta_id
-                WHERE r.id = :ingenieria_id";
+                WHERE r.id = :ingenieria_id
+                  AND COALESCE(d.es_adicional, 0) = 0";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':ingenieria_id', $ingenieriaId, PDO::PARAM_INT);
         $stmt->execute();
@@ -534,9 +538,26 @@ class Compras
             tipo VARCHAR(50) NULL DEFAULT NULL,
             created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
             cantidad INT NULL DEFAULT NULL,
+            es_adicional TINYINT(1) NOT NULL DEFAULT 0,
+            adicional_signo ENUM('positivo','negativo') NULL DEFAULT NULL,
             PRIMARY KEY (id),
             KEY idx_detalle_compras_compra (compra_id),
             KEY idx_detalle_compras_item (item_id)
         )");
+
+        $this->asegurarColumna('detalle_compras', 'es_adicional', "ALTER TABLE detalle_compras ADD COLUMN es_adicional TINYINT(1) NOT NULL DEFAULT 0 AFTER cantidad");
+        $this->asegurarColumna('detalle_compras', 'adicional_signo', "ALTER TABLE detalle_compras ADD COLUMN adicional_signo ENUM('positivo','negativo') NULL DEFAULT NULL AFTER es_adicional");
+        $this->asegurarColumna('detalle_ingenieria', 'es_adicional', "ALTER TABLE detalle_ingenieria ADD COLUMN es_adicional TINYINT(1) NOT NULL DEFAULT 0 AFTER cantidad");
+        $this->asegurarColumna('detalle_ingenieria', 'adicional_signo', "ALTER TABLE detalle_ingenieria ADD COLUMN adicional_signo ENUM('positivo','negativo') NULL DEFAULT NULL AFTER es_adicional");
+    }
+
+    private function asegurarColumna(string $tabla, string $columna, string $alterSql): void
+    {
+        $stmt = $this->conn->prepare("SHOW COLUMNS FROM `$tabla` LIKE :columna");
+        $stmt->bindValue(':columna', $columna);
+        $stmt->execute();
+        if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+            $this->conn->exec($alterSql);
+        }
     }
 }

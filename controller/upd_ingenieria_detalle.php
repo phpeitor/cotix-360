@@ -40,6 +40,8 @@ try {
     if ($accion === 'agregar') {
         $itemId = (int)($_POST['item_id'] ?? 0);
         $cantidad = (int)($_POST['cantidad'] ?? 1);
+        $esAdicional = (int)($_POST['es_adicional'] ?? 0) === 1;
+        $adicionalSigno = trim((string)($_POST['adicional_signo'] ?? 'positivo')) === 'negativo' ? 'negativo' : 'positivo';
         if ($itemId <= 0) {
             throw new Exception('Item inválido');
         }
@@ -48,29 +50,33 @@ try {
         }
 
         $detalleActual = $receta->obtenerDetalleIngenieriaPorHash($hash);
-        foreach ($detalleActual as $row) {
-            if ((int)($row['item_id'] ?? 0) === $itemId) {
-                throw new Exception('Este item ya fue agregado');
+        if (!$esAdicional) {
+            foreach ($detalleActual as $row) {
+                if ((int)($row['item_id'] ?? 0) === $itemId && (int)($row['es_adicional'] ?? 0) === 0) {
+                    throw new Exception('Este item ya fue agregado');
+                }
             }
         }
 
-        $ok = $receta->agregarDetalleIngenieriaDesdeItem($hash, $itemId, $cantidad);
+        $ok = $receta->agregarDetalleIngenieriaDesdeItem($hash, $itemId, $cantidad, $esAdicional, $adicionalSigno);
         if ($ok) {
             $detalleNuevo = $receta->obtenerDetalleIngenieriaPorHash($hash);
+            $detalleAgregado = null;
             foreach ($detalleNuevo as $row) {
                 if ((int)($row['item_id'] ?? 0) === $itemId) {
-                    $historial = ['agregar_item', (int)$row['id'], $itemId, [], $row];
-                    break;
+                    if ($detalleAgregado === null || (int)($row['id'] ?? 0) > (int)($detalleAgregado['id'] ?? 0)) {
+                        $detalleAgregado = $row;
+                    }
                 }
+            }
+            if ($detalleAgregado !== null) {
+                $historial = ['agregar_item', (int)$detalleAgregado['id'], $itemId, [], $detalleAgregado];
             }
         }
     } elseif ($accion === 'eliminar') {
         $detalleId = (int)($_POST['detalle_id'] ?? 0);
         if ($detalleId <= 0) {
             throw new Exception('Detalle inválido');
-        }
-        if ($cantidad < 1 || $cantidad > 5000) {
-            throw new Exception('La cantidad debe estar entre 1 y 5000');
         }
         $detalleActual = $receta->obtenerDetalleIngenieriaPorHash($hash);
         $antes = [];

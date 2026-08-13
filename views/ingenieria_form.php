@@ -218,6 +218,15 @@ $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
                             <label class="form-label">Sub Categoria 2</label>
                             <select id="subCat2" class="form-select" disabled><option value="">-- Seleccione --</option></select>
                         </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Tipo de agregado</label>
+                            <select id="tipoAgregadoIngenieria" class="form-select" style="max-width: 260px;">
+                                <option value="normal">Normal</option>
+                                <option value="adicional_positivo">Adicional positivo</option>
+                                <option value="adicional_negativo">Adicional negativo</option>
+                            </select>
+                            <span class="text-muted fs-12 d-block mt-1">Los adicionales se marcan para cálculos posteriores y no afectan el total validado de ingeniería.</span>
+                        </div>
                         <div class="col-12">
                             <div id="productoFiltersWrap" class="row d-none">
                                 <div class="col-md-6 mb-1">
@@ -381,6 +390,6 @@ $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="./assets/js/ingenieria_form.js?v=1.9"></script>
+    <script src="./assets/js/ingenieria_form.js?v=2.0"></script>
 </body>
 </html>

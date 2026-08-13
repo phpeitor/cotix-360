@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const categoriaSelect = document.getElementById("categoria");
     const subCat1Select = document.getElementById("subCat1");
     const subCat2Select = document.getElementById("subCat2");
+    const tipoAgregadoSelect = document.getElementById("tipoAgregadoIngenieria");
     const productoFiltersWrap = document.getElementById("productoFiltersWrap");
     const marcaSelect = document.getElementById("filterMarca");
     const modeloSelect = document.getElementById("filterModelo");
@@ -207,6 +208,22 @@ document.addEventListener("DOMContentLoaded", () => {
         return String(moneda || "").toUpperCase() === "DOLLAR" ? "$" : "S/.";
     }
 
+    function esAdicional(item) {
+        return Number(item?.es_adicional || 0) === 1;
+    }
+
+    function signoAdicional(item) {
+        return String(item?.adicional_signo || "positivo") === "negativo" ? "negativo" : "positivo";
+    }
+
+    function tipoAgregadoActual() {
+        const value = String(tipoAgregadoSelect?.value || "normal");
+        return {
+            esAdicional: value !== "normal",
+            signo: value === "adicional_negativo" ? "negativo" : "positivo"
+        };
+    }
+
     function getRandomLogo() {
         const n = Math.floor(Math.random() * 9) + 1;
         return `assets/images/products/logo/logo-${n}.svg`;
@@ -282,17 +299,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const antes = parseJsonSeguro(row.antes_json);
         const despues = parseJsonSeguro(row.despues_json);
         const nombre = despues.nombre || antes.nombre || "";
+        const adicionalData = esAdicional(despues) ? despues : (esAdicional(antes) ? antes : null);
+        const adicionalSigno = signoAdicional(adicionalData || {});
+        const itemMarca = adicionalData
+            ? `<span class="badge ${adicionalSigno === "negativo" ? "bg-danger-subtle text-danger" : "bg-success-subtle text-success"} ms-1">Adicional ${adicionalSigno === "negativo" ? "-" : "+"}</span>`
+            : "";
 
         if (accion === "cambiar_cantidad") {
-            return `${nombre ? escapeHtml(nombre) + "<br>" : ""}Cantidad: ${escapeHtml(antes.cantidad ?? "-")} <span class="mx-1">⮞</span> ${escapeHtml(despues.cantidad ?? "-")}`;
+            return `${nombre ? escapeHtml(nombre) + itemMarca + "<br>" : ""}Cantidad: ${escapeHtml(antes.cantidad ?? "-")} <span class="mx-1">⮞</span> ${escapeHtml(despues.cantidad ?? "-")}`;
         }
 
         if (accion === "agregar_item") {
-            return `${escapeHtml(nombre || "Item agregado")}<br>Cantidad: ${escapeHtml(despues.cantidad ?? "-")}`;
+            return `${escapeHtml(nombre || "Item agregado")}${itemMarca}<br>Cantidad: ${escapeHtml(despues.cantidad ?? "-")}`;
         }
 
         if (accion === "eliminar_item") {
-            return `${escapeHtml(nombre || "Item eliminado")}<br>Cantidad: ${escapeHtml(antes.cantidad ?? "-")}`;
+            return `${escapeHtml(nombre || "Item eliminado")}${itemMarca}<br>Cantidad: ${escapeHtml(antes.cantidad ?? "-")}`;
         }
 
         if (accion === "guardar_ingenieria") {
@@ -460,12 +482,15 @@ document.addEventListener("DOMContentLoaded", () => {
         tbody.innerHTML = detalle.map(item => {
             const cantidad = Number(item.cantidad || 0);
             const precio = Number(item.precio || 0);
+            const adicional = esAdicional(item);
             const total = cantidad * precio;
             const simbolo = monedaSimbolo(item.moneda);
 
             totalItems += cantidad;
-            if (String(item.moneda || "").toUpperCase() === "DOLLAR") totalDolares += total;
-            else totalSoles += total;
+            if (!adicional) {
+                if (String(item.moneda || "").toUpperCase() === "DOLLAR") totalDolares += total;
+                else totalSoles += total;
+            }
 
             const itemNombre = escapeHtml(item.nombre || "-");
             const itemDescripcion = escapeHtml(normalizarTextoDetalle(item.descripcion) || "-");
@@ -473,6 +498,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const detalleLinea2 = escapeHtml(formatearRutaDetalle([item.marca, item.modelo, item.uni_medida]) || "-");
             const tipo = String(item.tipo || "-").toUpperCase();
             const tipoColor = tipo === "PRODUCTO" ? "text-success" : "text-info";
+            const adicionalBadge = adicional
+                ? `<span class="badge ${signoAdicional(item) === "negativo" ? "bg-danger-subtle text-danger" : "bg-success-subtle text-success"} ms-1">Adicional ${signoAdicional(item) === "negativo" ? "-" : "+"}</span>`
+                : "";
 
             return `
                 <tr data-detalle-id="${item.id}">
@@ -484,7 +512,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 </span>
                             </div>
                             <div>
-                                <span class="text-muted fs-12">${itemNombre}</span><br>
+                                <span class="text-muted fs-12">${itemNombre}</span>${adicionalBadge}<br>
                                 <h5 class="fs-14 mt-1 item-description">${itemDescripcion}</h5>
                             </div>
                         </div>
@@ -515,6 +543,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <td class="text-end">
                             <span class="text-muted fs-12">${simbolo}</span>
                             <h5 class="fs-14 mt-1 fw-normal mb-0 item-total-value">${money(total)}</h5>
+                            ${adicional ? `<span class="badge bg-light text-muted mt-1">No suma al total</span>` : ""}
                         </td>
                     `}
                     <td class="text-center">
@@ -565,8 +594,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const cantidad = Number(item.cantidad || 0);
             const total = cantidad * Number(item.precio || 0);
             totalItems += cantidad;
-            if (String(item.moneda || "").toUpperCase() === "DOLLAR") totalDolares += total;
-            else totalSoles += total;
+            if (!esAdicional(item)) {
+                if (String(item.moneda || "").toUpperCase() === "DOLLAR") totalDolares += total;
+                else totalSoles += total;
+            }
         });
 
         setText(fields.totalItem, String(totalItems));
@@ -729,16 +760,24 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!itemId) return;
         if (!validarIngenieriaEditable()) return;
 
-        const existente = detalle.some(row => Number(row.item_id || row.id_item || 0) === Number(itemId));
-        if (existente) {
+        const agregado = tipoAgregadoActual();
+        const existente = detalle.some(row => Number(row.item_id || row.id_item || 0) === Number(itemId) && !esAdicional(row));
+        if (!agregado.esAdicional && existente) {
             alertify.error("Este item ya fue agregado");
             return;
         }
 
         const cantidadNormalizada = clampCantidad(cantidad);
         try {
-            await post("controller/upd_ingenieria_detalle.php", { hash, accion: "agregar", item_id: String(itemId), cantidad: String(cantidadNormalizada) });
-            alertify.success("Item agregado");
+            await post("controller/upd_ingenieria_detalle.php", {
+                hash,
+                accion: "agregar",
+                item_id: String(itemId),
+                cantidad: String(cantidadNormalizada),
+                es_adicional: agregado.esAdicional ? "1" : "0",
+                adicional_signo: agregado.signo
+            });
+            alertify.success(agregado.esAdicional ? "Item adicional agregado" : "Item agregado");
             await loadIngenieria();
             await cargarHistorialIngenieria(1);
         } catch (error) {

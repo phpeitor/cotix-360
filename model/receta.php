@@ -424,6 +424,8 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
 
     public function obtenerDetalleIngenieriaPorHash(string $hash): array
     {
+        $this->asegurarColumnasAdicionalesIngenieria();
+
         $sql = "SELECT d.*
                 FROM detalle_ingenieria d
                 INNER JOIN recetas_ingenieria r ON r.id = d.receta_id
@@ -444,6 +446,8 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     {
         $this->crearTablaCompras();
         $this->crearTablaHistorialIngenieria();
+        $this->asegurarColumnasAdicionalesIngenieria();
+        $this->asegurarColumnasAdicionalesCompras();
     }
 
     public function aprobarIngenieriaParaCompras(int $ingenieriaId, int $usuarioId): int
@@ -536,7 +540,9 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                            moneda,
                            tipo,
                            created_at,
-                           cantidad
+                           cantidad,
+                           es_adicional,
+                           adicional_signo
                        ) SELECT
                            :compra_id,
                            id,
@@ -553,7 +559,9 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                            moneda,
                            tipo,
                            :created_at,
-                           cantidad
+                           cantidad,
+                           COALESCE(es_adicional, 0),
+                           adicional_signo
                        FROM detalle_ingenieria
                        WHERE receta_id = :ingenieria_id";
         $stmtDetalle = $this->conn->prepare($sqlDetalle);
@@ -589,8 +597,11 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         return $stmt->execute();
     }
 
-    public function agregarDetalleIngenieriaDesdeItem(string $hash, int $itemId, int $cantidad = 1): bool
+    public function agregarDetalleIngenieriaDesdeItem(string $hash, int $itemId, int $cantidad = 1, bool $esAdicional = false, string $adicionalSigno = 'positivo'): bool
     {
+        $this->asegurarColumnasAdicionalesIngenieria();
+
+        $adicionalSigno = $adicionalSigno === 'negativo' ? 'negativo' : 'positivo';
         $sql = "INSERT INTO detalle_ingenieria (
                     receta_id,
                     item_id,
@@ -606,7 +617,9 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                     moneda,
                     tipo,
                     created_at,
-                    cantidad
+                    cantidad,
+                    es_adicional,
+                    adicional_signo
                 ) SELECT
                     r.id,
                     i.id,
@@ -622,7 +635,9 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                     i.moneda,
                     i.tipo,
                     :created_at,
-                    :cantidad
+                    :cantidad,
+                    :es_adicional,
+                    :adicional_signo
                 FROM recetas_ingenieria r
                 INNER JOIN receta_items i ON i.id = :item_id
                 WHERE MD5(r.id) = :hash
@@ -631,6 +646,12 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->bindValue(':cantidad', min(5000, max(1, $cantidad)), PDO::PARAM_INT);
+        $stmt->bindValue(':es_adicional', $esAdicional ? 1 : 0, PDO::PARAM_INT);
+        if ($esAdicional) {
+            $stmt->bindValue(':adicional_signo', $adicionalSigno);
+        } else {
+            $stmt->bindValue(':adicional_signo', null, PDO::PARAM_NULL);
+        }
         $stmt->bindValue(':item_id', $itemId, PDO::PARAM_INT);
         $stmt->bindValue(':hash', $hash);
         $stmt->execute();
@@ -668,6 +689,8 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
 
     public function totalIngenieriaDolaresPorHash(string $hash): float
     {
+        $this->asegurarColumnasAdicionalesIngenieria();
+
         $sql = "SELECT ROUND(COALESCE(SUM(
                     CASE
                         WHEN UPPER(COALESCE(d.moneda, '')) = 'DOLLAR' THEN COALESCE(d.precio, 0) * COALESCE(d.cantidad, 0)
@@ -676,7 +699,8 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                 ), 0), 2) AS total
                 FROM detalle_ingenieria d
                 INNER JOIN recetas_ingenieria r ON r.id = d.receta_id
-                WHERE MD5(r.id) = :hash";
+                WHERE MD5(r.id) = :hash
+                  AND COALESCE(d.es_adicional, 0) = 0";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':hash', $hash);
         $stmt->execute();
@@ -802,12 +826,36 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                            moneda VARCHAR(20) NULL DEFAULT NULL,
                            tipo VARCHAR(50) NULL DEFAULT NULL,
                            created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-                           cantidad INT NULL DEFAULT NULL,
-                           PRIMARY KEY (id),
+                            cantidad INT NULL DEFAULT NULL,
+                            es_adicional TINYINT(1) NOT NULL DEFAULT 0,
+                            adicional_signo ENUM('positivo','negativo') NULL DEFAULT NULL,
+                            PRIMARY KEY (id),
                            KEY idx_detalle_compras_compra (compra_id),
                            KEY idx_detalle_compras_item (item_id)
                        )";
         $this->conn->exec($sqlDetalle);
+    }
+
+    private function asegurarColumnasAdicionalesIngenieria(): void
+    {
+        $this->asegurarColumna('detalle_ingenieria', 'es_adicional', "ALTER TABLE detalle_ingenieria ADD COLUMN es_adicional TINYINT(1) NOT NULL DEFAULT 0 AFTER cantidad");
+        $this->asegurarColumna('detalle_ingenieria', 'adicional_signo', "ALTER TABLE detalle_ingenieria ADD COLUMN adicional_signo ENUM('positivo','negativo') NULL DEFAULT NULL AFTER es_adicional");
+    }
+
+    private function asegurarColumnasAdicionalesCompras(): void
+    {
+        $this->asegurarColumna('detalle_compras', 'es_adicional', "ALTER TABLE detalle_compras ADD COLUMN es_adicional TINYINT(1) NOT NULL DEFAULT 0 AFTER cantidad");
+        $this->asegurarColumna('detalle_compras', 'adicional_signo', "ALTER TABLE detalle_compras ADD COLUMN adicional_signo ENUM('positivo','negativo') NULL DEFAULT NULL AFTER es_adicional");
+    }
+
+    private function asegurarColumna(string $tabla, string $columna, string $alterSql): void
+    {
+        $stmt = $this->conn->prepare("SHOW COLUMNS FROM `$tabla` LIKE :columna");
+        $stmt->bindValue(':columna', $columna);
+        $stmt->execute();
+        if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+            $this->conn->exec($alterSql);
+        }
     }
 
     public function listarHistorialIngenieriaPorHash(string $hash, int $page = 1, int $perPage = 10): array
