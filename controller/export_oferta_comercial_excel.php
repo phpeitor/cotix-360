@@ -236,7 +236,11 @@ try {
         : 'TIEMPO DE ENTREGA';
     $descripcionReceta = textoOfertaExcel($receta['cliente_descripcion'] ?? '');
     $cantidadItemsReceta = (int)($receta['cliente_cantidad_items'] ?? 0);
-    $observacionesComerciales = textoOfertaExcel($receta['cliente_observaciones'] ?? '');
+    $observacionesComerciales = trim(preg_replace(
+        "/[ \t]+/",
+        ' ',
+        str_replace(["\r\n", "\r"], "\n", html_entity_decode(strip_tags((string)($receta['cliente_observaciones'] ?? '')), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'))
+    ));
 
     $sheet->mergeCells('C' . $row . ':F' . $row);
     $sheet->mergeCells('H' . $row . ':I' . $row);
@@ -324,7 +328,7 @@ try {
     $totalOferta = $totalesOfertaReceta['total'];
 
     $sheet->mergeCells('A' . $row . ':G' . $row);
-    $sheet->setCellValue('A' . $row, 'Observaciones:' . ($observacionesComerciales !== '' ? ' ' . $observacionesComerciales : ''));
+    $sheet->setCellValue('A' . $row, 'Observaciones:');
     $sheet->getRowDimension($row)->setRowHeight(18);
     $sheet->getStyle('A' . $row . ':G' . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF92D050');
     $sheet->getStyle('A' . $row)->getFont()->setBold(true);
@@ -332,7 +336,13 @@ try {
 
     $observacionesStartRow = $row;
     $sheet->mergeCells('A' . $row . ':G' . ($row + 2));
-    $sheet->setCellValue('K' . $row, 'SUBTOTAL_1');
+    $sheet->setCellValueExplicit('A' . $row, $observacionesComerciales, DataType::TYPE_STRING);
+    $lineasObservaciones = $observacionesComerciales !== '' ? max(1, substr_count($observacionesComerciales, "\n") + 1) : 1;
+    $alturaObservaciones = max(18, min(54, $lineasObservaciones * 18));
+    for ($observacionRow = $row; $observacionRow <= $row + 2; $observacionRow++) {
+        $sheet->getRowDimension($observacionRow)->setRowHeight($alturaObservaciones);
+    }
+    $sheet->setCellValue('K' . $row, 'SUBTOTAL');
     $sheet->setCellValue('L' . $row, $subtotalOferta);
     $sheet->setCellValue('K' . ($row + 1), 'IGV 18%');
     $sheet->setCellValue('L' . ($row + 1), $igvOferta);

@@ -542,6 +542,11 @@ table {
     white-space: nowrap;
 }
 
+.offer-pdf .offer-observations-cell {
+    vertical-align: top;
+    white-space: normal;
+}
+
 .offer-pdf .offer-block-title {
     border: 0.18mm solid #7f7f7f;
     font-family: DejaVu Sans Mono, monospace;

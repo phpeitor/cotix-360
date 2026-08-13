@@ -500,15 +500,21 @@ $tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['clie
     <?php endif; ?>
 
     <?php if ($esOferta): ?>
-        <?php $observacionesComercialesOferta = $observacionesComercialesOferta ?? textoOfertaExcel($receta['cliente_observaciones'] ?? ''); ?>
+        <?php
+            $observacionesComercialesOferta = $observacionesComercialesOferta ?? trim(preg_replace(
+                "/[ \t]+/",
+                ' ',
+                str_replace(["\r\n", "\r"], "\n", html_entity_decode(strip_tags((string)($receta['cliente_observaciones'] ?? '')), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'))
+            ));
+        ?>
         <table class="offer-summary-table">
             <tr>
-                <td class="offer-green" style="width: 70%;">Observaciones:<?= $observacionesComercialesOferta !== '' ? ' ' . nl2br(escaparPdf($observacionesComercialesOferta)) : '' ?></td>
-                <td style="width: 15%;"><strong>SUBTOTAL_1</strong></td>
+                <td class="offer-green" style="width: 70%;">Observaciones:</td>
+                <td style="width: 15%;"><strong>SUBTOTAL</strong></td>
                 <td class="money" style="width: 15%;">$ <?= number_format($totalesOfertaComercial['subtotal'], 2) ?></td>
             </tr>
             <tr>
-                <td rowspan="2"></td>
+                <td rowspan="2" class="offer-observations-cell"><?= $observacionesComercialesOferta !== '' ? nl2br(escaparPdf($observacionesComercialesOferta)) : '' ?></td>
                 <td><strong>IGV 18%</strong></td>
                 <td class="money">$ <?= number_format($totalesOfertaComercial['igv'], 2) ?></td>
             </tr>
