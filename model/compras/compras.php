@@ -283,7 +283,8 @@ class Compras
                     COALESCE(MAX(c.tipo_cambio), 0) AS tipo_cambio
                 FROM detalle_compras d
                 INNER JOIN receta_compras c ON c.id = d.compra_id
-                WHERE MD5(c.id) = :hash";
+                WHERE MD5(c.id) = :hash
+                  AND COALESCE(d.es_adicional, 0) = 0";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':hash', $hash);
         $stmt->execute();

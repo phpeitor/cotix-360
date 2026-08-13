@@ -177,6 +177,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return Boolean(permisos.puede_ver_montos);
     }
 
+    function esAdicional(item) {
+        return Number(item?.es_adicional || 0) === 1;
+    }
+
+    function signoAdicional(item) {
+        return String(item?.adicional_signo || "positivo") === "negativo" ? "negativo" : "positivo";
+    }
+
     async function loadCompra() {
         try {
             const res = await fetch(`controller/compras/get_compra.php?id=${encodeURIComponent(hash)}`);
@@ -342,6 +350,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const total = cantidad * precio;
             const moneda = String(item.moneda || "").toUpperCase();
             const simbolo = monedaSimbolo(moneda);
+            const adicional = esAdicional(item);
+            const adicionalSigno = signoAdicional(item);
+            const adicionalBadge = adicional
+                ? `<span class="badge ${adicionalSigno === "negativo" ? "bg-danger-subtle text-danger" : "bg-success-subtle text-success"} mt-1 d-inline-flex flex-shrink-0">Adicional ${adicionalSigno === "negativo" ? "-" : "+"}</span>`
+                : "";
 
             const accionHtml = editable
                 ? `<button type="button" class="btn btn-sm btn-danger" data-delete-detalle="${item.id}" data-bs-toggle="tooltip" data-bs-title="Eliminar"><i class="ti ti-trash"></i></button>`
@@ -378,23 +391,27 @@ document.addEventListener("DOMContentLoaded", () => {
             const tipoColor = tipo === "PRODUCTO" ? "text-success" : "text-info";
 
             return `
-                <tr data-detalle-id="${item.id}">
-                    <td>
+                <tr data-detalle-id="${item.id}" class="${adicional ? "table-light" : ""}">
+                    <td class="text-wrap" style="min-width: 280px; max-width: 520px; white-space: normal; overflow-wrap: anywhere;">
                         <div class="d-flex align-items-center">
                             <div class="avatar-md flex-shrink-0 me-2">
                                 <span class="avatar-title bg-primary-subtle rounded-circle">
                                     <img src="${getRandomLogo()}" alt="" height="22">
                                 </span>
                             </div>
-                            <div>
-                                <span class="text-muted fs-12">${itemNombre}</span><br>
-                                <h5 class="fs-14 mt-1 item-description">${itemDescripcion}</h5>
+                            <div class="min-w-0 w-100" style="min-width:0;">
+                                <div class="d-flex align-items-start gap-1 flex-wrap">
+                                    <span class="text-muted fs-12 text-break">${itemNombre}</span>
+                                    ${adicionalBadge}
+                                </div>
+                                <h5 class="fs-14 mt-1 item-description text-break mb-0">${itemDescripcion}</h5>
+                                ${adicional ? `<small class="text-muted d-block mt-1">No afecta el total comparativo</small>` : ""}
                             </div>
                         </div>
                     </td>
-                    <td>
-                        <span class="text-muted fs-12">${detalleLinea1}</span>
-                        <h5 class="fs-14 mt-1 fw-normal">${detalleLinea2}</h5>
+                    <td class="text-wrap" style="min-width: 240px; max-width: 420px; white-space: normal; overflow-wrap: anywhere;">
+                        <span class="text-muted fs-12 text-break">${detalleLinea1}</span>
+                        <h5 class="fs-14 mt-1 fw-normal text-break mb-0">${detalleLinea2}</h5>
                     </td>
                     <td>
                         <span class="text-muted fs-12">Tipo</span>
@@ -405,7 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                     <td class="text-center">${cantidadHtml}</td>
                     <td class="text-end">${verMontos() ? precioHtml : '<span class="text-muted">-</span>'}</td>
-                    <td class="text-end item-total-value">${verMontos() ? `<span class="text-muted fs-12">${simbolo}</span> <h5 class="fs-14 mt-1 fw-normal mb-0">${money(total)}</h5>` : "-"}</td>
+                    <td class="text-end item-total-value">${verMontos() ? `<span class="text-muted fs-12">${simbolo}</span> <h5 class="fs-14 mt-1 fw-normal mb-0">${money(total)}</h5>${adicional ? `<span class="badge bg-light text-muted mt-1">No suma</span>` : ""}` : "-"}</td>
                     <td class="text-center">${accionHtml}</td>
                 </tr>
             `;
@@ -425,7 +442,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (totalEl && verMontos()) {
             const moneda = String(item.moneda || "").toUpperCase();
             const simbolo = monedaSimbolo(moneda);
-            totalEl.textContent = `${simbolo} ${money(Number(item.precio || 0) * cantidad)}`;
+            totalEl.innerHTML = `<span class="text-muted fs-12">${simbolo}</span> <h5 class="fs-14 mt-1 fw-normal mb-0">${money(Number(item.precio || 0) * cantidad)}</h5>${esAdicional(item) ? `<span class="badge bg-light text-muted mt-1">No suma</span>` : ""}`;
         }
     }
 
@@ -438,8 +455,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const cantidad = Number(item.cantidad || 0);
             const total = cantidad * Number(item.precio || 0);
             totalItems += cantidad;
-            if (String(item.moneda || "").toUpperCase() === "DOLLAR") totalDolares += total;
-            else totalSoles += total;
+            if (!esAdicional(item)) {
+                if (String(item.moneda || "").toUpperCase() === "DOLLAR") totalDolares += total;
+                else totalSoles += total;
+            }
         });
 
         const tipoCambio = Number(totales?.tipo_cambio || compra?.tipo_cambio || 0) || 1;

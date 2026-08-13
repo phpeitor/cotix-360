@@ -20,7 +20,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta.css?v=1.4" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/compras_detalle.css?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/compras_detalle.css?v=1.1" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -123,11 +123,12 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                             <div class="col-lg-3 col-12">
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total S/.</span> <span id="total_peru">0.00</span></p>
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-minimalistic-outline" class="text-success"></iconify-icon> <span class="text-dark">Total $</span> <span id="total_peru_dolares">0.00</span></p>
+                                                <small class="text-muted d-block">No incluye adicionales</small>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="table-responsive">
-                                        <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">
+                                        <table class="table table-custom table-centered table-sm table-hover mb-0 compras-detalle-table">
                                             <thead class="table-light">
                                                 <tr>
                                                     <th>Item</th>
@@ -387,7 +388,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/compras_detalle.js?v=2.0"></script>
+    <script src="./assets/js/compras_detalle.js?v=2.1"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/compras_charts.js?v=1.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>

@@ -72,3 +72,24 @@
     padding-top: .3rem;
     padding-bottom: .3rem;
 }
+
+.compras-detalle-table {
+    table-layout: auto;
+}
+
+.compras-detalle-table td,
+.compras-detalle-table th {
+    white-space: normal;
+    vertical-align: middle;
+}
+
+.compras-detalle-table .item-description {
+    line-height: 1.35;
+}
+
+@media (max-width: 991.98px) {
+    .compras-detalle-table td,
+    .compras-detalle-table th {
+        min-width: 140px;
+    }
+}
