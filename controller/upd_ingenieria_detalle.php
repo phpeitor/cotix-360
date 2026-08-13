@@ -48,6 +48,9 @@ try {
         if ($cantidad < 1 || $cantidad > 5000) {
             throw new Exception('La cantidad debe estar entre 1 y 5000');
         }
+        if ($receta->obtenerPrecioItemReceta($itemId) <= 0) {
+            throw new Exception('No se puede agregar un item con precio 0');
+        }
 
         $detalleActual = $receta->obtenerDetalleIngenieriaPorHash($hash);
         if (!$esAdicional) {

@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const categoriaSelect = document.getElementById("categoria");
     const subCat1Select = document.getElementById("subCat1");
     const subCat2Select = document.getElementById("subCat2");
-    const tipoAgregadoSelect = document.getElementById("tipoAgregadoIngenieria");
+    const tipoAgregadoRadios = document.querySelectorAll('input[name="tipoAgregadoIngenieria"]');
     const productoFiltersWrap = document.getElementById("productoFiltersWrap");
     const marcaSelect = document.getElementById("filterMarca");
     const modeloSelect = document.getElementById("filterModelo");
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function init() {
         initTooltips();
         loadIngenieria();
-        cargarHistorialIngenieria();
+        if (historialBody) cargarHistorialIngenieria();
         cargarBases();
 
         baseSelect?.addEventListener("change", cargarCategorias);
@@ -217,7 +217,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function tipoAgregadoActual() {
-        const value = String(tipoAgregadoSelect?.value || "normal");
+        const selected = Array.from(tipoAgregadoRadios).find(radio => radio.checked);
+        const value = String(selected?.value || "normal");
         return {
             esAdicional: value !== "normal",
             signo: value === "adicional_negativo" ? "negativo" : "positivo"
@@ -391,7 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setText(fields.nombre, receta.nombre || "-");
         setText(fields.usuario, receta.usuario);
         setText(fields.aprobador, receta.usuario_aprobador);
-        fields.estado.innerHTML = `<span class="badge badge-outline-success">${escapeHtml(receta.estado || "GANADO")}</span>`;
+        if (fields.estado) fields.estado.innerHTML = `<span class="badge badge-outline-success">${escapeHtml(receta.estado || "GANADO")}</span>`;
         setText(fields.fecha, receta.created_at);
         setText(fields.tipoCambio, Number(receta.tipo_cambio || 0).toFixed(3));
 
@@ -407,13 +408,13 @@ document.addEventListener("DOMContentLoaded", () => {
             fields.btnGuardarIngenieria.setAttribute("aria-disabled", isIngenieriaAprobada() ? "true" : "false");
         }
 
-        fields.clienteRuc.value = cliente?.ruc || "";
-        fields.clienteRazonSocial.value = cliente?.razon_social_empresa || "";
-        fields.clienteNombreCompleto.value = cliente?.nombre_completo || "";
-        fields.clienteCorreo.value = cliente?.correo || "";
-        fields.clienteCelular.value = cliente?.celular || "";
-        fields.clienteMotivo.value = cliente?.motivo || "";
-        fields.clienteDireccion.value = cliente?.direccion || "";
+        if (fields.clienteRuc) fields.clienteRuc.value = cliente?.ruc || "";
+        if (fields.clienteRazonSocial) fields.clienteRazonSocial.value = cliente?.razon_social_empresa || "";
+        if (fields.clienteNombreCompleto) fields.clienteNombreCompleto.value = cliente?.nombre_completo || "";
+        if (fields.clienteCorreo) fields.clienteCorreo.value = cliente?.correo || "";
+        if (fields.clienteCelular) fields.clienteCelular.value = cliente?.celular || "";
+        if (fields.clienteMotivo) fields.clienteMotivo.value = cliente?.motivo || "";
+        if (fields.clienteDireccion) fields.clienteDireccion.value = cliente?.direccion || "";
     }
 
     function renderCondicionesModal() {
@@ -475,6 +476,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderDetalle() {
+        if (!tbody) return;
+
         let totalSoles = 0;
         let totalDolares = 0;
         let totalItems = 0;
@@ -499,27 +502,30 @@ document.addEventListener("DOMContentLoaded", () => {
             const tipo = String(item.tipo || "-").toUpperCase();
             const tipoColor = tipo === "PRODUCTO" ? "text-success" : "text-info";
             const adicionalBadge = adicional
-                ? `<span class="badge ${signoAdicional(item) === "negativo" ? "bg-danger-subtle text-danger" : "bg-success-subtle text-success"} ms-1">Adicional ${signoAdicional(item) === "negativo" ? "-" : "+"}</span>`
+                ? `<span class="badge ${signoAdicional(item) === "negativo" ? "bg-danger-subtle text-danger" : "bg-success-subtle text-success"} mt-1 d-inline-flex flex-shrink-0">Adicional ${signoAdicional(item) === "negativo" ? "-" : "+"}</span>`
                 : "";
 
             return `
                 <tr data-detalle-id="${item.id}">
-                    <td>
+                    <td class="text-wrap" style="min-width: 280px; max-width: 520px; white-space: normal; overflow-wrap: anywhere;">
                         <div class="d-flex align-items-center">
                             <div class="avatar-md flex-shrink-0 me-2">
                                 <span class="avatar-title bg-primary-subtle rounded-circle">
                                     <img src="${getRandomLogo()}" alt="" height="22">
                                 </span>
                             </div>
-                            <div>
-                                <span class="text-muted fs-12">${itemNombre}</span>${adicionalBadge}<br>
-                                <h5 class="fs-14 mt-1 item-description">${itemDescripcion}</h5>
+                            <div class="min-w-0 w-100" style="min-width:0;">
+                                <div class="d-flex align-items-start gap-1 flex-wrap">
+                                    <span class="text-muted fs-12 text-break">${itemNombre}</span>
+                                    ${adicionalBadge}
+                                </div>
+                                <h5 class="fs-14 mt-1 item-description text-break mb-0">${itemDescripcion}</h5>
                             </div>
                         </div>
                     </td>
-                    <td>
-                        <span class="text-muted fs-12">${detalleLinea1}</span>
-                        <h5 class="fs-14 mt-1 fw-normal">${detalleLinea2}</h5>
+                    <td class="text-wrap" style="min-width: 240px; max-width: 420px; white-space: normal; overflow-wrap: anywhere;">
+                        <span class="text-muted fs-12 text-break">${detalleLinea1}</span>
+                        <h5 class="fs-14 mt-1 fw-normal text-break mb-0">${detalleLinea2}</h5>
                     </td>
                     <td>
                         <span class="text-muted fs-12">Tipo</span>
@@ -629,7 +635,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await post("controller/guardar_ingenieria.php", { hash });
             alertify.success("Receta ingeniería guardada");
             await loadIngenieria();
-            await cargarHistorialIngenieria(1);
+            if (historialBody) await cargarHistorialIngenieria(1);
         } catch (error) {
             alertify.alert("Validación de ingeniería", error.message || "No se pudo guardar ingeniería");
         }
@@ -712,7 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 await post("controller/upd_ingenieria_detalle.php", { hash, accion: "eliminar", detalle_id: String(detalleId) });
                 alertify.success("Item eliminado");
                 await loadIngenieria();
-                await cargarHistorialIngenieria(1);
+                if (historialBody) await cargarHistorialIngenieria(1);
             } catch (error) {
                 alertify.error(error.message);
             }
@@ -748,17 +754,23 @@ document.addEventListener("DOMContentLoaded", () => {
         cantidadTimers.delete(detalleId);
         try {
             await post("controller/upd_ingenieria_detalle.php", { hash, accion: "cantidad", detalle_id: String(detalleId), cantidad: String(cantidad) });
-            await cargarHistorialIngenieria(1);
+            if (historialBody) await cargarHistorialIngenieria(1);
         } catch (error) {
             alertify.error(error.message);
             await loadIngenieria();
-            await cargarHistorialIngenieria(1);
+            if (historialBody) await cargarHistorialIngenieria(1);
         }
     }
 
     async function agregarItem(itemId, cantidad) {
         if (!itemId) return;
         if (!validarIngenieriaEditable()) return;
+
+        const itemDisponible = Array.from(document.querySelectorAll("[data-add-item]")).find(btn => Number(btn.dataset.addItem || 0) === Number(itemId));
+        if (itemDisponible?.dataset?.precioCero === "1") {
+            alertify.error("No se puede agregar un item con precio 0");
+            return;
+        }
 
         const agregado = tipoAgregadoActual();
         const existente = detalle.some(row => Number(row.item_id || row.id_item || 0) === Number(itemId) && !esAdicional(row));
@@ -779,7 +791,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             alertify.success(agregado.esAdicional ? "Item adicional agregado" : "Item agregado");
             await loadIngenieria();
-            await cargarHistorialIngenieria(1);
+            if (historialBody) await cargarHistorialIngenieria(1);
         } catch (error) {
             alertify.error(error.message);
         }
@@ -924,17 +936,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         itemSearchBody.innerHTML = items.map(item => {
             const simbolo = monedaSimbolo(item.moneda);
+            const precioVisible = Object.prototype.hasOwnProperty.call(item, "precio");
+            const precio = precioVisible ? Number(item.precio || 0) : null;
+            const precioCero = precioVisible ? precio <= 0 : item.precio_cero === true;
             const itemNombre = escapeHtml(item.nombre || "-");
             const itemDescripcion = escapeHtml(normalizarTextoDetalle(item.descripcion) || "-");
             const detalleLinea1 = escapeHtml(formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]) || "-");
             const detalleLinea2 = escapeHtml(formatearRutaDetalle([item.marca, item.modelo, item.uni_medida]) || "-");
             return `
-                <tr>
+                <tr class="${precioCero ? "table-warning" : ""}">
                     <td>
                         <div class="item-title">${itemNombre}</div>
                         ${itemDescripcion !== "-" ? `<div class="item-subtitle">${itemDescripcion}</div>` : ""}
                         <div class="item-title">${detalleLinea1}</div>
                         <div class="item-subtitle">${detalleLinea2}</div>
+                        ${precioCero ? `<span class="badge bg-warning-subtle text-warning-emphasis mt-1">Precio pendiente</span>` : ""}
                     </td>
                     <td class="text-center align-middle receta-qty-cell">
                         <div data-touchspin class="input-step border bg-body-secondary px-1 py-0 mt-1 rounded-pill d-inline-flex align-items-center overflow-visible" style="height:28px;">
@@ -943,11 +959,13 @@ document.addEventListener("DOMContentLoaded", () => {
                             <button type="button" class="qty-plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:20px;min-width:20px;height:20px;">+</button>
                         </div>
                     </td>
-                    ${esCargoIngenieria ? "" : `<td class="text-end">${simbolo} ${money(item.precio)}</td>`}
-                    <td class="text-center"><button type="button" class="btn btn-sm btn-primary" data-add-item="${item.id}" ${isIngenieriaAprobada() ? "disabled" : ""}><i class="ti ti-plus"></i></button></td>
+                    ${esCargoIngenieria ? "" : `<td class="text-end ${precioCero ? "text-warning fw-semibold" : ""}">${simbolo} ${money(precio)}</td>`}
+                    <td class="text-center"><button type="button" class="btn btn-sm ${precioCero ? "btn-secondary" : "btn-primary"}" data-add-item="${item.id}" data-precio-cero="${precioCero ? "1" : "0"}" ${isIngenieriaAprobada() || precioCero ? "disabled" : ""} data-bs-toggle="tooltip" data-bs-title="${precioCero ? "No se puede agregar con precio 0" : "Agregar"}"><i class="ti ${precioCero ? "ti-lock" : "ti-plus"}"></i></button></td>
                 </tr>
             `;
         }).join("");
+
+        initTooltips();
 
         itemSearchBody.querySelectorAll("tr").forEach(row => {
             const input = row.querySelector(".qty-input");

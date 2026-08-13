@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once ROOT . '/controller/check_session.php';
 $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
+$puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3], true);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,6 +21,28 @@ $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
     <link href="./assets/css/receta.css?v=1.4" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
+    <style>
+        .ingenieria-detalle-table {
+            table-layout: auto;
+        }
+
+        .ingenieria-detalle-table td,
+        .ingenieria-detalle-table th {
+            white-space: normal;
+            vertical-align: middle;
+        }
+
+        .ingenieria-detalle-table .item-description {
+            line-height: 1.35;
+        }
+
+        @media (max-width: 991.98px) {
+            .ingenieria-detalle-table td,
+            .ingenieria-detalle-table th {
+                min-width: 140px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -129,7 +152,7 @@ $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
                                     </div>
 
                                     <div class="table-responsive">
-                                        <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">
+                                        <table class="table table-custom table-centered table-sm table-hover mb-0 ingenieria-detalle-table">
                                             <thead class="table-light">
                                                 <tr>
                                                     <th>Item</th>
@@ -154,6 +177,7 @@ $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
                         </div>
                     </div>
                 </div>
+                <?php if ($puedeVerHistorialIngenieria): ?>
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="card">
@@ -188,6 +212,7 @@ $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
                         </div>
                     </div>
                 </div>
+                <?php endif; ?>
             </div>
             <?php include ROOT . '/layout/footer.html'; ?>
         </div>
@@ -219,13 +244,18 @@ $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
                             <select id="subCat2" class="form-select" disabled><option value="">-- Seleccione --</option></select>
                         </div>
                         <div class="col-12 mb-3">
-                            <label class="form-label">Tipo de agregado</label>
-                            <select id="tipoAgregadoIngenieria" class="form-select" style="max-width: 260px;">
-                                <option value="normal">Normal</option>
-                                <option value="adicional_positivo">Adicional positivo</option>
-                                <option value="adicional_negativo">Adicional negativo</option>
-                            </select>
-                            <span class="text-muted fs-12 d-block mt-1">Los adicionales se marcan para cálculos posteriores y no afectan el total validado de ingeniería.</span>
+                            <label class="form-label mb-2">Tipo de agregado</label>
+                            <div class="btn-group flex-wrap" role="group" aria-label="Tipo de agregado">
+                                <input type="radio" class="btn-check" name="tipoAgregadoIngenieria" id="tipoAgregadoNormal" value="normal" checked>
+                                <label class="btn btn-outline-dark" for="tipoAgregadoNormal"><i class="ti ti-circle me-1"></i> Normal</label>
+
+                                <input type="radio" class="btn-check" name="tipoAgregadoIngenieria" id="tipoAgregadoPositivo" value="adicional_positivo">
+                                <label class="btn btn-outline-success" for="tipoAgregadoPositivo"><i class="ti ti-plus me-1"></i> Adicional positivo</label>
+
+                                <input type="radio" class="btn-check" name="tipoAgregadoIngenieria" id="tipoAgregadoNegativo" value="adicional_negativo">
+                                <label class="btn btn-outline-danger" for="tipoAgregadoNegativo"><i class="ti ti-minus me-1"></i> Adicional negativo</label>
+                            </div>
+                            <span class="text-muted fs-12 d-block mt-2">Los adicionales se marcan para cálculos posteriores y no afectan el total validado de ingeniería.</span>
                         </div>
                         <div class="col-12">
                             <div id="productoFiltersWrap" class="row d-none">
@@ -390,6 +420,6 @@ $esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="./assets/js/ingenieria_form.js?v=2.0"></script>
+    <script src="./assets/js/ingenieria_form.js?v=2.6"></script>
 </body>
 </html>

@@ -659,6 +659,14 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         return $stmt->rowCount() > 0;
     }
 
+    public function obtenerPrecioItemReceta(int $itemId): float
+    {
+        $stmt = $this->conn->prepare("SELECT COALESCE(precio, 0) FROM receta_items WHERE id = :item_id LIMIT 1");
+        $stmt->bindValue(':item_id', $itemId, PDO::PARAM_INT);
+        $stmt->execute();
+        return (float)($stmt->fetchColumn() ?: 0);
+    }
+
     public function eliminarDetalleIngenieria(string $hash, int $detalleId): bool
     {
         $sql = "DELETE d

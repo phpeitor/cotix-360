@@ -40,6 +40,7 @@ try {
             $data = $item->obtenerItemsRecetaFiltrados($tipo, $categoria, $subCat1, $subCat2, $marca, $modelo);
             if ((int)($_SESSION['session_cargo'] ?? 0) === 6) {
                 foreach ($data as &$row) {
+                    $row['precio_cero'] = (float)($row['precio'] ?? 0) <= 0;
                     unset($row['precio']);
                 }
                 unset($row);
