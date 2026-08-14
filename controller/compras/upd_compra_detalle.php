@@ -94,6 +94,7 @@ try {
     }
 
     $totalCompra = $compras->totalCompraDolaresPorHash($hash);
+    $totalAdicionalesNegativos = $compras->totalAdicionalesNegativosDolaresPorHash($hash);
     $totalOrigen = $compras->totalIngenieriaDolaresPorId((int)($compra['ingenieria_id'] ?? 0));
     $semaforo = $compras->evaluarSemaforo($totalCompra, $totalOrigen);
     $totales = $compras->totalesCompraPorHash($hash);
@@ -103,6 +104,7 @@ try {
     echo json_encode([
         'success' => true,
         'total_compra_dolares' => $totalCompra,
+        'total_adicionales_negativos_dolares' => $totalAdicionalesNegativos,
         'total_origen_dolares' => $totalOrigen,
         'semaforo' => $semaforo,
         'totales' => $totales,

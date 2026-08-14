@@ -62,14 +62,16 @@ class Compras
                     COALESCE((
                         SELECT ROUND(SUM(
                             CASE
-                                WHEN UPPER(COALESCE(dc.moneda, '')) = 'DOLLAR' THEN COALESCE(dc.precio, 0) * COALESCE(dc.cantidad, 0)
-                                ELSE (COALESCE(dc.precio, 0) * COALESCE(dc.cantidad, 0)) / NULLIF(COALESCE(cc.tipo_cambio, 0), 0)
+                                WHEN COALESCE(dc.es_adicional, 0) = 1 AND COALESCE(dc.adicional_signo, 'positivo') <> 'negativo' THEN 0
+                                WHEN UPPER(COALESCE(dc.moneda, '')) = 'DOLLAR' THEN
+                                    (CASE WHEN COALESCE(dc.es_adicional, 0) = 1 THEN -1 ELSE 1 END) * COALESCE(dc.precio, 0) * COALESCE(dc.cantidad, 0)
+                                ELSE
+                                    (CASE WHEN COALESCE(dc.es_adicional, 0) = 1 THEN -1 ELSE 1 END) * (COALESCE(dc.precio, 0) * COALESCE(dc.cantidad, 0)) / NULLIF(COALESCE(cc.tipo_cambio, 0), 0)
                             END
                         ), 2)
                         FROM detalle_compras dc
                         INNER JOIN receta_compras cc ON cc.id = dc.compra_id
                         WHERE cc.id = c.id
-                          AND COALESCE(dc.es_adicional, 0) = 0
                     ), 0) AS total_compra_dolares,
                     COALESCE((
                         SELECT ROUND(SUM(
@@ -195,6 +197,28 @@ class Compras
         $stmt->bindValue(':hash', $hash);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        $total = (float)($row['total'] ?? 0);
+        $totalNegativos = $this->totalAdicionalesNegativosDolaresPorHash($hash);
+        return round($total - $totalNegativos, 2);
+    }
+
+    public function totalAdicionalesNegativosDolaresPorHash(string $hash): float
+    {
+        $sql = "SELECT ROUND(COALESCE(SUM(
+                    CASE
+                        WHEN UPPER(COALESCE(d.moneda, '')) = 'DOLLAR' THEN COALESCE(d.precio, 0) * COALESCE(d.cantidad, 0)
+                        ELSE (COALESCE(d.precio, 0) * COALESCE(d.cantidad, 0)) / NULLIF(COALESCE(c.tipo_cambio, 0), 0)
+                    END
+                ), 0), 2) AS total
+                FROM detalle_compras d
+                INNER JOIN receta_compras c ON c.id = d.compra_id
+                WHERE MD5(c.id) = :hash
+                  AND COALESCE(d.es_adicional, 0) = 1
+                  AND COALESCE(d.adicional_signo, 'positivo') = 'negativo'";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
         return (float)($row['total'] ?? 0);
     }
 
@@ -275,16 +299,23 @@ class Compras
         $sql = "SELECT
                     COALESCE(SUM(d.cantidad), 0) AS total_items,
                     COALESCE(SUM(
-                        CASE WHEN UPPER(COALESCE(d.moneda, '')) = 'DOLLAR' THEN 0 ELSE COALESCE(d.precio, 0) * COALESCE(d.cantidad, 0) END
+                        CASE
+                            WHEN COALESCE(d.es_adicional, 0) = 1 AND COALESCE(d.adicional_signo, 'positivo') <> 'negativo' THEN 0
+                            WHEN UPPER(COALESCE(d.moneda, '')) = 'DOLLAR' THEN 0
+                            ELSE (CASE WHEN COALESCE(d.es_adicional, 0) = 1 THEN -1 ELSE 1 END) * COALESCE(d.precio, 0) * COALESCE(d.cantidad, 0)
+                        END
                     ), 0) AS total_soles,
                     COALESCE(SUM(
-                        CASE WHEN UPPER(COALESCE(d.moneda, '')) = 'DOLLAR' THEN COALESCE(d.precio, 0) * COALESCE(d.cantidad, 0) ELSE 0 END
+                        CASE
+                            WHEN COALESCE(d.es_adicional, 0) = 1 AND COALESCE(d.adicional_signo, 'positivo') <> 'negativo' THEN 0
+                            WHEN UPPER(COALESCE(d.moneda, '')) = 'DOLLAR' THEN (CASE WHEN COALESCE(d.es_adicional, 0) = 1 THEN -1 ELSE 1 END) * COALESCE(d.precio, 0) * COALESCE(d.cantidad, 0)
+                            ELSE 0
+                        END
                     ), 0) AS total_dolares,
                     COALESCE(MAX(c.tipo_cambio), 0) AS tipo_cambio
                 FROM detalle_compras d
                 INNER JOIN receta_compras c ON c.id = d.compra_id
-                WHERE MD5(c.id) = :hash
-                  AND COALESCE(d.es_adicional, 0) = 0";
+                WHERE MD5(c.id) = :hash";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':hash', $hash);
         $stmt->execute();

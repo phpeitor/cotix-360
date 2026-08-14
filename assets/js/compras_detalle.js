@@ -36,7 +36,9 @@ document.addEventListener("DOMContentLoaded", () => {
         descripcionReceta: document.getElementById("descripcionReceta"),
         cantidadItemsReceta: document.getElementById("cantidadItemsReceta"),
         condicionesEconomicasDias: document.getElementById("condicionesEconomicasDias"),
-        condicionesEconomicasVisible: document.getElementById("condicionesEconomicasVisible")
+        condicionesEconomicasVisible: document.getElementById("condicionesEconomicasVisible"),
+        adicionalesNegativosBody: document.getElementById("adicionalesNegativosBody"),
+        totalAdicionalesNegativos: document.getElementById("totalAdicionalesNegativos")
     };
 
     const baseSelect = document.getElementById("filterBase");
@@ -60,6 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const dataAttr = {
         total_compra_dolares: 0,
         total_origen_dolares: 0,
+        total_adicionales_negativos_dolares: 0,
     };
 
     if (!hash) {
@@ -201,11 +204,13 @@ document.addEventListener("DOMContentLoaded", () => {
             permisos = data.permisos || permisos;
             dataAttr.total_compra_dolares = Number(data.total_compra_dolares ?? 0);
             dataAttr.total_origen_dolares = Number(data.total_origen_dolares ?? 0);
+            dataAttr.total_adicionales_negativos_dolares = Number(data.total_adicionales_negativos_dolares ?? 0);
 
             renderHeader();
             renderSemaforo();
             renderTotales();
             renderDetalle();
+            renderAdicionalesNegativos();
             initTooltips();
         } catch (error) {
             alertify.error(error.message || "No se pudo cargar la compra");
@@ -415,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                     ${adicionalBadge}
                                 </div>
                                 <h5 class="fs-14 mt-1 item-description text-break mb-0">${itemDescripcion}</h5>
-                                ${adicional ? `<small class="text-muted d-block mt-1">No afecta el total comparativo</small>` : ""}
+                                ${adicional ? `<small class="text-muted d-block mt-1">${adicionalSigno === "negativo" ? "Descuenta del total y semáforo" : "No afecta el total ni semáforo"}</small>` : ""}
                             </div>
                         </div>
                     </td>
@@ -432,7 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                     <td class="text-center">${cantidadHtml}</td>
                     <td class="text-end">${verMontos() ? precioHtml : '<span class="text-muted">-</span>'}</td>
-                    <td class="text-end item-total-value">${verMontos() ? `<span class="text-muted fs-12">${simbolo}</span> <h5 class="fs-14 mt-1 fw-normal mb-0">${money(total)}</h5>${adicional ? `<span class="badge bg-light text-muted mt-1">No suma</span>` : ""}` : "-"}</td>
+                    <td class="text-end item-total-value">${verMontos() ? `<span class="text-muted fs-12">${simbolo}</span> <h5 class="fs-14 mt-1 fw-normal mb-0">${money(total)}</h5>${adicional ? `<span class="badge bg-light text-muted mt-1">${adicionalSigno === "negativo" ? "Descuenta" : "No suma"}</span>` : ""}` : "-"}</td>
                     <td class="text-center">${accionHtml}</td>
                 </tr>
             `;
@@ -452,8 +457,44 @@ document.addEventListener("DOMContentLoaded", () => {
         if (totalEl && verMontos()) {
             const moneda = String(item.moneda || "").toUpperCase();
             const simbolo = monedaSimbolo(moneda);
-            totalEl.innerHTML = `<span class="text-muted fs-12">${simbolo}</span> <h5 class="fs-14 mt-1 fw-normal mb-0">${money(Number(item.precio || 0) * cantidad)}</h5>${esAdicional(item) ? `<span class="badge bg-light text-muted mt-1">No suma</span>` : ""}`;
+            totalEl.innerHTML = `<span class="text-muted fs-12">${simbolo}</span> <h5 class="fs-14 mt-1 fw-normal mb-0">${money(Number(item.precio || 0) * cantidad)}</h5>${esAdicional(item) ? `<span class="badge bg-light text-muted mt-1">${signoAdicional(item) === "negativo" ? "Descuenta" : "No suma"}</span>` : ""}`;
         }
+    }
+
+    function montoDolares(item) {
+        const monto = Number(item?.precio || 0) * Number(item?.cantidad || 0);
+        const tipoCambio = Number(totales?.tipo_cambio || compra?.tipo_cambio || 0) || 1;
+        return String(item?.moneda || "").toUpperCase() === "DOLLAR" ? monto : monto / tipoCambio;
+    }
+
+    function renderAdicionalesNegativos() {
+        if (!fields.adicionalesNegativosBody || !fields.totalAdicionalesNegativos) return;
+        const negativos = detalle.filter(item => esAdicional(item) && signoAdicional(item) === "negativo");
+        const total = negativos.reduce((sum, item) => sum + montoDolares(item), 0);
+
+        fields.totalAdicionalesNegativos.textContent = formatNumber(total);
+        dataAttr.total_adicionales_negativos_dolares = total;
+
+        if (!negativos.length) {
+            fields.adicionalesNegativosBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Sin adicionales negativos.</td></tr>';
+            return;
+        }
+
+        fields.adicionalesNegativosBody.innerHTML = negativos.map(item => {
+            const cantidad = Number(item.cantidad || 0);
+            const precio = Number(item.precio || 0);
+            const moneda = String(item.moneda || "").toUpperCase();
+            const detalleTexto = formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]) || "-";
+            return `
+                <tr>
+                    <td class="fw-semibold text-wrap">${escapeHtml(item.nombre || "-")}</td>
+                    <td class="text-wrap">${escapeHtml(detalleTexto)}</td>
+                    <td class="text-end">${cantidad}</td>
+                    <td class="text-end">${monedaSimbolo(moneda)} ${money(precio)}</td>
+                    <td class="text-end fw-semibold">$ ${formatNumber(montoDolares(item))}</td>
+                </tr>
+            `;
+        }).join("");
     }
 
     function actualizarTotalesDetalle() {
@@ -465,9 +506,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const cantidad = Number(item.cantidad || 0);
             const total = cantidad * Number(item.precio || 0);
             totalItems += cantidad;
-            if (!esAdicional(item)) {
-                if (String(item.moneda || "").toUpperCase() === "DOLLAR") totalDolares += total;
-                else totalSoles += total;
+            if (!esAdicional(item) || signoAdicional(item) === "negativo") {
+                const factor = esAdicional(item) ? -1 : 1;
+                if (String(item.moneda || "").toUpperCase() === "DOLLAR") totalDolares += factor * total;
+                else totalSoles += factor * total;
             }
         });
 
@@ -483,6 +525,9 @@ document.addEventListener("DOMContentLoaded", () => {
             total_peru_dolares: tipoCambio > 0 ? totalPeru / tipoCambio : 0,
         };
         renderTotales();
+        dataAttr.total_compra_dolares = totales.total_peru_dolares;
+        renderSemaforo();
+        renderAdicionalesNegativos();
     }
 
     async function post(url, body) {
@@ -504,9 +549,11 @@ document.addEventListener("DOMContentLoaded", () => {
             semaforo = json.semaforo;
             dataAttr.total_compra_dolares = json.total_compra_dolares ?? dataAttr.total_compra_dolares;
             dataAttr.total_origen_dolares = json.total_origen_dolares ?? dataAttr.total_origen_dolares;
+            dataAttr.total_adicionales_negativos_dolares = json.total_adicionales_negativos_dolares ?? dataAttr.total_adicionales_negativos_dolares;
             renderSemaforo();
         }
         renderTotales();
+        renderAdicionalesNegativos();
     }
 
     async function guardarCantidad(detalleId, cantidad) {

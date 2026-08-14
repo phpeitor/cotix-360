@@ -123,7 +123,8 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                             <div class="col-lg-3 col-12">
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total S/.</span> <span id="total_peru">0.00</span></p>
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-minimalistic-outline" class="text-success"></iconify-icon> <span class="text-dark">Total $</span> <span id="total_peru_dolares">0.00</span></p>
-                                                <small class="text-muted d-block">No incluye adicionales</small>
+                                                <small class="text-muted d-block">Incluye descuentos adicionales negativos</small>
+                                                <button type="button" class="btn btn-link btn-sm p-0 <?= $verMontos ? '' : 'd-none' ?>" data-bs-toggle="modal" data-bs-target="#adicionales-negativos-modal">Ver adicionales negativos</button>
                                             </div>
                                         </div>
                                     </div>
@@ -210,6 +211,39 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="adicionales-negativos-modal" class="modal fade" tabindex="-1" aria-labelledby="adicionales-negativos-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header text-bg-danger border-0">
+                    <h4 class="modal-title" id="adicionales-negativos-modalLabel">Adicionales negativos</h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Detalle</th>
+                                    <th class="text-end">Cantidad</th>
+                                    <th class="text-end">Precio</th>
+                                    <th class="text-end">Total $</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adicionalesNegativosBody">
+                                <tr><td colspan="5" class="text-center text-muted py-4">Sin adicionales negativos.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <div class="me-auto fw-semibold text-muted">Suma adicionales negativos $: <span id="totalAdicionalesNegativos">0.00</span></div>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -397,7 +431,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/compras_detalle.js?v=2.3"></script>
+    <script src="./assets/js/compras_detalle.js?v=2.4"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/compras_charts.js?v=2.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
