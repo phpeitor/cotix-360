@@ -26,7 +26,8 @@ if (isset($_SESSION['session_time'])) {
     }
 }
 
-$archivoActual = basename($_SERVER['SCRIPT_NAME'] ?? '');
+$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
+$archivoActual = basename($requestPath ?: ($_SERVER['SCRIPT_NAME'] ?? ''));
 
 if ($archivoActual !== '' && !tieneAcceso($archivoActual)) {
     if ($archivoActual === 'home.php') {
