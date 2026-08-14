@@ -93,7 +93,8 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
 
                                 <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end receta-header-actions">
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#cliente-modal" data-bs-title="Cliente" data-bs-placement="bottom"><i class="ti ti-user-circle fs-18"></i></button>
-                                    <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#condiciones-modal" data-bs-title="Datos comerciales" data-bs-placement="bottom"><i class="ti ti-clipboard-text fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon <?= $verMontos ? '' : 'd-none' ?>" data-bs-toggle="modal" data-bs-target="#adicionales-negativos-modal" data-bs-title="Adicionales negativos" data-bs-placement="bottom"><i class="ti ti-circle-minus fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon <?= $verMontos ? '' : 'd-none' ?>" data-bs-toggle="modal" data-bs-target="#adicionales-positivos-modal" data-bs-title="Adicionales positivos" data-bs-placement="bottom"><i class="ti ti-circle-plus fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon <?= $verMontos ? '' : 'd-none' ?>" id="btnToggleCharts" data-bs-toggle="tooltip" data-bs-title="Ver gráficos" data-bs-placement="bottom"><i class="ti ti-chart-arcs fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom" id="btnBuscarItems"><i class="ti ti-search fs-18"></i></button>
                                     <a href="compras.php" class="btn btn-dark btn-icon" data-bs-toggle="tooltip" data-bs-title="Volver" data-bs-placement="bottom"><i class="ti ti-corner-up-left-double fs-18"></i></a>
@@ -124,7 +125,6 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total S/.</span> <span id="total_peru">0.00</span></p>
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-minimalistic-outline" class="text-success"></iconify-icon> <span class="text-dark">Total $</span> <span id="total_peru_dolares">0.00</span></p>
                                                 <small class="text-muted d-block">Incluye descuentos adicionales negativos</small>
-                                                <button type="button" class="btn btn-link btn-sm p-0 <?= $verMontos ? '' : 'd-none' ?>" data-bs-toggle="modal" data-bs-target="#adicionales-negativos-modal">Ver adicionales negativos</button>
                                             </div>
                                         </div>
                                     </div>
@@ -243,6 +243,42 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                 </div>
                 <div class="modal-footer border-0">
                     <div class="me-auto fw-semibold text-muted">Suma adicionales negativos $: <span id="totalAdicionalesNegativos">0.00</span></div>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="adicionales-positivos-modal" class="modal fade" tabindex="-1" aria-labelledby="adicionales-positivos-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header text-bg-success border-0">
+                    <h4 class="modal-title" id="adicionales-positivos-modalLabel">Adicionales positivos</h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-success bg-success-subtle text-success-emphasis border-0 fs-13">
+                        Estos adicionales son informativos: no afectan el total ni el semáforo.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Detalle</th>
+                                    <th class="text-end">Cantidad</th>
+                                    <th class="text-end">Precio</th>
+                                    <th class="text-end">Total $</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adicionalesPositivosBody">
+                                <tr><td colspan="5" class="text-center text-muted py-4">Sin adicionales positivos.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <div class="me-auto fw-semibold text-muted">Suma adicionales positivos $: <span id="totalAdicionalesPositivos">0.00</span></div>
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
@@ -431,7 +467,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/compras_detalle.js?v=2.4"></script>
+    <script src="./assets/js/compras_detalle.js?v=2.5"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/compras_charts.js?v=2.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>

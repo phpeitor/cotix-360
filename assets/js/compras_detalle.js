@@ -38,7 +38,9 @@ document.addEventListener("DOMContentLoaded", () => {
         condicionesEconomicasDias: document.getElementById("condicionesEconomicasDias"),
         condicionesEconomicasVisible: document.getElementById("condicionesEconomicasVisible"),
         adicionalesNegativosBody: document.getElementById("adicionalesNegativosBody"),
-        totalAdicionalesNegativos: document.getElementById("totalAdicionalesNegativos")
+        totalAdicionalesNegativos: document.getElementById("totalAdicionalesNegativos"),
+        adicionalesPositivosBody: document.getElementById("adicionalesPositivosBody"),
+        totalAdicionalesPositivos: document.getElementById("totalAdicionalesPositivos")
     };
 
     const baseSelect = document.getElementById("filterBase");
@@ -210,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderSemaforo();
             renderTotales();
             renderDetalle();
-            renderAdicionalesNegativos();
+            renderAdicionales();
             initTooltips();
         } catch (error) {
             alertify.error(error.message || "No se pudo cargar la compra");
@@ -467,20 +469,27 @@ document.addEventListener("DOMContentLoaded", () => {
         return String(item?.moneda || "").toUpperCase() === "DOLLAR" ? monto : monto / tipoCambio;
     }
 
-    function renderAdicionalesNegativos() {
-        if (!fields.adicionalesNegativosBody || !fields.totalAdicionalesNegativos) return;
-        const negativos = detalle.filter(item => esAdicional(item) && signoAdicional(item) === "negativo");
-        const total = negativos.reduce((sum, item) => sum + montoDolares(item), 0);
+    function renderAdicionales() {
+        renderAdicionalesPorSigno("negativo", fields.adicionalesNegativosBody, fields.totalAdicionalesNegativos);
+        renderAdicionalesPorSigno("positivo", fields.adicionalesPositivosBody, fields.totalAdicionalesPositivos);
+    }
 
-        fields.totalAdicionalesNegativos.textContent = formatNumber(total);
-        dataAttr.total_adicionales_negativos_dolares = total;
+    function renderAdicionalesPorSigno(signo, bodyEl, totalEl) {
+        if (!bodyEl || !totalEl) return;
+        const items = detalle.filter(item => esAdicional(item) && signoAdicional(item) === signo);
+        const total = items.reduce((sum, item) => sum + montoDolares(item), 0);
 
-        if (!negativos.length) {
-            fields.adicionalesNegativosBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Sin adicionales negativos.</td></tr>';
+        totalEl.textContent = formatNumber(total);
+        if (signo === "negativo") {
+            dataAttr.total_adicionales_negativos_dolares = total;
+        }
+
+        if (!items.length) {
+            bodyEl.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">Sin adicionales ${signo === "negativo" ? "negativos" : "positivos"}.</td></tr>`;
             return;
         }
 
-        fields.adicionalesNegativosBody.innerHTML = negativos.map(item => {
+        bodyEl.innerHTML = items.map(item => {
             const cantidad = Number(item.cantidad || 0);
             const precio = Number(item.precio || 0);
             const moneda = String(item.moneda || "").toUpperCase();
@@ -527,7 +536,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderTotales();
         dataAttr.total_compra_dolares = totales.total_peru_dolares;
         renderSemaforo();
-        renderAdicionalesNegativos();
+        renderAdicionales();
     }
 
     async function post(url, body) {
@@ -553,7 +562,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderSemaforo();
         }
         renderTotales();
-        renderAdicionalesNegativos();
+        renderAdicionales();
     }
 
     async function guardarCantidad(detalleId, cantidad) {
