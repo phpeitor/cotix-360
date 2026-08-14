@@ -1,5 +1,27 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function initTooltips() {
+        if (typeof bootstrap === "undefined" || !bootstrap.Tooltip) return;
+        document.querySelectorAll('#table-gridjs [data-bs-toggle="tooltip"]').forEach(el => {
+            bootstrap.Tooltip.getOrCreateInstance(el);
+        });
+    }
+
+    const tableContainer = document.getElementById("table-gridjs");
+    const observer = new MutationObserver(initTooltips);
+    if (tableContainer) {
+        observer.observe(tableContainer, { childList: true, subtree: true });
+    }
+
     const grid = new gridjs.Grid({
         columns: [
             {
@@ -43,6 +65,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 id: "DOC",
                 name: "Documento",
                 width: "120px"
+            },
+            {
+                id: "PASSWORD",
+                name: "Password",
+                width: "160px",
+                formatter: (cell) => {
+                    const hash = String(cell || "");
+                    if (!hash) return gridjs.html('<span class="text-muted">-</span>');
+                    return gridjs.html(`
+                        <code class="usuario-password-hash" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${escapeHtml(hash)}">${escapeHtml(hash)}</code>
+                    `);
+                }
             },
             {
                 id: "SEXO",
@@ -100,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const cells = row.cells;
 
                     const id = cells[0].data;
-                    const estado = String(cells[5].data).trim();
+                    const estado = String(cells[6].data).trim();
                     const idHash = md5(String(id));
 
                     const btnDelete = estado === "1"
@@ -137,6 +171,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     })
     .render(document.getElementById("table-gridjs"));
+
+    grid.on("ready", initTooltips);
 
     document.addEventListener("click", async (e) => {
 
