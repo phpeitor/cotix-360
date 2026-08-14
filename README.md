@@ -9,73 +9,67 @@ Aplicación web para gestión de usuarios, carga de ítems y generación de coti
 
 [![Video Demo](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=QzPLElgIzGA)
 
+## Descripción
 
-## Qué hace el sistema
+Cotix360 es una aplicación web operativa para administrar catálogos, cotizaciones, recetas comerciales, ingeniería y compras. El sistema concentra el ciclo completo desde la carga de ítems hasta la validación técnica/comercial y el control de costos de compra contra la ingeniería aprobada.
 
-- Gestión de usuarios (alta, edición, baja lógica, validación de estado activo para login).
-- Gestión de ítems para cotización.
-- Carga masiva de ítems desde Excel con validación de cabeceras.
-- Cálculo comercial por cotización:
-	- FOB
-	- Flete por país y peso
-	- Gastos por tramo
-	- Interés de financiamiento
-	- Factor
-	- Precio M, utilidad y precio cliente
-- Historial de cotizaciones.
-- Exportación de cotización a PDF.
-- Módulo de recetas comerciales:
-	- Creación de receta con tipo de cambio SUNAT.
-	- Guardado de cabecera en `recetas` y detalle en `receta_detalle`.
-	- Consulta de recetas por rango de fechas.
-	- Vista de receta con edición de detalle (agregar, quitar y ajustar cantidad).
-	- Notificación en tiempo real de cambios de precio (SSE) sin refrescar página.
-	- Sincronización entre múltiples pestañas/ventanas abiertas de la misma receta.
-	- Detección de cambios de precio contra catálogo (`receta_items`) con alerta visual por fila e ícono informativo con tooltip.
-	- Recarga/sincronización de precios de detalle desde catálogo con botón `reload`.
-	- Restricción funcional: solo se permite editar y recargar precios cuando la receta está en estado `Enviada`.
-	- Restricción de stream: el canal en tiempo real solo permanece activo en estado `Enviada`; en otros estados se detiene para reducir consumo.
-	- Aprobación/anulación de receta.
-	- Exportación de receta a PDF con totales por moneda y total Perú.
-- Módulo de compras:
-	- Listado de compras generadas al aprobar ingenierías, con filtro por rango de fechas.
-	- Detalle de compra con semáforo comparativo contra la ingeniería aprobada.
-	- Semáforo: verde si los costos mejoran la cotización, naranja si se mantienen en un rango promedio aceptable, rojo si superan significativamente lo cotizado.
-	- Edición del detalle para cargos `administrador` (1), `supervisor` (3) y `compras` (5): agregar items desde el catálogo, cambiar cantidad, precio y moneda, y eliminar items, solo mientras la compra esté en estado `Pendiente`.
+El proyecto es una aplicación PHP tradicional con frontend server-rendered y JavaScript modular por pantalla. La prioridad funcional es mantener trazabilidad de precios, estados, márgenes, totales por moneda y reglas de negocio entre áreas.
 
-## Stack técnico
+## Capacidades Principales
 
-- Backend: PHP (capas controller, model, database).
-- Frontend: JavaScript + Bootstrap.
-- Base de datos: MySQL.
-- Dependencias PHP:
-	- dompdf/dompdf
-	- phpoffice/phpspreadsheet
-	- vlucas/phpdotenv
+- Gestión de usuarios, sesiones y permisos por cargo.
+- Administración de catálogo de ítems y carga masiva desde Excel.
+- Cotizaciones con cálculo comercial, financiamiento y exportación PDF.
+- Recetas comerciales con detalle editable, tipo de cambio, márgenes por categoría y datos comerciales.
+- Detección de cambios de precio contra catálogo mediante SSE.
+- Flujo de aprobación de recetas hacia ingeniería.
+- Ingeniería con validación técnica, estados controlados y adicionales positivos/negativos.
+- Compras generadas desde ingeniería validada, con edición controlada, semáforo comparativo y análisis gráfico.
+- Exportación a PDF/Excel para documentos comerciales y técnicos.
 
-## Requisitos
+## Stack
 
-- PHP 8.1 o superior
-- Composer
-- MySQL 5.7 o superior (recomendado 8.x)
-- Apache (recomendado) o servidor embebido de PHP
+- PHP 8.x
+- MySQL/MariaDB
+- Apache HTTP Server
+- JavaScript vanilla por módulo de pantalla
+- Bootstrap y componentes del template administrativo
+- Composer para dependencias PHP
+- Dompdf para PDF
+- PhpSpreadsheet para Excel
+- Dotenv para configuración de entorno
 
-## Instalación rápida
+## Arquitectura
 
-1. Clonar el proyecto.
-
-```bash
-git clone https://github.com/phpeitor/cotix-360.git
-cd cotix-360
+```text
+cotix/
+  assets/              Frontend: JS, CSS, imágenes, vendor assets
+  config/              Bootstrap de aplicación, APIs externas y configuración común
+  controller/          Endpoints HTTP y orquestación de casos de uso
+  database/            Conexión PDO y migraciones SQL
+  layout/              Shell HTML compartido: menú, navbar, theme, footer
+  model/               Acceso a datos y reglas de negocio por dominio
+  release-notes/       Registro de cambios relevantes
+  views/               Pantallas PHP renderizadas del lado servidor
+  vendor/              Dependencias Composer
 ```
 
-2. Instalar dependencias.
+La aplicación no usa un framework MVC completo. La separación real es pragmática:
+
+- `views/`: composición HTML/PHP y puntos de montaje para JS.
+- `assets/js/`: comportamiento de cada vista, llamadas `fetch`, renderizado dinámico y validaciones UX.
+- `controller/`: validación de request, sesión/permisos, transacciones y respuesta JSON/documento.
+- `model/`: consultas SQL, creación defensiva de columnas/tablas y reglas persistentes del dominio.
+
+## Instalación Local
+
+1. Instalar dependencias PHP.
 
 ```bash
 composer install
 ```
 
-3. Crear archivo .env en la raíz del proyecto.
+2. Crear `.env` en la raíz.
 
 ```env
 DB_HOST=127.0.0.1
@@ -83,135 +77,205 @@ DB_NAME=bd_cotix
 DB_USER=root
 DB_PASS=
 
-# Requerido por controller/acceso.php y controller/logout.php
 IP_API_URL=https://api.ipify.org
-
-# Opcional (consulta DNI usada por config/api.php; API_DNI_URL_2 es fallback)
 API_DNI_URL=
 API_DNI_URL_2=
 API_RUC_URL=
 API_RUC_URL_2=
 ```
 
-4. Crear la base de datos y cargar estructura/datos iniciales según tu script SQL interno.
+3. Crear base de datos y aplicar los scripts SQL disponibles en `database/migrations/` más el dump/base inicial del entorno.
 
-5. Levantar la aplicación.
-
-Opción A (Apache)
-
-- Copiar proyecto en htdocs.
-- Abrir: http://127.0.0.1/cotix/index.php
-
-Opción B (servidor embebido PHP)
-
-```bash
-php -S 127.0.0.1:8000
-```
-
-Abrir: http://127.0.0.1:8000/index.php
-
-## Estructura del proyecto
+4. Publicar el proyecto en Apache, por ejemplo:
 
 ```text
-cotix/
-	assets/          # CSS, JS, imágenes y recursos UI
-	config/          # bootstrap y configuración
-	controller/      # endpoints/controladores
-	database/        # conexión a MySQL
-	model/           # lógica de negocio
-	release-notes/   # notas por versión
-	vendor/          # dependencias Composer
+C:\Apache24\htdocs\cotix
 ```
 
-## Flujo principal
+5. Abrir la aplicación.
 
-1. Login.
-2. Gestión de usuarios e ítems.
-3. Carga masiva de ítems (Excel).
-4. Generación de cotización y cálculo de totales.
-5. Financiamiento (tasa, cuota e interés por períodos).
-6. Consulta de cotizaciones y exportación PDF.
-7. Creación, consulta, edición controlada, aprobación/anulación y exportación de recetas.
+```text
+http://127.0.0.1/cotix/index.php
+```
 
-## Reglas de cálculo relevantes
+## Configuración
 
-- El sistema aplica margen por grupo para obtener precio descuento.
-- El flete se calcula por país de origen y peso acumulado.
-- Gastos se calculan por tramos de FOB.
-- El interés de financiamiento se integra al costo total y al factor.
-- Puede existir ajuste por redondeo cuando se compara:
-	- Total teórico (FOB + Flete + Gastos + Interés)
-	- versus suma de líneas redondeadas por ítem.
+La configuración sensible debe vivir en `.env`. No subir credenciales reales al repositorio.
 
-## Endpoints/controladores importantes
+- `DB_HOST`: host MySQL.
+- `DB_NAME`: base de datos de Cotix360.
+- `DB_USER`: usuario de base de datos.
+- `DB_PASS`: contraseña de base de datos.
+- `IP_API_URL`: servicio para registrar IP en login/logout.
+- `API_DNI_URL`, `API_DNI_URL_2`: proveedores de consulta DNI.
+- `API_RUC_URL`, `API_RUC_URL_2`: proveedores de consulta RUC.
 
-- Login: controller/acceso.php
-- Logout: controller/logout.php
-- Cotización (tabla): controller/table_cotizacion.php
-- Cotización (detalle): controller/get_cotizacion.php
-- Guardar cotización: controller/add_cotizacion.php
-- Financiamiento: controller/financiamiento_cotizacion.php
-- Carga Excel ítems: controller/cargar_items.php
-- Receta (tabla): controller/table_receta.php
-- Receta (detalle): controller/get_receta.php
-- Guardar receta: controller/add_receta.php
-- Actualizar receta (detalle/cantidades): controller/upd_receta.php
-- Recargar precios de receta: controller/reload_receta_precios.php
-- Stream de cambios de precio (SSE): controller/stream_receta_cambios.php
-- Actualizar estado receta: controller/upd_estado_receta.php
-- Compras (tabla): controller/compras/table_compras.php
-- Compras (detalle): controller/compras/get_compra.php
-- Actualizar detalle compra (agregar item, precio, cantidad, eliminar): controller/compras/upd_compra_detalle.php
+## Roles Relevantes
 
-## Tiempo real (SSE) en recetas
+- `1`: Administrador.
+- `3`: Supervisor.
+- `4`: Técnico.
+- `5`: Compras.
+- `6`: Ingeniería.
 
-- El stream SSE se usa para detectar cambios de precio de `receta_items` en la vista de receta sin recargar.
-- El frontend consume el stream con `EventSource` y actualiza alertas/filas en vivo.
-- El stream solo notifica cuando la receta está en estado `Enviada`.
-- Si la receta cambia a estado no editable (`Aprobada`, `Anulada`, etc.), el backend emite desactivación y el frontend cierra la conexión.
+Los permisos no deben asumirse desde el frontend. Toda acción que cambie datos debe validarse en controller/model antes de persistir.
 
-### Optimización de rendimiento del stream
+## Flujos de Negocio
 
-- Se libera el lock de sesión (`session_write_close`) para no bloquear otras requests de la misma sesión.
-- Se usa firma liviana en BD (`count + checksum`) y solo se trae detalle completo cuando hay cambios reales.
-- Polling adaptativo:
-	- Modo activo: intervalo corto para respuesta rápida después de cambios.
-	- Modo idle: intervalo mayor cuando no hay actividad.
-- Heartbeat (`ping`) y refresh de estado con frecuencia desacoplada para reducir carga.
+### Cotizaciones
 
-## Exportación PDF
+La cotización calcula costos, financiamiento y precios finales a partir del catálogo y parámetros comerciales. La salida principal es PDF, manteniendo consistencia entre los valores calculados en pantalla y el documento generado.
 
-- Archivo principal: pdf_cotizacion.php
-- Genera PDF con Dompdf.
-- Incluye cálculos de Total Perú, Factor e Interés para mantener consistencia con la cotización.
-- Archivo principal receta: pdf_receta.php
-- El PDF de receta concatena símbolo de moneda al precio (`S/` o `$`).
-- Calcula y muestra `Total S/`, `Total $` y `Total Perú` (con tipo de cambio).
-- Muestra el tipo de cambio solo cuando `Total $ > 0`.
+### Recetas
 
-## Convenciones de desarrollo
+La receta representa una propuesta comercial editable antes de aprobación. Sus puntos críticos son:
 
-- Ver reglas del proyecto en `REGLAS_DESARROLLO.md`.
+- Detalle por ítem con cantidad, precio, moneda y tipo de cambio.
+- Márgenes por categoría obligatorios antes de aprobación.
+- Bloqueo de aprobación si hay precios en cero o datos comerciales incompletos.
+- Detección de cambios de precio del catálogo mediante SSE cuando la receta está en estado editable.
+- Exportación comercial PDF/Excel.
 
-## Solución de problemas
+### Ingeniería
 
-- Error de conexión a DB:
-	- Verifica DB_HOST, DB_NAME, DB_USER, DB_PASS en .env.
-- Login falla sin mensaje claro:
-	- Verifica que el usuario tenga IDESTADO = 1 (activo).
-- IP no registrada en login/logout:
-	- Configura IP_API_URL en .env.
-- Carga Excel rechazada:
-	- Confirma que el archivo tenga cabeceras exactas y en el orden esperado.
+Ingeniería recibe recetas aprobadas y valida el detalle técnico. Puede manejar adicionales positivos y negativos, pero esos adicionales tienen reglas explícitas según el módulo consumidor.
 
-## Roadmap sugerido
+### Compras
 
-- Añadir pruebas automatizadas para cálculos financieros.
+Compras se genera desde ingeniería validada. El módulo permite ajustar precios, cantidades, moneda y agregar ítems mientras el estado sea editable. El semáforo compara el total de compra contra la referencia de ingeniería.
 
-## Notas de la versión reciente
+Reglas actuales de adicionales en compras:
 
-Las nuevas funcionalidades y cambios recientes se han movido a notas de versión. Consulta [release-notes/v2.1.0.md](release-notes/v2.1.0.md) para el detalle completo de lo implementado el 16 de mayo de 2026.
+- Ítems normales suman al total y al semáforo.
+- Adicionales negativos descuentan del total y afectan el semáforo.
+- Adicionales positivos son informativos y no afectan total ni semáforo.
+- Existen modales separados para revisar adicionales negativos y positivos.
+
+## Estados Importantes
+
+- `Enviada`: estado editable principal en recetas.
+- `Aprobada`: receta aprobada y transferida al siguiente flujo.
+- `Validado`: estado usado en ingeniería/compras para indicar validación operativa.
+- `Pendiente`: estado legacy/compatible en compras.
+- `Anulada`: estado terminal no editable.
+
+Al agregar estados nuevos, revisar enums SQL, validaciones de controllers, badges frontend y reglas de editabilidad.
+
+## Reglas de Cálculo
+
+- Los totales por moneda deben calcularse en backend y reflejarse en frontend.
+- Para conversiones a dólares se usa `tipo_cambio` de la entidad correspondiente.
+- En recetas, los márgenes por categoría son obligatorios para aprobar.
+- En compras, el semáforo usa total ajustado según reglas de adicionales.
+- Evitar duplicar reglas críticas solo en JavaScript; el servidor debe ser la fuente de verdad.
+
+## Endpoints Relevantes
+
+### Sesión
+
+- `controller/acceso.php`
+- `controller/logout.php`
+
+### Recetas
+
+- `controller/table_receta.php`
+- `controller/get_receta.php`
+- `controller/add_receta.php`
+- `controller/upd_receta.php`
+- `controller/upd_estado_receta.php`
+- `controller/get_receta_categoria.php`
+- `controller/upd_receta_categoria.php`
+- `controller/reload_receta_precios.php`
+- `controller/stream_receta_cambios.php`
+
+### Ingeniería
+
+- `controller/aprobar_ingenieria.php`
+- `controller/guardar_ingenieria.php`
+- `controller/upd_ingenieria_detalle.php`
+- `controller/upd_ingenieria_header.php`
+
+### Compras
+
+- `controller/compras/table_compras.php`
+- `controller/compras/get_compra.php`
+- `controller/compras/upd_compra_detalle.php`
+- `controller/compras/charts_compra.php`
+
+### Exportaciones
+
+- `pdf_cotizacion.php`
+- `pdf_receta.php`
+- `controller/export_receta_excel.php`
+- `controller/export_oferta_comercial_excel.php`
+
+## Tiempo Real
+
+El módulo de recetas usa Server-Sent Events para detectar cambios de precio del catálogo sin recargar la pantalla.
+
+Consideraciones operativas:
+
+- El stream debe liberar lock de sesión con `session_write_close()`.
+- El stream solo debe mantenerse activo en estados editables.
+- El backend usa firma liviana para evitar consultar detalle completo si no hay cambios.
+- El frontend debe cerrar `EventSource` al salir de la vista.
+
+## Migraciones
+
+Las migraciones SQL viven en `database/migrations/`. Varias capas del modelo también hacen creación defensiva de columnas/tablas para ambientes existentes. Aun así, el camino preferido es ejecutar migraciones explícitas por ambiente.
+
+Antes de desplegar cambios de datos:
+
+- Revisar si hay `ENUM` afectados.
+- Validar que nuevas columnas tengan default compatible.
+- Confirmar compatibilidad con datos históricos.
+- Ejecutar backup si el ambiente tiene datos productivos.
+
+## Desarrollo
+
+Comandos útiles:
+
+```bash
+composer install
+php -l controller/compras/get_compra.php
+php -l model/compras/compras.php
+node --check assets/js/compras_detalle.js
+```
+
+Buenas prácticas del proyecto:
+
+- Mantener cambios pequeños y localizados.
+- Validar permisos en backend.
+- No confiar en campos ocultos del frontend.
+- Evitar lógica financiera divergente entre PHP y JavaScript.
+- Actualizar cache bust (`?v=`) al modificar assets JS/CSS servidos por vistas PHP.
+- Preferir migraciones explícitas antes que cambios manuales en BD.
+
+## Troubleshooting
+
+- Error de conexión a BD: revisar `.env`, credenciales y permisos del usuario MySQL.
+- Login falla: verificar que el usuario esté activo y que la sesión pueda escribirse.
+- PDF no genera: revisar `vendor/`, permisos de escritura temporales y dependencias de Dompdf.
+- Excel no carga: validar cabeceras, formato y tamaño del archivo.
+- Cambios JS no aparecen: forzar recarga (`Ctrl + F5`) y revisar versión `?v=` del asset.
+- SSE no notifica: revisar estado de la receta, conexión del navegador y endpoint `stream_receta_cambios.php`.
+
+## Calidad y Riesgos
+
+Este código concentra reglas de negocio críticas en una aplicación PHP legacy-style. Los principales riesgos técnicos son:
+
+- Reglas financieras duplicadas entre backend y frontend.
+- Estados representados como strings y enums SQL.
+- Compatibilidad con datos históricos.
+- Dependencia de cache bust manual para assets.
+- Consultas SQL complejas para totales y agrupaciones.
+
+Al tocar totales, márgenes, estados o permisos, validar el flujo completo: lista, detalle, exportación, actualización AJAX y transición de estado.
+
+## Release Notes
+
+Los cambios funcionales relevantes deben documentarse en `release-notes/` cuando impacten operación, datos, permisos o reglas comerciales.
 
 ## Licencia
 
-Uso interno del proyecto. Si se distribuirá a terceros, definir una licencia explícita.
+Proyecto de uso interno. Definir una licencia explícita antes de distribuirlo a terceros.
