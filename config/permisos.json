@@ -47,8 +47,11 @@
     "acceso": [
       "home.php",
       "items_receta.php",
+      "receta_item_categorias.php",
       "add_item_receta.php",
       "upd_item_receta.php",
+      "compras.php",
+      "compras_detalle.php",
       "cotizaciones.php",
       "form_cotizacion.php",
       "pdf_cotizacion.php",

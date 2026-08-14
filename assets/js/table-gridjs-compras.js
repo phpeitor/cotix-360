@@ -178,9 +178,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const totalCompra = Number(semaforo.total_compra_dolares ?? 0);
         const totalOrigen = Number(semaforo.total_origen_dolares ?? 0);
-        const diff = totalOrigen > 0
-            ? ((totalCompra / totalOrigen - 1) * 100).toFixed(1)
-            : null;
+        const diff = totalOrigen > 0 ? ((totalCompra / totalOrigen - 1) * 100) : null;
+        const diffTexto = diff !== null ? formatoDiferenciaSemaforo(diff) : "";
 
         const label = nivel === "verde"
             ? "Mejora"
@@ -191,10 +190,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return gridjs.html(`
             <span class="badge ${map[nivel] || "bg-secondary"} compras-semaforo-badge"
                   data-bs-toggle="tooltip"
-                  data-bs-title="${escapeHtml(String(semaforo.mensaje || nivel))}${diff !== null ? ` (${diff}%)` : ""}">
-                <i class="ti ti-circle-filled fs-10 me-1"></i>${label}${diff !== null ? ` ${diff}%` : ""}
+                  data-bs-title="${escapeHtml(String(semaforo.mensaje || nivel))}${diffTexto ? ` (${diffTexto})` : ""}">
+                <i class="ti ti-circle-filled fs-10 me-1"></i>${label}${diffTexto ? ` ${diffTexto}` : ""}
             </span>
         `);
+    }
+
+    function formatoDiferenciaSemaforo(diff) {
+        const abs = Math.abs(diff).toFixed(1);
+        if (Math.abs(diff) < 0.05) return "sin variación";
+        return diff < 0 ? `${abs}% menor` : `${abs}% mayor`;
     }
 
     function renderRecetaCliente(nombre, row) {
