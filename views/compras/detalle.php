@@ -128,6 +128,12 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="px-2 py-2 border-bottom">
+                                        <div class="input-group input-group-sm" style="max-width: 420px;">
+                                            <span class="input-group-text"><i class="ti ti-search"></i></span>
+                                            <input type="search" class="form-control" id="comprasDetalleSearch" placeholder="Buscar item en compras...">
+                                        </div>
+                                    </div>
                                     <div class="table-responsive">
                                         <table class="table table-custom table-centered table-sm table-hover mb-0 compras-detalle-table">
                                             <thead class="table-light">
@@ -453,6 +459,10 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                 </div>
                                 <span class="badge bg-light text-dark" id="itemsResultCount">0 resultados</span>
                             </div>
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text"><i class="ti ti-search"></i></span>
+                                <input type="search" class="form-control" id="itemsDisponiblesSearch" placeholder="Buscar item disponible...">
+                            </div>
                             <div class="table-responsive receta-items-table-wrap">
                                 <table class="table table-sm table-hover align-middle mb-0 receta-items-table">
                                     <thead class="table-light">
@@ -481,7 +491,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/compras_detalle.js?v=2.6"></script>
+    <script src="./assets/js/compras_detalle.js?v=2.8"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/compras_charts.js?v=2.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>

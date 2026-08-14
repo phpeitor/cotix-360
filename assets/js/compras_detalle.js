@@ -40,7 +40,9 @@ document.addEventListener("DOMContentLoaded", () => {
         adicionalesNegativosBody: document.getElementById("adicionalesNegativosBody"),
         totalAdicionalesNegativos: document.getElementById("totalAdicionalesNegativos"),
         adicionalesPositivosBody: document.getElementById("adicionalesPositivosBody"),
-        totalAdicionalesPositivos: document.getElementById("totalAdicionalesPositivos")
+        totalAdicionalesPositivos: document.getElementById("totalAdicionalesPositivos"),
+        detalleSearch: document.getElementById("comprasDetalleSearch"),
+        itemsDisponiblesSearch: document.getElementById("itemsDisponiblesSearch")
     };
 
     const baseSelect = document.getElementById("filterBase");
@@ -165,6 +167,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
         });
+        fields.detalleSearch?.addEventListener("input", filtrarDetalleCompra);
+        fields.itemsDisponiblesSearch?.addEventListener("input", filtrarItemsDisponibles);
 
         fields.condicionesModal?.addEventListener("show.bs.modal", renderCondicionesModal);
         fields.btnGuardarCondiciones?.addEventListener("click", guardarCondicionesComerciales);
@@ -417,9 +421,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const detalleLinea2 = escapeHtml(formatearRutaDetalle([item.marca, item.modelo, item.uni_medida]) || "-");
             const tipo = String(item.tipo || "-").toUpperCase();
             const tipoColor = tipo === "PRODUCTO" ? "text-success" : "text-info";
+            const searchText = escapeHtml([
+                item.nombre,
+                item.descripcion,
+                item.categoria,
+                item.sub_cat_1,
+                item.sub_cat_2,
+                item.marca,
+                item.modelo,
+                item.uni_medida,
+                tipo,
+                adicional ? `adicional ${adicionalSigno}` : "normal"
+            ].join(" ").toLowerCase());
 
             return `
-                <tr data-detalle-id="${item.id}" class="${adicional ? "table-light" : ""}">
+                <tr data-detalle-id="${item.id}" data-search-text="${searchText}" class="${adicional ? "table-light" : ""}">
                     <td class="text-wrap" style="min-width: 280px; max-width: 520px; white-space: normal; overflow-wrap: anywhere;">
                         <div class="d-flex align-items-center">
                             <div class="avatar-md flex-shrink-0 me-2">
@@ -455,6 +471,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 </tr>
             `;
         }).join("");
+        filtrarDetalleCompra();
+    }
+
+    function filtrarDetalleCompra() {
+        if (!fields.detalleSearch || !tbody) return;
+        const query = String(fields.detalleSearch.value || "").trim().toLowerCase();
+        const rows = Array.from(tbody.querySelectorAll("tr[data-detalle-id]"));
+        let visibles = 0;
+
+        rows.forEach(row => {
+            const match = !query || String(row.dataset.searchText || "").includes(query);
+            row.classList.toggle("d-none", !match);
+            if (match) visibles += 1;
+        });
+
+        const emptyRow = tbody.querySelector("tr[data-detalle-search-empty]");
+        if (!query || visibles > 0) {
+            emptyRow?.remove();
+            return;
+        }
+
+        if (!emptyRow && rows.length) {
+            tbody.insertAdjacentHTML("beforeend", '<tr data-detalle-search-empty><td colspan="7" class="text-center text-muted py-4">No hay items que coincidan con la búsqueda.</td></tr>');
+        }
     }
 
     function actualizarFilaCantidad(detalleId, cantidad) {
@@ -687,10 +727,15 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const existente = detalle.some(row => Number(row.item_id || 0) === Number(itemId));
         const tipoAgregado = tipoAgregadoActual();
-        if (existente && !tipoAgregado.esAdicional) {
-            alertify.error("Este item ya fue agregado");
+        const existente = detalle.find(row => {
+            if (Number(row.item_id || 0) !== Number(itemId)) return false;
+            if (!tipoAgregado.esAdicional) return !esAdicional(row);
+            return esAdicional(row) && signoAdicional(row) === tipoAgregado.signo;
+        });
+        if (existente) {
+            const tipoTexto = !tipoAgregado.esAdicional ? "normal" : `adicional ${tipoAgregado.signo === "negativo" ? "negativo" : "positivo"}`;
+            alertify.error(`Este item ya existe como ${tipoTexto}. Cambia la cantidad del item existente.`);
             return;
         }
 
@@ -839,6 +884,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderItemsDisponibles(items) {
+        if (fields.itemsDisponiblesSearch) fields.itemsDisponiblesSearch.value = "";
         itemsResultCount.textContent = `${items.length} resultados`;
         const editable = puedeEditar();
         if (!items.length) {
@@ -847,15 +893,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         itemSearchBody.innerHTML = items.map(item => {
             const simbolo = monedaSimbolo(item.moneda);
-            const yaExisteNormal = detalle.some(row => Number(row.item_id || 0) === Number(item.id) && !esAdicional(row));
             const tipoAgregado = tipoAgregadoActual();
-            const bloquearDuplicado = yaExisteNormal && !tipoAgregado.esAdicional;
+            const yaExisteTipo = detalle.some(row => {
+                if (Number(row.item_id || 0) !== Number(item.id)) return false;
+                if (!tipoAgregado.esAdicional) return !esAdicional(row);
+                return esAdicional(row) && signoAdicional(row) === tipoAgregado.signo;
+            });
+            const bloquearDuplicado = yaExisteTipo;
             const itemNombre = escapeHtml(item.nombre || "-");
             const itemDescripcion = escapeHtml(normalizarTextoDetalle(item.descripcion) || "-");
             const detalleLinea1 = escapeHtml(formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]) || "-");
             const detalleLinea2 = escapeHtml(formatearRutaDetalle([item.marca, item.modelo, item.uni_medida]) || "-");
+            const searchText = escapeHtml([item.nombre, item.descripcion, item.categoria, item.sub_cat_1, item.sub_cat_2, item.marca, item.modelo, item.uni_medida, item.moneda].join(" ").toLowerCase());
             return `
-                <tr>
+                <tr data-item-row="1" data-search-text="${searchText}">
                     <td>
                         <div class="item-title">${itemNombre}</div>
                         ${itemDescripcion !== "-" ? `<div class="item-subtitle">${itemDescripcion}</div>` : ""}
@@ -874,7 +925,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <button type="button" class="btn btn-sm btn-primary" data-add-item="${item.id}" ${(!editable || bloquearDuplicado) ? "disabled" : ""}>
                             <i class="ti ti-plus"></i>
                         </button>
-                        ${bloquearDuplicado ? `<small class="text-muted d-block mt-1">Ya agregado</small>` : ""}
+                        ${bloquearDuplicado ? `<small class="text-muted d-block mt-1">Ya existe; cambia cantidad</small>` : ""}
                     </td>
                 </tr>
             `;
@@ -893,6 +944,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 input.value = String(clampCantidad(input.value));
             });
         });
+        filtrarItemsDisponibles();
+    }
+
+    function filtrarItemsDisponibles() {
+        if (!fields.itemsDisponiblesSearch || !itemSearchBody) return;
+        const query = String(fields.itemsDisponiblesSearch.value || "").trim().toLowerCase();
+        const rows = Array.from(itemSearchBody.querySelectorAll("tr[data-item-row]"));
+        let visibles = 0;
+
+        rows.forEach(row => {
+            const match = !query || String(row.dataset.searchText || "").includes(query);
+            row.classList.toggle("d-none", !match);
+            if (match) visibles += 1;
+        });
+
+        itemsResultCount.textContent = `${query ? visibles : rows.length} resultados`;
+
+        const emptyRow = itemSearchBody.querySelector("tr[data-items-search-empty]");
+        if (!query || visibles > 0) {
+            emptyRow?.remove();
+            return;
+        }
+
+        if (!emptyRow && rows.length) {
+            itemSearchBody.insertAdjacentHTML("beforeend", '<tr data-items-search-empty><td colspan="4" class="text-center text-muted py-4">No hay resultados para la búsqueda.</td></tr>');
+        }
     }
 
     function renderEstado(value) {

@@ -54,8 +54,17 @@ try {
 
         $detalleActual = $compras->obtenerDetallePorHash($hash);
         foreach ($detalleActual as $row) {
-            if (!$esAdicional && (int)($row['item_id'] ?? 0) === $itemId && (int)($row['es_adicional'] ?? 0) === 0) {
-                throw new Exception('Este item ya fue agregado');
+            if ((int)($row['item_id'] ?? 0) !== $itemId) {
+                continue;
+            }
+
+            $rowEsAdicional = (int)($row['es_adicional'] ?? 0) === 1;
+            $rowSigno = strtolower((string)($row['adicional_signo'] ?? 'positivo')) === 'negativo' ? 'negativo' : 'positivo';
+            $mismoTipo = (!$esAdicional && !$rowEsAdicional) || ($esAdicional && $rowEsAdicional && $rowSigno === $adicionalSigno);
+
+            if ($mismoTipo) {
+                $tipoTexto = !$esAdicional ? 'normal' : 'adicional ' . ($adicionalSigno === 'negativo' ? 'negativo' : 'positivo');
+                throw new Exception('Este item ya existe como ' . $tipoTexto . '. Cambia la cantidad del item existente.');
             }
         }
 
