@@ -1329,6 +1329,24 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         return (int)($row['total'] ?? 0) > 0;
     }
 
+    public function recetaTieneMargenesCompletos(int $recetaId): bool
+    {
+        $categorias = $this->obtenerCategoriasParaEdicion($recetaId);
+        $rows = $categorias['rows'] ?? [];
+
+        if (!is_array($rows) || count($rows) === 0) {
+            return false;
+        }
+
+        foreach ($rows as $row) {
+            if ((float)($row['margen'] ?? 0) <= 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public function recetaTieneNombre(int $recetaId): bool
     {
         $sql = "SELECT COUNT(*) AS total

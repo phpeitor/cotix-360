@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const celularContactoInput = document.getElementById("celular_contacto");
     const userCargo = Number(recetaForm?.dataset?.userCargo || 0);
     const isTecnico = userCargo === 4;
-    const PAGE_SIZE = 10;
+    const PAGE_SIZE = 15;
     const MAX_CANTIDAD = 5000;
     let currentPage = 1;
 

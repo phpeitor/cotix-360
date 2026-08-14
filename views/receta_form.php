@@ -196,7 +196,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
                                     <div class="align-items-center justify-content-between row text-center text-sm-start">
                                         <div class="col-sm">
                                             <div class="text-muted" id="pagination_info">
-                                                Showing <span class="fw-semibold" id="pagination_from">1</span> of <span class="fw-semibold" id="pagination_to">10</span> Results
+                                                Showing <span class="fw-semibold" id="pagination_from">1</span> of <span class="fw-semibold" id="pagination_to">15</span> Results
                                             </div>
                                         </div>
                                         <div class="col-sm-auto mt-3 mt-sm-0" id="pagination_wrapper">
@@ -438,6 +438,38 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
         </div>
     </div>
 
+    <div id="categoria-detalle-modal" class="modal fade" tabindex="-1" aria-labelledby="categoria-detalle-modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header text-bg-info border-0">
+                    <h4 class="modal-title" id="categoria-detalle-modalLabel">Detalle de categoría</h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Marca</th>
+                                    <th class="text-end">Cantidad</th>
+                                    <th class="text-end">Precio</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categoriaDetalleTableBody">
+                                <tr><td colspan="5" class="text-center text-muted py-4">Selecciona una categoría.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="condiciones-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="condiciones-modalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -522,7 +554,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js"></script>
-    <script src="./assets/js/receta_form.js?v=2.4"></script>
+    <script src="./assets/js/receta_form.js?v=2.9"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

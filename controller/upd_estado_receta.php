@@ -47,8 +47,8 @@ try {
         throw new Exception('No se puede aprobar la receta porque hay productos con precio 0');
     }
 
-    if ($accion === 'aprobar' && !$receta->recetaTieneMargenes((int)$id)) {
-        throw new Exception('No se puede aprobar la receta porque no tiene márgenes registrados');
+    if ($accion === 'aprobar' && !$receta->recetaTieneMargenesCompletos((int)$id)) {
+        throw new Exception('No se puede aprobar la receta porque hay categorías sin margen o con margen 0');
     }
 
     $receta->begin();

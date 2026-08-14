@@ -27,6 +27,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnGuardarRecetaCategoria = document.getElementById("btnGuardarRecetaCategoria");
     const totalFormulaDolaresEl = document.getElementById("totalFormulaDolares");
     const totalMargenFormulaDolaresEl = document.getElementById("totalMargenFormulaDolares");
+    const categoriaDetalleModalEl = document.getElementById("categoria-detalle-modal");
+    const categoriaDetalleModalLabel = document.getElementById("categoria-detalle-modalLabel");
+    const categoriaDetalleTableBody = document.getElementById("categoriaDetalleTableBody");
+    const categoriaDetalleTotalGeneralEl = document.getElementById("categoriaDetalleTotalGeneral");
     const inputRecetaNombre = document.getElementById("inputRecetaNombre");
     const btnEditRecetaNombre = document.getElementById("btnEditRecetaNombre");
     const clienteModalEl = document.getElementById("cliente-modal");
@@ -79,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btnInfoCategoriaModal.classList.add("opacity-50", "cursor-not-allowed");
     }
 
-    const PAGE_SIZE = 10;
+    const PAGE_SIZE = 15;
     const MAX_CANTIDAD = 5000;
     let currentPage = 1;
     let receta = null;
@@ -907,13 +911,14 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
                 }
             }
             const categoriaTexto = escapeHtml(displayCategoria);
+            const categoriaAttr = escapeAttr(row.sub_cat_1 || "");
             const monedaRaw = String(row.moneda || "");
             const monedaSimbolo = monedaRaw.toUpperCase() === "DOLLAR" ? "$" : "S/.";
 
             return `
-                <tr class="receta-categoria-row" data-idx="${idx}" data-subcat="${escapeHtml(row.sub_cat_1 || "")}" data-subtotal="${subtotal}" data-cantidad="${cantidad}" data-margen="${margen}" data-moneda="${escapeAttr(monedaRaw)}">
+                <tr class="receta-categoria-row" data-idx="${idx}" data-tipo="${escapeAttr(row.tipo || "")}" data-subcat="${escapeAttr(row.sub_cat_1 || "")}" data-subtotal="${subtotal}" data-cantidad="${cantidad}" data-margen="${margen}" data-moneda="${escapeAttr(monedaRaw)}">
                     <td>
-                        <strong>${categoriaTexto}</strong>
+                        <button type="button" class="btn btn-link p-0 text-start fw-bold receta-categoria-detalle-btn" data-tipo="${escapeAttr(row.tipo || "")}" data-subcat="${categoriaAttr}" data-categoria="${escapeAttr(displayCategoria)}">${categoriaTexto}</button>
                     </td>
                     <td class="text-end">${format2(decimalAdjust("round", cantidad, "-2"))}</td>
                     <td class="text-end">${monedaSimbolo} ${format2(decimalAdjust("round", subtotal, "-2"))}</td>
@@ -1038,11 +1043,93 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
             actualizarTotalConMargen();
         });
 
+        recetaCategoriaTableBody.querySelectorAll(".receta-categoria-detalle-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                mostrarDetalleCategoria(btn.dataset.subcat || "", btn.dataset.categoria || "Categoría", btn.dataset.tipo || "");
+            });
+        });
+
         if (!recetaCategoriaTableBody.querySelector(".receta-categoria-row")) {
             limpiarResumenFormula();
         }
 
         initTooltips(recetaCategoriaTableBody);
+    }
+
+    function getCategoriaBase(value) {
+        return String(value ?? "").replace(/\s*\(.+\)\s*$/, "").trim();
+    }
+
+    function mostrarDetalleCategoria(subCat, categoriaLabel, tipoCategoria = "") {
+        if (!categoriaDetalleModalEl || !categoriaDetalleTableBody) return;
+
+        const table = categoriaDetalleTableBody.closest("table");
+        const theadRow = table?.querySelector("thead tr");
+        if (theadRow) {
+            theadRow.innerHTML = `
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Marca</th>
+                <th class="text-end">Cantidad</th>
+                <th class="text-end">Precio</th>
+                <th class="text-end">Total</th>
+            `;
+        }
+
+        const normalizar = value => String(value ?? "").trim().toUpperCase();
+        const subCatBase = getCategoriaBase(subCat);
+        const tipo = normalizar(tipoCategoria);
+        const items = detalle.filter(item => {
+            if (tipo === "SERVICIO") {
+                return normalizar(item.tipo) === tipo && normalizar(item.categoria) === normalizar(subCatBase);
+            }
+
+            if (tipo === "PRODUCTO") {
+                return normalizar(item.tipo) === tipo && normalizar(item.sub_cat_1) === normalizar(subCatBase);
+            }
+
+            return [item.categoria, item.sub_cat_1, item.sub_cat_2].some(value => normalizar(value) === normalizar(subCatBase));
+        });
+
+        if (categoriaDetalleModalLabel) {
+            categoriaDetalleModalLabel.textContent = `Detalle: ${categoriaLabel || subCat || "Categoría"}`;
+        }
+
+        if (!items.length) {
+            categoriaDetalleTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No hay items para esta categoría.</td></tr>';
+            if (categoriaDetalleTotalGeneralEl) categoriaDetalleTotalGeneralEl.textContent = "0.00";
+        } else {
+            let totalGeneral = 0;
+            const rowsHtml = items.map(item => {
+                const moneda = String(item.moneda || "").toUpperCase();
+                const tipoCambio = Number(receta?.tipo_cambio) > 0 ? Number(receta.tipo_cambio) : 1;
+                const cantidad = Number(item.cantidad) || 0;
+                const precio = Number(item.precio) || 0;
+                const precioDolares = moneda === "DOLLAR" ? precio : precio / tipoCambio;
+                const total = cantidad * precioDolares;
+                totalGeneral += total;
+                return `
+                    <tr>
+                        <td class="fw-semibold">${escapeHtml(item.nombre || "-")}</td>
+                        <td>${escapeHtml(item.descripcion || "-")}</td>
+                        <td>${escapeHtml(item.marca || "-")}</td>
+                        <td class="text-end">${Math.round(cantidad)}</td>
+                        <td class="text-end">$ ${format2(precioDolares)}</td>
+                        <td class="text-end fw-semibold">$ ${format2(total)}</td>
+                    </tr>
+                `;
+            }).join("");
+
+            categoriaDetalleTableBody.innerHTML = rowsHtml + `
+                <tr class="table-light">
+                    <td colspan="5" class="text-end fw-bold">Total general</td>
+                    <td class="text-end fw-bold">$ ${format2(totalGeneral)}</td>
+                </tr>
+            `;
+            if (categoriaDetalleTotalGeneralEl) categoriaDetalleTotalGeneralEl.textContent = format2(totalGeneral);
+        }
+
+        bootstrap.Modal.getOrCreateInstance(categoriaDetalleModalEl).show();
     }
 
     async function cargarCategoriasRecetaModal() {
