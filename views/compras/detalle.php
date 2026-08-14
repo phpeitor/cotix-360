@@ -421,6 +421,20 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                             <label class="form-label">Sub Categoria 2</label>
                             <select id="subCat2" class="form-select" disabled><option value="">-- Seleccione --</option></select>
                         </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label mb-2">Tipo de agregado</label>
+                            <div class="btn-group flex-wrap" role="group" aria-label="Tipo de agregado">
+                                <input type="radio" class="btn-check" name="tipoAgregadoCompras" id="tipoAgregadoCompraNormal" value="normal" checked>
+                                <label class="btn btn-outline-dark" for="tipoAgregadoCompraNormal"><i class="ti ti-circle me-1"></i> Normal</label>
+
+                                <input type="radio" class="btn-check" name="tipoAgregadoCompras" id="tipoAgregadoCompraPositivo" value="adicional_positivo">
+                                <label class="btn btn-outline-success" for="tipoAgregadoCompraPositivo"><i class="ti ti-plus me-1"></i> Adicional positivo</label>
+
+                                <input type="radio" class="btn-check" name="tipoAgregadoCompras" id="tipoAgregadoCompraNegativo" value="adicional_negativo">
+                                <label class="btn btn-outline-danger" for="tipoAgregadoCompraNegativo"><i class="ti ti-minus me-1"></i> Adicional negativo</label>
+                            </div>
+                            <span class="text-muted fs-12 d-block mt-2">Los adicionales positivos son informativos; los negativos descuentan del total y afectan el semáforo.</span>
+                        </div>
                         <div class="col-12">
                             <div id="productoFiltersWrap" class="row d-none">
                                 <div class="col-md-6 mb-1">
@@ -467,7 +481,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/compras_detalle.js?v=2.5"></script>
+    <script src="./assets/js/compras_detalle.js?v=2.6"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/compras_charts.js?v=2.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>

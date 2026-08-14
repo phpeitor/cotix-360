@@ -439,7 +439,7 @@ class Compras
         ];
     }
 
-    public function agregarDetalleDesdeItem(string $hash, int $itemId, int $cantidad): bool
+    public function agregarDetalleDesdeItem(string $hash, int $itemId, int $cantidad, bool $esAdicional = false, string $adicionalSigno = 'positivo'): bool
     {
         $sql = "INSERT INTO detalle_compras (
                     compra_id,
@@ -455,6 +455,8 @@ class Compras
                     precio,
                     moneda,
                     tipo,
+                    es_adicional,
+                    adicional_signo,
                     created_at,
                     cantidad
                 ) SELECT
@@ -471,6 +473,8 @@ class Compras
                     i.precio,
                     i.moneda,
                     i.tipo,
+                    :es_adicional,
+                    :adicional_signo,
                     :created_at,
                     :cantidad
                 FROM receta_compras c
@@ -480,6 +484,8 @@ class Compras
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->bindValue(':cantidad', min(5000, max(1, $cantidad)), PDO::PARAM_INT);
+        $stmt->bindValue(':es_adicional', $esAdicional ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':adicional_signo', $adicionalSigno === 'negativo' ? 'negativo' : 'positivo');
         $stmt->bindValue(':item_id', $itemId, PDO::PARAM_INT);
         $stmt->bindValue(':hash', $hash);
         $stmt->execute();

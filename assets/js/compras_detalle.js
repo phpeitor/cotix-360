@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const categoriaSelect = document.getElementById("categoria");
     const subCat1Select = document.getElementById("subCat1");
     const subCat2Select = document.getElementById("subCat2");
+    const tipoAgregadoRadios = document.querySelectorAll('input[name="tipoAgregadoCompras"]');
     const productoFiltersWrap = document.getElementById("productoFiltersWrap");
     const marcaSelect = document.getElementById("filterMarca");
     const modeloSelect = document.getElementById("filterModelo");
@@ -84,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         categoriaSelect?.addEventListener("change", cargarSubCat1);
         subCat1Select?.addEventListener("change", cargarSubCat2);
         subCat2Select?.addEventListener("change", onSubCat2Change);
+        tipoAgregadoRadios.forEach(radio => radio.addEventListener("change", cargarItems));
         marcaSelect?.addEventListener("change", cargarItems);
         modeloSelect?.addEventListener("change", cargarItems);
 
@@ -188,6 +190,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function signoAdicional(item) {
         return String(item?.adicional_signo || "positivo") === "negativo" ? "negativo" : "positivo";
+    }
+
+    function tipoAgregadoActual() {
+        const selected = Array.from(tipoAgregadoRadios).find(radio => radio.checked);
+        const value = String(selected?.value || "normal");
+        return {
+            esAdicional: value !== "normal",
+            signo: value === "adicional_negativo" ? "negativo" : "positivo"
+        };
     }
 
     async function loadCompra() {
@@ -677,16 +688,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const existente = detalle.some(row => Number(row.item_id || 0) === Number(itemId));
-        if (existente) {
+        const tipoAgregado = tipoAgregadoActual();
+        if (existente && !tipoAgregado.esAdicional) {
             alertify.error("Este item ya fue agregado");
             return;
         }
 
         try {
             const json = await post("controller/compras/upd_compra_detalle.php", {
-                hash, accion: "agregar", item_id: String(itemId), cantidad: String(clampCantidad(cantidad))
+                hash,
+                accion: "agregar",
+                item_id: String(itemId),
+                cantidad: String(clampCantidad(cantidad)),
+                es_adicional: tipoAgregado.esAdicional ? "1" : "0",
+                adicional_signo: tipoAgregado.signo
             });
-            alertify.success("Item agregado");
+            alertify.success(tipoAgregado.esAdicional ? "Adicional agregado" : "Item agregado");
             await loadCompra();
         } catch (error) {
             alertify.error(error.message);
@@ -830,7 +847,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         itemSearchBody.innerHTML = items.map(item => {
             const simbolo = monedaSimbolo(item.moneda);
-            const yaExiste = detalle.some(row => Number(row.item_id || 0) === Number(item.id));
+            const yaExisteNormal = detalle.some(row => Number(row.item_id || 0) === Number(item.id) && !esAdicional(row));
+            const tipoAgregado = tipoAgregadoActual();
+            const bloquearDuplicado = yaExisteNormal && !tipoAgregado.esAdicional;
             const itemNombre = escapeHtml(item.nombre || "-");
             const itemDescripcion = escapeHtml(normalizarTextoDetalle(item.descripcion) || "-");
             const detalleLinea1 = escapeHtml(formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]) || "-");
@@ -852,9 +871,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                     <td class="text-end">${verMontos() ? `${simbolo} ${money(item.precio)}` : "-"}</td>
                     <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-primary" data-add-item="${item.id}" ${(!editable || yaExiste) ? "disabled" : ""}>
+                        <button type="button" class="btn btn-sm btn-primary" data-add-item="${item.id}" ${(!editable || bloquearDuplicado) ? "disabled" : ""}>
                             <i class="ti ti-plus"></i>
                         </button>
+                        ${bloquearDuplicado ? `<small class="text-muted d-block mt-1">Ya agregado</small>` : ""}
                     </td>
                 </tr>
             `;

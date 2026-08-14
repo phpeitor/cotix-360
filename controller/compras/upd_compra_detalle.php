@@ -38,11 +38,13 @@ try {
     }
 
     $accion = trim((string)($_POST['accion'] ?? ''));
-    $compras->begin();
+    $transaccionIniciada = false;
 
     if ($accion === 'agregar') {
         $itemId = (int)($_POST['item_id'] ?? 0);
         $cantidad = (int)($_POST['cantidad'] ?? 1);
+        $esAdicional = (int)($_POST['es_adicional'] ?? 0) === 1;
+        $adicionalSigno = strtolower(trim((string)($_POST['adicional_signo'] ?? 'positivo'))) === 'negativo' ? 'negativo' : 'positivo';
         if ($itemId <= 0) {
             throw new Exception('Item inválido');
         }
@@ -52,12 +54,14 @@ try {
 
         $detalleActual = $compras->obtenerDetallePorHash($hash);
         foreach ($detalleActual as $row) {
-            if ((int)($row['item_id'] ?? 0) === $itemId) {
+            if (!$esAdicional && (int)($row['item_id'] ?? 0) === $itemId && (int)($row['es_adicional'] ?? 0) === 0) {
                 throw new Exception('Este item ya fue agregado');
             }
         }
 
-        $ok = $compras->agregarDetalleDesdeItem($hash, $itemId, $cantidad);
+        $compras->begin();
+        $transaccionIniciada = true;
+        $ok = $compras->agregarDetalleDesdeItem($hash, $itemId, $cantidad, $esAdicional, $adicionalSigno);
     } elseif ($accion === 'precio') {
         $detalleId = (int)($_POST['detalle_id'] ?? 0);
         $precio = (float)($_POST['precio'] ?? 0);
@@ -71,6 +75,8 @@ try {
         if ($moneda !== 'SOL' && $moneda !== 'DOLLAR') {
             throw new Exception('Moneda inválida');
         }
+        $compras->begin();
+        $transaccionIniciada = true;
         $ok = $compras->actualizarPrecioDetalle($hash, $detalleId, $precio, $moneda);
     } elseif ($accion === 'cantidad') {
         $detalleId = (int)($_POST['detalle_id'] ?? 0);
@@ -78,12 +84,16 @@ try {
         if ($detalleId <= 0) {
             throw new Exception('Detalle inválido');
         }
+        $compras->begin();
+        $transaccionIniciada = true;
         $ok = $compras->actualizarCantidadDetalle($hash, $detalleId, $cantidad);
     } elseif ($accion === 'eliminar') {
         $detalleId = (int)($_POST['detalle_id'] ?? 0);
         if ($detalleId <= 0) {
             throw new Exception('Detalle inválido');
         }
+        $compras->begin();
+        $transaccionIniciada = true;
         $ok = $compras->eliminarDetalle($hash, $detalleId);
     } else {
         throw new Exception('Acción no permitida');
@@ -110,7 +120,7 @@ try {
         'totales' => $totales,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
-    if (isset($compras) && $compras instanceof Compras) {
+    if (isset($compras, $transaccionIniciada) && $transaccionIniciada && $compras instanceof Compras) {
         $compras->rollback();
     }
 
