@@ -6,8 +6,8 @@ class Compras
     private PDO $conn;
     private string $nowLima;
 
-    public const UMBRAL_MEJORA = 0.97;
-    public const UMBRAL_SUPERIOR = 1.05;
+    public const UMBRAL_VERDE = 0.80;
+    public const UMBRAL_VALOR_TOTAL = 1.00;
 
     public const CARGOS_EDITABLES = [1, 3, 5];
     public const CARGOS_VER_MONTOS = [1, 3, 5];
@@ -271,26 +271,26 @@ class Compras
 
         $ratio = $totalCompra / $totalOrigen;
 
-        if ($ratio < self::UMBRAL_MEJORA) {
+        if ($ratio <= self::UMBRAL_VERDE) {
             return [
                 'nivel' => 'verde',
                 'color' => 'success',
-                'mensaje' => 'Mejora económica respecto a la ingeniería',
+                'mensaje' => 'Mejora económica: compra con 20% o más de ahorro respecto a la ingeniería',
             ];
         }
 
-        if ($ratio > self::UMBRAL_SUPERIOR) {
+        if ($ratio > self::UMBRAL_VALOR_TOTAL) {
             return [
                 'nivel' => 'rojo',
                 'color' => 'danger',
-                'mensaje' => 'Los costos superan significativamente a la ingeniería',
+                'mensaje' => 'Los costos superan el valor total de la ingeniería',
             ];
         }
 
         return [
             'nivel' => 'naranja',
             'color' => 'warning',
-            'mensaje' => 'Costos dentro del rango promedio aceptable',
+            'mensaje' => 'Costos entre el 20% de ahorro y el valor total (cerca del límite)',
         ];
     }
 
