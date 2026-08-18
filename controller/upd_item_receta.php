@@ -54,6 +54,7 @@ try {
         'precio'            => $_POST['precio'] ?? '',
         'moneda'            => $_POST['moneda'] ?? '',
         'estado'            => isset($_POST['estado']) ? 1 : 0,
+        'usuario_upd'       => (int)($_SESSION['session_id'] ?? 0),
         'updated_at'        => (new DateTime('now', $timezone))->format('Y-m-d H:i:s')
     ];
 

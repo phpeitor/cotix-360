@@ -34,6 +34,8 @@ try {
     $itemModel = new Item();
     $rows = $itemModel->obtenerTodosRecetaItems();
 
+    $ocultarPrecio = in_array((int)($_SESSION['session_cargo'] ?? 0), [4, 6], true);
+
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
     $sheet->setTitle('Items Receta');
@@ -53,19 +55,27 @@ try {
         'H' => 'Modelo',
         'I' => 'Uni. Medida',
         'J' => 'Tipo',
-        'K' => 'Precio',
-        'L' => 'Moneda',
-        'M' => 'Estado'
     ];
+
+    if ($ocultarPrecio) {
+        $columns['K'] = 'Moneda';
+        $columns['L'] = 'Estado';
+    } else {
+        $columns['K'] = 'Precio';
+        $columns['L'] = 'Moneda';
+        $columns['M'] = 'Estado';
+    }
+
+    $lastColumn = (string)array_key_last($columns);
 
     foreach ($columns as $col => $title) {
         $sheet->setCellValue($col . $headerRow, $title);
     }
 
-    $sheet->getStyle('A1:M2')->getFont()->setBold(true);
+    $sheet->getStyle('A1:' . $lastColumn . '2')->getFont()->setBold(true);
     $sheet->getStyle('A1')->getFont()->setSize(14);
 
-    $headerStyle = $sheet->getStyle('A' . $headerRow . ':M' . $headerRow);
+    $headerStyle = $sheet->getStyle('A' . $headerRow . ':' . $lastColumn . $headerRow);
     $headerStyle->getFont()->setBold(true);
     $headerStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9E2F3');
     $headerStyle->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -83,27 +93,34 @@ try {
         $sheet->setCellValue('H' . $row, normalizarTextoExcelItems($item['modelo'] ?? ''));
         $sheet->setCellValue('I' . $row, normalizarTextoExcelItems($item['uni_medida'] ?? ''));
         $sheet->setCellValue('J' . $row, normalizarTextoExcelItems($item['tipo'] ?? ''));
-        $sheet->setCellValue('K' . $row, (float)($item['precio'] ?? 0));
-        $sheet->setCellValue('L' . $row, normalizarTextoExcelItems($item['moneda'] ?? ''));
-        $sheet->setCellValue('M' . $row, (string)($item['estado'] ?? ''));
+        if (!$ocultarPrecio) {
+            $sheet->setCellValue('K' . $row, (float)($item['precio'] ?? 0));
+            $sheet->setCellValue('L' . $row, normalizarTextoExcelItems($item['moneda'] ?? ''));
+            $sheet->setCellValue('M' . $row, (string)($item['estado'] ?? ''));
+        } else {
+            $sheet->setCellValue('K' . $row, normalizarTextoExcelItems($item['moneda'] ?? ''));
+            $sheet->setCellValue('L' . $row, (string)($item['estado'] ?? ''));
+        }
         $row++;
     }
 
     $endRow = max($headerRow + 1, $row - 1);
-    $sheet->getStyle('A' . ($headerRow + 1) . ':M' . $endRow)
+    $sheet->getStyle('A' . ($headerRow + 1) . ':' . $lastColumn . $endRow)
         ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-    $sheet->getStyle('K' . ($headerRow + 1) . ':K' . $endRow)
-        ->getNumberFormat()->setFormatCode('#,##0.00');
+    if (!$ocultarPrecio) {
+        $sheet->getStyle('K' . ($headerRow + 1) . ':K' . $endRow)
+            ->getNumberFormat()->setFormatCode('#,##0.00');
+    }
 
-    $sheet->getStyle('A' . ($headerRow + 1) . ':M' . $endRow)
+    $sheet->getStyle('A' . ($headerRow + 1) . ':' . $lastColumn . $endRow)
         ->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
 
     $sheet->getColumnDimension('A')->setWidth(5);
     $sheet->getColumnDimension('B')->setWidth(24);
     $sheet->getColumnDimension('C')->setWidth(28);
 
-    foreach (['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'] as $col) {
+    foreach (range('D', $lastColumn) as $col) {
         $sheet->getColumnDimension($col)->setAutoSize(true);
     }
 

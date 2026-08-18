@@ -773,6 +773,57 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         return ["enviada", "ofertado", "aprobada"].includes(String(receta?.estado || "").toLowerCase());
     }
 
+    function renderSkeletonSincronizacion() {
+        if (!tbody) return;
+
+        const filas = Math.min(Math.max(detalle.length || 6, 4), 8);
+        const ocultarPrecio = isTecnico ? "d-none" : "";
+        const celda = (w, h, extra = "") => `<div class="skeleton-item ${extra}" style="width:${w};height:${h};"></div>`;
+
+        tbody.innerHTML = Array.from({ length: filas }, () => `
+            <tr style="pointer-events:none;">
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="avatar-md flex-shrink-0">
+                            <div class="skeleton-item rounded-circle" style="width:38px;height:38px;"></div>
+                        </div>
+                        <div class="flex-grow-1">
+                            ${celda("55%", "14px", "mb-1")}
+                            ${celda("35%", "12px")}
+                        </div>
+                    </div>
+                </td>
+                <td>${celda("70%", "14px", "mb-1")}${celda("45%", "12px")}</td>
+                <td>${celda("60%", "13px")}</td>
+                <td class="text-center">${celda("60%", "26px", "rounded-pill mx-auto")}</td>
+                <td class="text-end ${ocultarPrecio}">${celda("55%", "26px", "ms-auto")}</td>
+                <td class="text-end ${ocultarPrecio}">${celda("55%", "14px", "ms-auto")}</td>
+                <td class="text-center">${celda("18px", "18px", "rounded-circle mx-auto")}</td>
+            </tr>
+        `).join("");
+    }
+
+    function bloquearControlesSincronizacion(activo) {
+        const scope = recetaForm?.closest(".card");
+        if (scope) {
+            scope.querySelectorAll("button").forEach(btn => {
+                btn.disabled = activo;
+            });
+        }
+
+        document.querySelectorAll(".receta-header-actions button").forEach(btn => {
+            btn.disabled = activo;
+        });
+
+        tbody?.querySelectorAll("input, button").forEach(el => {
+            el.disabled = activo;
+        });
+
+        if (tipoCambioInputEl) tipoCambioInputEl.disabled = activo;
+        if (paginationList) paginationList.classList.toggle("pe-none", activo);
+        paginationWrapper?.classList.toggle("opacity-50", activo);
+    }
+
     function aplicarBloqueoPorEstado() {
         const editable = isRecetaEditable();
         const tipoCambioEditable = isTipoCambioEditable();
@@ -1849,7 +1900,8 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
             btnReloadPrecios.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
             btnReloadPrecios.setAttribute("aria-label", "Sincronizando precios");
         }
-        aplicarBloqueoPorEstado();
+        bloquearControlesSincronizacion(true);
+        renderSkeletonSincronizacion();
 
         try {
             const fd = new FormData();
@@ -1875,12 +1927,15 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         } catch (error) {
             console.error(error);
             alertify.error(error.message || "Error al recargar precios");
+            renderBody();
+            renderPagination();
         } finally {
             sincronizandoPrecios = false;
             if (btnReloadPrecios) {
                 btnReloadPrecios.innerHTML = btnReloadPreciosContent;
                 btnReloadPrecios.setAttribute("aria-label", "Sincronizar precios actualizados");
             }
+            bloquearControlesSincronizacion(false);
             aplicarBloqueoPorEstado();
         }
     }

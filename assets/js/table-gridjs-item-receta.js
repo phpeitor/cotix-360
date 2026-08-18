@@ -401,6 +401,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             },
             {
+                id: "usuario_cre_nombre",
+                name: "Creado por",
+                width: "120px",
+                sort: false,
+                formatter: (cell, row) => {
+                    const cells = row.cells;
+                    const creador = String(cell ?? "").trim();
+                    const editor = String(cells[14]?.data ?? "").trim();
+                    const nombre = creador || "—";
+                    const tooltip = creador
+                        ? (editor && editor !== creador ? `Creado por ${creador} · Editado por ${editor}` : `Creado por ${creador}`)
+                        : "Sin registro";
+                    return gridjs.html(`<span data-bs-toggle="tooltip" title="${tooltip}">${nombre}</span>`);
+                }
+            },
+            {
+                id: "usuario_upd_nombre",
+                hidden: true
+            },
+            {
                 id: "acciones",
                 name: "Opciones",
                 width: "90px",

@@ -144,7 +144,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2($defaultTipo);
                                             <select id="moneda" name="moneda" class="form-select" required="">
                                                 <option value="">-- Seleccione --</option>
                                                 <option value="SOL">S/</option>
-                                                <option value="DOLLAR">$</option>
+                                                <option value="DOLLAR" selected>$</option>
                                             </select>
                                             <div class="invalid-feedback">
                                                 Please select an option.

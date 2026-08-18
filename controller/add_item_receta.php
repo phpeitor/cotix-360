@@ -55,6 +55,7 @@ try {
         'stock' => isset($_POST['stock']) ? (int)$_POST['stock'] : 0,
         'moneda' => $_POST['moneda'] ?? '',
         'tipo' => $_POST['tipo'] ?? '',
+        'usuario_id' => (int)($_SESSION['session_id'] ?? 0),
     ]);
 
     $conexion = new Conexion();

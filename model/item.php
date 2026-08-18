@@ -519,20 +519,26 @@ class Item {
 
     public function obtenerItemsRecetaFiltrados(?string $tipo = null, ?string $categoria = null, ?string $subCat1 = null, ?string $subCat2 = null, ?string $marca = null, ?string $modelo = null): array {
         $sql = "SELECT 
-                    id,
-                    nombre,
-                    descripcion,
-                    uni_medida,
-                    precio,
-                    moneda,
-                    tipo,
-                    categoria,
-                    sub_cat_1,
-                    sub_cat_2,
-                    marca,
-                    modelo,
-                    estado
-                FROM receta_items
+                    i.id,
+                    i.nombre,
+                    i.descripcion,
+                    i.uni_medida,
+                    i.precio,
+                    i.moneda,
+                    i.tipo,
+                    i.categoria,
+                    i.sub_cat_1,
+                    i.sub_cat_2,
+                    i.marca,
+                    i.modelo,
+                    i.estado,
+                    p_cre.usuario AS usuario_cre_nombre,
+                    p_upd.usuario AS usuario_upd_nombre,
+                    i.usuario_id,
+                    i.usuario_upd
+                FROM receta_items i
+                LEFT JOIN personal p_cre ON p_cre.IDPERSONAL = i.usuario_id
+                LEFT JOIN personal p_upd ON p_upd.IDPERSONAL = i.usuario_upd
                 WHERE 1 = 1";
         $params = [];
 
@@ -682,6 +688,7 @@ class Item {
                     stock,
                     moneda,
                     tipo,
+                    usuario_id,
                     created_at
                 ) VALUES (
                     :categoria,
@@ -696,6 +703,7 @@ class Item {
                     :stock,
                     :moneda,
                     :tipo,
+                    :usuario_id,
                     :created_at
                 )";
 
@@ -712,6 +720,7 @@ class Item {
         $stmt->bindValue(':stock', (int)($data['stock'] ?? 0), PDO::PARAM_INT);
         $stmt->bindValue(':moneda', (string)($data['moneda'] ?? ''));
         $stmt->bindValue(':tipo', (string)($data['tipo'] ?? ''));
+        $stmt->bindValue(':usuario_id', (int)($data['usuario_id'] ?? 0) > 0 ? (int)$data['usuario_id'] : null, (int)($data['usuario_id'] ?? 0) > 0 ? PDO::PARAM_INT : PDO::PARAM_NULL);
         $stmt->bindValue(':created_at', $this->nowLima);
 
         $stmt->execute();
@@ -743,6 +752,7 @@ class Item {
                     precio = :precio,
                     moneda = :moneda,
                     estado = :estado,
+                    usuario_upd = :usuario_upd,
                     updated_at = :updated_at   
                 WHERE MD5(id) = :hash";
         $stmt = $this->conn->prepare($sql);
@@ -759,6 +769,7 @@ class Item {
         $stmt->bindValue(':precio', $data['precio']);
         $stmt->bindValue(':moneda', $data['moneda']);
         $stmt->bindValue(':estado', (int)$data['estado'], PDO::PARAM_INT);
+        $stmt->bindValue(':usuario_upd', (int)($data['usuario_upd'] ?? 0) > 0 ? (int)$data['usuario_upd'] : null, (int)($data['usuario_upd'] ?? 0) > 0 ? PDO::PARAM_INT : PDO::PARAM_NULL);
         $stmt->bindValue(':updated_at', $data['updated_at']);
         $stmt->bindValue(':hash', $hash);
         $stmt->execute();
@@ -766,9 +777,13 @@ class Item {
     }
 
     public function obtenerItemRecetaPorHash(string $hash): ?array {
-        $sql = "SELECT *
-                FROM receta_items
-                WHERE MD5(id) = :hash
+        $sql = "SELECT r.*,
+                       p_cre.usuario AS usuario_cre_nombre,
+                       p_upd.usuario AS usuario_upd_nombre
+                FROM receta_items r
+                LEFT JOIN personal p_cre ON p_cre.IDPERSONAL = r.usuario_id
+                LEFT JOIN personal p_upd ON p_upd.IDPERSONAL = r.usuario_upd
+                WHERE MD5(r.id) = :hash
                 LIMIT 1";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':hash', $hash);
