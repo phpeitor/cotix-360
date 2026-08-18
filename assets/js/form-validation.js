@@ -284,7 +284,10 @@ async function cargarItemReceta(hash) {
       document.querySelector('#stock').value = i.stock ?? 0;
     }
     document.querySelector('#moneda').value = i.moneda ?? '';
-    document.querySelector('#precio').value = i.precio ?? '';
+    const precioEl = document.querySelector('#precio');
+    if (precioEl) {
+      precioEl.value = i.precio ?? '';
+    }
     document.querySelector('#switch3').checked = parseInt(i.estado) === 1;
 
   } catch (err) {

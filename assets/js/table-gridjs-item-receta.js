@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const tableEl = document.getElementById("table-gridjs");
     const alertPrecioCambio = document.getElementById("alertPrecioCambio");
     const userCargo = Number(tableEl?.dataset?.userCargo || 0);
-    const isTecnico = userCargo === 4;
+    const ocultaPrecios = [4, 6].includes(userCargo);
     let precioCeroEventSource = null;
     let precioCeroSignature = "";
 
@@ -377,7 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 id: "precio",
                 name: "Precio",
                 width: "100px",
-                hidden: isTecnico,
+                hidden: ocultaPrecios,
                 formatter: (cell, row) => {
                     const moneda = row?.cells?.[11]?.data;
                     const simbolo = moneda === "DOLLAR" ? "$" : "S/.";
@@ -544,7 +544,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
     function conectarStreamPrecioCero() {
-        if (isTecnico || typeof window.EventSource === "undefined") {
+        if (ocultaPrecios || typeof window.EventSource === "undefined") {
             return;
         }
 

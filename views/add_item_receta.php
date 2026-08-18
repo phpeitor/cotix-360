@@ -151,7 +151,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2($defaultTipo);
                                             </div>
                                         </div>
 
-                                        <?php if ((int)$_SESSION['session_cargo'] !== 4): ?>
+                                        <?php if (!in_array((int)$_SESSION['session_cargo'], [4, 6], true)): ?>
                                         <div class="col-md-2 mb-3">
                                             <label class="form-label" for="precio">Precio </label>
                                             <input type="number" class="form-control" id="precio" name="precio" placeholder="100.00" value="0" required="" min="0" max="9999999" step="0.01">
@@ -176,7 +176,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2($defaultTipo);
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.0"></script>
     <script src="./assets/js/add-item-receta.js?v=1.1"></script>
-    <script src="./assets/js/form-validation.js?v=1.0"></script>
+    <script src="./assets/js/form-validation.js?v=1.1"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
