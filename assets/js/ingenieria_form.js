@@ -629,8 +629,72 @@ document.addEventListener("DOMContentLoaded", () => {
         return json;
     }
 
+    function renderSkeletonSincronizacion() {
+        if (!tbody) return;
+
+        const filas = Math.min(Math.max(detalle.length || 6, 4), 8);
+        const ocultarPrecio = esCargoIngenieria ? "d-none" : "";
+        const celda = (w, h, extra = "") => `<div class="skeleton-item ${extra}" style="width:${w};height:${h};"></div>`;
+
+        tbody.innerHTML = Array.from({ length: filas }, () => `
+            <tr style="pointer-events:none;">
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="avatar-md flex-shrink-0">
+                            <div class="skeleton-item rounded-circle" style="width:38px;height:38px;"></div>
+                        </div>
+                        <div class="flex-grow-1">
+                            ${celda("55%", "14px", "mb-1")}
+                            ${celda("35%", "12px")}
+                        </div>
+                    </div>
+                </td>
+                <td>${celda("70%", "14px", "mb-1")}${celda("45%", "12px")}</td>
+                <td>${celda("60%", "13px")}</td>
+                <td class="text-center">${celda("60%", "26px", "rounded-pill mx-auto")}</td>
+                <td class="text-end ${ocultarPrecio}">${celda("55%", "26px", "ms-auto")}</td>
+                <td class="text-end ${ocultarPrecio}">${celda("55%", "14px", "ms-auto")}</td>
+                <td class="text-center">${celda("18px", "18px", "rounded-circle mx-auto")}</td>
+            </tr>
+        `).join("");
+    }
+
+    function bloquearControlesSincronizacion(activo) {
+        const scope = fields.form?.closest(".card");
+        if (scope) {
+            scope.querySelectorAll("button").forEach(btn => {
+                btn.disabled = activo;
+            });
+        }
+
+        document.querySelectorAll(".ingenieria-header-actions button, .receta-header-actions button").forEach(btn => {
+            btn.disabled = activo;
+        });
+
+        tbody?.querySelectorAll("input, button").forEach(el => {
+            el.disabled = activo;
+        });
+
+        if (fields.tipoCambioInput) fields.tipoCambioInput.disabled = activo;
+    }
+
     async function guardarIngenieria() {
         if (!validarIngenieriaEditable()) return;
+
+        const submitBtn = fields.btnGuardarIngenieria;
+        if (submitBtn?.disabled) return;
+
+        const submitBtnContent = submitBtn?.innerHTML || '';
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add("opacity-50", "cursor-not-allowed");
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            submitBtn.setAttribute("aria-label", "Guardando ingeniería");
+        }
+        bloquearControlesSincronizacion(true);
+        renderSkeletonSincronizacion();
+
         try {
             await post("controller/guardar_ingenieria.php", { hash });
             alertify.success("Receta ingeniería guardada");
@@ -638,6 +702,15 @@ document.addEventListener("DOMContentLoaded", () => {
             if (historialBody) await cargarHistorialIngenieria(1);
         } catch (error) {
             alertify.alert("Validación de ingeniería", error.message || "No se pudo guardar ingeniería");
+            renderDetalle();
+        } finally {
+            if (submitBtn) {
+                submitBtn.innerHTML = submitBtnContent;
+                submitBtn.setAttribute("aria-label", "");
+                submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
+            }
+            bloquearControlesSincronizacion(false);
+            renderHeader();
         }
     }
 

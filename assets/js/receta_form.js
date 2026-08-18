@@ -1830,13 +1830,19 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
             return;
         }
 
-        const submitBtn = recetaForm?.querySelector("[type='submit']");
+const submitBtn = recetaForm?.querySelector("[type='submit']");
         if (submitBtn?.disabled) return;
+
+        const submitBtnContent = submitBtn?.innerHTML || '';
 
         if (submitBtn) {
             submitBtn.disabled = true;
             submitBtn.classList.add("opacity-50", "cursor-not-allowed");
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            submitBtn.setAttribute("aria-label", "Guardando receta");
         }
+        bloquearControlesSincronizacion(true);
+        renderSkeletonSincronizacion();
 
         try {
             const payloadItems = detalle.map(item => ({
@@ -1877,11 +1883,15 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         } catch (error) {
             console.error(error);
             alertify.error(error.message || "Error al actualizar receta");
+            renderBody();
+            renderPagination();
         } finally {
             if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
+                submitBtn.innerHTML = submitBtnContent;
+                submitBtn.setAttribute("aria-label", "");
             }
+            bloquearControlesSincronizacion(false);
+            aplicarBloqueoPorEstado();
         }
     }
 

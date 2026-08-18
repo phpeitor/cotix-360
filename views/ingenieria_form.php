@@ -42,6 +42,28 @@ $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), 
                 min-width: 140px;
             }
         }
+
+        .skeleton-item {
+            position: relative;
+            overflow: hidden;
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+
+        .skeleton-item::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: skeleton-shimmer 1.2s infinite;
+        }
+
+        @keyframes skeleton-shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
     </style>
 </head>
 
@@ -420,6 +442,6 @@ $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="./assets/js/ingenieria_form.js?v=2.7"></script>
+    <script src="./assets/js/ingenieria_form.js?v=2.8"></script>
 </body>
 </html>
