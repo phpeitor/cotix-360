@@ -225,11 +225,18 @@
         }, 'notification-db');
     }
 
-    function normalizeItems(dashboardItems, persistedItems) {
+function normalizeItems(dashboardItems, persistedItems) {
         const dashboardEntries = (Array.isArray(dashboardItems) ? dashboardItems : []).map(createDashboardEntry);
         const persistedEntries = (Array.isArray(persistedItems) ? persistedItems : []).map(createPersistedEntry);
 
-        return [...persistedEntries, ...dashboardEntries];
+        return [...persistedEntries, ...dashboardEntries].sort((a, b) => {
+            const fechaA = new Date(String(a.fecha || '')).getTime();
+            const fechaB = new Date(String(b.fecha || '')).getTime();
+            if (Number.isFinite(fechaA) && Number.isFinite(fechaB)) {
+                return fechaB - fechaA;
+            }
+            return Number.isFinite(fechaA) ? -1 : Number.isFinite(fechaB) ? 1 : 0;
+        });
     }
 
     function hasNewNotification(items, seenIds) {

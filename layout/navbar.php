@@ -284,4 +284,4 @@
         </div>
     </div>
 </div>
-<script src="./assets/js/header-notifications.js?v=1.1"></script>
+<script src="./assets/js/header-notifications.js?v=1.3"></script>

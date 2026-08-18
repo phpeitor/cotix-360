@@ -549,7 +549,7 @@ class Item {
         $this->agregarFiltroReceta($sql, $params, 'marca', $marca);
         $this->agregarFiltroReceta($sql, $params, 'modelo', $modelo);
 
-        $sql .= " ORDER BY nombre, modelo, id";
+        $sql .= " ORDER BY i.id DESC";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute($params);
