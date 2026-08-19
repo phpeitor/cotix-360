@@ -1608,13 +1608,20 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
                 ? escapeAttr(`Precio actualizado\n Anterior: ${formatMoneda(cambioPrecio.moneda_receta, cambioPrecio.precio_receta)} - ${formatFechaCambioTooltip(cambioPrecio.fecha_anterior)}\n Actual: ${formatMoneda(cambioPrecio.moneda_actual, cambioPrecio.precio_actual)} - ${formatFechaCambioTooltip(cambioPrecio.fecha_cambio)}`)
                 : "";
             const precioEditable = editable && canEditDetallePrice;
+            const esPrecioManual = Number(item.precio_manual || 0) === 1;
+const iconoManual = esPrecioManual
+                ? `<span class="precio-manual-icon ms-1" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-custom-class="tooltip-precio-manual" data-bs-title="Precio manual, no se sincronizará automáticamente">
+                        <i class="ti ti-zoom-in text-primary fs-14"></i>
+                   </span>`
+                : "";
             const precioCell = precioEditable
                 ? `<div class="d-inline-flex align-items-center justify-content-end gap-1">
                         <span class="text-muted fs-12">${monedaSimbolo}</span>
                         <input type="number" class="form-control form-control-sm text-end item-price-input" style="width:96px;" min="0" step="0.01" value="${precio.toFixed(2)}" data-id="${itemId}">
+                        ${iconoManual}
                    </div>`
                 : `<span class="text-muted fs-12">${monedaSimbolo}</span>
-                   <h5 class="fs-14 mt-1 fw-normal mb-0">${format2(precio)}</h5>`;
+                   <h5 class="fs-14 mt-1 fw-normal mb-0">${format2(precio)}${iconoManual}</h5>`;
 
             return `
                 <tr data-item-id="${itemId}" data-cantidad="${cantidad}" class="${cambioPrecio ? "table-warning" : ""}">
