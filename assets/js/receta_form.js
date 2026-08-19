@@ -552,7 +552,8 @@ document.addEventListener("DOMContentLoaded", () => {
             receta = data.receta;
             cliente = data.cliente || null;
             detalle = Array.isArray(data.detalle) ? data.detalle : [];
-            const cambiosPrecio = Array.isArray(data.cambios_precio) ? data.cambios_precio : [];
+            const esEnviada = String(data.receta?.estado || "").toLowerCase() === "enviada";
+            const cambiosPrecio = esEnviada && Array.isArray(data.cambios_precio) ? data.cambios_precio : [];
             cambiosPrecioActuales = cambiosPrecio;
             cambiosPrecioByItem = new Map(cambiosPrecio.map(item => [getClaveCambioPrecio(item), item]));
             cambiosStreamSignature = getCambiosPrecioSignature(cambiosPrecio);

@@ -1496,12 +1496,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                 FROM receta_detalle d
                 INNER JOIN recetas r1 ON r1.id = d.receta_id
                 LEFT JOIN recetas r_original ON r_original.id = r1.id_receta_duplicada
-                INNER JOIN receta_items r ON
-                LOWER(TRIM(COALESCE(r.nombre, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.nombre, '')) COLLATE utf8mb4_unicode_ci)
-                AND LOWER(TRIM(COALESCE(r.categoria, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.categoria, '')) COLLATE utf8mb4_unicode_ci)
-                AND LOWER(TRIM(COALESCE(r.sub_cat_1, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')) COLLATE utf8mb4_unicode_ci)
-                AND LOWER(TRIM(COALESCE(r.sub_cat_2, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')) COLLATE utf8mb4_unicode_ci)
-                AND LOWER(TRIM(COALESCE(r.descripcion, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.descripcion, '')) COLLATE utf8mb4_unicode_ci)
+INNER JOIN receta_items r ON r.id = d.item_id
                 WHERE d.receta_id = :receta_id
                   AND COALESCE(d.precio_manual, 0) = 0
                   AND (
@@ -1553,13 +1548,8 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                         ),
                         0
                     ) AS checksum
-                                FROM receta_detalle d
-                                INNER JOIN receta_items r ON
-                                        LOWER(TRIM(COALESCE(r.nombre, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.nombre, '')) COLLATE utf8mb4_unicode_ci)
-                                        AND LOWER(TRIM(COALESCE(r.categoria, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.categoria, '')) COLLATE utf8mb4_unicode_ci)
-                                        AND LOWER(TRIM(COALESCE(r.sub_cat_1, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')) COLLATE utf8mb4_unicode_ci)
-                                        AND LOWER(TRIM(COALESCE(r.sub_cat_2, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')) COLLATE utf8mb4_unicode_ci)
-                                        AND LOWER(TRIM(COALESCE(r.descripcion, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.descripcion, '')) COLLATE utf8mb4_unicode_ci)
+FROM receta_detalle d
+                                INNER JOIN receta_items r ON r.id = d.item_id
                 WHERE d.receta_id = :receta_id
                   AND COALESCE(d.precio_manual, 0) = 0
                   AND (
@@ -1581,13 +1571,8 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
 
     public function sincronizarPreciosDetalle(int $recetaId): int
     {
-        $sql = "UPDATE receta_detalle d
-                                INNER JOIN receta_items r ON
-                                        LOWER(TRIM(COALESCE(r.nombre, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.nombre, '')) COLLATE utf8mb4_unicode_ci)
-                                        AND LOWER(TRIM(COALESCE(r.categoria, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.categoria, '')) COLLATE utf8mb4_unicode_ci)
-                                        AND LOWER(TRIM(COALESCE(r.sub_cat_1, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.sub_cat_1, '')) COLLATE utf8mb4_unicode_ci)
-                                                                                AND LOWER(TRIM(COALESCE(r.sub_cat_2, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.sub_cat_2, '')) COLLATE utf8mb4_unicode_ci)
-                                                                                AND LOWER(TRIM(COALESCE(r.descripcion, '')) COLLATE utf8mb4_unicode_ci) = LOWER(TRIM(COALESCE(d.descripcion, '')) COLLATE utf8mb4_unicode_ci)
+$sql = "UPDATE receta_detalle d
+                                INNER JOIN receta_items r ON r.id = d.item_id
                 SET d.precio = r.precio,
                     d.moneda = r.moneda,
                     d.precio_manual = 0
