@@ -177,8 +177,10 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         const totalCompra = Number(semaforo.total_compra_dolares ?? 0);
+        const totalReceta = Number(semaforo.total_receta_dolares ?? 0);
         const totalOrigen = Number(semaforo.total_origen_dolares ?? 0);
-        const diff = totalOrigen > 0 ? ((totalCompra / totalOrigen - 1) * 100) : null;
+        const referencia = totalReceta > 0 ? totalReceta : totalOrigen;
+        const diff = referencia > 0 ? ((totalCompra / referencia - 1) * 100) : null;
         const diffTexto = diff !== null ? formatoDiferenciaSemaforo(diff) : "";
 
         const label = nivel === "verde"

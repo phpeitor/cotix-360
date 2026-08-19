@@ -24,7 +24,7 @@ try {
     $cargo = (int)($_SESSION['session_cargo'] ?? 0);
     if (!in_array($cargo, Compras::CARGOS_VER_MONTOS, true)) {
         foreach ($data as &$row) {
-            unset($row['total_compra_dolares'], $row['total_origen_dolares'], $row['semaforo']);
+            unset($row['total_compra_dolares'], $row['total_receta_dolares'], $row['total_origen_dolares'], $row['semaforo']);
         }
         unset($row);
     }

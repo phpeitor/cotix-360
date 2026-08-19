@@ -66,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const precioTimers = new Map();
     const dataAttr = {
         total_compra_dolares: 0,
+        total_receta_dolares: 0,
         total_origen_dolares: 0,
         total_adicionales_negativos_dolares: 0,
     };
@@ -220,6 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
             condiciones = data.condiciones || {};
             permisos = data.permisos || permisos;
             dataAttr.total_compra_dolares = Number(data.total_compra_dolares ?? 0);
+            dataAttr.total_receta_dolares = Number(data.total_receta_dolares ?? 0);
             dataAttr.total_origen_dolares = Number(data.total_origen_dolares ?? 0);
             dataAttr.total_adicionales_negativos_dolares = Number(data.total_adicionales_negativos_dolares ?? 0);
 
@@ -333,16 +335,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const totalCompra = Number(dataAttr?.total_compra_dolares ?? 0);
-        const totalOrigen = Number(dataAttr?.total_origen_dolares ?? 0);
+        const totalReceta = Number(dataAttr?.total_receta_dolares ?? 0);
+        const totalIngenieria = Number(dataAttr?.total_origen_dolares ?? 0);
+        const tieneReceta = totalReceta > 0;
 
         semaforoWrap.classList.remove("d-none");
         semaforoWrap.innerHTML = `
             <span class="semaforo-badge semaforo-${escapeHtml(semaforo.nivel)}" data-bs-toggle="tooltip" data-bs-title="${escapeHtml(semaforo.mensaje)}">
                 <span class="semaforo-indicator"></span>
                 <span class="semaforo-main">${escapeHtml(resumenSemaforo(semaforo.nivel))}</span>
-                ${totalOrigen > 0 ? `
+                ${tieneReceta ? `
                     <span class="semaforo-diff">
-                        Compra: $ ${formatNumber(totalCompra)} | Ingeniería: $ ${formatNumber(totalOrigen)}
+                        Compra: $ ${formatNumber(totalCompra)} | Receta: $ ${formatNumber(totalReceta)} | Ingeniería: $ ${formatNumber(totalIngenieria)}
                     </span>
                 ` : ""}
             </span>
@@ -353,7 +357,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const map = {
             verde: "Mejora económica",
             naranja: "Dentro del rango",
-            rojo: "Supera ingeniería",
+            rojo: "Supera receta",
             gris: "Sin referencia",
         };
         return map[String(nivel || "gris")] || "Sin referencia";
@@ -608,6 +612,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (json.semaforo) {
             semaforo = json.semaforo;
             dataAttr.total_compra_dolares = json.total_compra_dolares ?? dataAttr.total_compra_dolares;
+            dataAttr.total_receta_dolares = json.total_receta_dolares ?? dataAttr.total_receta_dolares;
             dataAttr.total_origen_dolares = json.total_origen_dolares ?? dataAttr.total_origen_dolares;
             dataAttr.total_adicionales_negativos_dolares = json.total_adicionales_negativos_dolares ?? dataAttr.total_adicionales_negativos_dolares;
             renderSemaforo();

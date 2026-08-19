@@ -76,6 +76,17 @@ class Compras
                     COALESCE((
                         SELECT ROUND(SUM(
                             CASE
+                                WHEN UPPER(COALESCE(dr.moneda, '')) = 'DOLLAR' THEN COALESCE(dr.precio, 0) * COALESCE(dr.cantidad, 0)
+                                ELSE (COALESCE(dr.precio, 0) * COALESCE(dr.cantidad, 0)) / NULLIF(COALESCE(rr.tipo_cambio, 0), 0)
+                            END
+                        ), 2)
+                        FROM receta_detalle dr
+                        INNER JOIN recetas rr ON rr.id = dr.receta_id
+                        WHERE rr.id = c.id_receta_duplicada
+                    ), 0) AS total_receta_dolares,
+                    COALESCE((
+                        SELECT ROUND(SUM(
+                            CASE
                                 WHEN UPPER(COALESCE(di.moneda, '')) = 'DOLLAR' THEN COALESCE(di.precio, 0) * COALESCE(di.cantidad, 0)
                                 ELSE (COALESCE(di.precio, 0) * COALESCE(di.cantidad, 0)) / NULLIF(COALESCE(ri.tipo_cambio, 0), 0)
                             END
@@ -113,11 +124,14 @@ class Compras
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
         foreach ($rows as &$row) {
+            $totalCompra = (float)($row['total_compra_dolares'] ?? 0);
+            $totalReceta = (float)($row['total_receta_dolares'] ?? 0);
             $semaforo = $this->evaluarSemaforo(
-                (float)($row['total_compra_dolares'] ?? 0),
-                (float)($row['total_origen_dolares'] ?? 0)
+                $totalCompra,
+                $totalReceta
             );
-            $semaforo['total_compra_dolares'] = (float)($row['total_compra_dolares'] ?? 0);
+            $semaforo['total_compra_dolares'] = $totalCompra;
+            $semaforo['total_receta_dolares'] = $totalReceta;
             $semaforo['total_origen_dolares'] = (float)($row['total_origen_dolares'] ?? 0);
             $row['semaforo'] = $semaforo;
         }
@@ -259,23 +273,23 @@ class Compras
         return (float)($row['total'] ?? 0);
     }
 
-    public function evaluarSemaforo(float $totalCompra, float $totalOrigen): array
+    public function evaluarSemaforo(float $totalCompra, float $totalRecetaOriginal): array
     {
-        if ($totalOrigen <= 0) {
+        if ($totalRecetaOriginal <= 0) {
             return [
                 'nivel' => 'gris',
                 'color' => 'secondary',
-                'mensaje' => 'Sin referencia de la ingeniería',
+                'mensaje' => 'Sin referencia de la receta original',
             ];
         }
 
-        $ratio = $totalCompra / $totalOrigen;
+        $ratio = $totalCompra / $totalRecetaOriginal;
 
         if ($ratio <= self::UMBRAL_VERDE) {
             return [
                 'nivel' => 'verde',
                 'color' => 'success',
-                'mensaje' => 'Mejora económica: compra con 20% o más de ahorro respecto a la ingeniería',
+                'mensaje' => 'Mejora económica: compra con 20% o más de ahorro respecto a la receta original',
             ];
         }
 
@@ -283,14 +297,14 @@ class Compras
             return [
                 'nivel' => 'rojo',
                 'color' => 'danger',
-                'mensaje' => 'Los costos superan el valor total de la ingeniería',
+                'mensaje' => 'Los costos superan el valor total de la receta original',
             ];
         }
 
         return [
             'nivel' => 'naranja',
             'color' => 'warning',
-            'mensaje' => 'Costos entre el 20% de ahorro y el valor total (cerca del límite)',
+            'mensaje' => 'Costos entre el 20% de ahorro y el valor total de la receta original (cerca del límite)',
         ];
     }
 

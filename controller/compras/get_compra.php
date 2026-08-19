@@ -33,12 +33,14 @@ try {
     $totalCompra = $compras->totalCompraDolaresPorHash($hash);
     $totalAdicionalesNegativos = $compras->totalAdicionalesNegativosDolaresPorHash($hash);
     $totalOrigen = $compras->totalIngenieriaDolaresPorId((int)($compra['ingenieria_id'] ?? 0));
+    $totalReceta = $compras->totalRecetaOrigenDolares((int)($compra['id_receta_duplicada'] ?? 0));
 
     if (!$puedeVerMontos) {
         $totales = null;
         $totalCompra = null;
         $totalAdicionalesNegativos = null;
         $totalOrigen = null;
+        $totalReceta = null;
     }
 
     echo json_encode([
@@ -46,10 +48,11 @@ try {
         'compra' => $compra,
         'detalle' => $detalle,
         'totales' => $totales,
-        'semaforo' => $puedeVerMontos ? $compras->evaluarSemaforo((float)$totalCompra, (float)$totalOrigen) : null,
+        'semaforo' => $puedeVerMontos ? $compras->evaluarSemaforo((float)$totalCompra, (float)$totalReceta) : null,
         'total_compra_dolares' => $totalCompra,
         'total_adicionales_negativos_dolares' => $totalAdicionalesNegativos,
         'total_origen_dolares' => $totalOrigen,
+        'total_receta_dolares' => $totalReceta,
         'condiciones' => [
             'razon_social_empresa' => $compra['cliente_razon_social_empresa'] ?? '',
             'direccion' => $compra['cliente_direccion'] ?? '',

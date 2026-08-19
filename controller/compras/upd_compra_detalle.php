@@ -115,7 +115,8 @@ try {
     $totalCompra = $compras->totalCompraDolaresPorHash($hash);
     $totalAdicionalesNegativos = $compras->totalAdicionalesNegativosDolaresPorHash($hash);
     $totalOrigen = $compras->totalIngenieriaDolaresPorId((int)($compra['ingenieria_id'] ?? 0));
-    $semaforo = $compras->evaluarSemaforo($totalCompra, $totalOrigen);
+    $totalReceta = $compras->totalRecetaOrigenDolares((int)($compra['id_receta_duplicada'] ?? 0));
+    $semaforo = $compras->evaluarSemaforo($totalCompra, $totalReceta);
     $totales = $compras->totalesCompraPorHash($hash);
 
     $compras->commit();
@@ -125,6 +126,7 @@ try {
         'total_compra_dolares' => $totalCompra,
         'total_adicionales_negativos_dolares' => $totalAdicionalesNegativos,
         'total_origen_dolares' => $totalOrigen,
+        'total_receta_dolares' => $totalReceta,
         'semaforo' => $semaforo,
         'totales' => $totales,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
