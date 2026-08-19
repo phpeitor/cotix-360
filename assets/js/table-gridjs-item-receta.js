@@ -346,9 +346,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
 
                     return gridjs.html(`
-                        <div>
+                        <div class="item-receta-nombre">
                             <div class="fw-semibold">${nombre}</div>
-                            <div class="text-muted">${descripcion}</div>
+                            <div class="text-muted item-receta-descripcion">${descripcion}</div>
                         </div>
                     `);
                 }
