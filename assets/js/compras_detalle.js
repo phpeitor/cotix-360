@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
         clienteCorreo: document.getElementById("clienteCorreo"),
         clienteCelular: document.getElementById("clienteCelular"),
         clienteMotivo: document.getElementById("clienteMotivo"),
+        clienteModal: document.getElementById("cliente-modal"),
         condicionesModal: document.getElementById("condiciones-modal"),
         btnGuardarCondiciones: document.getElementById("btnGuardarCondiciones"),
         tiempoEntrega: document.getElementById("tiempoEntrega"),
@@ -172,6 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fields.itemsDisponiblesSearch?.addEventListener("input", filtrarItemsDisponibles);
 
         fields.condicionesModal?.addEventListener("show.bs.modal", renderCondicionesModal);
+        fields.clienteModal?.addEventListener("show.bs.modal", renderClienteModal);
         fields.btnGuardarCondiciones?.addEventListener("click", guardarCondicionesComerciales);
     }
 
@@ -253,12 +255,13 @@ document.addEventListener("DOMContentLoaded", () => {
             fields.btnBuscarItems.setAttribute("aria-disabled", habilitado ? "false" : "true");
         }
 
-        fields.clienteRuc.textContent = compra.cliente_ruc || "-";
-        fields.clienteRazonSocial.textContent = compra.cliente_razon_social_empresa || "-";
-        fields.clienteDireccion.textContent = compra.cliente_direccion || "-";
-        fields.clienteNombreCompleto.textContent = compra.cliente_nombre_completo || "-";
-        fields.clienteCorreo.textContent = compra.cliente_correo || "-";
-        fields.clienteCelular.textContent = compra.cliente_celular || "-";
+        if (fields.clienteRuc) fields.clienteRuc.value = compra.cliente_ruc || "";
+        if (fields.clienteRazonSocial) fields.clienteRazonSocial.value = compra.cliente_razon_social_empresa || "";
+        if (fields.clienteNombreCompleto) fields.clienteNombreCompleto.value = compra.cliente_nombre_completo || "";
+        if (fields.clienteCorreo) fields.clienteCorreo.value = compra.cliente_correo || "";
+        if (fields.clienteCelular) fields.clienteCelular.value = compra.cliente_celular || "";
+        if (fields.clienteMotivo) fields.clienteMotivo.value = compra.cliente_motivo || "";
+        if (fields.clienteDireccion) fields.clienteDireccion.value = compra.cliente_direccion || "";
     }
 
     function renderCondicionesModal() {
@@ -279,6 +282,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if (fields.cantidadItemsReceta) fields.cantidadItemsReceta.value = data.cantidad_items || "";
         if (fields.condicionesEconomicasDias) fields.condicionesEconomicasDias.value = data.condiciones_economicas_dias || "";
         if (fields.condicionesEconomicasVisible) fields.condicionesEconomicasVisible.checked = String(data.condiciones_economicas_visible || "0") === "1";
+    }
+
+    function renderClienteModal() {
+        const data = condiciones || {};
+        if (fields.clienteRuc) fields.clienteRuc.value = data.ruc || compra.cliente_ruc || "";
+        if (fields.clienteRazonSocial) fields.clienteRazonSocial.value = data.razon_social_empresa || compra.cliente_razon_social_empresa || "";
+        if (fields.clienteNombreCompleto) fields.clienteNombreCompleto.value = data.nombre_completo || compra.cliente_nombre_completo || "";
+        if (fields.clienteCorreo) fields.clienteCorreo.value = data.correo || compra.cliente_correo || "";
+        if (fields.clienteCelular) fields.clienteCelular.value = data.celular || compra.cliente_celular || "";
+        if (fields.clienteMotivo) fields.clienteMotivo.value = data.motivo || "";
+        if (fields.clienteDireccion) fields.clienteDireccion.value = data.direccion || compra.cliente_direccion || "";
     }
 
     function getCondicionesPayload() {
