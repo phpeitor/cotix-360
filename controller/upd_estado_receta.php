@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../model/receta.php';
+require_once __DIR__ . '/../model/tracking/tracking.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -59,9 +60,12 @@ try {
         throw new Exception("No se pudo actualizar el estado");
     }
 
-    $ingenieriaId = null;
+$ingenieriaId = null;
     if ($accion === 'aprobar') {
         $ingenieriaId = $receta->crearRecetaIngenieriaDesdeReceta((int)$id, (int)$_SESSION['session_id']);
+
+        $tracking = new Tracking();
+        $trackingId = $tracking->crearDesdeReceta((int)$id);
     }
 
     $receta->commit();
@@ -69,7 +73,8 @@ try {
     echo json_encode([
         'success' => true,
         'estado'  => $estado,
-        'ingenieria_id' => $ingenieriaId
+        'ingenieria_id' => $ingenieriaId,
+        'tracking_id' => $trackingId ?? null
     ]);
 
 } catch (Throwable $e) {

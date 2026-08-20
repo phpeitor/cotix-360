@@ -26,7 +26,9 @@
       "items_receta.php",
       "pdf_receta.php",
       "add_item_receta.php",
-      "upd_item_receta.php"
+      "upd_item_receta.php",
+      "tracking.php",
+      "tracking_crear.php"
     ]
   },
   "4": {
@@ -39,7 +41,9 @@
       "items_receta.php",
       "pdf_receta.php",
       "add_item_receta.php",
-      "upd_item_receta.php"
+      "upd_item_receta.php",
+      "tracking.php",
+      "tracking_crear.php"
     ]
   },
   "5": {
@@ -52,6 +56,8 @@
       "upd_item_receta.php",
       "compras.php",
       "compras_detalle.php",
+      "tracking.php",
+      "tracking_crear.php",
       "cotizaciones.php",
       "form_cotizacion.php",
       "pdf_cotizacion.php",
@@ -66,7 +72,9 @@
       "ingenieria_form.php",
       "items_receta.php",
       "add_item_receta.php",
-      "upd_item_receta.php"
+      "upd_item_receta.php",
+      "tracking.php",
+      "tracking_crear.php"
     ]
   }
 }
