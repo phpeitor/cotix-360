@@ -203,6 +203,42 @@ class Tracking
         return (bool)$stmt->fetchColumn();
     }
 
+    public function trackingPorCodigo(string $codTracking): ?array
+    {
+        $sql = "SELECT
+                    t.id,
+                    t.id_receta,
+                    t.nombre,
+                    t.razon_social_empresa,
+                    t.ruc,
+                    t.cod_tracking,
+                    t.created_at,
+                    t.updated_at,
+                    CASE WHEN t.id_receta IS NULL THEN 0 ELSE 1 END AS origen_receta
+                FROM trackings t
+                WHERE t.cod_tracking = :cod
+                LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':cod', trim($codTracking));
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row === false ? null : $row;
+    }
+
+    public function trackingConActividades(string $codTracking): ?array
+    {
+        $tracking = $this->trackingPorCodigo($codTracking);
+        if ($tracking === null) {
+            return null;
+        }
+
+        $tracking['actividades'] = $this->actividadesTracking((int)$tracking['id']);
+
+        return $tracking;
+    }
+
     private function actualizarCodTracking(int $id): void
     {
         $sql = "UPDATE trackings
