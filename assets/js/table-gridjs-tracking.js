@@ -53,10 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 id: "cod_tracking",
                 name: "Código Tracking",
                 width: "170px",
-                formatter: (cell) => {
-                    const cod = String(cell || "-");
-                    return gridjs.html(`<span class="badge badge-outline-primary font-monospace">${escapeHtml(cod)}</span>`);
-                }
+                formatter: (cell, row) => renderCodTracking(cell, row)
             },
             { id: "created_at", name: "Fecha", width: "170px" },
             {
@@ -71,7 +68,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 width: "130px",
                 sort: false,
                 formatter: (cell, row) => renderAcciones(row)
-            }
+            },
+            { id: "cod_publico", name: "", hidden: true }
         ],
         server: {
             url: buildUrl(),
@@ -116,6 +114,21 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#39;");
+    }
+
+    function renderCodTracking(cell, row) {
+        const codInterno = String(cell || "");
+        const codPublico = String(row?.cells?.[9]?.data ?? "").trim();
+
+        if (codPublico) {
+            const partes = codInterno.split("-");
+            if (partes.length >= 4) {
+                partes[partes.length - 1] = codPublico;
+                return gridjs.html(`<span class="badge badge-outline-primary font-monospace">${escapeHtml(partes.join("-"))}</span>`);
+            }
+        }
+
+        return gridjs.html(`<span class="badge badge-outline-primary font-monospace">${escapeHtml(codInterno || "-")}</span>`);
     }
 
     function renderNombre(nombre, row) {

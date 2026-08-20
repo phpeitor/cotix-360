@@ -1370,7 +1370,34 @@ $stmtDetalle->execute();
         $upd->bindValue(':id', $id, PDO::PARAM_INT);
         $upd->execute();
 
+        $codPublico = $this->generarCodigoPublicoTracking();
+        $updPub = $this->conn->prepare(
+            "UPDATE trackings SET cod_publico = :cod WHERE id = :id"
+        );
+        $updPub->bindValue(':cod', $codPublico);
+        $updPub->bindValue(':id', $id, PDO::PARAM_INT);
+        $updPub->execute();
+
         return $id;
+    }
+
+    private function generarCodigoPublicoTracking(): string
+    {
+        for ($intentos = 0; $intentos < 20; $intentos++) {
+            $codigo = str_pad((string)random_int(0, 9999999999), 10, '0', STR_PAD_LEFT);
+
+            $stmt = $this->conn->prepare(
+                "SELECT 1 FROM trackings WHERE cod_publico = :cod LIMIT 1"
+            );
+            $stmt->bindValue(':cod', $codigo);
+            $stmt->execute();
+
+            if (!$stmt->fetchColumn()) {
+                return $codigo;
+            }
+        }
+
+        throw new RuntimeException('No se pudo generar un código público único');
     }
 
     public function recetaTieneMargenes(int $recetaId): bool

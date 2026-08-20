@@ -75,6 +75,7 @@ class Tracking
                     t.razon_social_empresa,
                     t.ruc,
                     t.cod_tracking,
+                    t.cod_publico,
                     t.created_at,
                     CASE WHEN t.id_receta IS NULL THEN 0 ELSE 1 END AS origen_receta
                 FROM trackings t
@@ -128,6 +129,7 @@ class Tracking
 
         $id = (int)$this->conn->lastInsertId();
         $this->actualizarCodTracking($id);
+        $this->asignarCodigoPublico($id);
 
         return $id;
     }
@@ -180,7 +182,59 @@ class Tracking
             $this->actualizarCodTracking($id);
         }
 
+        $this->asignarCodigoPublico($id);
+
         return $id;
+    }
+
+    public function generarCodigoPublico(): string
+    {
+        for ($intentos = 0; $intentos < 20; $intentos++) {
+            $codigo = str_pad((string)random_int(0, 9999999999), 10, '0', STR_PAD_LEFT);
+
+            if (!$this->codigoPublicoExiste($codigo)) {
+                return $codigo;
+            }
+        }
+
+        throw new RuntimeException('No se pudo generar un código público único');
+    }
+
+    public function codigoPublicoExiste(string $codPublico): bool
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT 1 FROM trackings WHERE cod_publico = :cod LIMIT 1"
+        );
+        $stmt->bindValue(':cod', trim($codPublico));
+        $stmt->execute();
+        return (bool)$stmt->fetchColumn();
+    }
+
+    public function asignarCodigoPublico(int $trackingId): string
+    {
+        $codigo = $this->generarCodigoPublico();
+
+        $stmt = $this->conn->prepare(
+            "UPDATE trackings SET cod_publico = :cod WHERE id = :id"
+        );
+        $stmt->bindValue(':cod', $codigo);
+        $stmt->bindValue(':id', $trackingId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $codigo;
+    }
+
+    public function trackingsSinCodigoPublico(): array
+    {
+        $sql = "SELECT id, cod_tracking
+                FROM trackings
+                WHERE cod_publico IS NULL OR TRIM(cod_publico) = ''
+                ORDER BY id ASC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     public function codigoExiste(string $codTracking): bool
@@ -212,6 +266,7 @@ class Tracking
                     t.razon_social_empresa,
                     t.ruc,
                     t.cod_tracking,
+                    t.cod_publico,
                     t.created_at,
                     t.updated_at,
                     CASE WHEN t.id_receta IS NULL THEN 0 ELSE 1 END AS origen_receta
@@ -227,9 +282,83 @@ class Tracking
         return $row === false ? null : $row;
     }
 
+    public function trackingPorCodigoPublico(string $codPublico): ?array
+    {
+        $sql = "SELECT
+                    t.id,
+                    t.id_receta,
+                    t.nombre,
+                    t.razon_social_empresa,
+                    t.ruc,
+                    t.cod_tracking,
+                    t.cod_publico,
+                    t.created_at,
+                    t.updated_at,
+                    CASE WHEN t.id_receta IS NULL THEN 0 ELSE 1 END AS origen_receta
+                FROM trackings t
+                WHERE t.cod_publico = :cod
+                LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':cod', trim($codPublico));
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row === false ? null : $row;
+    }
+
+    public function trackingConActividadesPorCodigoPublico(string $codPublico): ?array
+    {
+        $tracking = $this->trackingPorCodigoPublico($codPublico);
+        if ($tracking === null) {
+            return null;
+        }
+
+        $tracking['actividades'] = $this->actividadesTracking((int)$tracking['id']);
+
+        return $tracking;
+    }
+
+    public function trackingPorId(int $trackingId): ?array
+    {
+        $sql = "SELECT
+                    t.id,
+                    t.id_receta,
+                    t.nombre,
+                    t.razon_social_empresa,
+                    t.ruc,
+                    t.cod_tracking,
+                    t.cod_publico,
+                    t.created_at,
+                    t.updated_at,
+                    CASE WHEN t.id_receta IS NULL THEN 0 ELSE 1 END AS origen_receta
+                FROM trackings t
+                WHERE t.id = :id
+                LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $trackingId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row === false ? null : $row;
+    }
+
     public function trackingConActividades(string $codTracking): ?array
     {
         $tracking = $this->trackingPorCodigo($codTracking);
+        if ($tracking === null) {
+            return null;
+        }
+
+        $tracking['actividades'] = $this->actividadesTracking((int)$tracking['id']);
+
+        return $tracking;
+    }
+
+    public function trackingConActividadesPorId(int $trackingId): ?array
+    {
+        $tracking = $this->trackingPorId($trackingId);
         if ($tracking === null) {
             return null;
         }

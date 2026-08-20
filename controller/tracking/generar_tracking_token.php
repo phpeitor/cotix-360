@@ -21,30 +21,36 @@ try {
         jsonResponse(405, ['ok' => false, 'message' => 'Método no permitido']);
     }
 
-    $encodificado = trim((string)($_GET['cod_tracking'] ?? $_GET['cod'] ?? ''));
+    if (!isset($_SESSION['session_id']) || (int)$_SESSION['session_id'] <= 0) {
+        jsonResponse(401, ['ok' => false, 'message' => 'Sesión expirada o usuario no autenticado']);
+    }
 
-    if ($encodificado === '') {
+    $codTracking = trim((string)($_GET['cod_tracking'] ?? ''));
+
+    if ($codTracking === '') {
         jsonResponse(400, ['ok' => false, 'message' => 'Debe enviar el parámetro cod_tracking']);
     }
 
-    $codPublico = trackingResolver($encodificado);
-
-    if ($codPublico === null) {
-        jsonResponse(400, ['ok' => false, 'message' => 'Código inválido o alterado']);
-    }
-
     $tracking = new Tracking();
-    $data = $tracking->trackingConActividadesPorCodigoPublico($codPublico);
+    $trackingRow = $tracking->trackingPorCodigo($codTracking);
 
-    if ($data === null) {
+    if ($trackingRow === null) {
         jsonResponse(404, ['ok' => false, 'message' => 'No se encontró un tracking con el código proporcionado']);
     }
 
-    $data['origen'] = (int)$data['origen_receta'] === 1 ? 'receta' : 'manual';
+    $codPublico = trim((string)($trackingRow['cod_publico'] ?? ''));
+
+    if ($codPublico === '') {
+        $codPublico = $tracking->asignarCodigoPublico((int)$trackingRow['id']);
+    }
+
+    $codigoPublico = trackingCodigoPublico($codTracking, $codPublico);
 
     jsonResponse(200, [
         'ok' => true,
-        'data' => $data,
+        'cod_interno' => $codTracking,
+        'cod_publico' => $codigoPublico,
+        'url' => 'controller/tracking/api_tracking.php?cod_tracking=' . urlencode($codigoPublico),
     ]);
 } catch (Throwable $e) {
     jsonResponse(500, ['ok' => false, 'message' => $e->getMessage()]);
