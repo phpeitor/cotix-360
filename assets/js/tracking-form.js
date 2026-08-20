@@ -4,11 +4,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const rucInput = form.querySelector("#ruc");
     const codInput = form.querySelector("#cod_tracking");
+    const razonSocialInput = form.querySelector("#razon_social_empresa");
+
+    let lastRucConsulted = null;
 
     if (rucInput) {
-        rucInput.addEventListener("input", () => {
-            rucInput.value = rucInput.value.replace(/\D/g, "").slice(0, 11);
-            rucInput.classList.remove("is-invalid", "border-danger");
+        rucInput.addEventListener("input", async () => {
+            const ruc = String(rucInput.value || "").replace(/\D/g, "").slice(0, 11);
+            if (rucInput.value !== ruc) {
+                rucInput.value = ruc;
+            }
+
+            if (ruc.length < 11) {
+                lastRucConsulted = null;
+                if (razonSocialInput && !razonSocialInput.value.trim()) {
+                    razonSocialInput.removeAttribute("readonly");
+                }
+                return;
+            }
+
+            if (ruc === lastRucConsulted) return;
+            lastRucConsulted = ruc;
+
+            try {
+                const res = await fetch(`./config/api-ruc.php?ruc=${encodeURIComponent(ruc)}`);
+                const data = await res.json();
+
+                if (!res.ok || !data.ok) {
+                    throw new Error(data.message || "No se pudo consultar el RUC");
+                }
+
+                if (razonSocialInput) {
+                    if (data.nombre) {
+                        razonSocialInput.value = data.nombre || "";
+                        razonSocialInput.removeAttribute("readonly");
+                    }
+                }
+            } catch (error) {
+                console.error("Error RUC:", error);
+                lastRucConsulted = null;
+                alertify.error(error.message || "Error al consultar RUC");
+            }
         });
     }
 

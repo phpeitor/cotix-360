@@ -31,7 +31,7 @@
       "tracking_crear.php"
     ]
   },
-  "4": {
+"4": {
     "nombre": "Tecnico",
     "acceso": [
       "home.php",
@@ -41,9 +41,7 @@
       "items_receta.php",
       "pdf_receta.php",
       "add_item_receta.php",
-      "upd_item_receta.php",
-      "tracking.php",
-      "tracking_crear.php"
+      "upd_item_receta.php"
     ]
   },
   "5": {
@@ -56,8 +54,8 @@
       "upd_item_receta.php",
       "compras.php",
       "compras_detalle.php",
-      "tracking.php",
-      "tracking_crear.php",
+      "receta_form.php",
+      "pdf_receta.php",
       "cotizaciones.php",
       "form_cotizacion.php",
       "pdf_cotizacion.php",
@@ -74,7 +72,9 @@
       "add_item_receta.php",
       "upd_item_receta.php",
       "tracking.php",
-      "tracking_crear.php"
+      "tracking_crear.php",
+      "receta_form.php",
+      "pdf_receta.php"
     ]
   }
 }

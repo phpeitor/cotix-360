@@ -46,6 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 width: "260px",
                 formatter: (cell, row) => renderNombre(cell, row)
             },
+            { id: "id_receta", name: "", hidden: true },
             { id: "razon_social_empresa", name: "Razón Social", width: "240px" },
             { id: "ruc", name: "RUC", width: "120px" },
             {
@@ -111,16 +112,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderNombre(nombre, row) {
-        const origen = Number(row?.cells?.[6]?.data || 0) === 1;
-        const badge = origen
-            ? '<span class="badge badge-outline-info ms-1">Receta</span>'
-            : '<span class="badge badge-outline-secondary ms-1">Manual</span>';
+        const idReceta = String(row?.cells?.[2]?.data ?? "").trim();
+        const origenReceta = Number(row?.cells?.[7]?.data || 0) === 1;
 
-        return gridjs.html(`
-            <div class="lh-sm">
-                <span>${escapeHtml(String(nombre || "-"))}</span>${badge}
-            </div>
-        `);
+        if (origenReceta && idReceta && typeof md5 === "function") {
+            const hash = md5(idReceta);
+            return gridjs.html(`
+                <a href="receta_form.php?id=${encodeURIComponent(hash)}"
+                   class="fw-semibold link-primary"
+                   data-bs-toggle="tooltip"
+                   data-bs-title="Ver receta">
+                    ${escapeHtml(String(nombre || "-"))}
+                </a>
+            `);
+        }
+
+        return gridjs.html(`<span>${escapeHtml(String(nombre || "-"))}</span>`);
     }
 
     function renderOrigen(cell) {

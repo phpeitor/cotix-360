@@ -78,14 +78,7 @@ class Tracking
                     r.nombre,
                     rc.razon_social_empresa,
                     rc.ruc,
-                    CONCAT(
-                        'MGI-',
-                        UPPER(LEFT(TRIM(rc.razon_social_empresa), 1)),
-                        '-',
-                        YEAR(r.created_at),
-                        '-',
-                        r.id
-                    ) AS cod_tracking,
+                    CONCAT('PEND-', UUID_SHORT()),
                     r.created_at
                 FROM recetas r
                 INNER JOIN receta_cliente rc ON rc.id_receta = r.id
@@ -98,7 +91,10 @@ class Tracking
             return null;
         }
 
-        return (int)$this->conn->lastInsertId();
+        $id = (int)$this->conn->lastInsertId();
+        $this->actualizarCodTracking($id);
+
+        return $id;
     }
 
     public function crearManual(string $nombre, string $razonSocial, string $ruc, string $codTracking): int
@@ -110,9 +106,6 @@ class Tracking
 
         if ($nombre === '' || $razonSocial === '' || $ruc === '') {
             throw new InvalidArgumentException('Nombre, razón social y RUC son obligatorios');
-        }
-        if ($codTracking === '') {
-            $codTracking = $this->generarCodTracking($razonSocial);
         }
 
         $sql = "INSERT INTO trackings (
@@ -131,15 +124,28 @@ class Tracking
                     :created_at
                 )";
 
+        $code = '';
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':nombre', $nombre);
         $stmt->bindValue(':razon_social', $razonSocial);
         $stmt->bindValue(':ruc', $ruc);
-        $stmt->bindValue(':cod_tracking', $codTracking);
+
+        if ($codTracking !== '') {
+            $code = $codTracking;
+        } else {
+            $code = 'PEND-' . bin2hex(random_bytes(6));
+        }
+        $stmt->bindValue(':cod_tracking', $code);
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->execute();
 
-        return (int)$this->conn->lastInsertId();
+        $id = (int)$this->conn->lastInsertId();
+
+        if ($codTracking === '') {
+            $this->actualizarCodTracking($id);
+        }
+
+        return $id;
     }
 
     public function codigoExiste(string $codTracking): bool
@@ -152,18 +158,20 @@ class Tracking
         return (bool)$stmt->fetchColumn();
     }
 
-    public function generarCodTracking(string $razonSocial): string
+    private function actualizarCodTracking(int $id): void
     {
-        $letra = strtoupper(mb_substr(trim($razonSocial), 0, 1, 'UTF-8'));
-        if ($letra === '' || !preg_match('/[A-Z]/', $letra)) {
-            $letra = 'X';
-        }
-
-        $stmt = $this->conn->query(
-            "SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(cod_tracking, '-', -1) AS UNSIGNED)), 0) AS max_cod FROM trackings"
-        );
-        $max = (int)$stmt->fetch(PDO::FETCH_ASSOC)['max_cod'];
-
-        return sprintf('MGI-%s-%s-%d', $letra, date('Y'), $max + 1);
+        $sql = "UPDATE trackings
+                SET cod_tracking = CONCAT(
+                    'MGI-',
+                    UPPER(LEFT(TRIM(razon_social_empresa), 1)),
+                    '-',
+                    YEAR(created_at),
+                    '-',
+                    id
+                )
+                WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
     }
 }

@@ -54,17 +54,6 @@ require_once ROOT . '/controller/check_session.php';
                             <div class="card-body">
                                 <form class="needs-validation form-add-tracking" method="post" novalidate="">
                                     <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label" for="nombre">Nombre</label>
-                                            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre del proyecto/receta" required="" maxlength="200">
-                                            <div class="invalid-feedback">Ingrese el nombre.</div>
-                                        </div>
-
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label" for="razon_social_empresa">Razón Social</label>
-                                            <input type="text" class="form-control" id="razon_social_empresa" name="razon_social_empresa" placeholder="Razón social de la empresa" required="" maxlength="200">
-                                            <div class="invalid-feedback">Ingrese la razón social.</div>
-                                        </div>
 
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label" for="ruc">RUC</label>
@@ -73,10 +62,17 @@ require_once ROOT . '/controller/check_session.php';
                                         </div>
 
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label" for="cod_tracking">Código de tracking <small class="text-muted">(opcional, se genera automáticamente)</small></label>
-                                            <input type="text" class="form-control" id="cod_tracking" name="cod_tracking" placeholder="MGI-G-2026-N" maxlength="30">
-                                            <div class="invalid-feedback">El código ya se encuentra registrado.</div>
+                                            <label class="form-label" for="razon_social_empresa">Razón Social</label>
+                                            <input type="text" class="form-control" id="razon_social_empresa" name="razon_social_empresa" placeholder="Razón social de la empresa" required="" maxlength="200">
+                                            <div class="invalid-feedback">Ingrese la razón social.</div>
                                         </div>
+
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label" for="nombre">Nombre</label>
+                                            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre del proyecto/receta" required="" maxlength="200">
+                                            <div class="invalid-feedback">Ingrese el nombre.</div>
+                                        </div>
+
                                     </div>
 
                                     <button class="btn btn-primary" type="submit">Guardar</button>

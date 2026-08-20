@@ -125,7 +125,7 @@
 
             <li class="side-nav-item">
                 <a href="tracking.php" class="side-nav-link">
-                    <span class="menu-icon"><i class="ti ti-tracking"></i></span>
+                    <span class="menu-icon"><i class="ti ti-truck"></i></span>
                     <span class="menu-text"> Trackings </span>
                 </a>
             </li>
