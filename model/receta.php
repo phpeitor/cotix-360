@@ -1308,9 +1308,69 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         $stmtDetalle->bindValue(':ingenieria_id', $ingenieriaId, PDO::PARAM_INT);
         $stmtDetalle->bindValue(':created_at', $this->nowLima);
         $stmtDetalle->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
-        $stmtDetalle->execute();
+$stmtDetalle->execute();
 
         return $ingenieriaId;
+    }
+
+    public function crearTrackingDesdeReceta(int $recetaId): ?int
+    {
+        $existente = $this->conn->prepare(
+            "SELECT id FROM trackings WHERE id_receta = :receta_id LIMIT 1"
+        );
+        $existente->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $existente->execute();
+        if ($idExist = $existente->fetchColumn()) {
+            return (int)$idExist;
+        }
+
+        $sql = "INSERT INTO trackings (
+                    id_receta,
+                    nombre,
+                    razon_social_empresa,
+                    ruc,
+                    cod_tracking,
+                    created_at
+                )
+                SELECT
+                    r.id,
+                    r.nombre,
+                    rc.razon_social_empresa,
+                    rc.ruc,
+                    CONCAT('PEND-', UUID_SHORT()),
+                    r.created_at
+                FROM recetas r
+                INNER JOIN receta_cliente rc ON rc.id_receta = r.id
+                WHERE r.id = :receta_id";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+        if ($stmt->rowCount() <= 0) {
+            return null;
+        }
+
+        $id = (int)$this->conn->lastInsertId();
+        if ($id <= 0) {
+            return null;
+        }
+
+        $upd = $this->conn->prepare(
+            "UPDATE trackings
+             SET cod_tracking = CONCAT(
+                 'MGI-',
+                 UPPER(LEFT(TRIM(razon_social_empresa), 1)),
+                 '-',
+                 YEAR(created_at),
+                 '-',
+                 id
+             )
+             WHERE id = :id"
+        );
+        $upd->bindValue(':id', $id, PDO::PARAM_INT);
+        $upd->execute();
+
+        return $id;
     }
 
     public function recetaTieneMargenes(int $recetaId): bool

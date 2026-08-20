@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 id: "origen_receta",
                 name: "Origen",
                 width: "110px",
-                formatter: (cell) => renderOrigen(cell)
+                formatter: (cell, row) => renderOrigen(cell, row)
             }
         ],
         server: {
@@ -130,10 +130,25 @@ document.addEventListener("DOMContentLoaded", () => {
         return gridjs.html(`<span>${escapeHtml(String(nombre || "-"))}</span>`);
     }
 
-    function renderOrigen(cell) {
+    function renderOrigen(cell, row) {
         const esReceta = Number(cell || 0) === 1;
+        const idReceta = String(row?.cells?.[2]?.data ?? "").trim();
         const label = esReceta ? "Receta" : "Manual";
         const cls = esReceta ? "badge-outline-info" : "badge-outline-secondary";
-        return gridjs.html(`<span class="badge ${cls}">${label}</span>`);
+        const badge = `<span class="badge ${cls}">${label}</span>`;
+
+        if (esReceta && idReceta && typeof md5 === "function") {
+            const hash = md5(idReceta);
+            return gridjs.html(`
+                <a href="receta_form.php?id=${encodeURIComponent(hash)}"
+                   data-bs-toggle="tooltip"
+                   data-bs-title="Ver receta"
+                   class="text-decoration-none">
+                    ${badge}
+                </a>
+            `);
+        }
+
+        return gridjs.html(badge);
     }
 });
