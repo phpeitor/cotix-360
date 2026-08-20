@@ -64,6 +64,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 name: "Origen",
                 width: "110px",
                 formatter: (cell, row) => renderOrigen(cell, row)
+            },
+            {
+                id: "acciones",
+                name: "Acciones",
+                width: "130px",
+                sort: false,
+                formatter: (cell, row) => renderAcciones(row)
             }
         ],
         server: {
@@ -150,5 +157,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         return gridjs.html(badge);
+    }
+
+    function renderAcciones(row) {
+        const idTracking = String(row?.cells?.[0]?.data ?? "").trim();
+        const codTracking = String(row?.cells?.[5]?.data ?? "").trim();
+
+        return gridjs.html(`
+            <a href="javascript:void(0);"
+               class="btn btn-sm btn-soft-info btn-icon"
+               data-tracking-actividades="1"
+               data-tracking-id="${escapeHtml(idTracking)}"
+               data-tracking-cod="${escapeHtml(codTracking)}"
+               data-bs-toggle="tooltip"
+               data-bs-title="Actividades">
+                <i class="ti ti-checklist fs-18"></i>
+            </a>
+        `);
     }
 });

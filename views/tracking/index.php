@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/../../config/bootstrap.php';
 require_once ROOT . '/controller/check_session.php';
+require_once ROOT . '/model/tracking/tracking.php';
 $cargo = (int)($_SESSION['session_cargo'] ?? 0);
+$fasesActividades = Tracking::FASES_ACTIVIDADES;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -93,11 +95,103 @@ $cargo = (int)($_SESSION['session_cargo'] ?? 0);
 
     <?php include ROOT . '/layout/theme.html'; ?>
 
+    <div class="modal fade" id="modalActividadesTracking" tabindex="-1" aria-labelledby="modalActividadesTrackingLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <h4 class="modal-title mb-1" id="modalActividadesTrackingLabel">Actividades del tracking</h4>
+                        <p class="text-muted mb-0">
+                            <span class="font-monospace" id="actTrackingCod">-</span>
+                        </p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="actividadesModalBody">
+                    <ul class="nav nav-tabs mb-3" id="fasesActividadesTabs" role="tablist">
+                        <?php $i = 0; foreach ($fasesActividades as $fase => $actividades): ?>
+                            <li class="nav-item" role="presentation">
+                                <button
+                                    type="button"
+                                    class="nav-link <?= $i === 0 ? 'active' : '' ?>"
+                                    id="tab-<?= md5($fase) ?>-tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#tab-<?= md5($fase) ?>"
+                                    role="tab"
+                                    aria-controls="tab-<?= md5($fase) ?>"
+                                    aria-selected="<?= $i === 0 ? 'true' : 'false' ?>">
+                                    <?= htmlspecialchars($fase, ENT_QUOTES, 'UTF-8') ?>
+                                </button>
+                            </li>
+                        <?php $i++; endforeach; ?>
+                    </ul>
+
+                    <div class="tab-content" id="fasesActividadesTabsContent">
+                        <?php $i = 0; foreach ($fasesActividades as $fase => $actividades): ?>
+                            <div
+                                class="tab-pane fade <?= $i === 0 ? 'show active' : '' ?>"
+                                id="tab-<?= md5($fase) ?>"
+                                role="tabpanel"
+                                aria-labelledby="tab-<?= md5($fase) ?>-tab"
+                                data-fase="<?= htmlspecialchars($fase, ENT_QUOTES, 'UTF-8') ?>">
+                                <div class="table-responsive">
+                                    <table class="table table-centered align-middle table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="w-25">Actividad</th>
+                                                <th class="w-20">Fecha</th>
+                                                <th>Observación</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($actividades as $actividad): ?>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-check">
+                                                            <input
+                                                                class="form-check-input act-check"
+                                                                type="checkbox"
+                                                                id="act-<?= md5($fase . '|' . $actividad) ?>"
+                                                                value=""
+                                                                data-fase="<?= htmlspecialchars($fase, ENT_QUOTES, 'UTF-8') ?>"
+                                                                data-actividad="<?= htmlspecialchars($actividad, ENT_QUOTES, 'UTF-8') ?>">
+                                                            <label
+                                                                class="form-check-label"
+                                                                for="act-<?= md5($fase . '|' . $actividad) ?>">
+                                                                <?= htmlspecialchars($actividad, ENT_QUOTES, 'UTF-8') ?>
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <input type="date" class="form-control form-control-sm act-fecha" disabled>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control form-control-sm act-obs" placeholder="Observación" maxlength="300" disabled>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        <?php $i++; endforeach; ?>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <span class="text-muted me-auto" id="actividades-count-info">0 actividades registradas</span>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="btnGuardarActividades">Guardar actividades</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/table-gridjs-tracking.js?v=1.0"></script>
+    <script src="./assets/js/table-gridjs-tracking.js?v=1.1"></script>
+    <script src="./assets/js/tracking-actividades.js?v=1.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
 </html>

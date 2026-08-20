@@ -6,6 +6,41 @@ class Tracking
     private PDO $conn;
     private string $nowLima;
 
+    public const FASES_ACTIVIDADES = [
+        'Inicio' => [
+            'Inicio de Proyecto'
+        ],
+        'Planificación' => [
+            'Acta de Inicio del Proyecto',
+            'Registro de Interesados',
+            'Envió de Diseño Preliminar',
+            'Aprobación del Diseño',
+            'Envio de Documentos SST',
+            'Envio del GANTT'
+        ],
+        'Fabricación' => [
+            'Inicio de Fabricación',
+            'Inicio de Programación',
+            'Fin de Fabricación',
+            'Fin de Programación',
+            'Visita a Planta'
+        ],
+        'Instalación / Entrega' => [
+            'Inicio de Instalación',
+            'Fin de Instalación',
+            'Entrega de Materiales',
+            'Inicio en Puesta en Marcha',
+            'Fin de Puesta en Marcha',
+            'Ingreso a Planta',
+            'Salida de Planta'
+        ],
+        'Cierre' => [
+            'Entrega de Dossier en la plataforma',
+            'Envio de Acta de Conformidad',
+            'Recepcion de Acta de Conformidad'
+        ]
+    ];
+
     public function __construct()
     {
         $conexion = new Conexion();
@@ -158,6 +193,16 @@ class Tracking
         return (bool)$stmt->fetchColumn();
     }
 
+    public function trackingExiste(int $trackingId): bool
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT 1 FROM trackings WHERE id = :id LIMIT 1"
+        );
+        $stmt->bindValue(':id', $trackingId, PDO::PARAM_INT);
+        $stmt->execute();
+        return (bool)$stmt->fetchColumn();
+    }
+
     private function actualizarCodTracking(int $id): void
     {
         $sql = "UPDATE trackings
@@ -173,5 +218,87 @@ class Tracking
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
+    }
+
+    public function actividadesTracking(int $trackingId): array
+    {
+        $sql = "SELECT
+                    id,
+                    fase,
+                    actividad,
+                    fecha,
+                    observacion
+                FROM tracking_actividades
+                WHERE tracking_id = :tracking_id
+                ORDER BY id ASC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function guardarActividades(int $trackingId, array $actividades): void
+    {
+        $actividades = array_values(array_filter($actividades, static function ($item) {
+            $item = is_array($item) ? $item : [];
+            return isset($item['fase'], $item['actividad'])
+                && trim((string)$item['fase']) !== ''
+                && trim((string)$item['actividad']) !== '';
+        }));
+
+        $this->begin();
+
+        try {
+            $delete = $this->conn->prepare(
+                "DELETE FROM tracking_actividades WHERE tracking_id = :tracking_id"
+            );
+            $delete->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
+            $delete->execute();
+
+            $insert = $this->conn->prepare(
+                "INSERT INTO tracking_actividades (
+                    tracking_id,
+                    fase,
+                    actividad,
+                    fecha,
+                    observacion
+                ) VALUES (
+                    :tracking_id,
+                    :fase,
+                    :actividad,
+                    :fecha,
+                    :observacion
+                )"
+            );
+
+            foreach ($actividades as $item) {
+                $fecha = trim((string)($item['fecha'] ?? ''));
+                if ($fecha !== '' && !$this->fechaValida($fecha)) {
+                    throw new InvalidArgumentException('Formato de fecha inválido');
+                }
+
+                $observacion = trim((string)($item['observacion'] ?? ''));
+
+                $insert->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
+                $insert->bindValue(':fase', trim((string)$item['fase']));
+                $insert->bindValue(':actividad', trim((string)$item['actividad']));
+                $insert->bindValue(':fecha', $fecha !== '' ? $fecha : null, $fecha !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                $insert->bindValue(':observacion', $observacion !== '' ? $observacion : null, $observacion !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                $insert->execute();
+            }
+
+            $this->commit();
+        } catch (Throwable $e) {
+            $this->rollback();
+            throw $e;
+        }
+    }
+
+    private function fechaValida(string $fecha): bool
+    {
+        $d = DateTimeImmutable::createFromFormat('Y-m-d', $fecha);
+        return $d !== false && $d->format('Y-m-d') === $fecha;
     }
 }
