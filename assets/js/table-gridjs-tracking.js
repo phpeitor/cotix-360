@@ -63,6 +63,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 formatter: (cell, row) => renderOrigen(cell, row)
             },
             {
+                id: "estado",
+                name: "Estado",
+                width: "110px",
+                formatter: (cell) => renderEstado(cell)
+            },
+            {
                 id: "acciones",
                 name: "Acciones",
                 width: "130px",
@@ -70,7 +76,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 formatter: (cell, row) => renderAcciones(row)
             },
             { id: "cod_publico", name: "", hidden: true },
-            { id: "estado", name: "", hidden: true },
             { id: "total_actividades", name: "", hidden: true }
         ],
         server: {
@@ -120,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderCodTracking(cell, row) {
         const codInterno = String(cell || "");
-        const codPublico = String(row?.cells?.[9]?.data ?? "").trim();
+        const codPublico = String(row?.cells?.[10]?.data ?? "").trim();
 
         if (codPublico) {
             const partes = codInterno.split("-");
@@ -174,10 +179,17 @@ document.addEventListener("DOMContentLoaded", () => {
         return gridjs.html(badge);
     }
 
+    function renderEstado(cell) {
+        const estado = String(cell || "abierto").trim();
+        const cls = estado === "cerrado" ? "badge-outline-danger" : "badge-outline-primary";
+        const label = estado === "cerrado" ? "Cerrado" : "Abierto";
+        return gridjs.html(`<span class="badge ${cls}">${label}</span>`);
+    }
+
     function renderAcciones(row) {
         const idTracking = String(row?.cells?.[0]?.data ?? "").trim();
         const codTracking = String(row?.cells?.[5]?.data ?? "").trim();
-        const estado = String(row?.cells?.[10]?.data ?? "").trim();
+        const estado = String(row?.cells?.[8]?.data ?? "").trim();
         const totalActividades = Number(row?.cells?.[11]?.data ?? 0);
 
         let botones = `
