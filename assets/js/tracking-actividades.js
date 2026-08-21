@@ -159,4 +159,42 @@ document.addEventListener("DOMContentLoaded", () => {
         const count = body.querySelectorAll("input.act-check:checked").length;
         if (countInfo) countInfo.textContent = `${count} actividad(es) registrada(s)`;
     }
+
+    document.addEventListener("click", async (e) => {
+        const btn = e.target.closest("[data-cerrar-tracking]");
+        if (!btn) return;
+
+        const idTracking = String(btn.dataset.trackingId || "").trim();
+        const codTracking = String(btn.dataset.trackingCod || "").trim();
+
+        if (!idTracking) return;
+
+        const confirmado = confirm(`¿Está seguro de cerrar el tracking ${codTracking}?`);
+        if (!confirmado) return;
+
+        try {
+            const fd = new FormData();
+            fd.append("tracking_id", idTracking);
+
+            const res = await fetch("controller/tracking/cerrar_tracking.php", {
+                method: "POST",
+                body: fd,
+            });
+
+            const ct = res.headers.get("content-type") || "";
+            const json = ct.includes("application/json")
+                ? await res.json()
+                : { ok: false, message: await res.text() };
+
+            if (json.ok) {
+                alertify.success("Tracking cerrado correctamente");
+                document.getElementById("btn_buscar")?.click();
+            } else {
+                alertify.error("Alerta: " + String(json.message || "No se pudo cerrar."));
+            }
+        } catch (err) {
+            console.error(err);
+            alertify.error("Fallo de red o excepción, revisa consola");
+        }
+    });
 });

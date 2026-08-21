@@ -69,7 +69,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 sort: false,
                 formatter: (cell, row) => renderAcciones(row)
             },
-            { id: "cod_publico", name: "", hidden: true }
+            { id: "cod_publico", name: "", hidden: true },
+            { id: "estado", name: "", hidden: true },
+            { id: "total_actividades", name: "", hidden: true }
         ],
         server: {
             url: buildUrl(),
@@ -175,17 +177,33 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderAcciones(row) {
         const idTracking = String(row?.cells?.[0]?.data ?? "").trim();
         const codTracking = String(row?.cells?.[5]?.data ?? "").trim();
+        const estado = String(row?.cells?.[10]?.data ?? "").trim();
+        const totalActividades = Number(row?.cells?.[11]?.data ?? 0);
 
-        return gridjs.html(`
+        let botones = `
             <a href="javascript:void(0);"
-               class="btn btn-sm btn-soft-info btn-icon"
+               class="btn btn-sm btn-soft-info btn-icon me-1"
                data-tracking-actividades="1"
                data-tracking-id="${escapeHtml(idTracking)}"
                data-tracking-cod="${escapeHtml(codTracking)}"
                data-bs-toggle="tooltip"
                data-bs-title="Actividades">
                 <i class="ti ti-checklist fs-18"></i>
-            </a>
-        `);
+            </a>`;
+
+        if (estado === 'abierto' && totalActividades >= 2) {
+            botones += `
+            <a href="javascript:void(0);"
+               class="btn btn-sm btn-soft-danger btn-icon"
+               data-cerrar-tracking="1"
+               data-tracking-id="${escapeHtml(idTracking)}"
+               data-tracking-cod="${escapeHtml(codTracking)}"
+               data-bs-toggle="tooltip"
+               data-bs-title="Cerrar tracking">
+                <i class="ti ti-lock fs-18"></i>
+            </a>`;
+        }
+
+        return gridjs.html(botones);
     }
 });

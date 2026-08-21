@@ -76,8 +76,10 @@ class Tracking
                     t.ruc,
                     t.cod_tracking,
                     t.cod_publico,
+                    t.estado,
                     t.created_at,
-                    CASE WHEN t.id_receta IS NULL THEN 0 ELSE 1 END AS origen_receta
+                    CASE WHEN t.id_receta IS NULL THEN 0 ELSE 1 END AS origen_receta,
+                    (SELECT COUNT(*) FROM tracking_actividades ta WHERE ta.tracking_id = t.id) AS total_actividades
                 FROM trackings t
                 WHERE t.created_at BETWEEN :fecIni AND DATE_ADD(:fecFin, INTERVAL 1 DAY)
                 ORDER BY t.id DESC";
@@ -465,5 +467,32 @@ class Tracking
     {
         $d = DateTimeImmutable::createFromFormat('Y-m-d', $fecha);
         return $d !== false && $d->format('Y-m-d') === $fecha;
+    }
+
+    public function totalActividades(int $trackingId): int
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT COUNT(*) FROM tracking_actividades WHERE tracking_id = :id"
+        );
+        $stmt->bindValue(':id', $trackingId, PDO::PARAM_INT);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function cerrarTracking(int $trackingId): bool
+    {
+        $total = $this->totalActividades($trackingId);
+
+        if ($total < 2) {
+            throw new InvalidArgumentException('Debe tener al menos 2 actividades registradas para cerrar el tracking');
+        }
+
+        $stmt = $this->conn->prepare(
+            "UPDATE trackings SET estado = 'cerrado' WHERE id = :id AND estado = 'abierto'"
+        );
+        $stmt->bindValue(':id', $trackingId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
     }
 }
