@@ -26,7 +26,7 @@ try {
         exit;
     }
 
-    if (!in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3], true)) {
+    if (!in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 4, 3], true)) {
         throw new Exception('No tienes permisos para actualizar los datos del cliente');
     }
 
