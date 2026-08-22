@@ -1,5 +1,24 @@
 <?php
+$allowedOrigins = [
+    'http://localhost',
+    'http://127.0.0.1',
+    'https://tracking.metadatape.com',
+    'https://mgindusol.metadatape.com',
+];
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins, true)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+}
+header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Credentials: true');
 header('Content-Type: application/json; charset=utf-8');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
 require_once __DIR__ . '/../../config/tracking_codec.php';
 require_once __DIR__ . '/../../model/tracking/tracking.php';
 
