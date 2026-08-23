@@ -95,6 +95,8 @@
     word-break: break-word;
     line-height: 1.35;
     margin-bottom: 0;
+    max-height: 120px;
+    overflow-y: auto;
 }
 
 .form-ingenieria .table-custom,
