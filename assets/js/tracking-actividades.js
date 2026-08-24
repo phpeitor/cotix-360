@@ -18,10 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!trackingId) return;
 
         const cod = String(btn.dataset.trackingCod || "-");
+        const estado = String(btn.dataset.trackingEstado || "abierto").trim();
         if (codEl) codEl.textContent = cod;
 
         resetForm();
-        cargarActividades(trackingId);
+        cargarActividades(trackingId, estado);
         modalInstance?.show();
     });
 
@@ -72,6 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (json.success) {
                 alertify.success("Actividades guardadas correctamente");
                 modalInstance?.hide();
+                document.getElementById("btn_buscar")?.click();
             } else {
                 alertify.error("Alerta: " + String(json.message || "No se pudo guardar."));
             }
@@ -96,7 +98,9 @@ document.addEventListener("DOMContentLoaded", () => {
         actualizarInfo();
     }
 
-    async function cargarActividades(id) {
+    async function cargarActividades(id, estado) {
+        const cerrado = estado === "cerrado";
+
         try {
             const res = await fetch(`controller/tracking/table_actividades_tracking.php?tracking_id=${id}`);
             const json = await res.json();
@@ -123,9 +127,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 check.checked = true;
                 const fecha = row.querySelector("input.act-fecha");
                 const obs = row.querySelector("input.act-obs");
-                if (fecha) { fecha.value = saved.fecha || ""; fecha.disabled = false; }
-                if (obs) { obs.value = saved.observacion || ""; obs.disabled = false; }
+                if (fecha) { fecha.value = saved.fecha || ""; fecha.disabled = cerrado || false; }
+                if (obs) { obs.value = saved.observacion || ""; obs.disabled = cerrado || false; }
+                if (cerrado) check.disabled = true;
             });
+
+            if (cerrado) {
+                body.querySelectorAll("input.act-check:not(:checked)").forEach((check) => {
+                    check.disabled = true;
+                });
+                if (btnGuardar) btnGuardar.disabled = true;
+            } else {
+                if (btnGuardar) btnGuardar.disabled = false;
+            }
 
             actualizarInfo();
         } catch (err) {

@@ -198,6 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
                data-tracking-actividades="1"
                data-tracking-id="${escapeHtml(idTracking)}"
                data-tracking-cod="${escapeHtml(codTracking)}"
+               data-tracking-estado="${escapeHtml(estado)}"
                data-bs-toggle="tooltip"
                data-bs-title="Actividades">
                 <i class="ti ti-checklist fs-18"></i>
