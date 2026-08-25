@@ -204,6 +204,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 <i class="ti ti-checklist fs-18"></i>
             </a>`;
 
+        if (totalActividades >= 1) {
+            botones += `
+            <a href="javascript:void(0);"
+               class="btn btn-sm btn-soft-primary btn-icon me-1"
+               data-tracking-timeline="1"
+               data-tracking-id="${escapeHtml(idTracking)}"
+               data-tracking-cod="${escapeHtml(codTracking)}"
+               data-bs-toggle="tooltip"
+               data-bs-title="Timeline">
+                <i class="ti ti-map-pin fs-18"></i>
+            </a>`;
+        }
+
         if (estado === 'abierto' && totalActividades >= 2) {
             botones += `
             <a href="javascript:void(0);"
@@ -212,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
                data-tracking-id="${escapeHtml(idTracking)}"
                data-tracking-cod="${escapeHtml(codTracking)}"
                data-bs-toggle="tooltip"
-               data-bs-title="Cerrar tracking">
+               data-bs-title="Cerrar">
                 <i class="ti ti-lock fs-18"></i>
             </a>`;
         }

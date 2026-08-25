@@ -186,12 +186,138 @@ $fasesActividades = Tracking::FASES_ACTIVIDADES;
         </div>
     </div>
 
+    <div class="modal fade" id="modalTimelineTracking" tabindex="-1" aria-labelledby="modalTimelineTrackingLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <h4 class="modal-title mb-1" id="modalTimelineTrackingLabel">Timeline del tracking</h4>
+                        <p class="text-muted mb-0">
+                            <span class="font-monospace" id="timelineTrackingCod">-</span>
+                        </p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="trackingTimelineContainer" class="tracking-timeline"></div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .tracking-timeline {
+            position: relative;
+            padding-left: 50px;
+            padding-top: 20px;
+        }
+        .tracking-timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 24px;
+            height: 100%;
+            width: 2px;
+            background: #e2e8f0;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 40px;
+        }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-marker {
+            position: absolute;
+            left: -50px;
+            top: 0;
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            color: #6c757d;
+        }
+        .timeline-item.active .timeline-marker {
+            border-color: #0d6efd;
+            background: #0d6efd;
+            color: #fff;
+            box-shadow: 0 0 0 6px rgba(13,110,253,0.15);
+        }
+        .timeline-item.completed .timeline-marker {
+            border-color: #0d6efd;
+            background: #fff;
+            color: #0d6efd;
+        }
+        .timeline-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            border: 1px solid #f1f5f9;
+        }
+        .timeline-content::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 20px;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-left: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+            transform: rotate(45deg);
+        }
+        .timeline-content .date {
+            display: block;
+            font-size: 0.8rem;
+            color: #0d6efd;
+            font-weight: 600;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .timeline-content .title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #212529;
+        }
+        .fase-actividades {
+            list-style: none;
+            margin: 14px 0 0;
+            padding: 0;
+            display: grid;
+            gap: 6px;
+        }
+        .fase-actividades li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+        }
+        .fase-actividades li > i { color: #10b981; flex-shrink: 0; }
+        .fase-actividades .act-title { display: block; font-weight: 600; color: #212529; }
+        .fase-actividades .act-obs { display: block; font-size: 0.82rem; color: #6c757d; margin-top: 2px; }
+        .fase-actividades .act-fecha { margin-left: auto; color: #6c757d; font-size: 0.8rem; white-space: nowrap; flex-shrink: 0; }
+        .timeline-item.active .fase-actividades li { border-color: rgba(13,110,253,0.25); background: rgba(13,110,253,0.04); }
+    </style>
+
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/table-gridjs-tracking.js?v=1.4"></script>
-    <script src="./assets/js/tracking-actividades.js?v=1.3"></script>
+    <script src="./assets/js/table-gridjs-tracking.js?v=1.5"></script>
+    <script src="./assets/js/tracking-actividades.js?v=1.4"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
 </html>

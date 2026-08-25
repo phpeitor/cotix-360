@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
+    function escHtml(s) { const d = document.createElement("div"); d.appendChild(document.createTextNode(String(s ?? ""))); return d.innerHTML; }
+
     const modal = document.getElementById("modalActividadesTracking");
     const body = document.getElementById("actividadesModalBody");
     if (!modal || !body) return;
@@ -214,5 +216,138 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             () => {}
         ).set({ title: "Cerrar tracking" });
+    });
+
+    const PHASES = [
+        { name: 'Inicio', icon: 'ti ti-layers' },
+        { name: 'Planificación', icon: 'ti ti-clipboard' },
+        { name: 'Fabricación', icon: 'ti ti-settings' },
+        { name: 'Instalación / Entrega', icon: 'ti ti-truck' },
+        { name: 'Cierre', icon: 'ti ti-flag' }
+    ];
+
+    function normalizeFase(fase) {
+        return String(fase || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]/g, '');
+    }
+
+    function faseIcon(fase) {
+        const key = normalizeFase(fase);
+        for (let i = 0; i < PHASES.length; i++) {
+            if (normalizeFase(PHASES[i].name) === key) return PHASES[i].icon;
+        }
+        return 'ti ti-check';
+    }
+
+    function formatTimelineDate(str) {
+        if (!str) return '-';
+        const d = new Date(str.replace(' ', 'T'));
+        if (isNaN(d)) return str;
+        return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function renderTimelineModal(actividades) {
+        const container = document.getElementById("trackingTimelineContainer");
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!actividades || !actividades.length) {
+            container.innerHTML = '<div class="alert alert-info">No hay actividades registradas.</div>';
+            return;
+        }
+
+        const groups = new Map();
+        actividades.forEach(a => {
+            const key = normalizeFase(a.fase);
+            if (!groups.has(key)) groups.set(key, { fase: a.fase, items: [] });
+            groups.get(key).items.push(a);
+        });
+
+        let lastIdx = -1;
+        PHASES.forEach((p, i) => {
+            if (groups.has(normalizeFase(p.name))) lastIdx = i;
+        });
+
+        PHASES.forEach((p, i) => {
+            const key = normalizeFase(p.name);
+            const group = groups.get(key);
+            if (!group) return;
+
+            const cls = i < lastIdx ? 'completed' : (i === lastIdx ? 'active' : '');
+            const fechas = group.items.map(a => a.fecha).filter(Boolean);
+            const rango = fechas.length === 1
+                ? formatTimelineDate(fechas[0])
+                : formatTimelineDate(fechas[0]) + ' - ' + formatTimelineDate(fechas[fechas.length - 1]);
+
+            const itemsHtml = group.items.map(a => {
+                let obs = a.observacion ? '<span class="act-obs">' + escHtml(a.observacion) + '</span>' : '';
+                return '<li><i class="ti ti-check"></i><div><span class="act-title">' + escHtml(a.actividad) + '</span>' + obs + '</div><span class="act-fecha">' + formatTimelineDate(a.fecha) + '</span></li>';
+            }).join('');
+
+            const html = `
+                <div class="timeline-item ${cls}">
+                    <div class="timeline-marker"><i class="${faseIcon(p.name)}"></i></div>
+                    <div class="timeline-content">
+                        <span class="date">${rango}</span>
+                        <h3 class="title">${escHtml(group.fase)}</h3>
+                        <ul class="fase-actividades">${itemsHtml}</ul>
+                    </div>
+                </div>`;
+
+            container.insertAdjacentHTML('beforeend', html);
+        });
+
+        groups.forEach(group => {
+            const key = normalizeFase(group.fase);
+            if (PHASES.some(p => normalizeFase(p.name) === key)) return;
+
+            const itemsHtml = group.items.map(a => {
+                return '<li><i class="ti ti-check"></i><div><span class="act-title">' + escHtml(a.actividad) + '</span></div><span class="act-fecha">' + formatTimelineDate(a.fecha) + '</span></li>';
+            }).join('');
+
+            const html = `
+                <div class="timeline-item completed">
+                    <div class="timeline-marker"><i class="ti ti-check"></i></div>
+                    <div class="timeline-content">
+                        <span class="date">${escHtml(group.fase)}</span>
+                        <h3 class="title">${escHtml(group.fase)}</h3>
+                        <ul class="fase-actividades">${itemsHtml}</ul>
+                    </div>
+                </div>`;
+
+            container.insertAdjacentHTML('beforeend', html);
+        });
+    }
+
+    const timelineModalEl = document.getElementById("modalTimelineTracking");
+    const timelineModal = timelineModalEl ? bootstrap.Modal.getOrCreateInstance(timelineModalEl) : null;
+
+    document.addEventListener("click", async (e) => {
+        const btn = e.target.closest("[data-tracking-timeline]");
+        if (!btn) return;
+
+        const idTracking = String(btn.dataset.trackingId || "").trim();
+        const codTracking = String(btn.dataset.trackingCod || "").trim();
+        if (!idTracking) return;
+
+        const codEl = document.getElementById("timelineTrackingCod");
+        if (codEl) codEl.textContent = codTracking;
+
+        const container = document.getElementById("trackingTimelineContainer");
+        if (container) container.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div></div>';
+
+        timelineModal?.show();
+
+        try {
+            const res = await fetch("controller/tracking/table_actividades_tracking.php?tracking_id=" + idTracking);
+            const json = await res.json();
+            if (json.success) {
+                renderTimelineModal(json.actividades || []);
+            } else {
+                if (container) container.innerHTML = '<div class="alert alert-danger">' + escHtml(json.message || 'Error al cargar') + '</div>';
+            }
+        } catch (err) {
+            console.error(err);
+            if (container) container.innerHTML = '<div class="alert alert-danger">Fallo de red al cargar timeline.</div>';
+        }
     });
 });
