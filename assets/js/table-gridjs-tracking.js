@@ -190,7 +190,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const idTracking = String(row?.cells?.[0]?.data ?? "").trim();
         const codTracking = String(row?.cells?.[5]?.data ?? "").trim();
         const estado = String(row?.cells?.[8]?.data ?? "").trim();
+        const codPublico = String(row?.cells?.[10]?.data ?? "").trim();
         const totalActividades = Number(row?.cells?.[11]?.data ?? 0);
+
+        const codPublicoCompleto = codPublico
+            ? codTracking.substring(0, codTracking.lastIndexOf('-') + 1) + codPublico
+            : codTracking;
 
         let botones = `
             <a href="javascript:void(0);"
@@ -211,9 +216,10 @@ document.addEventListener("DOMContentLoaded", () => {
                data-tracking-timeline="1"
                data-tracking-id="${escapeHtml(idTracking)}"
                data-tracking-cod="${escapeHtml(codTracking)}"
+               data-tracking-cod-publico="${escapeHtml(codPublicoCompleto)}"
                data-bs-toggle="tooltip"
                data-bs-title="Timeline">
-                <i class="ti ti-map-pin fs-18"></i>
+                <i class="ti ti-pin fs-18"></i>
             </a>`;
         }
 

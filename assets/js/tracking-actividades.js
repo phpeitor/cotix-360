@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const PHASES = [
-        { name: 'Inicio', icon: 'ti ti-layers' },
+        { name: 'Inicio', icon: 'ti ti-home' },
         { name: 'Planificación', icon: 'ti ti-clipboard' },
         { name: 'Fabricación', icon: 'ti ti-settings' },
         { name: 'Instalación / Entrega', icon: 'ti ti-truck' },
@@ -326,11 +326,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!btn) return;
 
         const idTracking = String(btn.dataset.trackingId || "").trim();
-        const codTracking = String(btn.dataset.trackingCod || "").trim();
+        const codPublicoCompleto = String(btn.dataset.trackingCodPublico || btn.dataset.trackingCod || "").trim();
         if (!idTracking) return;
 
         const codEl = document.getElementById("timelineTrackingCod");
-        if (codEl) codEl.textContent = codTracking;
+        if (codEl) codEl.textContent = codPublicoCompleto;
 
         const container = document.getElementById("trackingTimelineContainer");
         if (container) container.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div></div>';
