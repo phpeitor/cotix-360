@@ -495,4 +495,25 @@ class Tracking
 
         return $stmt->rowCount() > 0;
     }
+
+    public function obtenerDescripcion(int $trackingId): ?string
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT descripcion FROM trackings WHERE id = :id LIMIT 1"
+        );
+        $stmt->bindValue(':id', $trackingId, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetchColumn();
+        return $result !== false ? (string)$result : null;
+    }
+
+    public function guardarDescripcion(int $trackingId, ?string $descripcion): void
+    {
+        $stmt = $this->conn->prepare(
+            "UPDATE trackings SET descripcion = :desc WHERE id = :id"
+        );
+        $stmt->bindValue(':desc', trim((string)$descripcion));
+        $stmt->bindValue(':id', $trackingId, PDO::PARAM_INT);
+        $stmt->execute();
+    }
 }

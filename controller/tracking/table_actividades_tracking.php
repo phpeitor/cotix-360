@@ -27,7 +27,8 @@ try {
     echo json_encode([
         'success' => true,
         'fases' => Tracking::FASES_ACTIVIDADES,
-        'actividades' => $tracking->actividadesTracking($trackingId)
+        'actividades' => $tracking->actividadesTracking($trackingId),
+        'descripcion' => $tracking->obtenerDescripcion($trackingId)
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
     http_response_code(400);

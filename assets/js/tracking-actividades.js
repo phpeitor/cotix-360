@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const btnGuardar = document.getElementById("btnGuardarActividades");
     const codEl = document.getElementById("actTrackingCod");
+    const descEl = document.getElementById("actTrackingDescripcion");
     const countInfo = document.getElementById("actividades-count-info");
     const modalInstance = modal ? (bootstrap.Modal.getOrCreateInstance(modal)) : null;
 
@@ -55,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const fd = new FormData();
             fd.append("tracking_id", String(trackingId));
+            fd.append("descripcion", String(descEl?.value || "").trim());
             registradas.forEach((act, index) => {
                 fd.append(`actividades[${index}][fase]`, act.fase);
                 fd.append(`actividades[${index}][actividad]`, act.actividad);
@@ -88,6 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function resetForm() {
+        if (descEl) { descEl.value = ""; descEl.disabled = false; }
         body.querySelectorAll("input.act-check").forEach((check) => {
             check.checked = false;
             const row = check.closest("tr");
@@ -113,6 +116,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const registradas = json.actividades || [];
+            if (descEl) descEl.value = json.descripcion || "";
+            if (cerrado && descEl) descEl.disabled = true;
+            else if (descEl) descEl.disabled = false;
             const popup = new Map(registradas.map((a) => [
                 `${a.fase}|${a.actividad}`,
                 a

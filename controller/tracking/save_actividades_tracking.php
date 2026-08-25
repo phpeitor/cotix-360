@@ -60,6 +60,9 @@ try {
 
     $tracking->guardarActividades($trackingId, $actividades);
 
+    $descripcion = trim((string)($_POST['descripcion'] ?? ''));
+    $tracking->guardarDescripcion($trackingId, $descripcion);
+
     echo json_encode([
         'success' => true,
         'registradas' => count($actividades)
