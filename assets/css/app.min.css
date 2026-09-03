@@ -29,3 +29,16 @@
     line-height: 1.35;
     margin-bottom: 0;
 }
+
+#table-gridjs .usuario-password-hash {
+    display: inline-block;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+    white-space: nowrap;
+}
+
+#table-gridjs .gridjs-wrapper {
+    overflow-x: auto;
+}

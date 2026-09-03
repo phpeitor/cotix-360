@@ -290,6 +290,7 @@ class Tracking
                     t.id,
                     t.id_receta,
                     t.nombre,
+                    t.descripcion,
                     t.razon_social_empresa,
                     t.ruc,
                     t.cod_tracking,
