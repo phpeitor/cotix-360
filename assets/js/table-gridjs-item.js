@@ -124,7 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
             server: {
                 url: "controller/table_item.php?" + params.toString(),
                 method: "GET",
-                then: data => data
+                then: data => data.data,
+                total: data => data.total
             }
         }).forceRender();
     }
@@ -231,12 +232,13 @@ document.addEventListener("DOMContentLoaded", () => {
             url: "controller/table_item.php",
             method: "GET",
             then: (data) => data.data,
-            total: (data) => data.total,
-            search: {
+            total: (data) => data.total
+        },
+        search: {
+            server: {
                 url: (prev, keyword) => `${prev}${prev.includes("?") ? "&" : "?"}search=${encodeURIComponent(keyword)}`
             }
         },
-        search: true,
         sort: true,
         pagination: {
             enabled: true,
