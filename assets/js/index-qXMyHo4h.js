@@ -16049,6 +16049,21 @@ const au = "Login Machine",
 			}),
 			...rt
 		}), [B, Mt] = hl.useState(""), [Ht, Nt] = hl.useState(""), [Ct, at] = hl.useState(0), [Y, vt] = hl.useState(Hd), [_showReq, _setShowReq] = hl.useState(!1), [isChecking, setIsChecking] = hl.useState(!1), it = hl.useRef(null), ne = hl.useRef(!1), ce = hl.useRef(!1), ot = ei.useStateMachineInput(I, au, "isChecking"), yt = ei.useStateMachineInput(I, au, "numLook"), S = ei.useStateMachineInput(I, au, "trigSuccess"), Pt = ei.useStateMachineInput(I, au, "trigFail"), re = ei.useStateMachineInput(I, au, "isHandsUp");
+		const directAnimation = (name, returnToIdle = !0) => {
+			if (!I || typeof I.play !== "function") return;
+			try {
+				if (typeof I.stop === "function") I.stop(au);
+				I.play(name);
+				if (returnToIdle) window.setTimeout(() => { try { I.play("idle"); } catch (_) {} }, 1200);
+			} catch (_) {}
+		};
+		const setHandsUp = value => {
+			if (re) {
+				re.value = value;
+				return;
+			}
+			directAnimation(value ? "Hands_up" : "hands_down");
+		};
 		hl.useEffect(() => {
 			it?.current && !Ct && at(it.current.offsetWidth / 100)
 		}, [it]);
@@ -16070,24 +16085,31 @@ const au = "Login Machine",
 				const It = Dt.target.value;
 				Mt(It), setIsChecking(!0), ot && (ot.value || (ot.value = !0));
 				const ae = It.length;
-				yt && (yt.value = ae * Ct)
+				if (yt) yt.value = ae * Ct;
+				else if (ae > 0) directAnimation(ae < 8 ? "Look_down_left" : "Look_down_right")
 			},
 			Yt = () => {
-				setIsChecking(!0), ot && (ot.value = !0), yt && yt.value !== B.length * Ct && (yt.value = B.length * Ct)
+				setIsChecking(!0), ot && (ot.value = !0);
+				if (yt) yt.value !== B.length * Ct && (yt.value = B.length * Ct);
+				else directAnimation(B.length > 0 ? "Look_down_left" : "look_idle")
 			};
 			const xm = (Dt, It = !1) => {
 				if (Dt && typeof Dt.fire == "function") {
 					requestAnimationFrame(() => Dt.fire());
 					return
 				}
-				It && (ne.current = !0)
+				if (It) {
+					ne.current = !0;
+					directAnimation("fail");
+				}
 			};
 			const Sm = Dt => {
 				if (Dt && typeof Dt.fire == "function") {
 					requestAnimationFrame(() => Dt.fire());
 					return
 				}
-				ce.current = !0
+				ce.current = !0;
+				directAnimation("success");
 			};
 			const Gt = async (e) => {
 				e.preventDefault();
@@ -16105,7 +16127,7 @@ const au = "Login Machine",
 				
 				vt("Checking...");
 				setIsChecking(!0), ot && (ot.value = !0);
-				re && (re.value = !1);
+				setHandsUp(!1);
 
 				const formData = new FormData();
 				formData.append("usuario", usuario);
@@ -16244,8 +16266,8 @@ const au = "Login Machine",
 								placeholder: "Password",
 								maxLength: 12,
 								value: Ht,
-								onFocus: () => re && (re.value = !0),
-								onBlur: () => re && (re.value = !1),
+								onFocus: () => setHandsUp(!0),
+								onBlur: () => setHandsUp(!1),
 								onChange: Dt => Nt(Dt.target.value)
 							})
 						}), Rn.jsx("button", {
