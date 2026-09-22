@@ -16040,7 +16040,7 @@ const au = "Login Machine",
 			rive: I,
 			RiveComponent: Xt
 		} = ei.useRive({
-			src: "./assets/resources/login-teddy1.riv",
+			src: `./assets/resources/login-teddy${Math.floor(Math.random() * 2) + 1}.riv`,
 			stateMachines: au,
 			autoplay: !0,
 			layout: new ei.Layout({
