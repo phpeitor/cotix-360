@@ -230,13 +230,20 @@ document.addEventListener("DOMContentLoaded", () => {
         server: {
             url: "controller/table_item.php",
             method: "GET",
-            then: (data) => data 
+            then: (data) => data.data,
+            total: (data) => data.total,
+            search: {
+                url: (prev, keyword) => `${prev}${prev.includes("?") ? "&" : "?"}search=${encodeURIComponent(keyword)}`
+            }
         },
         search: true,
         sort: true,
         pagination: {
             enabled: true,
-            limit: 10
+            limit: 10,
+            server: {
+                url: (prev, page, limit) => `${prev}${prev.includes("?") ? "&" : "?"}page=${page + 1}&limit=${limit}`
+            }
         }
     })
     .render(document.getElementById("table-gridjs"));
@@ -284,7 +291,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         server: {
                             url: "controller/table_item.php",
                             method: "GET",
-                            then: (data) => data
+                            then: (data) => data.data,
+                            total: (data) => data.total
                         }
                     }).forceRender();
 

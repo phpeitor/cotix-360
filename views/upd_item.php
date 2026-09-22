@@ -78,7 +78,7 @@ require_once ROOT . '/controller/check_session.php';
                                             <select id="grupo" name="grupo" class="form-select" required="">
                                                 <option value="">-- Seleccione --</option>
                                                 <option value="Default">Default</option>
-                                                <?php for ($i = 0; $i <= 9; $i++): ?>
+                                                <?php for ($i = 0; $i <= 12; $i++): ?>
                                                     <option value="Group <?= $i ?>">Group <?= $i ?></option>
                                                 <?php endfor; ?>
                                             </select>

@@ -113,15 +113,15 @@ class Item {
         $grupo = null,
         $clase = null,
         $categoria = null,
-        $md5_id = null
+        $md5_id = null,
+        ?string $search = null,
+        int $page = 1,
+        int $limit = 10
     ): array {
 
-        $sql = "
-            SELECT a.*
-            FROM item a
-            LEFT JOIN carga b ON a.id_carga = b.id
-            WHERE 1 = 1
-        ";
+        $sql = "FROM item a
+                LEFT JOIN carga b ON a.id_carga = b.id
+                WHERE 1 = 1";
 
         $params = [];
 
@@ -154,12 +154,29 @@ class Item {
             $params[] = $md5_id;
         }
 
-        $sql .= " ORDER BY a.id DESC";
+        if ($search !== null && trim($search) !== '') {
+            $sql .= " AND (a.modelo LIKE ? OR a.descripcion LIKE ? OR a.grupo_descuento LIKE ? OR a.clase_producto LIKE ? OR a.categoria_producto LIKE ?)";
+            $searchLike = '%' . trim($search) . '%';
+            array_push($params, $searchLike, $searchLike, $searchLike, $searchLike, $searchLike);
+        }
+
+        $countStmt = $this->conn->prepare("SELECT COUNT(*) $sql");
+        $countStmt->execute($params);
+        $total = (int)$countStmt->fetchColumn();
+
+        $page = max(1, $page);
+        $limit = min(100, max(1, $limit));
+        $offset = ($page - 1) * $limit;
+
+        $sql = "SELECT a.* $sql ORDER BY a.id DESC LIMIT $limit OFFSET $offset";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute($params);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return [
+            'data' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+            'total' => $total,
+        ];
     }
 
     public function table_carga(): array{
