@@ -62,6 +62,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             },
             {
+                id: "USUARIO",
+                name: "Usuario",
+                width: "160px"
+            },
+            {
                 id: "DOC",
                 name: "Documento",
                 width: "120px"
@@ -134,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const cells = row.cells;
 
                     const id = cells[0].data;
-                    const estado = String(cells[6].data).trim();
+                    const estado = String(cells[7].data).trim();
                     const idHash = md5(String(id));
 
                     const btnDelete = estado === "1"

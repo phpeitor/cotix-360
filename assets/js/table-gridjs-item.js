@@ -81,6 +81,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const clases = data.map(item => item.clase_producto);
             const categorias = data.map(item => item.categoria_producto);
 
+            grupos.sort((a, b) => {
+                const numA = String(a).match(/\d+/);
+                const numB = String(b).match(/\d+/);
+                const orderA = numA ? parseInt(numA[0], 10) : Number.MAX_SAFE_INTEGER;
+                const orderB = numB ? parseInt(numB[0], 10) : Number.MAX_SAFE_INTEGER;
+                return orderA - orderB || String(a).localeCompare(String(b));
+            });
+
             setSelectOptions(filterGrupo, grupos, selectLabels.grupo);
             setSelectOptions(filterClase, clases, selectLabels.clase);
             setSelectOptions(filterCategoria, categorias, selectLabels.categoria);

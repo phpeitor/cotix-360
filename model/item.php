@@ -211,7 +211,12 @@ class Item {
             $params[] = $base;
         }
 
-        $sql .= " group by grupo_descuento";
+         $sql .= " group by grupo_descuento
+                   order by case
+                       when grupo_descuento like 'Group %'
+                           then cast(substring(grupo_descuento, 7) as unsigned)
+                       else 999
+                   end, grupo_descuento";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute($params);
