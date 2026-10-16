@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 width: "170px",
                 formatter: (cell, row) => renderCodTracking(cell, row)
             },
-            { id: "created_at", name: "Fecha", width: "170px" },
+            { id: "updated_at", name: "Fecha", width: "170px" },
             {
                 id: "origen_receta",
                 name: "Origen",

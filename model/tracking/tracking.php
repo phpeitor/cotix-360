@@ -78,10 +78,11 @@ class Tracking
                     t.cod_publico,
                     t.estado,
                     t.created_at,
+                    t.updated_at,
                     CASE WHEN t.id_receta IS NULL THEN 0 ELSE 1 END AS origen_receta,
                     (SELECT COUNT(*) FROM tracking_actividades ta WHERE ta.tracking_id = t.id) AS total_actividades
                 FROM trackings t
-                WHERE t.created_at BETWEEN :fecIni AND DATE_ADD(:fecFin, INTERVAL 1 DAY)
+                WHERE t.updated_at BETWEEN :fecIni AND DATE_ADD(:fecFin, INTERVAL 1 DAY)
                 ORDER BY t.id DESC";
 
         $stmt = $this->conn->prepare($sql);

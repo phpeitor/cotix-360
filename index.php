@@ -8,7 +8,7 @@ if (isset($_SESSION['session_usuario'], $_SESSION['session_cargo'])) {
 }
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./assets/resources/vite.svg" />
@@ -16,7 +16,8 @@ if (isset($_SESSION['session_usuario'], $_SESSION['session_cargo'])) {
     <title>Cotix360</title>
     <script type="module" crossorigin src="./assets/js/index-qXMyHo4h.js?v=3.5"></script>
     <link rel="stylesheet" crossorigin href="./assets/css/index-D03ZEYWy.css?v=3.4">    
-    <link rel="stylesheet" href="./assets/css/login-validation.css">    
+    <link rel="stylesheet" href="./assets/css/login-validation.css">
+    <link rel="stylesheet" href="./assets/css/login-responsive.css?v=1.1">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
   </head>
