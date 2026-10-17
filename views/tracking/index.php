@@ -109,8 +109,16 @@ $fasesActividades = Tracking::FASES_ACTIVIDADES;
                 </div>
                 <div class="modal-body" id="actividadesModalBody">
                     <div class="mb-3">
-                        <label for="actTrackingDescripcion" class="form-label fw-semibold">Descripción del tracking</label>
-                        <textarea class="form-control" id="actTrackingDescripcion" rows="2" placeholder="Descripción del proyecto..." maxlength="500"></textarea>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-8">
+                                <label for="actTrackingDescripcion" class="form-label fw-semibold">Descripción del tracking</label>
+                                <textarea class="form-control" id="actTrackingDescripcion" rows="2" placeholder="Descripción del proyecto..." maxlength="500"></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="actTrackingNumOc" class="form-label fw-semibold">Num. OC</label>
+                                <input type="text" class="form-control" id="actTrackingNumOc" placeholder="Número de orden de compra" maxlength="100">
+                            </div>
+                        </div>
                     </div>
                     <ul class="nav nav-tabs mb-3" id="fasesActividadesTabs" role="tablist">
                         <?php $i = 0; foreach ($fasesActividades as $fase => $actividades): ?>
@@ -320,8 +328,8 @@ $fasesActividades = Tracking::FASES_ACTIVIDADES;
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/table-gridjs-tracking.js?v=1.6"></script>
-    <script src="./assets/js/tracking-actividades.js?v=1.6"></script>
+    <script src="./assets/js/table-gridjs-tracking.js?v=1.7"></script>
+    <script src="./assets/js/tracking-actividades.js?v=1.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
 </html>

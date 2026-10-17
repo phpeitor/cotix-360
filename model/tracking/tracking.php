@@ -518,4 +518,25 @@ class Tracking
         $stmt->bindValue(':id', $trackingId, PDO::PARAM_INT);
         $stmt->execute();
     }
+
+    public function obtenerNumOc(int $trackingId): ?string
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT num_oc FROM trackings WHERE id = :id LIMIT 1"
+        );
+        $stmt->bindValue(':id', $trackingId, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetchColumn();
+        return $result !== false && $result !== null ? (string)$result : null;
+    }
+
+    public function guardarNumOc(int $trackingId, ?string $numOc): void
+    {
+        $stmt = $this->conn->prepare(
+            "UPDATE trackings SET num_oc = :num_oc WHERE id = :id"
+        );
+        $stmt->bindValue(':num_oc', trim((string)$numOc));
+        $stmt->bindValue(':id', $trackingId, PDO::PARAM_INT);
+        $stmt->execute();
+    }
 }

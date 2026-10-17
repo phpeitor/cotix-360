@@ -28,7 +28,8 @@ try {
         'success' => true,
         'fases' => Tracking::FASES_ACTIVIDADES,
         'actividades' => $tracking->actividadesTracking($trackingId),
-        'descripcion' => $tracking->obtenerDescripcion($trackingId)
+        'descripcion' => $tracking->obtenerDescripcion($trackingId),
+        'num_oc' => $tracking->obtenerNumOc($trackingId)
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
     http_response_code(400);
