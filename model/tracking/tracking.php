@@ -92,6 +92,49 @@ class Tracking
         ]
     ];
 
+    public const PESOS_FASE = [
+        'Inicio' => [
+            'Inicio de Proyecto' => 20.00,
+            'Acta de Inicio del Proyecto' => 40.00,
+            'Registro de Interesados' => 40.00
+        ],
+        'Planificación' => [
+            'Envió de Diseño Preliminar' => 20.00,
+            'Aprobación del Diseño' => 25.00,
+            'Compra de Materiales Crítico' => 7.50,
+            'Compra Parcial de Materiales' => 5.00,
+            'Llegada de Material Crítico' => 10.00,
+            'Final de Compras de Materiales*' => 25.00,
+            'Envio de Documentos SST' => 2.50,
+            'Envio del GANTT' => 5.00
+        ],
+        'Fabricación' => [
+            'Inicio de Fabricación' => 2.20,
+            'Inicio de Programación' => 2.20,
+            'Fin de Fabricación' => 44.00,
+            'Fin de Programación' => 33.00,
+            'Pruebas FAT' => 11.00,
+            'Otras Pruebas' => 5.40,
+            'Visita a Planta' => 2.20
+        ],
+        'Instalación / Entrega' => [
+            'Ingreso a Planta' => 4.00,
+            'Inicio de Instalación' => 8.00,
+            'Entrega de Materiales para Instalación' => 12.00,
+            'Fin de Instalación' => 40.00,
+            'Pruebas SAT' => 8.00,
+            'Inicio en Puesta en Marcha' => 4.00,
+            'Fin de Puesta en Marcha' => 16.00,
+            'Salida de Planta' => 8.00
+        ],
+        'Cierre' => [
+            'Entrega de Dossier en la plataforma' => 40.00,
+            'Envio de Acta de Conformidad' => 20.00,
+            'Recepcion de Acta de Conformidad' => 20.00,
+            'Final del Proyecto' => 20.00
+        ]
+    ];
+
     public function __construct()
     {
         $conexion = new Conexion();

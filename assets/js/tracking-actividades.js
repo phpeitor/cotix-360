@@ -216,7 +216,8 @@ document.addEventListener("DOMContentLoaded", () => {
             let progresoFase = 0;
 
             pane.querySelectorAll("input.act-check:checked").forEach((check) => {
-                progresoProyecto += Number(check.dataset.pesoProyecto || 0);
+                const pesoProyectoActividad = Number(check.dataset.pesoProyecto || 0);
+                progresoProyecto += pesoProyectoActividad;
                 progresoFase += Number(check.dataset.pesoFase || 0);
             });
 
