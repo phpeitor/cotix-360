@@ -8,13 +8,17 @@ class Tracking
 
     public const FASES_ACTIVIDADES = [
         'Inicio' => [
-            'Inicio de Proyecto'
+            'Inicio de Proyecto',
+            'Acta de Inicio del Proyecto',
+            'Registro de Interesados'
         ],
         'Planificación' => [
-            'Acta de Inicio del Proyecto',
-            'Registro de Interesados',
             'Envió de Diseño Preliminar',
             'Aprobación del Diseño',
+            'Compra de Materiales Crítico',
+            'Compra Parcial de Materiales',
+            'Llegada de Material Crítico',
+            'Final de Compras de Materiales*',
             'Envio de Documentos SST',
             'Envio del GANTT'
         ],
@@ -23,21 +27,68 @@ class Tracking
             'Inicio de Programación',
             'Fin de Fabricación',
             'Fin de Programación',
+            'Pruebas FAT',
+            'Otras Pruebas',
             'Visita a Planta'
         ],
         'Instalación / Entrega' => [
+            'Ingreso a Planta',
             'Inicio de Instalación',
+            'Entrega de Materiales para Instalación',
             'Fin de Instalación',
-            'Entrega de Materiales',
+            'Pruebas SAT',
             'Inicio en Puesta en Marcha',
             'Fin de Puesta en Marcha',
-            'Ingreso a Planta',
             'Salida de Planta'
         ],
         'Cierre' => [
             'Entrega de Dossier en la plataforma',
             'Envio de Acta de Conformidad',
-            'Recepcion de Acta de Conformidad'
+            'Recepcion de Acta de Conformidad',
+            'Final del Proyecto'
+        ]
+    ];
+
+    public const PESOS_PROYECTO = [
+        'Inicio' => [
+            'Inicio de Proyecto' => 1.00,
+            'Acta de Inicio del Proyecto' => 2.00,
+            'Registro de Interesados' => 2.00
+        ],
+        'Planificación' => [
+            'Envió de Diseño Preliminar' => 4.00,
+            'Aprobación del Diseño' => 5.00,
+            'Compra de Materiales Crítico' => 1.50,
+            'Compra Parcial de Materiales' => 1.00,
+            'Llegada de Material Crítico' => 2.00,
+            'Final de Compras de Materiales*' => 5.00,
+            'Envio de Documentos SST' => 0.50,
+            'Envio del GANTT' => 1.00
+        ],
+        'Fabricación' => [
+            'Inicio de Fabricación' => 1.00,
+            'Inicio de Programación' => 1.00,
+            'Fin de Fabricación' => 20.00,
+            'Fin de Programación' => 15.00,
+            'Pruebas FAT' => 5.00,
+            'Otras Pruebas' => 2.00,
+            'Visita a Planta' => 1.00
+        ],
+        'Instalación / Entrega' => [
+            'Ingreso a Planta' => 1.00,
+            'Inicio de Instalación' => 2.00,
+            'Entrega de Materiales para Instalación' => 3.00,
+            'Fin de Instalación' => 10.00,
+            'Pruebas SAT' => 2.00,
+            'Inicio en Puesta en Marcha' => 1.00,
+            'Fin de Puesta en Marcha' => 4.00,
+            'Salida de Planta' => 2.00
+        ],
+        'Cierre' => [
+            'Entrega de Dossier en la plataforma' => 2.00,
+            'Envio de Acta de Conformidad' => 1.00,
+            'Recepcion de Acta de Conformidad' => 1.00,
+            'Final del Proyecto' => 1.00
         ]
     ];
 
@@ -266,6 +317,8 @@ class Tracking
                     t.id,
                     t.id_receta,
                     t.nombre,
+                    t.descripcion,
+                    t.num_oc,
                     t.razon_social_empresa,
                     t.ruc,
                     t.cod_tracking,
@@ -292,6 +345,7 @@ class Tracking
                     t.id_receta,
                     t.nombre,
                     t.descripcion,
+                    t.num_oc,
                     t.razon_social_empresa,
                     t.ruc,
                     t.cod_tracking,
@@ -335,6 +389,8 @@ class Tracking
                     t.cod_publico,
                     t.created_at,
                     t.updated_at,
+                    t.descripcion,
+                    t.num_oc,
                     CASE WHEN t.id_receta IS NULL THEN 0 ELSE 1 END AS origen_receta
                 FROM trackings t
                 WHERE t.id = :id
@@ -536,6 +592,27 @@ class Tracking
             "UPDATE trackings SET num_oc = :num_oc WHERE id = :id"
         );
         $stmt->bindValue(':num_oc', trim((string)$numOc));
+        $stmt->bindValue(':id', $trackingId, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
+    public function datosTrackingModal(int $trackingId): ?array
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT nombre, razon_social_empresa, ruc, estado FROM trackings WHERE id = :id LIMIT 1"
+        );
+        $stmt->bindValue(':id', $trackingId, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row === false ? null : $row;
+    }
+
+    public function guardarNombre(int $trackingId, string $nombre): void
+    {
+        $stmt = $this->conn->prepare(
+            "UPDATE trackings SET nombre = :nombre WHERE id = :id"
+        );
+        $stmt->bindValue(':nombre', trim($nombre));
         $stmt->bindValue(':id', $trackingId, PDO::PARAM_INT);
         $stmt->execute();
     }

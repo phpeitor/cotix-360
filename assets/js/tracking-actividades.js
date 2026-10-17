@@ -9,6 +9,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const codEl = document.getElementById("actTrackingCod");
     const descEl = document.getElementById("actTrackingDescripcion");
     const numOcEl = document.getElementById("actTrackingNumOc");
+    const nombreEl = document.getElementById("actTrackingNombre");
+    const rucEl = document.getElementById("actTrackingRuc");
+    const razonSocialEl = document.getElementById("actTrackingRazonSocial");
+    const estadoEl = document.getElementById("actTrackingEstado");
     const countInfo = document.getElementById("actividades-count-info");
     const modalInstance = modal ? (bootstrap.Modal.getOrCreateInstance(modal)) : null;
 
@@ -24,6 +28,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const cod = String(btn.dataset.trackingCod || "-");
         const estado = String(btn.dataset.trackingEstado || "abierto").trim();
         if (codEl) codEl.textContent = cod;
+        actualizarEstado(estado);
+        if (rucEl) rucEl.textContent = "-";
+        if (razonSocialEl) razonSocialEl.textContent = "-";
 
         resetForm();
         cargarActividades(trackingId, estado);
@@ -59,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fd.append("tracking_id", String(trackingId));
             fd.append("descripcion", String(descEl?.value || "").trim());
             fd.append("num_oc", String(numOcEl?.value || "").trim());
+            fd.append("nombre", String(nombreEl?.value || "").trim());
             registradas.forEach((act, index) => {
                 fd.append(`actividades[${index}][fase]`, act.fase);
                 fd.append(`actividades[${index}][actividad]`, act.actividad);
@@ -94,6 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function resetForm() {
         if (descEl) { descEl.value = ""; descEl.disabled = false; }
         if (numOcEl) { numOcEl.value = ""; numOcEl.disabled = false; }
+        if (nombreEl) { nombreEl.value = ""; nombreEl.disabled = false; }
         body.querySelectorAll("input.act-check").forEach((check) => {
             check.checked = false;
             const row = check.closest("tr");
@@ -121,9 +130,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const registradas = json.actividades || [];
             if (descEl) descEl.value = json.descripcion || "";
             if (numOcEl) numOcEl.value = json.num_oc || "";
+            if (nombreEl) nombreEl.value = json.tracking?.nombre || "";
+            if (rucEl) rucEl.textContent = json.tracking?.ruc || "-";
+            if (razonSocialEl) razonSocialEl.textContent = json.tracking?.razon_social_empresa || "-";
+            if (json.tracking?.estado) actualizarEstado(json.tracking.estado);
             if (cerrado && descEl) descEl.disabled = true;
             else if (descEl) descEl.disabled = false;
             if (numOcEl) numOcEl.disabled = cerrado;
+            if (nombreEl) nombreEl.disabled = cerrado;
             const popup = new Map(registradas.map((a) => [
                 `${a.fase}|${a.actividad}`,
                 a
@@ -161,6 +175,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function actualizarEstado(estado) {
+        if (!estadoEl) return;
+        const cerrado = String(estado).trim().toLowerCase() === "cerrado";
+        estadoEl.textContent = cerrado ? "Cerrado" : "Abierto";
+        estadoEl.classList.toggle("is-closed", cerrado);
+        estadoEl.classList.toggle("is-open", !cerrado);
+    }
+
     function recogerActividades() {
         const result = [];
 
@@ -185,6 +207,35 @@ document.addEventListener("DOMContentLoaded", () => {
     function actualizarInfo() {
         const count = body.querySelectorAll("input.act-check:checked").length;
         if (countInfo) countInfo.textContent = `${count} actividad(es) registrada(s)`;
+        actualizarProgreso();
+    }
+
+    function actualizarProgreso() {
+        let progresoProyecto = 0;
+        body.querySelectorAll(".tab-pane").forEach((pane) => {
+            let progresoFase = 0;
+
+            pane.querySelectorAll("input.act-check:checked").forEach((check) => {
+                progresoProyecto += Number(check.dataset.pesoProyecto || 0);
+                progresoFase += Number(check.dataset.pesoFase || 0);
+            });
+
+            const labelFase = pane.querySelector(".tracking-phase-progress");
+            if (labelFase) {
+                labelFase.textContent = `${progresoFase.toFixed(2)}% de fase`;
+            }
+        });
+
+        progresoProyecto = Math.min(100, Math.max(0, progresoProyecto));
+        const porcentaje = progresoProyecto.toFixed(2);
+        const labelProyecto = document.getElementById("trackingProjectProgressLabel");
+        const barraProyecto = document.getElementById("trackingProjectProgressBar");
+        if (labelProyecto) labelProyecto.textContent = `${porcentaje}%`;
+        if (barraProyecto) {
+            barraProyecto.style.width = `${porcentaje}%`;
+            barraProyecto.setAttribute("aria-valuenow", porcentaje);
+            barraProyecto.parentElement?.setAttribute("aria-valuenow", porcentaje);
+        }
     }
 
     document.addEventListener("click", async (e) => {

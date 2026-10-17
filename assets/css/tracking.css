@@ -1,0 +1,244 @@
+.tracking-modal-heading {
+    min-width: 0;
+}
+
+.tracking-modal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 22px;
+    color: #6c757d;
+    font-size: .9rem;
+}
+
+.tracking-modal-meta strong {
+    color: #495057;
+}
+
+.tracking-state-badge {
+    flex: 0 0 auto;
+    margin-left: auto;
+    margin-right: 12px;
+    padding: 8px 12px;
+    font-size: .82rem;
+}
+
+.tracking-state-badge.is-open {
+    color: #146c43;
+    background: #d1e7dd;
+}
+
+.tracking-state-badge.is-closed {
+    color: #842029;
+    background: #f8d7da;
+}
+
+.tracking-info-fields textarea {
+    min-height: 38px;
+    resize: vertical;
+}
+
+.tracking-progress-summary {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    padding: 12px 16px;
+}
+
+#trackingProjectProgress {
+    height: 10px;
+}
+
+#trackingProjectProgressBar {
+    width: 0;
+    transition: width .25s ease;
+}
+
+.tracking-phase-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 6px;
+    background: #e8f0fe;
+    padding: 8px 12px;
+}
+
+.tracking-phase-summary > span:last-child {
+    margin-left: auto;
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+.tracking-activity-table {
+    min-width: 850px;
+}
+
+.tracking-weight {
+    white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+    .tracking-phase-summary {
+        flex-wrap: wrap;
+        gap: 4px 10px;
+    }
+
+    .tracking-phase-summary > span:last-child {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .tracking-modal-meta {
+        gap: 5px 14px;
+    }
+
+    .tracking-state-badge {
+        margin: 8px 8px 0 0;
+    }
+
+    .modal-header {
+        flex-wrap: wrap;
+    }
+}
+
+.tracking-timeline {
+    position: relative;
+    padding: 20px 0 0 50px;
+}
+
+.tracking-timeline::before {
+    position: absolute;
+    top: 0;
+    left: 24px;
+    width: 2px;
+    height: 100%;
+    background: #e2e8f0;
+    content: '';
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 40px;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: -50px;
+    display: flex;
+    width: 50px;
+    height: 50px;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e2e8f0;
+    border-radius: 50%;
+    background: #fff;
+    color: #6c757d;
+}
+
+.timeline-item.active .timeline-marker {
+    border-color: #0d6efd;
+    background: #0d6efd;
+    box-shadow: 0 0 0 6px rgba(13, 110, 253, .15);
+    color: #fff;
+}
+
+.timeline-item.completed .timeline-marker {
+    border-color: #0d6efd;
+    background: #fff;
+    color: #0d6efd;
+}
+
+.timeline-content {
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+}
+
+.timeline-content::before {
+    position: absolute;
+    top: 20px;
+    left: -8px;
+    width: 14px;
+    height: 14px;
+    transform: rotate(45deg);
+    border-bottom: 1px solid #f1f5f9;
+    border-left: 1px solid #f1f5f9;
+    background: #fff;
+    content: '';
+}
+
+.timeline-content .date {
+    display: block;
+    margin-bottom: 4px;
+    color: #0d6efd;
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+}
+
+.timeline-content .title {
+    margin-bottom: 10px;
+    color: #212529;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.fase-actividades {
+    display: grid;
+    margin: 14px 0 0;
+    padding: 0;
+    gap: 6px;
+    list-style: none;
+}
+
+.fase-actividades li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    background: #f8fafc;
+    padding: 8px 12px;
+    font-size: .9rem;
+}
+
+.fase-actividades li > i {
+    flex-shrink: 0;
+    color: #10b981;
+}
+
+.fase-actividades .act-title {
+    display: block;
+    color: #212529;
+    font-weight: 600;
+}
+
+.fase-actividades .act-obs {
+    display: block;
+    margin-top: 2px;
+    color: #6c757d;
+    font-size: .82rem;
+}
+
+.fase-actividades .act-fecha {
+    flex-shrink: 0;
+    margin-left: auto;
+    color: #6c757d;
+    font-size: .8rem;
+    white-space: nowrap;
+}
+
+.timeline-item.active .fase-actividades li {
+    border-color: rgba(13, 110, 253, .25);
+    background: rgba(13, 110, 253, .04);
+}

@@ -64,6 +64,8 @@ try {
     $tracking->guardarDescripcion($trackingId, $descripcion);
     $numOc = trim((string)($_POST['num_oc'] ?? ''));
     $tracking->guardarNumOc($trackingId, $numOc);
+    $nombre = trim((string)($_POST['nombre'] ?? ''));
+    $tracking->guardarNombre($trackingId, $nombre);
 
     echo json_encode([
         'success' => true,
