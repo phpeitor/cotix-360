@@ -108,13 +108,7 @@
 }
 
 .tracking-card-header {
-    flex-wrap: nowrap;
-    gap: 16px;
-}
-
-.tracking-filter-container {
-    min-width: 0;
-    flex: 1 1 auto;
+    display: block;
 }
 
 .tracking-filter-form {
@@ -122,24 +116,24 @@
 }
 
 .tracking-filter-toolbar {
-    display: flex;
-    flex-wrap: nowrap;
+    display: grid;
+    grid-template-columns: minmax(240px, 1.2fr) minmax(185px, .9fr) minmax(145px, .7fr) 112px 145px;
+    grid-template-rows: auto auto;
     gap: 8px;
     margin: 0;
 }
 
 .tracking-filter-toolbar > div {
-    flex: 0 0 auto;
-    width: auto;
+    width: 100%;
     padding-right: 0;
     padding-left: 0;
 }
 
-.tracking-filter-date { width: 310px !important; }
-.tracking-filter-state { width: 190px !important; }
-.tracking-filter-code-wrap { width: 220px !important; }
-.tracking-filter-ruc-wrap { width: 150px !important; }
-.tracking-filter-submit { width: 100px !important; }
+.tracking-filter-date { grid-column: 1; grid-row: 1; }
+.tracking-filter-state { grid-column: 2; grid-row: 1; }
+.tracking-filter-ruc-wrap { grid-column: 3; grid-row: 1; }
+.tracking-filter-code-wrap { grid-column: 1 / 4; grid-row: 2; }
+.tracking-filter-submit { grid-column: 4; grid-row: 2; }
 
 .tracking-filter-date .input-group,
 .tracking-filter-state select,
@@ -150,21 +144,61 @@
 }
 
 .tracking-new-button-wrap {
-    flex: 0 0 auto;
+    grid-column: 5;
+    grid-row: 2;
     white-space: nowrap;
 }
 
+.tracking-new-button-wrap .btn,
+.tracking-filter-submit .btn {
+    width: 100%;
+    white-space: nowrap;
+}
+
+.gridjs-search {
+    float: none;
+    padding: 14px 0 10px;
+}
+
+.gridjs-search-input {
+    min-width: 260px;
+}
+
 @media (max-width: 1199.98px) {
-    .tracking-card-header {
-        flex-wrap: wrap;
-    }
-
-    .tracking-filter-container {
-        flex-basis: 100%;
-    }
-
     .tracking-filter-toolbar {
-        flex-wrap: wrap;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: auto auto auto;
+    }
+
+    .tracking-filter-toolbar > div {
+        grid-row: auto;
+    }
+
+    .tracking-filter-date { grid-column: 1; grid-row: 1; }
+    .tracking-filter-state { grid-column: 2; grid-row: 1; }
+    .tracking-filter-ruc-wrap { grid-column: 1; grid-row: 2; }
+    .tracking-filter-code-wrap { grid-column: 2; grid-row: 2; }
+    .tracking-filter-submit { grid-column: 1; grid-row: 3; }
+    .tracking-new-button-wrap {
+        grid-column: 2;
+        grid-row: 3;
+        justify-self: end;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .tracking-filter-toolbar {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto;
+    }
+
+    .tracking-filter-toolbar > div {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .tracking-new-button-wrap {
+        justify-self: stretch;
     }
 }
 

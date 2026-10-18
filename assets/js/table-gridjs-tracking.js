@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
             limit: 10
         },
         sort: true,
-        search: false
+        search: true
     }).render(tableContainer);
 
     function recargarGrid() {
