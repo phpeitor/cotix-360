@@ -25,8 +25,14 @@ try {
         throw new Exception('Filtro de estado inválido');
     }
 
+    $codigoTracking = trim((string)($_GET['cod_tracking'] ?? ''));
+    $ruc = trim((string)($_GET['ruc'] ?? ''));
+    if (mb_strlen($codigoTracking) > 100 || mb_strlen($ruc) > 20) {
+        throw new Exception('El filtro enviado supera la longitud permitida');
+    }
+
     $tracking = new Tracking();
-    $data = $tracking->tableTracking($fecIni, $fecFin, $estado);
+    $data = $tracking->tableTracking($fecIni, $fecFin, $estado, $codigoTracking, $ruc);
 
     echo json_encode([
         'error' => false,

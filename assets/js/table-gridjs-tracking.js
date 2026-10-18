@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById("filterDate");
     const estadoSelect = document.getElementById("filterEstado");
+    const codigoInput = document.getElementById("filterCodTracking");
+    const rucInput = document.getElementById("filterRuc");
     const tableContainer = document.getElementById("table-gridjs");
     if (!dateInput || !tableContainer) return;
 
@@ -90,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
             limit: 10
         },
         sort: true,
-        search: true
+        search: false
     }).render(tableContainer);
 
     function recargarGrid() {
@@ -105,6 +107,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("btn_buscar")?.addEventListener("click", recargarGrid);
     estadoSelect?.addEventListener("change", recargarGrid);
+    [codigoInput, rucInput].forEach(input => input?.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            recargarGrid();
+        }
+    }));
 
     function buildUrl() {
         const fp = dateInput._flatpickr;
@@ -117,7 +125,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const estado = estadoSelect?.value || "todos";
-        return "controller/tracking/table_tracking.php?" + new URLSearchParams({ fec_ini, fec_fin, estado });
+        const cod_tracking = String(codigoInput?.value || "").trim();
+        const ruc = String(rucInput?.value || "").trim();
+        return "controller/tracking/table_tracking.php?" + new URLSearchParams({ fec_ini, fec_fin, estado, cod_tracking, ruc });
     }
 
     function escapeHtml(value) {

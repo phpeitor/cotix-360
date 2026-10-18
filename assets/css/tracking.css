@@ -99,6 +99,14 @@
     min-width: 1050px;
 }
 
+.tracking-filter-code {
+    min-width: 230px;
+}
+
+.tracking-filter-ruc {
+    min-width: 150px;
+}
+
 .act-guardado-por {
     display: inline-block;
     min-width: 100px;

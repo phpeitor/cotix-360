@@ -169,7 +169,13 @@ class Tracking
         }
     }
 
-    public function tableTracking(string $fecIni, string $fecFin, string $estado = 'todos'): array
+    public function tableTracking(
+        string $fecIni,
+        string $fecFin,
+        string $estado = 'todos',
+        string $codigoTracking = '',
+        string $ruc = ''
+    ): array
     {
         $sql = "SELECT
                     t.id,
@@ -197,6 +203,20 @@ class Tracking
         if ($estado === 'abierto' || $estado === 'cerrado') {
             $sql .= " AND LOWER(TRIM(COALESCE(t.estado, 'abierto'))) = :estado";
         }
+        if ($codigoTracking !== '') {
+            $sql .= " AND (
+                t.cod_tracking LIKE :cod_interno
+                OR t.cod_publico LIKE :cod_publico
+                OR CASE
+                    WHEN COALESCE(TRIM(t.cod_publico), '') <> ''
+                    THEN CONCAT(SUBSTRING_INDEX(t.cod_tracking, '-', 3), '-', t.cod_publico)
+                    ELSE t.cod_tracking
+                END LIKE :cod_visible
+            )";
+        }
+        if ($ruc !== '') {
+            $sql .= " AND t.ruc LIKE :ruc";
+        }
         $sql .= " ORDER BY t.id DESC";
 
         $stmt = $this->conn->prepare($sql);
@@ -204,6 +224,15 @@ class Tracking
         $stmt->bindValue(':fecFin', $fecFin);
         if ($estado === 'abierto' || $estado === 'cerrado') {
             $stmt->bindValue(':estado', $estado);
+        }
+        if ($codigoTracking !== '') {
+            $likeCodigo = '%' . $codigoTracking . '%';
+            $stmt->bindValue(':cod_interno', $likeCodigo);
+            $stmt->bindValue(':cod_publico', $likeCodigo);
+            $stmt->bindValue(':cod_visible', $likeCodigo);
+        }
+        if ($ruc !== '') {
+            $stmt->bindValue(':ruc', '%' . $ruc . '%');
         }
         $stmt->execute();
 

@@ -21,7 +21,7 @@ $trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/tracking.css?v=1.8" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/tracking.css?v=1.9" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -80,6 +80,14 @@ $trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
                                                 </select>
                                             </div>
 
+                                            <div class="col-sm-auto">
+                                                <input type="search" id="filterCodTracking" class="form-control tracking-filter-code" placeholder="Código tracking" aria-label="Filtrar por código tracking">
+                                            </div>
+
+                                            <div class="col-sm-auto">
+                                                <input type="search" id="filterRuc" class="form-control tracking-filter-ruc" placeholder="RUC" aria-label="Filtrar por RUC" inputmode="numeric">
+                                            </div>
+
                                             <div class="col-auto">
                                                 <a href="#" id="btn_buscar" class="btn btn-sm rounded-pill btn-info"><i class="ti ti-search fs-22"></i> Buscar</a>
                                             </div>
@@ -88,7 +96,7 @@ $trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
                                 </div>
 
                                 <div class="text-end">
-                                    <a href="tracking_crear.php" class="btn btn-sm rounded-pill btn-primary"><i class="ti ti-plus fs-22"></i> Nuevo tracking</a>
+                                    <a href="tracking_crear.php" class="btn btn-sm rounded-pill btn-primary"><i class="ti ti-plus fs-22"></i> Nuevo</a>
                                 </div>
                             </div>
 
@@ -286,7 +294,7 @@ $trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/table-gridjs-tracking.js?v=1.9"></script>
+    <script src="./assets/js/table-gridjs-tracking.js?v=1.10"></script>
     <script src="./assets/js/tracking-actividades.js?v=1.18"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
