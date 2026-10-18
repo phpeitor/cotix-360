@@ -43,7 +43,12 @@ document.addEventListener("DOMContentLoaded", () => {
         adicionalesPositivosBody: document.getElementById("adicionalesPositivosBody"),
         totalAdicionalesPositivos: document.getElementById("totalAdicionalesPositivos"),
         detalleSearch: document.getElementById("comprasDetalleSearch"),
-        itemsDisponiblesSearch: document.getElementById("itemsDisponiblesSearch")
+        itemsDisponiblesSearch: document.getElementById("itemsDisponiblesSearch"),
+        btnTrackingActividades: document.getElementById("btnComprasTrackingActividades"),
+        trackingActividadesModal: document.getElementById("comprasTrackingActividadesModal"),
+        trackingActividadesBody: document.getElementById("comprasTrackingActividadesBody"),
+        trackingCode: document.getElementById("comprasTrackingCode"),
+        btnGuardarTrackingActividades: document.getElementById("btnGuardarComprasTrackingActividades")
     };
 
     const baseSelect = document.getElementById("filterBase");
@@ -175,6 +180,16 @@ document.addEventListener("DOMContentLoaded", () => {
         fields.condicionesModal?.addEventListener("show.bs.modal", renderCondicionesModal);
         fields.clienteModal?.addEventListener("show.bs.modal", renderClienteModal);
         fields.btnGuardarCondiciones?.addEventListener("click", guardarCondicionesComerciales);
+        fields.btnTrackingActividades?.addEventListener("click", cargarActividadesTrackingCompras);
+        fields.trackingActividadesBody?.addEventListener("change", event => {
+            const checkbox = event.target.closest(".compras-tracking-check");
+            if (!checkbox) return;
+            const row = checkbox.closest("tr");
+            row?.querySelectorAll(".compras-tracking-fecha, .compras-tracking-observacion").forEach(input => {
+                input.disabled = !checkbox.checked;
+            });
+        });
+        fields.btnGuardarTrackingActividades?.addEventListener("click", guardarActividadesTrackingCompras);
     }
 
     function initTooltips() {
@@ -232,6 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderTotales();
             renderDetalle();
             renderAdicionales();
+            fields.btnTrackingActividades?.classList.toggle("d-none", !puedeEditar() || Number(compra?.id_receta_duplicada || 0) <= 0);
             initTooltips();
         } catch (error) {
             alertify.error(error.message || "No se pudo cargar la compra");
@@ -293,6 +309,70 @@ document.addEventListener("DOMContentLoaded", () => {
         if (fields.clienteCelular) fields.clienteCelular.value = data.celular || compra.cliente_celular || "";
         if (fields.clienteMotivo) fields.clienteMotivo.value = data.motivo || "";
         if (fields.clienteDireccion) fields.clienteDireccion.value = data.direccion || compra.cliente_direccion || "";
+    }
+
+    async function cargarActividadesTrackingCompras() {
+        if (!hash || !fields.trackingActividadesModal) return;
+        fields.btnTrackingActividades.disabled = true;
+        try {
+            const res = await fetch(`controller/compras/actividades_tracking.php?id=${encodeURIComponent(hash)}`);
+            const json = await res.json();
+            if (!res.ok || !json.success) throw new Error(json.message || "No se pudo cargar el tracking asociado");
+
+            if (fields.trackingCode) fields.trackingCode.textContent = json.cod_tracking || "";
+            const cerrado = String(json.estado || "").toLowerCase() === "cerrado";
+            const guardadas = new Map((json.actividades || []).map(item => [item.actividad, item]));
+
+            fields.trackingActividadesBody?.querySelectorAll("tr[data-actividad]").forEach(row => {
+                const actividad = row.dataset.actividad;
+                const saved = guardadas.get(actividad);
+                const check = row.querySelector(".compras-tracking-check");
+                const fecha = row.querySelector(".compras-tracking-fecha");
+                const observacion = row.querySelector(".compras-tracking-observacion");
+                if (!check || !fecha || !observacion) return;
+
+                check.checked = Boolean(saved);
+                check.disabled = cerrado;
+                fecha.value = saved?.fecha || "";
+                fecha.disabled = cerrado || !saved;
+                observacion.value = saved?.observacion || "";
+                observacion.disabled = cerrado || !saved;
+            });
+
+            if (fields.btnGuardarTrackingActividades) fields.btnGuardarTrackingActividades.disabled = cerrado;
+            bootstrap.Modal.getOrCreateInstance(fields.trackingActividadesModal).show();
+        } catch (error) {
+            alertify.error(error.message || "Error al cargar las actividades del tracking");
+        } finally {
+            fields.btnTrackingActividades.disabled = false;
+        }
+    }
+
+    async function guardarActividadesTrackingCompras() {
+        const button = fields.btnGuardarTrackingActividades;
+        if (!button) return;
+        button.disabled = true;
+        try {
+            const fd = new FormData();
+            fd.append("id", hash);
+            fields.trackingActividadesBody?.querySelectorAll("tr[data-actividad]").forEach((row, index) => {
+                fd.append(`actividades[${index}][actividad]`, row.dataset.actividad || "");
+                fd.append(`actividades[${index}][completada]`, row.querySelector(".compras-tracking-check")?.checked ? "1" : "0");
+                fd.append(`actividades[${index}][fecha]`, row.querySelector(".compras-tracking-fecha")?.value || "");
+                fd.append(`actividades[${index}][observacion]`, row.querySelector(".compras-tracking-observacion")?.value.trim() || "");
+            });
+
+            const res = await fetch("controller/compras/actividades_tracking.php", { method: "POST", body: fd });
+            const json = await res.json();
+            if (!res.ok || !json.success) throw new Error(json.message || "No se pudieron guardar las actividades");
+
+            alertify.success(json.message || "Actividades sincronizadas con el tracking");
+            bootstrap.Modal.getInstance(fields.trackingActividadesModal)?.hide();
+        } catch (error) {
+            alertify.error(error.message || "Error al sincronizar las actividades");
+        } finally {
+            button.disabled = false;
+        }
     }
 
     function getCondicionesPayload() {

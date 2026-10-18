@@ -135,6 +135,13 @@ class Tracking
         ]
     ];
 
+    public const ACTIVIDADES_COMPRAS = [
+        'Compra de Materiales Crítico',
+        'Compra Parcial de Materiales',
+        'Llegada de Material Crítico',
+        'Final de Compras de Materiales'
+    ];
+
     public function __construct()
     {
         $conexion = new Conexion();
@@ -505,6 +512,83 @@ class Tracking
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function trackingPorReceta(int $recetaId): ?array
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT id, cod_tracking, cod_publico, estado
+             FROM trackings
+             WHERE id_receta = :receta_id
+             LIMIT 1"
+        );
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row === false ? null : $row;
+    }
+
+    public function actividadesComprasTracking(int $trackingId): array
+    {
+        $placeholders = implode(',', array_fill(0, count(self::ACTIVIDADES_COMPRAS), '?'));
+        $stmt = $this->conn->prepare(
+            "SELECT fase, actividad, fecha, observacion
+             FROM tracking_actividades
+             WHERE tracking_id = ? AND fase = 'Planificación'
+               AND actividad IN ($placeholders)"
+        );
+        $stmt->execute(array_merge([$trackingId], self::ACTIVIDADES_COMPRAS));
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function guardarActividadesCompras(int $trackingId, array $actividades): void
+    {
+        $porNombre = [];
+        foreach ($actividades as $actividad) {
+            if (!is_array($actividad)) {
+                continue;
+            }
+            $nombre = trim((string)($actividad['actividad'] ?? ''));
+            if (in_array($nombre, self::ACTIVIDADES_COMPRAS, true)) {
+                $porNombre[$nombre] = $actividad;
+            }
+        }
+
+        $this->begin();
+        try {
+            $delete = $this->conn->prepare(
+                "DELETE FROM tracking_actividades
+                 WHERE tracking_id = :tracking_id AND fase = 'Planificación' AND actividad = :actividad"
+            );
+            $insert = $this->conn->prepare(
+                "INSERT INTO tracking_actividades (tracking_id, fase, actividad, fecha, observacion)
+                 VALUES (:tracking_id, 'Planificación', :actividad, :fecha, :observacion)
+                 ON DUPLICATE KEY UPDATE fecha = VALUES(fecha), observacion = VALUES(observacion)"
+            );
+
+            foreach (self::ACTIVIDADES_COMPRAS as $nombre) {
+                $actividad = $porNombre[$nombre] ?? null;
+                if (!$actividad || empty($actividad['completada'])) {
+                    $delete->execute([':tracking_id' => $trackingId, ':actividad' => $nombre]);
+                    continue;
+                }
+
+                $fecha = trim((string)($actividad['fecha'] ?? ''));
+                if ($fecha !== '' && !$this->fechaValida($fecha)) {
+                    throw new InvalidArgumentException('Formato de fecha inválido para ' . $nombre);
+                }
+                $observacion = trim((string)($actividad['observacion'] ?? ''));
+                $insert->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
+                $insert->bindValue(':actividad', $nombre, PDO::PARAM_STR);
+                $insert->bindValue(':fecha', $fecha !== '' ? $fecha : null, $fecha !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                $insert->bindValue(':observacion', $observacion !== '' ? $observacion : null, $observacion !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                $insert->execute();
+            }
+            $this->commit();
+        } catch (Throwable $e) {
+            $this->rollback();
+            throw $e;
+        }
     }
 
     public function guardarActividades(int $trackingId, array $actividades): void

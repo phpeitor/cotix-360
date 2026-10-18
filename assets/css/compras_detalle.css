@@ -6,6 +6,19 @@
     flex-wrap: wrap;
 }
 
+#comprasTrackingActividadesModal .table {
+    min-width: 760px;
+}
+
+#comprasTrackingActividadesModal .form-check {
+    min-width: 220px;
+}
+
+#comprasTrackingActividadesModal .font-monospace {
+    display: inline-block;
+    margin-top: 4px;
+}
+
 .semaforo-badge {
     display: inline-flex;
     align-items: center;
