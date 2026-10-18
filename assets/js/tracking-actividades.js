@@ -213,17 +213,34 @@ document.addEventListener("DOMContentLoaded", () => {
     function actualizarProgreso() {
         let progresoProyecto = 0;
         body.querySelectorAll(".tab-pane").forEach((pane) => {
-            let progresoFase = 0;
+            let aporteProyectoFase = 0;
+            const pesoTotalFase = Number(pane.dataset.pesoFase || 0);
 
             pane.querySelectorAll("input.act-check:checked").forEach((check) => {
                 const pesoProyectoActividad = Number(check.dataset.pesoProyecto || 0);
                 progresoProyecto += pesoProyectoActividad;
-                progresoFase += Number(check.dataset.pesoFase || 0);
+                aporteProyectoFase += pesoProyectoActividad;
             });
 
-            const labelFase = pane.querySelector(".tracking-phase-progress");
-            if (labelFase) {
-                labelFase.textContent = `${progresoFase.toFixed(2)}% de fase`;
+            const progresoFase = pesoTotalFase > 0
+                ? Math.min(100, (aporteProyectoFase / pesoTotalFase) * 100)
+                : 0;
+            const aporteLabel = pane.querySelector(".tracking-phase-contribution");
+            const progresoLabel = pane.querySelector(".tracking-phase-progress-label");
+            const barraFase = pane.querySelector(".tracking-phase-progress-bar");
+            const trackFase = pane.querySelector(".tracking-phase-progress-track");
+
+            if (aporteLabel) {
+                aporteLabel.textContent = `${aporteProyectoFase.toFixed(2)}% / ${pesoTotalFase.toFixed(2)}% del proyecto`;
+            }
+            if (progresoLabel) {
+                progresoLabel.textContent = `${progresoFase.toFixed(2)}% de fase`;
+            }
+            if (barraFase) {
+                barraFase.style.width = `${progresoFase}%`;
+            }
+            if (trackFase) {
+                trackFase.setAttribute("aria-valuenow", progresoFase.toFixed(2));
             }
         });
 

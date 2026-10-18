@@ -18,7 +18,7 @@ class Tracking
             'Compra de Materiales Crítico',
             'Compra Parcial de Materiales',
             'Llegada de Material Crítico',
-            'Final de Compras de Materiales*',
+            'Final de Compras de Materiales',
             'Envio de Documentos SST',
             'Envio del GANTT'
         ],
@@ -61,7 +61,7 @@ class Tracking
             'Compra de Materiales Crítico' => 1.50,
             'Compra Parcial de Materiales' => 1.00,
             'Llegada de Material Crítico' => 2.00,
-            'Final de Compras de Materiales*' => 5.00,
+            'Final de Compras de Materiales' => 5.00,
             'Envio de Documentos SST' => 0.50,
             'Envio del GANTT' => 1.00
         ],
@@ -104,7 +104,7 @@ class Tracking
             'Compra de Materiales Crítico' => 7.50,
             'Compra Parcial de Materiales' => 5.00,
             'Llegada de Material Crítico' => 10.00,
-            'Final de Compras de Materiales*' => 25.00,
+            'Final de Compras de Materiales' => 25.00,
             'Envio de Documentos SST' => 2.50,
             'Envio del GANTT' => 5.00
         ],
