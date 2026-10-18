@@ -23,6 +23,10 @@ try {
     if (!$tracking->trackingExiste($trackingId)) {
         throw new Exception('El tracking no existe');
     }
+    $trackingActual = $tracking->datosTrackingModal($trackingId);
+    if (strtolower((string)($trackingActual['estado'] ?? '')) === 'cerrado') {
+        throw new Exception('El tracking está cerrado y no admite cambios');
+    }
 
     $actividadesRaw = $_POST['actividades'] ?? [];
     if (!is_array($actividadesRaw)) {
@@ -63,6 +67,19 @@ try {
 
     $usuarioId = (int)$_SESSION['session_id'];
     $tracking->guardarActividades($trackingId, $actividades, $usuarioId);
+
+    $finalDelProyectoCompletado = false;
+    foreach ($actividades as $item) {
+        if ($item['fase'] === 'Cierre'
+            && $item['actividad'] === 'Final del Proyecto'
+            && (!empty($item['completada']) || trim((string)$item['fecha']) !== '')) {
+            $finalDelProyectoCompletado = true;
+            break;
+        }
+    }
+    if ($finalDelProyectoCompletado) {
+        $tracking->cerrarTracking($trackingId);
+    }
 
     $descripcion = trim((string)($_POST['descripcion'] ?? ''));
     $tracking->guardarDescripcion($trackingId, $descripcion);

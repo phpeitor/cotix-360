@@ -20,8 +20,13 @@ try {
         throw new Exception('Formato de fecha inválido (YYYY-MM-DD)');
     }
 
+    $estado = strtolower(trim((string)($_GET['estado'] ?? 'todos')));
+    if (!in_array($estado, ['todos', 'abierto', 'cerrado'], true)) {
+        throw new Exception('Filtro de estado inválido');
+    }
+
     $tracking = new Tracking();
-    $data = $tracking->tableTracking($fecIni, $fecFin);
+    $data = $tracking->tableTracking($fecIni, $fecFin, $estado);
 
     echo json_encode([
         'error' => false,

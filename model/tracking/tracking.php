@@ -169,7 +169,7 @@ class Tracking
         }
     }
 
-    public function tableTracking(string $fecIni, string $fecFin): array
+    public function tableTracking(string $fecIni, string $fecFin, string $estado = 'todos'): array
     {
         $sql = "SELECT
                     t.id,
@@ -183,14 +183,28 @@ class Tracking
                     t.created_at,
                     t.updated_at,
                     CASE WHEN t.id_receta IS NULL THEN 0 ELSE 1 END AS origen_receta,
-                    (SELECT COUNT(*) FROM tracking_actividades ta WHERE ta.tracking_id = t.id) AS total_actividades
+                    (SELECT COUNT(*) FROM tracking_actividades ta WHERE ta.tracking_id = t.id) AS total_actividades,
+                    CASE WHEN EXISTS (
+                        SELECT 1 FROM tracking_actividades ta_final
+                        WHERE ta_final.tracking_id = t.id
+                          AND ta_final.fase = 'Cierre'
+                          AND ta_final.actividad = 'Final del Proyecto'
+                    ) THEN 1 ELSE 0 END AS final_proyecto_completado
                 FROM trackings t
                 WHERE t.updated_at BETWEEN :fecIni AND DATE_ADD(:fecFin, INTERVAL 1 DAY)
-                ORDER BY t.id DESC";
+                ";
+
+        if ($estado === 'abierto' || $estado === 'cerrado') {
+            $sql .= " AND LOWER(TRIM(COALESCE(t.estado, 'abierto'))) = :estado";
+        }
+        $sql .= " ORDER BY t.id DESC";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':fecIni', $fecIni);
         $stmt->bindValue(':fecFin', $fecFin);
+        if ($estado === 'abierto' || $estado === 'cerrado') {
+            $stmt->bindValue(':estado', $estado);
+        }
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
@@ -823,6 +837,16 @@ class Tracking
 
     public function cerrarTracking(int $trackingId): bool
     {
+        $stmtFinal = $this->conn->prepare(
+            "SELECT COUNT(*) FROM tracking_actividades
+             WHERE tracking_id = :id AND fase = 'Cierre' AND actividad = 'Final del Proyecto'"
+        );
+        $stmtFinal->bindValue(':id', $trackingId, PDO::PARAM_INT);
+        $stmtFinal->execute();
+        if ((int)$stmtFinal->fetchColumn() <= 0) {
+            throw new InvalidArgumentException('Para cerrar el tracking, primero complete la actividad Final del Proyecto');
+        }
+
         $total = $this->totalActividades($trackingId);
 
         if ($total < 2) {

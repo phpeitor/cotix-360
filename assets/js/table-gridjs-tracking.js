@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById("filterDate");
+    const estadoSelect = document.getElementById("filterEstado");
     const tableContainer = document.getElementById("table-gridjs");
     if (!dateInput || !tableContainer) return;
 
@@ -76,7 +77,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 formatter: (cell, row) => renderAcciones(row)
             },
             { id: "cod_publico", name: "", hidden: true },
-            { id: "total_actividades", name: "", hidden: true }
+            { id: "total_actividades", name: "", hidden: true },
+            { id: "final_proyecto_completado", name: "", hidden: true }
         ],
         server: {
             url: buildUrl(),
@@ -91,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
         search: true
     }).render(tableContainer);
 
-    document.getElementById("btn_buscar")?.addEventListener("click", () => {
+    function recargarGrid() {
         grid.updateConfig({
             server: {
                 url: buildUrl(),
@@ -99,7 +101,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 then: res => res.data
             }
         }).forceRender();
-    });
+    }
+
+    document.getElementById("btn_buscar")?.addEventListener("click", recargarGrid);
+    estadoSelect?.addEventListener("change", recargarGrid);
 
     function buildUrl() {
         const fp = dateInput._flatpickr;
@@ -111,7 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
             fec_fin = formatISO(fp.selectedDates[1]);
         }
 
-        return "controller/tracking/table_tracking.php?" + new URLSearchParams({ fec_ini, fec_fin });
+        const estado = estadoSelect?.value || "todos";
+        return "controller/tracking/table_tracking.php?" + new URLSearchParams({ fec_ini, fec_fin, estado });
     }
 
     function escapeHtml(value) {
@@ -192,6 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const estado = String(row?.cells?.[8]?.data ?? "").trim();
         const codPublico = String(row?.cells?.[10]?.data ?? "").trim();
         const totalActividades = Number(row?.cells?.[11]?.data ?? 0);
+        const finalProyectoCompletado = Number(row?.cells?.[12]?.data ?? 0) === 1;
 
         const codPublicoCompleto = codPublico
             ? codTracking.substring(0, codTracking.lastIndexOf('-') + 1) + codPublico
@@ -238,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </a>`;
         }
 
-        if (estado === 'abierto' && totalActividades >= 2) {
+        if (estado === 'abierto' && finalProyectoCompletado && totalActividades >= 2) {
             botones += `
             <a href="javascript:void(0);"
                class="btn btn-sm btn-soft-danger btn-icon"
