@@ -72,7 +72,8 @@ try {
         'tracking_id' => (int)$trackingRow['id'],
         'cod_tracking' => $codTracking,
         'estado' => (string)$trackingRow['estado'],
-        'actividades' => $tracking->actividadesComprasTracking((int)$trackingRow['id'])
+        'actividades' => $tracking->actividadesComprasTracking((int)$trackingRow['id']),
+        'colores' => $tracking->coloresActividadesTracking((int)$trackingRow['id'])
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
     http_response_code(400);

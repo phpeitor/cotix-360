@@ -43,7 +43,8 @@ try {
             'fase' => $fase,
             'actividad' => $actividad,
             'fecha' => trim((string)($item['fecha'] ?? '')),
-            'observacion' => trim((string)($item['observacion'] ?? ''))
+            'observacion' => trim((string)($item['observacion'] ?? '')),
+            'color' => trim((string)($item['color'] ?? Tracking::COLOR_ACTIVIDAD_DEFAULT))
         ];
     }
 
@@ -59,6 +60,20 @@ try {
     }
 
     $tracking->guardarActividades($trackingId, $actividades);
+    foreach ($actividades as $item) {
+        $tracking->guardarColorActividad($trackingId, $item['fase'], $item['actividad'], $item['color']);
+    }
+    $coloresRaw = $_POST['colores'] ?? [];
+    if (is_array($coloresRaw)) {
+        foreach ($coloresRaw as $item) {
+            $item = is_array($item) ? $item : [];
+            $fase = trim((string)($item['fase'] ?? ''));
+            $actividad = trim((string)($item['actividad'] ?? ''));
+            if ($fase !== '' && $actividad !== '') {
+                $tracking->guardarColorActividad($trackingId, $fase, $actividad, (string)($item['color'] ?? Tracking::COLOR_ACTIVIDAD_DEFAULT));
+            }
+        }
+    }
 
     $descripcion = trim((string)($_POST['descripcion'] ?? ''));
     $tracking->guardarDescripcion($trackingId, $descripcion);

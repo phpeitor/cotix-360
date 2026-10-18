@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modalInstance?.show();
     });
 
-    body.addEventListener("change", (e) => {
+    body.addEventListener("change", async (e) => {
         const check = e.target.closest("input.act-check");
         if (check) {
             const row = check.closest("tr");
@@ -47,8 +47,31 @@ document.addEventListener("DOMContentLoaded", () => {
             [fecha, obs].forEach((input) => {
                 if (input) input.disabled = !check.checked;
             });
+            const color = row.querySelector("input.act-color");
+            if (!check.checked) {
+                if (fecha) fecha.value = "";
+                if (obs) obs.value = "";
+                if (color?.value.toLowerCase() === "#22c55e") color.value = "#facc15";
+                if (color) color.disabled = false;
+            }
             actualizarInfo();
         }
+
+        const fechaInput = e.target.closest("input.act-fecha");
+        if (fechaInput) {
+            const row = fechaInput.closest("tr");
+            const color = row?.querySelector("input.act-color");
+            if (color && fechaInput.value) {
+                color.value = "#22c55e";
+                color.disabled = true;
+            } else if (color) {
+                if (color.value.toLowerCase() === "#22c55e") color.value = "#facc15";
+                color.disabled = false;
+            }
+        }
+
+        const colorInput = e.target.closest("input.act-color");
+        if (colorInput) await guardarColorActividad(colorInput);
     });
 
     btnGuardar?.addEventListener("click", async () => {
@@ -72,6 +95,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 fd.append(`actividades[${index}][actividad]`, act.actividad);
                 fd.append(`actividades[${index}][fecha]`, act.fecha);
                 fd.append(`actividades[${index}][observacion]`, act.observacion);
+                fd.append(`actividades[${index}][color]`, act.color);
+            });
+            body.querySelectorAll("input.act-check").forEach((check, index) => {
+                const color = check.closest("tr")?.querySelector("input.act-color");
+                fd.append(`colores[${index}][fase]`, check.dataset.fase || "");
+                fd.append(`colores[${index}][actividad]`, check.dataset.actividad || "");
+                fd.append(`colores[${index}][color]`, color?.value || "#facc15");
             });
 
             const res = await fetch("controller/tracking/save_actividades_tracking.php", {
@@ -105,19 +135,24 @@ document.addEventListener("DOMContentLoaded", () => {
         if (nombreEl) { nombreEl.value = ""; nombreEl.disabled = false; }
         body.querySelectorAll("input.act-check").forEach((check) => {
             check.checked = false;
+            check.disabled = false;
             const row = check.closest("tr");
             if (!row) return;
             const fecha = row.querySelector("input.act-fecha");
             const obs = row.querySelector("input.act-obs");
             if (fecha) { fecha.value = ""; fecha.disabled = true; }
             if (obs) { obs.value = ""; obs.disabled = true; }
+            const colorInput = row.querySelector("input.act-color");
+            if (colorInput) {
+                colorInput.value = "#facc15";
+                colorInput.dataset.savedColor = "#facc15";
+                colorInput.disabled = false;
+            }
         });
         actualizarInfo();
     }
 
     async function cargarActividades(id, estado) {
-        const cerrado = estado === "cerrado";
-
         try {
             const res = await fetch(`controller/tracking/table_actividades_tracking.php?tracking_id=${id}`);
             const json = await res.json();
@@ -128,6 +163,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const registradas = json.actividades || [];
+            const colores = new Map((json.colores || []).map(item => [`${item.fase}|${item.actividad}`, item.color]));
+            const cerrado = String(json.tracking?.estado || estado).trim().toLowerCase() === "cerrado";
             if (descEl) descEl.value = json.descripcion || "";
             if (numOcEl) numOcEl.value = json.num_oc || "";
             if (nombreEl) nombreEl.value = json.tracking?.nombre || "";
@@ -145,10 +182,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             body.querySelectorAll("input.act-check").forEach((check) => {
                 const key = `${check.dataset.fase}|${check.dataset.actividad}`;
+                const row = check.closest("tr");
+                const colorInput = row?.querySelector("input.act-color");
+                if (colorInput) {
+                    const color = colores.get(key) || "#facc15";
+                    colorInput.value = color;
+                    colorInput.dataset.savedColor = color;
+                    colorInput.disabled = cerrado;
+                }
                 const saved = popup.get(key);
                 if (!saved) return;
 
-                const row = check.closest("tr");
                 if (!row) return;
 
                 check.checked = true;
@@ -156,6 +200,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 const obs = row.querySelector("input.act-obs");
                 if (fecha) { fecha.value = saved.fecha || ""; fecha.disabled = cerrado || false; }
                 if (obs) { obs.value = saved.observacion || ""; obs.disabled = cerrado || false; }
+                if (fecha?.value) {
+                    const colorInput = row.querySelector("input.act-color");
+                    if (colorInput) {
+                        colorInput.value = "#22c55e";
+                        colorInput.dataset.savedColor = "#22c55e";
+                        colorInput.disabled = true;
+                    }
+                }
                 if (cerrado) check.disabled = true;
             });
 
@@ -183,6 +235,36 @@ document.addEventListener("DOMContentLoaded", () => {
         estadoEl.classList.toggle("is-open", !cerrado);
     }
 
+    async function guardarColorActividad(colorInput) {
+        const check = colorInput.closest("tr")?.querySelector("input.act-check");
+        if (!check || !trackingId) return;
+
+        const colorAnterior = colorInput.dataset.savedColor || "#facc15";
+        const fd = new FormData();
+        fd.append("tracking_id", String(trackingId));
+        fd.append("fase", check.dataset.fase || "");
+        fd.append("actividad", check.dataset.actividad || "");
+        fd.append("color", colorInput.value);
+
+        colorInput.disabled = true;
+        try {
+            const res = await fetch("controller/tracking/save_color_actividad.php", {
+                method: "POST",
+                body: fd
+            });
+            const json = await res.json();
+            if (!res.ok || !json.success) throw new Error(json.message || "No se pudo guardar el color");
+            colorInput.dataset.savedColor = json.color || colorInput.value;
+            colorInput.value = colorInput.dataset.savedColor;
+            colorInput.title = "Color guardado";
+        } catch (error) {
+            colorInput.value = colorAnterior;
+            alertify.error(error.message || "Error al guardar el color");
+        } finally {
+            colorInput.disabled = String(estadoEl?.textContent || "").toLowerCase() === "cerrado";
+        }
+    }
+
     function recogerActividades() {
         const result = [];
 
@@ -197,7 +279,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 fase: check.dataset.fase || "",
                 actividad: check.dataset.actividad || "",
                 fecha,
-                observacion: obs
+                observacion: obs,
+                color: row.querySelector("input.act-color")?.value || "#facc15"
             });
         });
 
@@ -325,6 +408,17 @@ document.addEventListener("DOMContentLoaded", () => {
         return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
+    function colorHex(color) {
+        const value = String(color || "").trim();
+        return /^#[0-9a-f]{6}$/i.test(value) ? value : "#facc15";
+    }
+
+    function pintarIndicadoresTimeline(container) {
+        container.querySelectorAll(".timeline-color-indicator").forEach(dot => {
+            dot.style.backgroundColor = colorHex(dot.dataset.color);
+        });
+    }
+
     function renderTimelineModal(actividades) {
         const container = document.getElementById("trackingTimelineContainer");
         if (!container) return;
@@ -360,7 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const itemsHtml = group.items.map(a => {
                 let obs = a.observacion ? '<span class="act-obs">' + escHtml(a.observacion) + '</span>' : '';
-                return '<li><i class="ti ti-check"></i><div><span class="act-title">' + escHtml(a.actividad) + '</span>' + obs + '</div><span class="act-fecha">' + formatTimelineDate(a.fecha) + '</span></li>';
+                return '<li><span class="timeline-color-indicator" data-color="' + colorHex(a.color) + '"></span><div><span class="act-title">' + escHtml(a.actividad) + '</span>' + obs + '</div><span class="act-fecha">' + formatTimelineDate(a.fecha) + '</span></li>';
             }).join('');
 
             const html = `
@@ -381,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (PHASES.some(p => normalizeFase(p.name) === key)) return;
 
             const itemsHtml = group.items.map(a => {
-                return '<li><i class="ti ti-check"></i><div><span class="act-title">' + escHtml(a.actividad) + '</span></div><span class="act-fecha">' + formatTimelineDate(a.fecha) + '</span></li>';
+                return '<li><span class="timeline-color-indicator" data-color="' + colorHex(a.color) + '"></span><div><span class="act-title">' + escHtml(a.actividad) + '</span></div><span class="act-fecha">' + formatTimelineDate(a.fecha) + '</span></li>';
             }).join('');
 
             const html = `
@@ -396,6 +490,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             container.insertAdjacentHTML('beforeend', html);
         });
+
+        pintarIndicadoresTimeline(container);
     }
 
     const timelineModalEl = document.getElementById("modalTimelineTracking");
@@ -421,7 +517,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const res = await fetch("controller/tracking/table_actividades_tracking.php?tracking_id=" + idTracking);
             const json = await res.json();
             if (json.success) {
-                renderTimelineModal(json.actividades || []);
+                const colors = new Map((json.colores || []).map(item => [`${item.fase}|${item.actividad}`, item.color]));
+                const activities = (json.actividades || []).map(item => ({
+                    ...item,
+                    color: colors.get(`${item.fase}|${item.actividad}`) || "#facc15"
+                }));
+                renderTimelineModal(activities);
             } else {
                 if (container) container.innerHTML = '<div class="alert alert-danger">' + escHtml(json.message || 'Error al cargar') + '</div>';
             }

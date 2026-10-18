@@ -7,7 +7,7 @@
 }
 
 #comprasTrackingActividadesModal .table {
-    min-width: 760px;
+    min-width: 900px;
 }
 
 #comprasTrackingActividadesModal .form-check {
@@ -18,6 +18,53 @@
     display: inline-block;
     margin-top: 4px;
 }
+
+#comprasTrackingActividadesModal .compras-tracking-color {
+    width: 32px;
+    height: 32px;
+    padding: 3px;
+    border: 1px solid #cbd5e1;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+}
+
+#comprasTrackingActividadesModal .compras-tracking-color:disabled {
+    cursor: not-allowed;
+    opacity: .65;
+}
+
+#comprasTrackingActividadesModal .alert-info {
+    line-height: 1.5;
+}
+
+.compras-tracking-color-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    color: #64748b;
+    font-size: .82rem;
+}
+
+.compras-tracking-color-legend > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.compras-tracking-color-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    flex: 0 0 12px;
+    border-radius: 50%;
+}
+
+.compras-tracking-color-dot.color-critical { background: #ef4444; }
+.compras-tracking-color-dot.color-delay { background: #f97316; }
+.compras-tracking-color-dot.color-scheduled { background: #facc15; }
+.compras-tracking-color-dot.color-completed { background: #22c55e; }
 
 .semaforo-badge {
     display: inline-flex;

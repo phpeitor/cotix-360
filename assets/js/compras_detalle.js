@@ -183,11 +183,39 @@ document.addEventListener("DOMContentLoaded", () => {
         fields.btnTrackingActividades?.addEventListener("click", cargarActividadesTrackingCompras);
         fields.trackingActividadesBody?.addEventListener("change", event => {
             const checkbox = event.target.closest(".compras-tracking-check");
-            if (!checkbox) return;
-            const row = checkbox.closest("tr");
-            row?.querySelectorAll(".compras-tracking-fecha, .compras-tracking-observacion").forEach(input => {
-                input.disabled = !checkbox.checked;
-            });
+            const row = event.target.closest("tr[data-actividad]");
+            if (!row) return;
+            const check = checkbox || row.querySelector(".compras-tracking-check");
+            const fecha = row.querySelector(".compras-tracking-fecha");
+            const observacion = row.querySelector(".compras-tracking-observacion");
+            const color = row.querySelector(".compras-tracking-color");
+
+            if (checkbox) {
+                [fecha, observacion].forEach(input => {
+                    if (input) input.disabled = !checkbox.checked;
+                });
+                if (!checkbox.checked) {
+                    if (fecha) fecha.value = "";
+                    if (observacion) observacion.value = "";
+                    if (color?.value.toLowerCase() === "#22c55e") color.value = "#facc15";
+                }
+            }
+            if (event.target.matches(".compras-tracking-fecha") && fecha?.value) {
+                if (check) check.checked = true;
+                [fecha, observacion].forEach(input => {
+                    if (input) input.disabled = false;
+                });
+                if (color) {
+                    color.value = "#22c55e";
+                    color.disabled = true;
+                }
+            } else if (event.target.matches(".compras-tracking-fecha") && color) {
+                if (color.value.toLowerCase() === "#22c55e") color.value = "#facc15";
+                color.disabled = false;
+            }
+            if (event.target.matches(".compras-tracking-color") && fecha?.value) {
+                color.value = "#22c55e";
+            }
         });
         fields.btnGuardarTrackingActividades?.addEventListener("click", guardarActividadesTrackingCompras);
     }
@@ -322,6 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (fields.trackingCode) fields.trackingCode.textContent = json.cod_tracking || "";
             const cerrado = String(json.estado || "").toLowerCase() === "cerrado";
             const guardadas = new Map((json.actividades || []).map(item => [item.actividad, item]));
+            const colores = new Map((json.colores || []).map(item => [`${item.fase}|${item.actividad}`, item.color]));
 
             fields.trackingActividadesBody?.querySelectorAll("tr[data-actividad]").forEach(row => {
                 const actividad = row.dataset.actividad;
@@ -329,7 +358,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const check = row.querySelector(".compras-tracking-check");
                 const fecha = row.querySelector(".compras-tracking-fecha");
                 const observacion = row.querySelector(".compras-tracking-observacion");
-                if (!check || !fecha || !observacion) return;
+                const color = row.querySelector(".compras-tracking-color");
+                if (!check || !fecha || !observacion || !color) return;
 
                 check.checked = Boolean(saved);
                 check.disabled = cerrado;
@@ -337,6 +367,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 fecha.disabled = cerrado || !saved;
                 observacion.value = saved?.observacion || "";
                 observacion.disabled = cerrado || !saved;
+                color.value = fecha.value ? "#22c55e" : (colores.get(`Planificación|${actividad}`) || "#facc15");
+                color.disabled = cerrado || Boolean(fecha.value);
             });
 
             if (fields.btnGuardarTrackingActividades) fields.btnGuardarTrackingActividades.disabled = cerrado;
@@ -360,6 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 fd.append(`actividades[${index}][completada]`, row.querySelector(".compras-tracking-check")?.checked ? "1" : "0");
                 fd.append(`actividades[${index}][fecha]`, row.querySelector(".compras-tracking-fecha")?.value || "");
                 fd.append(`actividades[${index}][observacion]`, row.querySelector(".compras-tracking-observacion")?.value.trim() || "");
+                fd.append(`actividades[${index}][color]`, row.querySelector(".compras-tracking-color")?.value || "#facc15");
             });
 
             const res = await fetch("controller/compras/actividades_tracking.php", { method: "POST", body: fd });

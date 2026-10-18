@@ -142,6 +142,8 @@ class Tracking
         'Final de Compras de Materiales'
     ];
 
+    public const COLOR_ACTIVIDAD_DEFAULT = '#facc15';
+
     public function __construct()
     {
         $conexion = new Conexion();
@@ -499,19 +501,76 @@ class Tracking
     {
         $sql = "SELECT
                     id,
-                    fase,
-                    actividad,
-                    fecha,
-                    observacion
-                FROM tracking_actividades
-                WHERE tracking_id = :tracking_id
-                ORDER BY id ASC";
+                    ta.fase,
+                    ta.actividad,
+                    ta.fecha,
+                    ta.observacion,
+                    COALESCE(tc.color, '#FACC15') AS color
+                FROM tracking_actividades ta
+                LEFT JOIN tracking_actividad_colores tc
+                    ON tc.tracking_id = ta.tracking_id
+                   AND tc.fase COLLATE utf8mb4_unicode_ci = ta.fase COLLATE utf8mb4_unicode_ci
+                   AND tc.actividad COLLATE utf8mb4_unicode_ci = ta.actividad COLLATE utf8mb4_unicode_ci
+                WHERE ta.tracking_id = :tracking_id
+                ORDER BY ta.id ASC";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function coloresActividadesTracking(int $trackingId): array
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT fase, actividad, color
+             FROM tracking_actividad_colores
+             WHERE tracking_id = :tracking_id"
+        );
+        $stmt->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function guardarColorActividad(int $trackingId, string $fase, string $actividad, string $color): string
+    {
+        $fase = trim($fase);
+        $actividad = trim($actividad);
+        $color = strtoupper(trim($color));
+
+        if (!isset(self::FASES_ACTIVIDADES[$fase]) || !in_array($actividad, self::FASES_ACTIVIDADES[$fase], true)) {
+            throw new InvalidArgumentException('La actividad seleccionada no es válida');
+        }
+        if (!preg_match('/^#[0-9A-F]{6}$/', $color)) {
+            throw new InvalidArgumentException('El color debe ser un hexadecimal válido');
+        }
+
+        $fechaStmt = $this->conn->prepare(
+            "SELECT fecha FROM tracking_actividades
+             WHERE tracking_id = :tracking_id AND fase = :fase AND actividad = :actividad
+             LIMIT 1"
+        );
+        $fechaStmt->execute([
+            ':tracking_id' => $trackingId,
+            ':fase' => $fase,
+            ':actividad' => $actividad
+        ]);
+        if ($fechaStmt->fetchColumn()) {
+            $color = '#22C55E';
+        }
+
+        $stmt = $this->conn->prepare(
+            "INSERT INTO tracking_actividad_colores (tracking_id, fase, actividad, color)
+             VALUES (:tracking_id, :fase, :actividad, :color)
+             ON DUPLICATE KEY UPDATE color = VALUES(color)"
+        );
+        $stmt->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
+        $stmt->bindValue(':fase', $fase);
+        $stmt->bindValue(':actividad', $actividad);
+        $stmt->bindValue(':color', $color);
+        $stmt->execute();
+        return $color;
     }
 
     public function trackingPorReceta(int $recetaId): ?array
@@ -568,8 +627,7 @@ class Tracking
 
             foreach (self::ACTIVIDADES_COMPRAS as $nombre) {
                 $actividad = $porNombre[$nombre] ?? null;
-                if (!$actividad || empty($actividad['completada'])) {
-                    $delete->execute([':tracking_id' => $trackingId, ':actividad' => $nombre]);
+                if (!$actividad) {
                     continue;
                 }
 
@@ -577,12 +635,23 @@ class Tracking
                 if ($fecha !== '' && !$this->fechaValida($fecha)) {
                     throw new InvalidArgumentException('Formato de fecha inválido para ' . $nombre);
                 }
-                $observacion = trim((string)($actividad['observacion'] ?? ''));
-                $insert->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
-                $insert->bindValue(':actividad', $nombre, PDO::PARAM_STR);
-                $insert->bindValue(':fecha', $fecha !== '' ? $fecha : null, $fecha !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
-                $insert->bindValue(':observacion', $observacion !== '' ? $observacion : null, $observacion !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
-                $insert->execute();
+
+                if (empty($actividad['completada']) && $fecha === '') {
+                    $delete->execute([':tracking_id' => $trackingId, ':actividad' => $nombre]);
+                } else {
+                    $observacion = trim((string)($actividad['observacion'] ?? ''));
+                    $insert->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
+                    $insert->bindValue(':actividad', $nombre, PDO::PARAM_STR);
+                    $insert->bindValue(':fecha', $fecha !== '' ? $fecha : null, $fecha !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                    $insert->bindValue(':observacion', $observacion !== '' ? $observacion : null, $observacion !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                    $insert->execute();
+                }
+
+                $color = trim((string)($actividad['color'] ?? self::COLOR_ACTIVIDAD_DEFAULT));
+                if ($fecha !== '') {
+                    $color = '#22c55e';
+                }
+                $this->guardarColorActividad($trackingId, 'Planificación', $nombre, $color);
             }
             $this->commit();
         } catch (Throwable $e) {

@@ -28,6 +28,7 @@ try {
         'success' => true,
         'fases' => Tracking::FASES_ACTIVIDADES,
         'actividades' => $tracking->actividadesTracking($trackingId),
+        'colores' => $tracking->coloresActividadesTracking($trackingId),
         'descripcion' => $tracking->obtenerDescripcion($trackingId),
         'num_oc' => $tracking->obtenerNumOc($trackingId),
         'tracking' => $tracking->datosTrackingModal($trackingId)
