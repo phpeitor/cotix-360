@@ -4,6 +4,8 @@ require_once ROOT . '/controller/check_session.php';
 require_once ROOT . '/model/tracking/tracking.php';
 $cargo = (int)($_SESSION['session_cargo'] ?? 0);
 $fasesActividades = Tracking::FASES_ACTIVIDADES;
+$trackingUrl = trim((string)($_ENV['TRACKING_URL'] ?? ''));
+$trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -19,7 +21,7 @@ $fasesActividades = Tracking::FASES_ACTIVIDADES;
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/tracking.css?v=1.5" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/tracking.css?v=1.7" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -83,7 +85,7 @@ $fasesActividades = Tracking::FASES_ACTIVIDADES;
                             </div>
 
                             <div class="card-body">
-                                <div id="table-gridjs" data-user-cargo="<?= $cargo ?>"></div>
+                                <div id="table-gridjs" data-user-cargo="<?= $cargo ?>" data-tracking-url="<?= htmlspecialchars($trackingUrl, ENT_QUOTES, 'UTF-8') ?>" data-tracking-icon-url="<?= htmlspecialchars($trackingIconUrl, ENT_QUOTES, 'UTF-8') ?>"></div>
                             </div>
                         </div>
                     </div>
@@ -276,8 +278,8 @@ $fasesActividades = Tracking::FASES_ACTIVIDADES;
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/table-gridjs-tracking.js?v=1.7"></script>
-    <script src="./assets/js/tracking-actividades.js?v=1.17"></script>
+    <script src="./assets/js/table-gridjs-tracking.js?v=1.8"></script>
+    <script src="./assets/js/tracking-actividades.js?v=1.18"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
 </html>

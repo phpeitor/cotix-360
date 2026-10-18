@@ -238,6 +238,13 @@
     color: #6c757d;
 }
 
+.timeline-marker img {
+    display: block;
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+}
+
 .timeline-item.active .timeline-marker {
     border-color: #0d6efd;
     background: #0d6efd;

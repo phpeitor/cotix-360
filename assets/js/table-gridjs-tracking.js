@@ -196,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const codPublicoCompleto = codPublico
             ? codTracking.substring(0, codTracking.lastIndexOf('-') + 1) + codPublico
             : codTracking;
+        const trackingUrl = String(tableContainer.dataset.trackingUrl || "").trim();
 
         let botones = `
             <a href="javascript:void(0);"
@@ -208,6 +209,20 @@ document.addEventListener("DOMContentLoaded", () => {
                data-bs-title="Actividades">
                 <i class="ti ti-checklist fs-18"></i>
             </a>`;
+
+        const urlPublica = buildPublicTrackingUrl(trackingUrl, codPublicoCompleto);
+        if (urlPublica) {
+            botones += `
+            <a href="${escapeHtml(urlPublica)}"
+               class="btn btn-sm btn-soft-success btn-icon me-1"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Abrir tracking público ${escapeHtml(codPublicoCompleto)}"
+               data-bs-toggle="tooltip"
+               data-bs-title="Abrir tracking público">
+                <i class="ti ti-external-link fs-18"></i>
+            </a>`;
+        }
 
         if (totalActividades >= 1) {
             botones += `
@@ -237,5 +252,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         return gridjs.html(botones);
+    }
+
+    function buildPublicTrackingUrl(baseUrl, codTracking) {
+        if (!baseUrl || !codTracking) return "";
+        try {
+            if (baseUrl.includes("cod_tracking=")) {
+                return baseUrl + encodeURIComponent(codTracking);
+            }
+            const url = new URL(baseUrl, window.location.href);
+            url.searchParams.set("cod_tracking", codTracking);
+            return url.href;
+        } catch (error) {
+            console.error("TRACKING_URL no es una URL válida", error);
+            return "";
+        }
     }
 });

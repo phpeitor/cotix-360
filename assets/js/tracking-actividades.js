@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const estadoEl = document.getElementById("actTrackingEstado");
     const countInfo = document.getElementById("actividades-count-info");
     const modalInstance = modal ? (bootstrap.Modal.getOrCreateInstance(modal)) : null;
+    const iconBaseUrl = String(document.getElementById("table-gridjs")?.dataset.trackingIconUrl || "").trim().replace(/\/+$/, "");
 
     let trackingId = 0;
 
@@ -403,23 +404,27 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const PHASES = [
-        { name: 'Inicio', icon: 'ti ti-home' },
-        { name: 'Planificación', icon: 'ti ti-clipboard' },
-        { name: 'Fabricación', icon: 'ti ti-settings' },
-        { name: 'Instalación / Entrega', icon: 'ti ti-truck' },
-        { name: 'Cierre', icon: 'ti ti-flag' }
+        { name: 'Inicio', image: 'inicio.png' },
+        { name: 'Planificación', image: 'planificacion.png' },
+        { name: 'Fabricación', image: 'fabricacion.png' },
+        { name: 'Instalación / Entrega', image: 'instalacion-entrega.png' },
+        { name: 'Cierre', image: 'cierre.png' }
     ];
 
     function normalizeFase(fase) {
         return String(fase || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]/g, '');
     }
 
-    function faseIcon(fase) {
-        const key = normalizeFase(fase);
-        for (let i = 0; i < PHASES.length; i++) {
-            if (normalizeFase(PHASES[i].name) === key) return PHASES[i].icon;
-        }
-        return 'ti ti-check';
+    function faseImage(image) {
+        if (!iconBaseUrl || !image) return "";
+        return `${iconBaseUrl}/${encodeURIComponent(image)}`;
+    }
+
+    function renderFaseMarker(phase) {
+        const url = faseImage(phase?.image);
+        return url
+            ? `<img src="${escHtml(url)}" alt="" loading="lazy">`
+            : '<i class="ti ti-check"></i>';
     }
 
     function formatTimelineDate(str) {
@@ -480,7 +485,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const html = `
                 <div class="timeline-item ${cls}">
-                    <div class="timeline-marker"><i class="${faseIcon(p.name)}"></i></div>
+                    <div class="timeline-marker">${renderFaseMarker(p)}</div>
                     <div class="timeline-content">
                         <span class="date">${rango}</span>
                         <h3 class="title">${escHtml(group.fase)}</h3>
