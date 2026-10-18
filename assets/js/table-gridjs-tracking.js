@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const rucInput = document.getElementById("filterRuc");
     const tableContainer = document.getElementById("table-gridjs");
     if (!dateInput || !tableContainer) return;
+    const puedeVerReceta = Number(tableContainer.dataset.userCargo || 0) === 1;
 
     const today = new Date();
     const pastDate = new Date();
@@ -158,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const idReceta = String(row?.cells?.[2]?.data ?? "").trim();
         const origenReceta = Number(row?.cells?.[7]?.data || 0) === 1;
 
-        if (origenReceta && idReceta && typeof md5 === "function") {
+        if (puedeVerReceta && origenReceta && idReceta && typeof md5 === "function") {
             const hash = md5(idReceta);
             return gridjs.html(`
                 <a href="receta_form.php?id=${encodeURIComponent(hash)}"
@@ -180,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const cls = esReceta ? "badge-outline-info" : "badge-outline-secondary";
         const badge = `<span class="badge ${cls}">${label}</span>`;
 
-        if (esReceta && idReceta && typeof md5 === "function") {
+        if (puedeVerReceta && esReceta && idReceta && typeof md5 === "function") {
             const hash = md5(idReceta);
             return gridjs.html(`
                 <a href="receta_form.php?id=${encodeURIComponent(hash)}"

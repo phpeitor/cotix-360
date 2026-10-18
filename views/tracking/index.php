@@ -292,7 +292,7 @@ $trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/table-gridjs-tracking.js?v=1.11"></script>
+    <script src="./assets/js/table-gridjs-tracking.js?v=1.12"></script>
     <script src="./assets/js/tracking-actividades.js?v=1.18"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
