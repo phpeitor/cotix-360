@@ -88,15 +88,6 @@
 .compras-tracking-color-dot.color-scheduled { background: #facc15; }
 .compras-tracking-color-dot.color-completed { background: #22c55e; }
 
-.compras-tracking-guardado-por {
-    display: inline-block;
-    min-width: 110px;
-    max-width: 160px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 @media (max-width: 767.98px) {
     #comprasTrackingActividadesModal .compras-tracking-modal-dialog {
         width: calc(100vw - 1rem);

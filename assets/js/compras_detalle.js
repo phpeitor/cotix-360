@@ -360,7 +360,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const fecha = row.querySelector(".compras-tracking-fecha");
                 const observacion = row.querySelector(".compras-tracking-observacion");
                 const color = row.querySelector(".compras-tracking-color");
-                const guardadoPor = row.querySelector(".compras-tracking-guardado-por");
                 if (!check || !fecha || !observacion || !color) return;
 
                 check.checked = Boolean(saved);
@@ -371,7 +370,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 observacion.disabled = cerrado || !saved;
                 color.value = fecha.value ? "#22c55e" : (colorInfo?.color || "#facc15");
                 color.disabled = cerrado || Boolean(fecha.value);
-                if (guardadoPor) guardadoPor.textContent = saved?.actualizado_por || colorInfo?.actualizado_por || "-";
+                row.dataset.originalState = JSON.stringify({
+                    completada: check.checked,
+                    fecha: fecha.value,
+                    observacion: observacion.value.trim(),
+                    color: color.value.toLowerCase()
+                });
             });
             const tableWrap = fields.trackingActividadesBody?.closest(".table-responsive");
             if (tableWrap) tableWrap.scrollLeft = 0;
@@ -393,11 +397,26 @@ document.addEventListener("DOMContentLoaded", () => {
             const fd = new FormData();
             fd.append("id", hash);
             fields.trackingActividadesBody?.querySelectorAll("tr[data-actividad]").forEach((row, index) => {
+                const check = row.querySelector(".compras-tracking-check");
+                const fecha = row.querySelector(".compras-tracking-fecha");
+                const observacion = row.querySelector(".compras-tracking-observacion");
+                const color = row.querySelector(".compras-tracking-color");
+                const currentState = {
+                    completada: Boolean(check?.checked),
+                    fecha: fecha?.value || "",
+                    observacion: observacion?.value.trim() || "",
+                    color: (color?.value || "#facc15").toLowerCase()
+                };
+                let originalState = {};
+                try { originalState = JSON.parse(row.dataset.originalState || "{}"); } catch (_) {}
+                const cambiada = Object.keys(currentState).some(key => currentState[key] !== originalState[key]);
+
                 fd.append(`actividades[${index}][actividad]`, row.dataset.actividad || "");
-                fd.append(`actividades[${index}][completada]`, row.querySelector(".compras-tracking-check")?.checked ? "1" : "0");
-                fd.append(`actividades[${index}][fecha]`, row.querySelector(".compras-tracking-fecha")?.value || "");
-                fd.append(`actividades[${index}][observacion]`, row.querySelector(".compras-tracking-observacion")?.value.trim() || "");
-                fd.append(`actividades[${index}][color]`, row.querySelector(".compras-tracking-color")?.value || "#facc15");
+                fd.append(`actividades[${index}][completada]`, currentState.completada ? "1" : "0");
+                fd.append(`actividades[${index}][fecha]`, currentState.fecha);
+                fd.append(`actividades[${index}][observacion]`, currentState.observacion);
+                fd.append(`actividades[${index}][color]`, currentState.color);
+                fd.append(`actividades[${index}][cambiada]`, cambiada ? "1" : "0");
             });
 
             const res = await fetch("controller/compras/actividades_tracking.php", { method: "POST", body: fd });
@@ -405,9 +424,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!res.ok || !json.success) throw new Error(json.message || "No se pudieron guardar las actividades");
 
             alertify.success(json.message || "Actividades sincronizadas con el tracking");
-            fields.trackingActividadesBody?.querySelectorAll(".compras-tracking-guardado-por").forEach(el => {
-                el.textContent = json.guardado_por || "-";
-            });
             bootstrap.Modal.getInstance(fields.trackingActividadesModal)?.hide();
         } catch (error) {
             alertify.error(error.message || "Error al sincronizar las actividades");

@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btnGuardar?.addEventListener("click", async () => {
         const registradas = recogerActividades();
-        const fasesRegistradas = new Set(registradas.map((a) => a.fase));
+        const fasesRegistradas = new Set(registradas.filter(a => a.completada).map((a) => a.fase));
 
         if (!fasesRegistradas.has("Inicio")) {
             alertify.warning("Debe registrar al menos una actividad de la fase Inicio");
@@ -96,12 +96,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 fd.append(`actividades[${index}][fecha]`, act.fecha);
                 fd.append(`actividades[${index}][observacion]`, act.observacion);
                 fd.append(`actividades[${index}][color]`, act.color);
-            });
-            body.querySelectorAll("input.act-check").forEach((check, index) => {
-                const color = check.closest("tr")?.querySelector("input.act-color");
-                fd.append(`colores[${index}][fase]`, check.dataset.fase || "");
-                fd.append(`colores[${index}][actividad]`, check.dataset.actividad || "");
-                fd.append(`colores[${index}][color]`, color?.value || "#facc15");
+                fd.append(`actividades[${index}][completada]`, act.completada ? "1" : "0");
+                fd.append(`actividades[${index}][cambiada]`, act.cambiada ? "1" : "0");
             });
 
             const res = await fetch("controller/tracking/save_actividades_tracking.php", {
@@ -214,6 +210,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (cerrado) check.disabled = true;
             });
 
+            body.querySelectorAll("input.act-check").forEach((check) => {
+                const row = check.closest("tr");
+                if (row) row.dataset.originalState = JSON.stringify(estadoActividad(check));
+            });
+
             if (cerrado) {
                 body.querySelectorAll("input.act-check:not(:checked)").forEach((check) => {
                     check.disabled = true;
@@ -260,7 +261,15 @@ document.addEventListener("DOMContentLoaded", () => {
             colorInput.dataset.savedColor = json.color || colorInput.value;
             colorInput.value = colorInput.dataset.savedColor;
             colorInput.title = "Color guardado";
-            const guardadoPor = colorInput.closest("tr")?.querySelector(".act-guardado-por");
+            const row = colorInput.closest("tr");
+            const check = row?.querySelector("input.act-check");
+            if (row && check) {
+                let originalState = {};
+                try { originalState = JSON.parse(row.dataset.originalState || "{}"); } catch (_) {}
+                originalState.color = colorInput.dataset.savedColor.toLowerCase();
+                row.dataset.originalState = JSON.stringify(originalState);
+            }
+            const guardadoPor = row?.querySelector(".act-guardado-por");
             if (guardadoPor && json.guardado_por) guardadoPor.textContent = json.guardado_por;
         } catch (error) {
             colorInput.value = colorAnterior;
@@ -270,23 +279,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function estadoActividad(check) {
+        const row = check.closest("tr");
+        return {
+            completada: Boolean(check.checked),
+            fase: check.dataset.fase || "",
+            actividad: check.dataset.actividad || "",
+            fecha: row?.querySelector("input.act-fecha")?.value || "",
+            observacion: row?.querySelector("input.act-obs")?.value.trim() || "",
+            color: row?.querySelector("input.act-color")?.value.toLowerCase() || "#facc15"
+        };
+    }
+
     function recogerActividades() {
         const result = [];
 
-        body.querySelectorAll("input.act-check:checked").forEach((check) => {
+        body.querySelectorAll("input.act-check").forEach((check) => {
             const row = check.closest("tr");
             if (!row) return;
-
-            const fecha = row.querySelector("input.act-fecha")?.value || "";
-            const obs = row.querySelector("input.act-obs")?.value || "";
-
-            result.push({
-                fase: check.dataset.fase || "",
-                actividad: check.dataset.actividad || "",
-                fecha,
-                observacion: obs,
-                color: row.querySelector("input.act-color")?.value || "#facc15"
-            });
+            const currentState = estadoActividad(check);
+            let originalState = {};
+            try { originalState = JSON.parse(row.dataset.originalState || "{}"); } catch (_) {}
+            currentState.cambiada = ["completada", "fecha", "observacion", "color"]
+                .some(key => currentState[key] !== originalState[key]);
+            result.push(currentState);
         });
 
         return result;

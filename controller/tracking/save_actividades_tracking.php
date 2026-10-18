@@ -44,13 +44,15 @@ try {
             'actividad' => $actividad,
             'fecha' => trim((string)($item['fecha'] ?? '')),
             'observacion' => trim((string)($item['observacion'] ?? '')),
-            'color' => trim((string)($item['color'] ?? Tracking::COLOR_ACTIVIDAD_DEFAULT))
+            'color' => trim((string)($item['color'] ?? Tracking::COLOR_ACTIVIDAD_DEFAULT)),
+            'completada' => filter_var($item['completada'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            'cambiada' => filter_var($item['cambiada'] ?? true, FILTER_VALIDATE_BOOLEAN)
         ];
     }
 
     $fasesRegistradas = array_fill_keys(array_keys(Tracking::FASES_ACTIVIDADES), false);
     foreach ($actividades as $item) {
-        if (isset($fasesRegistradas[$item['fase']])) {
+        if (!empty($item['completada']) && isset($fasesRegistradas[$item['fase']])) {
             $fasesRegistradas[$item['fase']] = true;
         }
     }
@@ -61,20 +63,6 @@ try {
 
     $usuarioId = (int)$_SESSION['session_id'];
     $tracking->guardarActividades($trackingId, $actividades, $usuarioId);
-    foreach ($actividades as $item) {
-        $tracking->guardarColorActividad($trackingId, $item['fase'], $item['actividad'], $item['color'], $usuarioId);
-    }
-    $coloresRaw = $_POST['colores'] ?? [];
-    if (is_array($coloresRaw)) {
-        foreach ($coloresRaw as $item) {
-            $item = is_array($item) ? $item : [];
-            $fase = trim((string)($item['fase'] ?? ''));
-            $actividad = trim((string)($item['actividad'] ?? ''));
-            if ($fase !== '' && $actividad !== '') {
-                $tracking->guardarColorActividad($trackingId, $fase, $actividad, (string)($item['color'] ?? Tracking::COLOR_ACTIVIDAD_DEFAULT), $usuarioId);
-            }
-        }
-    }
 
     $descripcion = trim((string)($_POST['descripcion'] ?? ''));
     $tracking->guardarDescripcion($trackingId, $descripcion);
@@ -85,7 +73,7 @@ try {
 
     echo json_encode([
         'success' => true,
-        'registradas' => count($actividades),
+        'registradas' => count(array_filter($actividades, static fn($item) => !empty($item['completada']))),
         'guardado_por' => (string)($_SESSION['session_usuario'] ?? '')
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {

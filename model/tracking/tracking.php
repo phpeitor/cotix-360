@@ -556,17 +556,18 @@ class Tracking
             throw new InvalidArgumentException('El color debe ser un hexadecimal válido');
         }
 
-        $fechaStmt = $this->conn->prepare(
-            "SELECT fecha FROM tracking_actividades
+        $actividadStmt = $this->conn->prepare(
+            "SELECT id, fecha FROM tracking_actividades
              WHERE tracking_id = :tracking_id AND fase = :fase AND actividad = :actividad
              LIMIT 1"
         );
-        $fechaStmt->execute([
+        $actividadStmt->execute([
             ':tracking_id' => $trackingId,
             ':fase' => $fase,
             ':actividad' => $actividad
         ]);
-        if ($fechaStmt->fetchColumn()) {
+        $actividadGuardada = $actividadStmt->fetch(PDO::FETCH_ASSOC);
+        if ($actividadGuardada && !empty($actividadGuardada['fecha'])) {
             $color = '#22C55E';
         }
 
@@ -581,6 +582,15 @@ class Tracking
         $stmt->bindValue(':color', $color);
         $stmt->bindValue(':updated_by', $usuarioId, $usuarioId === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
         $stmt->execute();
+
+        if ($actividadGuardada && $usuarioId !== null) {
+            $actualizarUsuario = $this->conn->prepare(
+                "UPDATE tracking_actividades SET updated_by = :usuario_id WHERE id = :id"
+            );
+            $actualizarUsuario->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+            $actualizarUsuario->bindValue(':id', (int)$actividadGuardada['id'], PDO::PARAM_INT);
+            $actualizarUsuario->execute();
+        }
         return $color;
     }
 
@@ -649,6 +659,9 @@ class Tracking
                 if (!$actividad) {
                     continue;
                 }
+                if (array_key_exists('cambiada', $actividad) && empty($actividad['cambiada'])) {
+                    continue;
+                }
 
                 $fecha = trim((string)($actividad['fecha'] ?? ''));
                 if ($fecha !== '' && !$this->fechaValida($fecha)) {
@@ -693,11 +706,9 @@ class Tracking
 
         try {
             $delete = $this->conn->prepare(
-                "DELETE FROM tracking_actividades WHERE tracking_id = :tracking_id"
+                "DELETE FROM tracking_actividades
+                 WHERE tracking_id = :tracking_id AND fase = :fase AND actividad = :actividad"
             );
-            $delete->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
-            $delete->execute();
-
             $insert = $this->conn->prepare(
                 "INSERT INTO tracking_actividades (
                     tracking_id,
@@ -713,24 +724,47 @@ class Tracking
                     :fecha,
                     :observacion,
                     :updated_by
-                )"
+                )
+                ON DUPLICATE KEY UPDATE fecha = VALUES(fecha), observacion = VALUES(observacion), updated_by = VALUES(updated_by)"
             );
 
             foreach ($actividades as $item) {
+                if (array_key_exists('cambiada', $item) && empty($item['cambiada'])) {
+                    continue;
+                }
+
+                $fase = trim((string)$item['fase']);
+                $actividad = trim((string)$item['actividad']);
+                if (!isset(self::FASES_ACTIVIDADES[$fase]) || !in_array($actividad, self::FASES_ACTIVIDADES[$fase], true)) {
+                    throw new InvalidArgumentException('La actividad seleccionada no es válida');
+                }
                 $fecha = trim((string)($item['fecha'] ?? ''));
                 if ($fecha !== '' && !$this->fechaValida($fecha)) {
                     throw new InvalidArgumentException('Formato de fecha inválido');
                 }
+                $completada = !empty($item['completada']) || $fecha !== '';
+                if (!$completada) {
+                    $delete->execute([
+                        ':tracking_id' => $trackingId,
+                        ':fase' => $fase,
+                        ':actividad' => $actividad
+                    ]);
+                } else {
+                    $observacion = trim((string)($item['observacion'] ?? ''));
+                    $insert->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
+                    $insert->bindValue(':fase', $fase);
+                    $insert->bindValue(':actividad', $actividad);
+                    $insert->bindValue(':fecha', $fecha !== '' ? $fecha : null, $fecha !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                    $insert->bindValue(':observacion', $observacion !== '' ? $observacion : null, $observacion !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                    $insert->bindValue(':updated_by', $usuarioId, $usuarioId === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+                    $insert->execute();
+                }
 
-                $observacion = trim((string)($item['observacion'] ?? ''));
-
-                $insert->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
-                $insert->bindValue(':fase', trim((string)$item['fase']));
-                $insert->bindValue(':actividad', trim((string)$item['actividad']));
-                $insert->bindValue(':fecha', $fecha !== '' ? $fecha : null, $fecha !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
-                $insert->bindValue(':observacion', $observacion !== '' ? $observacion : null, $observacion !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
-                $insert->bindValue(':updated_by', $usuarioId, $usuarioId === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
-                $insert->execute();
+                $color = trim((string)($item['color'] ?? self::COLOR_ACTIVIDAD_DEFAULT));
+                if ($fecha !== '') {
+                    $color = '#22c55e';
+                }
+                $this->guardarColorActividad($trackingId, $fase, $actividad, $color, $usuarioId);
             }
 
             $this->commit();
