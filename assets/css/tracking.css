@@ -107,6 +107,67 @@
     min-width: 150px;
 }
 
+.tracking-card-header {
+    flex-wrap: nowrap;
+    gap: 16px;
+}
+
+.tracking-filter-container {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.tracking-filter-form {
+    width: 100%;
+}
+
+.tracking-filter-toolbar {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin: 0;
+}
+
+.tracking-filter-toolbar > div {
+    flex: 0 0 auto;
+    width: auto;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.tracking-filter-date { width: 310px !important; }
+.tracking-filter-state { width: 190px !important; }
+.tracking-filter-code-wrap { width: 220px !important; }
+.tracking-filter-ruc-wrap { width: 150px !important; }
+.tracking-filter-submit { width: 100px !important; }
+
+.tracking-filter-date .input-group,
+.tracking-filter-state select,
+.tracking-filter-code,
+.tracking-filter-ruc {
+    width: 100%;
+    min-width: 0;
+}
+
+.tracking-new-button-wrap {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+@media (max-width: 1199.98px) {
+    .tracking-card-header {
+        flex-wrap: wrap;
+    }
+
+    .tracking-filter-container {
+        flex-basis: 100%;
+    }
+
+    .tracking-filter-toolbar {
+        flex-wrap: wrap;
+    }
+}
+
 .act-guardado-por {
     display: inline-block;
     min-width: 100px;
