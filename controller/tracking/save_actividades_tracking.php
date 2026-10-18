@@ -59,9 +59,10 @@ try {
         throw new Exception('Debe registrar al menos una actividad de la fase Inicio');
     }
 
-    $tracking->guardarActividades($trackingId, $actividades);
+    $usuarioId = (int)$_SESSION['session_id'];
+    $tracking->guardarActividades($trackingId, $actividades, $usuarioId);
     foreach ($actividades as $item) {
-        $tracking->guardarColorActividad($trackingId, $item['fase'], $item['actividad'], $item['color']);
+        $tracking->guardarColorActividad($trackingId, $item['fase'], $item['actividad'], $item['color'], $usuarioId);
     }
     $coloresRaw = $_POST['colores'] ?? [];
     if (is_array($coloresRaw)) {
@@ -70,7 +71,7 @@ try {
             $fase = trim((string)($item['fase'] ?? ''));
             $actividad = trim((string)($item['actividad'] ?? ''));
             if ($fase !== '' && $actividad !== '') {
-                $tracking->guardarColorActividad($trackingId, $fase, $actividad, (string)($item['color'] ?? Tracking::COLOR_ACTIVIDAD_DEFAULT));
+                $tracking->guardarColorActividad($trackingId, $fase, $actividad, (string)($item['color'] ?? Tracking::COLOR_ACTIVIDAD_DEFAULT), $usuarioId);
             }
         }
     }
@@ -84,7 +85,8 @@ try {
 
     echo json_encode([
         'success' => true,
-        'registradas' => count($actividades)
+        'registradas' => count($actividades),
+        'guardado_por' => (string)($_SESSION['session_usuario'] ?? '')
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
     http_response_code(400);

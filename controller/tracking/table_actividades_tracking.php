@@ -27,7 +27,7 @@ try {
     echo json_encode([
         'success' => true,
         'fases' => Tracking::FASES_ACTIVIDADES,
-        'actividades' => $tracking->actividadesTracking($trackingId),
+        'actividades' => $tracking->actividadesTracking($trackingId, true),
         'colores' => $tracking->coloresActividadesTracking($trackingId),
         'descripcion' => $tracking->obtenerDescripcion($trackingId),
         'num_oc' => $tracking->obtenerNumOc($trackingId),

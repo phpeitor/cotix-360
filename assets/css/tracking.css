@@ -96,7 +96,16 @@
 }
 
 .tracking-activity-table {
-    min-width: 850px;
+    min-width: 1050px;
+}
+
+.act-guardado-por {
+    display: inline-block;
+    min-width: 100px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .tracking-weight {

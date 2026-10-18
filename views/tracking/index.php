@@ -19,7 +19,7 @@ $fasesActividades = Tracking::FASES_ACTIVIDADES;
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/tracking.css?v=1.4" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/tracking.css?v=1.5" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -191,6 +191,7 @@ $fasesActividades = Tracking::FASES_ACTIVIDADES;
                                                 <th class="text-center">% fase</th>
                                                 <th>Fecha</th>
                                                 <th>Observación</th>
+                                                <th>Guardado por</th>
                                                 <th class="text-center">Color</th>
                                             </tr>
                                         </thead>
@@ -227,6 +228,7 @@ $fasesActividades = Tracking::FASES_ACTIVIDADES;
                                                     <td>
                                                         <input type="text" class="form-control form-control-sm act-obs" maxlength="300" disabled>
                                                     </td>
+                                                    <td><span class="act-guardado-por text-muted">-</span></td>
                                                     <td class="text-center">
                                                         <input type="color" class="act-color" value="#facc15" aria-label="Color de <?= htmlspecialchars($actividad, ENT_QUOTES, 'UTF-8') ?>" title="Seleccionar estado de la actividad">
                                                     </td>
@@ -275,7 +277,7 @@ $fasesActividades = Tracking::FASES_ACTIVIDADES;
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
     <script src="./assets/js/table-gridjs-tracking.js?v=1.7"></script>
-    <script src="./assets/js/tracking-actividades.js?v=1.15"></script>
+    <script src="./assets/js/tracking-actividades.js?v=1.16"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
 </html>

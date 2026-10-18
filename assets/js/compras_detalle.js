@@ -350,15 +350,17 @@ document.addEventListener("DOMContentLoaded", () => {
             if (fields.trackingCode) fields.trackingCode.textContent = json.cod_tracking || "";
             const cerrado = String(json.estado || "").toLowerCase() === "cerrado";
             const guardadas = new Map((json.actividades || []).map(item => [item.actividad, item]));
-            const colores = new Map((json.colores || []).map(item => [`${item.fase}|${item.actividad}`, item.color]));
+            const colores = new Map((json.colores || []).map(item => [`${item.fase}|${item.actividad}`, item]));
 
             fields.trackingActividadesBody?.querySelectorAll("tr[data-actividad]").forEach(row => {
                 const actividad = row.dataset.actividad;
                 const saved = guardadas.get(actividad);
+                const colorInfo = colores.get(`Planificación|${actividad}`);
                 const check = row.querySelector(".compras-tracking-check");
                 const fecha = row.querySelector(".compras-tracking-fecha");
                 const observacion = row.querySelector(".compras-tracking-observacion");
                 const color = row.querySelector(".compras-tracking-color");
+                const guardadoPor = row.querySelector(".compras-tracking-guardado-por");
                 if (!check || !fecha || !observacion || !color) return;
 
                 check.checked = Boolean(saved);
@@ -367,9 +369,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 fecha.disabled = cerrado || !saved;
                 observacion.value = saved?.observacion || "";
                 observacion.disabled = cerrado || !saved;
-                color.value = fecha.value ? "#22c55e" : (colores.get(`Planificación|${actividad}`) || "#facc15");
+                color.value = fecha.value ? "#22c55e" : (colorInfo?.color || "#facc15");
                 color.disabled = cerrado || Boolean(fecha.value);
+                if (guardadoPor) guardadoPor.textContent = saved?.actualizado_por || colorInfo?.actualizado_por || "-";
             });
+            const tableWrap = fields.trackingActividadesBody?.closest(".table-responsive");
+            if (tableWrap) tableWrap.scrollLeft = 0;
 
             if (fields.btnGuardarTrackingActividades) fields.btnGuardarTrackingActividades.disabled = cerrado;
             bootstrap.Modal.getOrCreateInstance(fields.trackingActividadesModal).show();
@@ -400,6 +405,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!res.ok || !json.success) throw new Error(json.message || "No se pudieron guardar las actividades");
 
             alertify.success(json.message || "Actividades sincronizadas con el tracking");
+            fields.trackingActividadesBody?.querySelectorAll(".compras-tracking-guardado-por").forEach(el => {
+                el.textContent = json.guardado_por || "-";
+            });
             bootstrap.Modal.getInstance(fields.trackingActividadesModal)?.hide();
         } catch (error) {
             alertify.error(error.message || "Error al sincronizar las actividades");

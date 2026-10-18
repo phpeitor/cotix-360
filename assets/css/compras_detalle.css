@@ -7,7 +7,25 @@
 }
 
 #comprasTrackingActividadesModal .table {
-    min-width: 900px;
+    min-width: 1120px;
+}
+
+#comprasTrackingActividadesModal .compras-tracking-modal-dialog {
+    width: min(96vw, 1680px);
+    max-width: 1680px;
+}
+
+#comprasTrackingActividadesModal .modal-body {
+    overflow-x: hidden;
+}
+
+#comprasTrackingActividadesModal .table-responsive {
+    width: 100%;
+}
+
+#comprasTrackingActividadesModal .table th:first-child,
+#comprasTrackingActividadesModal .table td:first-child {
+    min-width: 250px;
 }
 
 #comprasTrackingActividadesModal .form-check {
@@ -43,6 +61,10 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 8px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    padding: 10px 12px;
     color: #64748b;
     font-size: .82rem;
 }
@@ -65,6 +87,27 @@
 .compras-tracking-color-dot.color-delay { background: #f97316; }
 .compras-tracking-color-dot.color-scheduled { background: #facc15; }
 .compras-tracking-color-dot.color-completed { background: #22c55e; }
+
+.compras-tracking-guardado-por {
+    display: inline-block;
+    min-width: 110px;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+    #comprasTrackingActividadesModal .compras-tracking-modal-dialog {
+        width: calc(100vw - 1rem);
+        max-width: none;
+        margin: .5rem;
+    }
+
+    .compras-tracking-color-legend {
+        gap: 7px 12px;
+    }
+}
 
 .semaforo-badge {
     display: inline-flex;

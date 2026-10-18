@@ -20,7 +20,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta.css?v=1.4" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/compras_detalle.css?v=2.4" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/compras_detalle.css?v=2.7" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -224,7 +224,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     </div>
 
     <div id="comprasTrackingActividadesModal" class="modal fade" tabindex="-1" aria-labelledby="comprasTrackingActividadesTitle" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-dialog modal-xl compras-tracking-modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header text-bg-primary border-0">
                     <div>
@@ -237,6 +237,13 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                     <div class="alert alert-info py-2">
                         Las actividades y sus fechas se sincronizan con la fase Planificación del tracking asociado.
                     </div>
+                    <div class="compras-tracking-color-legend mb-3" aria-label="Leyenda de colores de las actividades">
+                        <strong>Estado:</strong>
+                        <span><i class="compras-tracking-color-dot color-critical"></i> Retraso crítico</span>
+                        <span><i class="compras-tracking-color-dot color-delay"></i> Retraso leve</span>
+                        <span><i class="compras-tracking-color-dot color-scheduled"></i> Según cronograma</span>
+                        <span><i class="compras-tracking-color-dot color-completed"></i> Completada</span>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
@@ -247,6 +254,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                     <th>Fecha</th>
                                     <th>Observación</th>
                                     <th class="text-center">Color</th>
+                                    <th>Guardado por</th>
                                 </tr>
                             </thead>
                             <tbody id="comprasTrackingActividadesBody">
@@ -256,6 +264,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                     <td><input type="date" class="form-control form-control-sm compras-tracking-fecha" disabled></td>
                                     <td><input type="text" class="form-control form-control-sm compras-tracking-observacion" maxlength="500" placeholder="Observación" disabled></td>
                                     <td class="text-center"><input type="color" class="act-color compras-tracking-color" value="#facc15" aria-label="Color de Compra de Materiales Críticos" title="Seleccionar estado de la actividad"></td>
+                                    <td><span class="compras-tracking-guardado-por text-muted">-</span></td>
                                 </tr>
                                 <tr data-actividad="Compra Parcial de Materiales" data-peso-proyecto="1.00" data-peso-fase="5.00">
                                     <td><div class="form-check"><input class="form-check-input compras-tracking-check" type="checkbox"><label class="form-check-label">Compra Parcial de Materiales</label></div></td>
@@ -263,6 +272,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                     <td><input type="date" class="form-control form-control-sm compras-tracking-fecha" disabled></td>
                                     <td><input type="text" class="form-control form-control-sm compras-tracking-observacion" maxlength="500" placeholder="Observación" disabled></td>
                                     <td class="text-center"><input type="color" class="act-color compras-tracking-color" value="#facc15" aria-label="Color de Compra Parcial de Materiales" title="Seleccionar estado de la actividad"></td>
+                                    <td><span class="compras-tracking-guardado-por text-muted">-</span></td>
                                 </tr>
                                 <tr data-actividad="Llegada de Material Crítico" data-peso-proyecto="2.00" data-peso-fase="10.00">
                                     <td><div class="form-check"><input class="form-check-input compras-tracking-check" type="checkbox"><label class="form-check-label">Llegada de Material Crítico</label></div></td>
@@ -270,6 +280,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                     <td><input type="date" class="form-control form-control-sm compras-tracking-fecha" disabled></td>
                                     <td><input type="text" class="form-control form-control-sm compras-tracking-observacion" maxlength="500" placeholder="Observación" disabled></td>
                                     <td class="text-center"><input type="color" class="act-color compras-tracking-color" value="#facc15" aria-label="Color de Llegada de Material Crítico" title="Seleccionar estado de la actividad"></td>
+                                    <td><span class="compras-tracking-guardado-por text-muted">-</span></td>
                                 </tr>
                                 <tr data-actividad="Final de Compras de Materiales" data-peso-proyecto="5.00" data-peso-fase="25.00">
                                     <td><div class="form-check"><input class="form-check-input compras-tracking-check" type="checkbox"><label class="form-check-label">Final de Compras de Materiales</label></div></td>
@@ -277,6 +288,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                     <td><input type="date" class="form-control form-control-sm compras-tracking-fecha" disabled></td>
                                     <td><input type="text" class="form-control form-control-sm compras-tracking-observacion" maxlength="500" placeholder="Observación" disabled></td>
                                     <td class="text-center"><input type="color" class="act-color compras-tracking-color" value="#facc15" aria-label="Color de Final de Compras de Materiales" title="Seleccionar estado de la actividad"></td>
+                                    <td><span class="compras-tracking-guardado-por text-muted">-</span></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -559,7 +571,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/compras_detalle.js?v=3.2"></script>
+    <script src="./assets/js/compras_detalle.js?v=3.4"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/compras_charts.js?v=2.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>

@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const registradas = json.actividades || [];
-            const colores = new Map((json.colores || []).map(item => [`${item.fase}|${item.actividad}`, item.color]));
+            const colores = new Map((json.colores || []).map(item => [`${item.fase}|${item.actividad}`, item]));
             const cerrado = String(json.tracking?.estado || estado).trim().toLowerCase() === "cerrado";
             if (descEl) descEl.value = json.descripcion || "";
             if (numOcEl) numOcEl.value = json.num_oc || "";
@@ -184,13 +184,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 const key = `${check.dataset.fase}|${check.dataset.actividad}`;
                 const row = check.closest("tr");
                 const colorInput = row?.querySelector("input.act-color");
+                const colorInfo = colores.get(key);
                 if (colorInput) {
-                    const color = colores.get(key) || "#facc15";
+                    const color = colorInfo?.color || "#facc15";
                     colorInput.value = color;
                     colorInput.dataset.savedColor = color;
                     colorInput.disabled = cerrado;
                 }
                 const saved = popup.get(key);
+                const guardadoPor = row?.querySelector(".act-guardado-por");
+                if (guardadoPor) guardadoPor.textContent = saved?.guardado_por || colorInfo?.actualizado_por || "-";
                 if (!saved) return;
 
                 if (!row) return;
@@ -257,6 +260,8 @@ document.addEventListener("DOMContentLoaded", () => {
             colorInput.dataset.savedColor = json.color || colorInput.value;
             colorInput.value = colorInput.dataset.savedColor;
             colorInput.title = "Color guardado";
+            const guardadoPor = colorInput.closest("tr")?.querySelector(".act-guardado-por");
+            if (guardadoPor && json.guardado_por) guardadoPor.textContent = json.guardado_por;
         } catch (error) {
             colorInput.value = colorAnterior;
             alertify.error(error.message || "Error al guardar el color");

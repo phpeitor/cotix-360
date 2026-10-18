@@ -497,8 +497,15 @@ class Tracking
         $stmt->execute();
     }
 
-    public function actividadesTracking(int $trackingId): array
+    public function actividadesTracking(int $trackingId, bool $incluirAuditoria = false): array
     {
+        $camposAuditoria = $incluirAuditoria
+            ? ", COALESCE(pa.usuario, pc.usuario, '-') AS guardado_por"
+            : '';
+        $joinsAuditoria = $incluirAuditoria
+            ? " LEFT JOIN personal pa ON pa.IDPERSONAL = ta.updated_by
+               LEFT JOIN personal pc ON pc.IDPERSONAL = tc.updated_by"
+            : '';
         $sql = "SELECT
                     id,
                     ta.fase,
@@ -506,11 +513,13 @@ class Tracking
                     ta.fecha,
                     ta.observacion,
                     COALESCE(tc.color, '#FACC15') AS color
+                    $camposAuditoria
                 FROM tracking_actividades ta
                 LEFT JOIN tracking_actividad_colores tc
                     ON tc.tracking_id = ta.tracking_id
                    AND tc.fase COLLATE utf8mb4_unicode_ci = ta.fase COLLATE utf8mb4_unicode_ci
                    AND tc.actividad COLLATE utf8mb4_unicode_ci = ta.actividad COLLATE utf8mb4_unicode_ci
+                $joinsAuditoria
                 WHERE ta.tracking_id = :tracking_id
                 ORDER BY ta.id ASC";
 
@@ -524,16 +533,17 @@ class Tracking
     public function coloresActividadesTracking(int $trackingId): array
     {
         $stmt = $this->conn->prepare(
-            "SELECT fase, actividad, color
-             FROM tracking_actividad_colores
-             WHERE tracking_id = :tracking_id"
+            "SELECT tc.fase, tc.actividad, tc.color, p.usuario AS actualizado_por
+             FROM tracking_actividad_colores tc
+             LEFT JOIN personal p ON p.IDPERSONAL = tc.updated_by
+             WHERE tc.tracking_id = :tracking_id"
         );
         $stmt->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
-    public function guardarColorActividad(int $trackingId, string $fase, string $actividad, string $color): string
+    public function guardarColorActividad(int $trackingId, string $fase, string $actividad, string $color, ?int $usuarioId = null): string
     {
         $fase = trim($fase);
         $actividad = trim($actividad);
@@ -561,14 +571,15 @@ class Tracking
         }
 
         $stmt = $this->conn->prepare(
-            "INSERT INTO tracking_actividad_colores (tracking_id, fase, actividad, color)
-             VALUES (:tracking_id, :fase, :actividad, :color)
-             ON DUPLICATE KEY UPDATE color = VALUES(color)"
+            "INSERT INTO tracking_actividad_colores (tracking_id, fase, actividad, color, updated_by)
+             VALUES (:tracking_id, :fase, :actividad, :color, :updated_by)
+             ON DUPLICATE KEY UPDATE color = VALUES(color), updated_by = VALUES(updated_by)"
         );
         $stmt->bindValue(':tracking_id', $trackingId, PDO::PARAM_INT);
         $stmt->bindValue(':fase', $fase);
         $stmt->bindValue(':actividad', $actividad);
         $stmt->bindValue(':color', $color);
+        $stmt->bindValue(':updated_by', $usuarioId, $usuarioId === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
         $stmt->execute();
         return $color;
     }
@@ -591,16 +602,24 @@ class Tracking
     {
         $placeholders = implode(',', array_fill(0, count(self::ACTIVIDADES_COMPRAS), '?'));
         $stmt = $this->conn->prepare(
-            "SELECT fase, actividad, fecha, observacion
-             FROM tracking_actividades
-             WHERE tracking_id = ? AND fase = 'Planificación'
-               AND actividad IN ($placeholders)"
+            "SELECT ta.fase, ta.actividad, ta.fecha, ta.observacion,
+                    COALESCE(tc.color, '#FACC15') AS color,
+                    COALESCE(pa.usuario, pc.usuario, '-') AS actualizado_por
+             FROM tracking_actividades ta
+             LEFT JOIN tracking_actividad_colores tc
+                 ON tc.tracking_id = ta.tracking_id
+                AND tc.fase COLLATE utf8mb4_unicode_ci = ta.fase COLLATE utf8mb4_unicode_ci
+                AND tc.actividad COLLATE utf8mb4_unicode_ci = ta.actividad COLLATE utf8mb4_unicode_ci
+             LEFT JOIN personal pa ON pa.IDPERSONAL = ta.updated_by
+             LEFT JOIN personal pc ON pc.IDPERSONAL = tc.updated_by
+             WHERE ta.tracking_id = ? AND ta.fase = 'Planificación'
+               AND ta.actividad IN ($placeholders)"
         );
         $stmt->execute(array_merge([$trackingId], self::ACTIVIDADES_COMPRAS));
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
-    public function guardarActividadesCompras(int $trackingId, array $actividades): void
+    public function guardarActividadesCompras(int $trackingId, array $actividades, ?int $usuarioId = null): void
     {
         $porNombre = [];
         foreach ($actividades as $actividad) {
@@ -620,9 +639,9 @@ class Tracking
                  WHERE tracking_id = :tracking_id AND fase = 'Planificación' AND actividad = :actividad"
             );
             $insert = $this->conn->prepare(
-                "INSERT INTO tracking_actividades (tracking_id, fase, actividad, fecha, observacion)
-                 VALUES (:tracking_id, 'Planificación', :actividad, :fecha, :observacion)
-                 ON DUPLICATE KEY UPDATE fecha = VALUES(fecha), observacion = VALUES(observacion)"
+                "INSERT INTO tracking_actividades (tracking_id, fase, actividad, fecha, observacion, updated_by)
+                 VALUES (:tracking_id, 'Planificación', :actividad, :fecha, :observacion, :updated_by)
+                 ON DUPLICATE KEY UPDATE fecha = VALUES(fecha), observacion = VALUES(observacion), updated_by = VALUES(updated_by)"
             );
 
             foreach (self::ACTIVIDADES_COMPRAS as $nombre) {
@@ -644,6 +663,7 @@ class Tracking
                     $insert->bindValue(':actividad', $nombre, PDO::PARAM_STR);
                     $insert->bindValue(':fecha', $fecha !== '' ? $fecha : null, $fecha !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
                     $insert->bindValue(':observacion', $observacion !== '' ? $observacion : null, $observacion !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                    $insert->bindValue(':updated_by', $usuarioId, $usuarioId === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
                     $insert->execute();
                 }
 
@@ -651,7 +671,7 @@ class Tracking
                 if ($fecha !== '') {
                     $color = '#22c55e';
                 }
-                $this->guardarColorActividad($trackingId, 'Planificación', $nombre, $color);
+                $this->guardarColorActividad($trackingId, 'Planificación', $nombre, $color, $usuarioId);
             }
             $this->commit();
         } catch (Throwable $e) {
@@ -660,7 +680,7 @@ class Tracking
         }
     }
 
-    public function guardarActividades(int $trackingId, array $actividades): void
+    public function guardarActividades(int $trackingId, array $actividades, ?int $usuarioId = null): void
     {
         $actividades = array_values(array_filter($actividades, static function ($item) {
             $item = is_array($item) ? $item : [];
@@ -684,13 +704,15 @@ class Tracking
                     fase,
                     actividad,
                     fecha,
-                    observacion
+                    observacion,
+                    updated_by
                 ) VALUES (
                     :tracking_id,
                     :fase,
                     :actividad,
                     :fecha,
-                    :observacion
+                    :observacion,
+                    :updated_by
                 )"
             );
 
@@ -707,6 +729,7 @@ class Tracking
                 $insert->bindValue(':actividad', trim((string)$item['actividad']));
                 $insert->bindValue(':fecha', $fecha !== '' ? $fecha : null, $fecha !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
                 $insert->bindValue(':observacion', $observacion !== '' ? $observacion : null, $observacion !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
+                $insert->bindValue(':updated_by', $usuarioId, $usuarioId === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
                 $insert->execute();
             }
 

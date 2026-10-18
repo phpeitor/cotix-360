@@ -32,10 +32,15 @@ try {
         $trackingId,
         (string)($_POST['fase'] ?? ''),
         (string)($_POST['actividad'] ?? ''),
-        (string)($_POST['color'] ?? '')
+        (string)($_POST['color'] ?? ''),
+        (int)$_SESSION['session_id']
     );
 
-    echo json_encode(['success' => true, 'color' => $color], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    echo json_encode([
+        'success' => true,
+        'color' => $color,
+        'guardado_por' => (string)($_SESSION['session_usuario'] ?? '')
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
     http_response_code(400);
     echo json_encode([

@@ -48,11 +48,12 @@ try {
         if (!is_array($actividades)) {
             throw new InvalidArgumentException('Datos de actividades inválidos');
         }
-        $tracking->guardarActividadesCompras((int)$trackingRow['id'], $actividades);
+        $tracking->guardarActividadesCompras((int)$trackingRow['id'], $actividades, (int)$_SESSION['session_id']);
 
         echo json_encode([
             'success' => true,
-            'message' => 'Actividades de compras sincronizadas con el tracking'
+            'message' => 'Actividades de compras sincronizadas con el tracking',
+            'guardado_por' => (string)($_SESSION['session_usuario'] ?? '')
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         exit;
     }
