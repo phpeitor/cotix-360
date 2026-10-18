@@ -393,20 +393,46 @@ class Tracking
     public function trackingPorCodigoPublico(string $codPublico): ?array
     {
         $sql = "SELECT
-                    t.id,
-                    t.id_receta,
-                    t.nombre,
-                    t.descripcion,
-                    t.num_oc,
-                    t.razon_social_empresa,
-                    t.ruc,
-                    t.cod_tracking,
-                    t.cod_publico,
-                    t.created_at,
-                    t.updated_at,
-                    CASE WHEN t.id_receta IS NULL THEN 0 ELSE 1 END AS origen_receta
-                FROM trackings t
-                WHERE t.cod_publico = :cod
+                    publico.*,
+                    CURRENT_TIMESTAMP <= publico.public_window_until AS public_window_active
+                FROM (
+                    SELECT
+                        t.id,
+                        t.id_receta,
+                        t.nombre,
+                        t.descripcion,
+                        t.num_oc,
+                        t.razon_social_empresa,
+                        t.ruc,
+                        t.cod_tracking,
+                        t.cod_publico,
+                        t.estado,
+                        t.created_at,
+                        t.updated_at,
+                        CASE WHEN t.id_receta IS NULL THEN 0 ELSE 1 END AS origen_receta,
+                        CASE
+                            WHEN LOWER(TRIM(COALESCE(t.estado, ''))) = 'cerrado' THEN
+                                DATE_ADD(COALESCE(t.updated_at, t.created_at), INTERVAL 3 MONTH)
+                            ELSE
+                                DATE_ADD(
+                                    GREATEST(
+                                        COALESCE((
+                                            SELECT MAX(COALESCE(ta.updated_at, ta.created_at))
+                                            FROM tracking_actividades ta
+                                            WHERE ta.tracking_id = t.id
+                                        ), t.created_at),
+                                        COALESCE((
+                                            SELECT MAX(tc.updated_at)
+                                            FROM tracking_actividad_colores tc
+                                            WHERE tc.tracking_id = t.id
+                                        ), t.created_at)
+                                    ),
+                                    INTERVAL 3 MONTH
+                                )
+                        END AS public_window_until
+                    FROM trackings t
+                    WHERE t.cod_publico = :cod
+                ) publico
                 LIMIT 1";
 
         $stmt = $this->conn->prepare($sql);
@@ -422,6 +448,11 @@ class Tracking
         $tracking = $this->trackingPorCodigoPublico($codPublico);
         if ($tracking === null) {
             return null;
+        }
+
+        if (!(bool)$tracking['public_window_active']) {
+            $tracking['actividades'] = [];
+            return $tracking;
         }
 
         $tracking['actividades'] = $this->actividadesTracking((int)$tracking['id']);

@@ -59,7 +59,16 @@ try {
         jsonResponse(404, ['ok' => false, 'message' => 'No se encontró un tracking con el código proporcionado']);
     }
 
+    if ((int)($data['public_window_active'] ?? 0) !== 1) {
+        jsonResponse(410, [
+            'ok' => false,
+            'message' => 'La ventana pública de este tracking venció después de 3 meses sin actividad o desde el cierre del proyecto',
+            'expires_at' => $data['public_window_until'] ?? null
+        ]);
+    }
+
     $data['origen'] = (int)$data['origen_receta'] === 1 ? 'receta' : 'manual';
+    unset($data['public_window_active']);
 
     jsonResponse(200, [
         'ok' => true,
