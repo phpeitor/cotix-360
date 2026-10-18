@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../model/usuario.php';
+require_once __DIR__ . '/../config/permisos.php';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -25,6 +26,12 @@ try {
         'cargo'     => $_POST['cargo'] ?? '',
         'estado'    => isset($_POST['estado']) ? 1 : 0,
     ];
+
+    if (!cargoPermisoExiste(trim((string)$data['cargo']))) {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'message' => 'Selecciona un cargo configurado en Permisos']);
+        exit;
+    }
 
     $usuario = new Usuario();
 

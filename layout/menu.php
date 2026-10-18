@@ -38,6 +38,15 @@
                 </a>
             </li>
 
+            <?php if (function_exists('tieneAcceso') && tieneAcceso('permisos.php')): ?>
+                <li class="side-nav-item">
+                    <a href="permisos.php" class="side-nav-link">
+                        <span class="menu-icon"><i class="ti ti-key"></i></span>
+                        <span class="menu-text"> Permisos </span>
+                    </a>
+                </li>
+            <?php endif; ?>
+
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarEcommerce" aria-expanded="false" aria-controls="sidebarEcommerce" class="side-nav-link">
                     <span class="menu-icon"><i class="ti ti-basket-filled"></i></span>

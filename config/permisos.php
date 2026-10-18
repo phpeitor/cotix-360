@@ -1,4 +1,20 @@
 <?php
+function obtenerRolesPermisos(): array
+{
+    $path = __DIR__ . '/permisos.json';
+    if (!is_file($path) || !is_readable($path)) {
+        return [];
+    }
+
+    $roles = json_decode((string)file_get_contents($path), true);
+    return is_array($roles) ? $roles : [];
+}
+
+function cargoPermisoExiste(string $cargo): bool
+{
+    return array_key_exists($cargo, obtenerRolesPermisos());
+}
+
 function tieneAcceso(string $archivo): bool
 {
     if (!isset($_SESSION['session_cargo'])) {
@@ -7,10 +23,7 @@ function tieneAcceso(string $archivo): bool
 
     $rol = (string)$_SESSION['session_cargo'];
 
-    $permisos = json_decode(
-        file_get_contents(__DIR__ . '/permisos.json'),
-        true
-    );
+    $permisos = obtenerRolesPermisos();
 
     if (!isset($permisos[$rol])) {
         return false;

@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once ROOT . '/controller/check_session.php';
+$rolesCargo = obtenerRolesPermisos();
+ksort($rolesCargo, SORT_NUMERIC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -91,12 +93,9 @@ require_once ROOT . '/controller/check_session.php';
                                             <label class="form-label">Cargo</label>
                                             <select id="cargo" name="cargo" class="form-select" required="">
                                                 <option value="">-- Seleccione --</option>
-                                                <option value="1">Admin</option>
-                                                <option value="2">Gestor</option>
-                                                <option value="3">Supervisor</option>
-                                                <option value="4">Tecnico</option>
-                                                <option value="5">Compras</option>
-                                                <option value="6">Ingeniería</option>
+                                                <?php foreach ($rolesCargo as $idRol => $rol): ?>
+                                                    <option value="<?= htmlspecialchars((string)$idRol, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string)($rol['nombre'] ?? ('Rol ' . $idRol)), ENT_QUOTES, 'UTF-8') ?></option>
+                                                <?php endforeach; ?>
                                             </select>
                                             <div class="invalid-feedback">
                                                 Please select an option.

@@ -1,80 +1,82 @@
 {
-  "1": {
-    "nombre": "Admin",
-    "acceso": "*"
-  },
-  "2": {
-    "nombre": "Gestor",
-    "acceso": [
-      "home.php",
-      "cotizaciones.php",
-      "form_cotizacion.php",
-      "pdf_cotizacion.php",
-      "calculo.php"
-    ]
-  },
-  "3": {
-    "nombre": "Supervisor",
-    "acceso": [
-      "home.php",
-      "cotizaciones.php",
-      "form_cotizacion.php",
-      "pdf_cotizacion.php",
-      "receta.php",
-      "receta_list.php",
-      "receta_form.php",
-      "items_receta.php",
-      "pdf_receta.php",
-      "add_item_receta.php",
-      "upd_item_receta.php",
-      "tracking.php",
-      "tracking_crear.php"
-    ]
-  },
-"4": {
-    "nombre": "Tecnico",
-    "acceso": [
-      "home.php",
-      "receta.php",
-      "receta_list.php",
-      "receta_form.php",
-      "items_receta.php",
-      "pdf_receta.php",
-      "add_item_receta.php",
-      "upd_item_receta.php"
-    ]
-  },
-  "5": {
-    "nombre": "Compras",
-    "acceso": [
-      "home.php",
-      "items_receta.php",
-      "receta_item_categorias.php",
-      "add_item_receta.php",
-      "upd_item_receta.php",
-      "compras.php",
-      "compras_detalle.php",
-      "receta_form.php",
-      "pdf_receta.php",
-      "cotizaciones.php",
-      "form_cotizacion.php",
-      "pdf_cotizacion.php",
-      "calculo.php"
-    ]
-  },
-  "6": {
-    "nombre": "Ingeniería",
-    "acceso": [
-      "home.php",
-      "ingenieria.php",
-      "ingenieria_form.php",
-      "items_receta.php",
-      "add_item_receta.php",
-      "upd_item_receta.php",
-      "tracking.php",
-      "tracking_crear.php",
-      "receta_form.php",
-      "pdf_receta.php"
-    ]
-  }
+    "1": {
+        "nombre": "Admin",
+        "acceso": "*"
+    },
+    "2": {
+        "nombre": "Gestor",
+        "acceso": [
+            "calculo.php",
+            "cotizaciones.php",
+            "form_cotizacion.php",
+            "home.php",
+            "pdf_cotizacion.php"
+        ]
+    },
+    "3": {
+        "nombre": "Supervisor",
+        "acceso": [
+            "add_item_receta.php",
+            "cotizaciones.php",
+            "form_cotizacion.php",
+            "home.php",
+            "items_receta.php",
+            "pdf_cotizacion.php",
+            "pdf_receta.php",
+            "receta.php",
+            "receta_form.php",
+            "receta_list.php",
+            "tracking.php",
+            "tracking_crear.php",
+            "upd_item_receta.php"
+        ]
+    },
+    "4": {
+        "nombre": "Tecnico",
+        "acceso": [
+            "add_item_receta.php",
+            "home.php",
+            "items_receta.php",
+            "pdf_receta.php",
+            "receta.php",
+            "receta_form.php",
+            "receta_list.php",
+            "tracking.php",
+            "tracking_crear.php",
+            "upd_item_receta.php"
+        ]
+    },
+    "5": {
+        "nombre": "Compras",
+        "acceso": [
+            "add_item_receta.php",
+            "calculo.php",
+            "compras.php",
+            "compras_detalle.php",
+            "cotizaciones.php",
+            "form_cotizacion.php",
+            "home.php",
+            "items_receta.php",
+            "pdf_cotizacion.php",
+            "pdf_receta.php",
+            "receta_form.php",
+            "receta_item_categorias.php",
+            "upd_item_receta.php"
+        ]
+    },
+    "6": {
+        "nombre": "Ingeniería",
+        "acceso": [
+            "add_item_receta.php",
+            "home.php",
+            "ingenieria.php",
+            "ingenieria_form.php",
+            "items_receta.php",
+            "pdf_receta.php",
+            "receta_form.php",
+            "tracking.php",
+            "tracking_crear.php",
+            "upd_item_receta.php"
+        ]
+    }
 }
