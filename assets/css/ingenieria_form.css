@@ -1,0 +1,62 @@
+.ingenieria-detalle-table {
+    table-layout: auto;
+}
+
+.ingenieria-detalle-table td,
+.ingenieria-detalle-table th {
+    white-space: normal;
+    vertical-align: middle;
+}
+
+.ingenieria-detalle-table .item-description {
+    line-height: 1.35;
+}
+
+.ingenieria-receta-name-input {
+    max-width: 400px;
+}
+
+.ingenieria-tipo-cambio-input {
+    display: inline-block;
+    width: 110px;
+    margin-left: 8px;
+}
+
+.ingenieria-history-date-col,
+.ingenieria-history-user-col,
+.ingenieria-history-action-col {
+    width: 150px;
+}
+
+.ingenieria-search-dialog {
+    max-width: 840px;
+}
+
+@media (max-width: 991.98px) {
+    .ingenieria-detalle-table td,
+    .ingenieria-detalle-table th {
+        min-width: 140px;
+    }
+}
+
+.skeleton-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    background: #e2e8f0;
+}
+
+.skeleton-item::after {
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .6), transparent);
+    animation: skeleton-shimmer 1.2s infinite;
+    content: "";
+}
+
+@keyframes skeleton-shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}

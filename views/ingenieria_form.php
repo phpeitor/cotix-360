@@ -20,52 +20,9 @@ $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), 
     <link href="./assets/css/branding.css?v=1.0" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta.css?v=1.4" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/ingenieria_form.css?v=1.0" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
-    <style>
-        .ingenieria-detalle-table {
-            table-layout: auto;
-        }
-
-        .ingenieria-detalle-table td,
-        .ingenieria-detalle-table th {
-            white-space: normal;
-            vertical-align: middle;
-        }
-
-        .ingenieria-detalle-table .item-description {
-            line-height: 1.35;
-        }
-
-        @media (max-width: 991.98px) {
-            .ingenieria-detalle-table td,
-            .ingenieria-detalle-table th {
-                min-width: 140px;
-            }
-        }
-
-        .skeleton-item {
-            position: relative;
-            overflow: hidden;
-            background: #e2e8f0;
-            border-radius: 4px;
-        }
-
-        .skeleton-item::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            transform: translateX(-100%);
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-            animation: skeleton-shimmer 1.2s infinite;
-        }
-
-        @keyframes skeleton-shimmer {
-            100% {
-                transform: translateX(100%);
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -100,7 +57,7 @@ $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), 
                                         <p class="text-muted fs-14 mb-0" id="receta_nombre_display"></p>
                                         <button type="button" class="btn btn-sm btn-outline-secondary" id="btnEditRecetaNombre" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar nombre"><i class="ti ti-edit"></i></button>
                                     </div>
-                                    <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none" style="max-width:400px;" placeholder="Nombre de la receta">
+                                    <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none ingenieria-receta-name-input" placeholder="Nombre de la receta">
                                 </div>
 
                                 <div class="row g-3 flex-grow-1 justify-content-center receta-meta-row">
@@ -164,7 +121,7 @@ $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), 
                                                     <span class="tipo-cambio-label">Tipo de Cambio SUNAT (Venta)</span>
                                                     <span id="tipo_cambio_sunat" class="external-event fc-event bg-warning-subtle text-warning-emphasis tipo-cambio-pulse">0.000</span>
                                                     <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btnEditTipoCambio" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar tipo de cambio"><i class="ti ti-edit"></i></button>
-                                                    <input type="number" step="0.001" id="tipo_cambio_input" class="form-control form-control-sm d-none" style="width:110px;display:inline-block;margin-left:8px;">
+                                                    <input type="number" step="0.001" id="tipo_cambio_input" class="form-control form-control-sm d-none ingenieria-tipo-cambio-input">
                                                 </p>
                                             </div>
                                             <div class="col-lg-3 col-12">
@@ -216,9 +173,9 @@ $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), 
                                     <table class="table table-sm table-hover align-middle mb-0">
                                         <thead class="table-light">
                                             <tr>
-                                                <th style="width: 150px;">Fecha</th>
-                                                <th style="width: 150px;">Usuario</th>
-                                                <th style="width: 150px;">Acción</th>
+                                                <th class="ingenieria-history-date-col">Fecha</th>
+                                                <th class="ingenieria-history-user-col">Usuario</th>
+                                                <th class="ingenieria-history-action-col">Acción</th>
                                                 <th>Detalle</th>
                                             </tr>
                                         </thead>
@@ -242,7 +199,7 @@ $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), 
     </div>
 
     <div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="max-width: 840px;">
+        <div class="modal-dialog ingenieria-search-dialog">
             <div class="modal-content">
                 <div class="modal-header text-bg-info border-0">
                     <h4 class="modal-title" id="info-header-modalLabel">Buscar item para agregar a la receta</h4>
