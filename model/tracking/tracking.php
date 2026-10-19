@@ -495,10 +495,16 @@ class Tracking
 
         if (!(bool)$tracking['public_window_active']) {
             $tracking['actividades'] = [];
+            $tracking['actividades_estado'] = [];
             return $tracking;
         }
 
-        $tracking['actividades'] = $this->actividadesTracking((int)$tracking['id']);
+        $actividadesEstado = $this->actividadesTrackingPublicas((int)$tracking['id']);
+        $tracking['actividades_estado'] = $actividadesEstado;
+        $tracking['actividades'] = array_values(array_filter(
+            $actividadesEstado,
+            static fn(array $actividad): bool => $actividad['completada']
+        ));
 
         return $tracking;
     }
@@ -602,6 +608,41 @@ class Tracking
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function actividadesTrackingPublicas(int $trackingId): array
+    {
+        $registradas = [];
+        foreach ($this->actividadesTracking($trackingId) as $actividad) {
+            $registradas[$actividad['fase'] . '|' . $actividad['actividad']] = $actividad;
+        }
+
+        $colores = [];
+        foreach ($this->coloresActividadesTracking($trackingId) as $estadoColor) {
+            $colores[$estadoColor['fase'] . '|' . $estadoColor['actividad']] = $estadoColor['color'];
+        }
+
+        $resultado = [];
+        foreach (self::FASES_ACTIVIDADES as $fase => $actividadesFase) {
+            foreach ($actividadesFase as $nombre) {
+                $key = $fase . '|' . $nombre;
+                $guardada = $registradas[$key] ?? null;
+                $completada = $guardada !== null;
+                $resultado[] = [
+                    'fase' => $fase,
+                    'actividad' => $nombre,
+                    'completada' => $completada,
+                    'estado' => $completada ? 'completada' : 'pendiente',
+                    'fecha' => $completada ? ($guardada['fecha'] ?? null) : null,
+                    'observacion' => $completada ? ($guardada['observacion'] ?? null) : null,
+                    'color' => $guardada['color'] ?? $colores[$key] ?? self::COLOR_ACTIVIDAD_DEFAULT,
+                    'peso_proyecto' => (float)(self::PESOS_PROYECTO[$fase][$nombre] ?? 0),
+                    'peso_fase' => (float)(self::PESOS_FASE[$fase][$nombre] ?? 0)
+                ];
+            }
+        }
+
+        return $resultado;
     }
 
     public function coloresActividadesTracking(int $trackingId): array

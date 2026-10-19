@@ -2,12 +2,12 @@
     <div class="d-flex align-items-center gap-2">
         <a href="index.html" class="logo">
             <span class="logo-light">
-                <span class="logo-lg"><img src="./assets/images/logo.png" alt="logo"></span>
+                <span class="logo-lg"><img src="./assets/resources/phpeitor-light.svg" alt="logo"></span>
                 <span class="logo-sm"><img src="./assets/images/logo-sm.png" alt="small logo"></span>
             </span>
 
             <span class="logo-dark">
-                <span class="logo-lg"><img src="./assets/images/logo-dark.png" alt="dark logo"></span>
+                <span class="logo-lg"><img src="./assets/resources/phpeitor-dark.svg" alt="dark logo"></span>
                 <span class="logo-sm"><img src="./assets/images/logo-sm.png" alt="small logo"></span>
             </span>
         </a>
