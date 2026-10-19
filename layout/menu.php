@@ -1,12 +1,12 @@
 <div class="sidenav-menu">
     <a href="index.php" class="logo">
         <span class="logo-light">
-            <span class="logo-lg"><img src="./assets/resources/phpeitor-light.svg" alt="logo"></span>
+            <span class="logo-lg"><img src="./assets/resources/phpeitor-light.svg?v=2.0" alt="Cotix360"></span>
             <span class="logo-sm text-center"><img src="./assets/images/logo-sm.png" alt="small logo"></span>
         </span>
 
         <span class="logo-dark">
-            <span class="logo-lg"><img src="./assets/resources/phpeitor-dark.svg" alt="dark logo"></span>
+            <span class="logo-lg"><img src="./assets/resources/phpeitor-dark.svg?v=2.0" alt="Cotix360"></span>
             <span class="logo-sm text-center"><img src="./assets/images/logo-sm.png" alt="small logo"></span>
         </span>
     </a>

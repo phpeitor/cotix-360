@@ -16,6 +16,7 @@ $cargo = (int)($_SESSION['session_cargo'] ?? 0);
     <script src="./assets/js/config.js"></script>
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
+    <link href="./assets/css/branding.css?v=1.0" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta_list.css?v=1.0" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>

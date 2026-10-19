@@ -1,0 +1,90 @@
+.sidenav-menu > a.logo {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    min-height: 68px;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+    padding: 10px 18px;
+    box-sizing: border-box;
+}
+
+.sidenav-menu > a.logo .logo-light,
+.sidenav-menu > a.logo .logo-dark {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+}
+
+.sidenav-menu > a.logo .logo-lg {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+}
+
+.sidenav-menu > a.logo .logo-lg img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 54px;
+    object-fit: contain;
+    object-position: left center;
+}
+
+.sidenav-menu > a.logo .logo-sm img {
+    display: block;
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+}
+
+html[data-menu-color="light"] .sidenav-menu > a.logo .logo-light {
+    display: none !important;
+}
+
+html[data-menu-color="light"] .sidenav-menu > a.logo .logo-dark {
+    display: block !important;
+}
+
+html:not([data-menu-color="light"]) .sidenav-menu > a.logo .logo-light {
+    display: block !important;
+}
+
+html:not([data-menu-color="light"]) .sidenav-menu > a.logo .logo-dark {
+    display: none !important;
+}
+
+html[data-topbar-color="light"] .topbar-menu > div > a.logo .logo-light {
+    display: none !important;
+}
+
+html[data-topbar-color="light"] .topbar-menu > div > a.logo .logo-dark {
+    display: block !important;
+}
+
+html:not([data-topbar-color="light"]) .topbar-menu > div > a.logo .logo-light {
+    display: block !important;
+}
+
+html:not([data-topbar-color="light"]) .topbar-menu > div > a.logo .logo-dark {
+    display: none !important;
+}
+
+html[data-sidenav-size="condensed"] .sidenav-menu > a.logo,
+html[data-sidenav-size="sm-hover"] .sidenav-menu > a.logo {
+    justify-content: center;
+    padding-right: 8px;
+    padding-left: 8px;
+}
+
+html[data-sidenav-size="condensed"] .sidenav-menu > a.logo .logo-lg,
+html[data-sidenav-size="sm-hover"] .sidenav-menu > a.logo .logo-lg {
+    display: none !important;
+}
+
+html[data-sidenav-size="condensed"] .sidenav-menu > a.logo .logo-sm,
+html[data-sidenav-size="sm-hover"] .sidenav-menu > a.logo .logo-sm {
+    display: block !important;
+}
