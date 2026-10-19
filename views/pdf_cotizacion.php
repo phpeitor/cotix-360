@@ -6,6 +6,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     @session_start();
 }
 use Dompdf\Dompdf;
+use Dompdf\Options;
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once ROOT . '/model/cotizacion.php';
 require_once ROOT . '/model/item.php';
@@ -157,35 +158,7 @@ ob_start();
 <head>
     <meta charset="UTF-8">
     <title>PDF <?= md5($cotizacion['id']) ?></title>
-    <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 10px; }
-        h2 { margin-bottom: 5px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ccc; padding: 4px; }
-        th { background: #f2f2f2; }
-        .right { text-align: right; }
-        .center { text-align: center; }
-        .watermark {
-            position: fixed;
-            top: 45%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 80px;
-            font-weight: bold;
-            color: rgba(0,0,0,0.08);
-            z-index: -1;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-
-        .watermark.aprobada {
-            color: rgba(25, 135, 84, 0.15); 
-        }
-
-        .watermark.anulada {
-            color: rgba(220, 53, 69, 0.15); 
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/pdf_cotizacion.css">
 </head>
 <body>
 <?php
@@ -205,10 +178,10 @@ ob_start();
     </div>
 <?php endif; ?>
 
-<h2 style="text-align:center; margin-bottom:4px;">
+<h2 class="pdf-cotizacion-title">
     COTIZACION COMERCIAL
 </h2>
-<p style="text-align:center; font-size:11px; margin-top:0;">
+<p class="pdf-cotizacion-notice">
     Documento informativo – No constituye factura
 </p>
 <hr>
@@ -303,7 +276,10 @@ if (!class_exists('\Dompdf\Dompdf')) {
 //echo $html;
 //exit;
 try {
-    $pdf = new Dompdf();
+    $options = new Options();
+    $options->setChroot(ROOT);
+    $pdf = new Dompdf($options);
+    $pdf->setBasePath(ROOT . DIRECTORY_SEPARATOR);
     $pdf->loadHtml($html);
     $pdf->setPaper('A4', 'portrait');
     $pdf->render();

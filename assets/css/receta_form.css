@@ -1,0 +1,51 @@
+.precio-cero-label {
+    display: inline-flex;
+    border-radius: 999px;
+    padding: .15rem .45rem;
+    font-weight: 700;
+    animation: precioCeroPulse 1s ease-in-out infinite;
+}
+
+@keyframes precioCeroPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(250, 92, 124, .55);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(250, 92, 124, 0);
+        transform: scale(1.04);
+    }
+}
+
+.skeleton-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    background: #e2e8f0;
+}
+
+.skeleton-item::after {
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .6), transparent);
+    animation: skeleton-shimmer 1.2s infinite;
+    content: "";
+}
+
+@keyframes skeleton-shimmer {
+    100% { transform: translateX(100%); }
+}
+
+.precio-manual-icon { cursor: help; }
+.precio-manual-icon i { transition: transform .2s ease; }
+.precio-manual-icon:hover i { transform: scale(1.2); }
+
+.receta-nombre-input { max-width: 400px; }
+.receta-tipo-cambio-input {
+    display: inline-block;
+    width: 110px;
+    margin-left: 8px;
+}
+.receta-datos-comerciales-unidad { max-width: 120px; }
+.receta-modal-dialog-wide { max-width: 840px; }

@@ -24,25 +24,10 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/branding.css?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/items_receta.css?v=1.0" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
-    <style>
-        .item-receta-nombre {
-            max-width: 100%;
-        }
-
-        .item-receta-descripcion {
-            max-height: 72px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding-right: 4px;
-            line-height: 1.35;
-            scrollbar-width: thin;
-            word-break: break-word;
-            white-space: normal;
-        }
-    </style>
 </head>
 
 <body>

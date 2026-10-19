@@ -4,6 +4,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     @session_start();
 }
 use Dompdf\Dompdf;
+use Dompdf\Options;
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once ROOT . '/model/receta.php';
 require_once ROOT . '/model/item.php';
@@ -209,17 +210,7 @@ ob_start();
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title><?= $esOferta ? 'Oferta PDF' : 'Receta PDF' ?></title>
-<?php
-    // Cargar archivo CSS externo para Dompdf
-    $cssPath = ROOT . '/assets/css/pdf_receta.css';
-    $cssContent = '';
-    if (file_exists($cssPath) && is_readable($cssPath)) {
-        $cssContent = file_get_contents($cssPath);
-    }
-?>
-    <style>
-    <?= $cssContent ?>
-    </style>
+    <link rel="stylesheet" href="assets/css/pdf_receta.css">
 </head>
 <body class="<?= $esOferta ? 'offer-pdf' : 'recipe-pdf' ?>">
 <?php
@@ -350,9 +341,9 @@ ob_start();
             <tr>
                 <td class="hero-left">
                     <?php if ($logoDataUri): ?>
-                        <img src="<?= $logoDataUri ?>" alt="Logo" class="hero-logo" style="width: 45mm; height: auto;" />
+                        <img src="<?= $logoDataUri ?>" alt="Logo" class="hero-logo" />
                     <?php else: ?>
-                        <div style="width: 45mm; height: 13mm; background: #f0f0f0;"></div>
+                        <div class="hero-logo-placeholder"></div>
                     <?php endif; ?>
                 </td>
                 <td class="hero-right">
@@ -363,7 +354,7 @@ ob_start();
 
         <table class="panels">
             <tr>
-                <td class="panel" style="padding-right: 6mm;">
+                <td class="panel panel-receta">
                     <div class="panel-title">RECETA</div>
                     <div class="panel-name"><?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Sin responsable') ?></div>
                     <p class="panel-line">Usuario registro: <?= escaparPdf($usuarioRegistro !== '' ? $usuarioRegistro : 'Desconocido') ?></p>
@@ -373,7 +364,7 @@ ob_start();
                         <p class="panel-line">Fecha aprobación: <?= escaparPdf($fechaAprobacion) ?></p>
                     <?php endif; ?>
                 </td>
-                <td class="panel" style="padding-left: 6mm; text-align: right;">
+                <td class="panel panel-company">
                     <div class="panel-title">MG INDUSOL</div>
                     <p class="panel-line"><?= escaparPdf($empresaLinea1) ?></p>
                     <p class="panel-line"><?= escaparPdf($empresaLinea2) ?></p>
@@ -396,11 +387,11 @@ $tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['clie
         <table class="offer-excel-table">
             <thead>
                 <tr>
-                    <th style="width:45%;">DESCRIPCION</th>
-                    <th style="width:13%;">MARCA</th>
-                    <th style="width:17%;">TIEMPO DE ENTREGA</th>
-                    <th style="width:8%;">CANT.</th>
-                    <th style="width:17%;">VALOR TOTAL</th>
+                    <th class="offer-excel-description-col">DESCRIPCION</th>
+                    <th class="offer-excel-brand-col">MARCA</th>
+                    <th class="offer-excel-delivery-col">TIEMPO DE ENTREGA</th>
+                    <th class="offer-excel-quantity-col">CANT.</th>
+                    <th class="offer-excel-total-col">VALOR TOTAL</th>
                 </tr>
             </thead>
             <tbody>
@@ -449,10 +440,10 @@ $tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['clie
         <table class="section-table">
             <thead>
                 <tr class="section-head">
-                    <th style="width: <?= $esTecnico ? '88%' : '68%'; ?>;">DESCRIPCIÓN</th>
-                    <th style="width: 12%;">CANT.</th>
+                    <th class="<?= $esTecnico ? 'section-description-technician' : 'section-description-standard' ?>">DESCRIPCIÓN</th>
+                    <th class="section-quantity-col">CANT.</th>
                     <?php if (!$esTecnico): ?>
-                        <th style="width: 10%;">PRECIO $</th>
+                        <th class="section-price-col">PRECIO $</th>
                     <?php endif; ?>
                 </tr>
             </thead>
@@ -509,9 +500,9 @@ $tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['clie
         ?>
         <table class="offer-summary-table">
             <tr>
-                <td class="offer-green" style="width: 70%;">Observaciones:</td>
-                <td style="width: 15%;"><strong>SUBTOTAL</strong></td>
-                <td class="money" style="width: 15%;">$ <?= number_format($totalesOfertaComercial['subtotal'], 2) ?></td>
+                <td class="offer-green offer-summary-observations-label">Observaciones:</td>
+                <td class="offer-summary-subtotal-label"><strong>SUBTOTAL</strong></td>
+                <td class="money offer-summary-subtotal-value">$ <?= number_format($totalesOfertaComercial['subtotal'], 2) ?></td>
             </tr>
             <tr>
                 <td rowspan="2" class="offer-observations-cell"><?= $observacionesComercialesOferta !== '' ? nl2br(escaparPdf($observacionesComercialesOferta)) : '' ?></td>
@@ -547,10 +538,10 @@ $tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['clie
         <table class="offer-conditions-table">
             <?php foreach ($condicionesRowsOferta as [$label, $value, $extra]): ?>
                 <tr>
-                    <td style="width: 22%;"><strong><?= escaparPdf($label) ?></strong></td>
-                    <td style="width: 2%;">:</td>
-                    <td style="width: 46%;"><?= escaparPdf($value) ?></td>
-                    <td style="width: 30%;"><?= escaparPdf($extra) ?></td>
+                    <td class="offer-condition-label"><strong><?= escaparPdf($label) ?></strong></td>
+                    <td class="offer-condition-separator">:</td>
+                    <td class="offer-condition-value"><?= escaparPdf($value) ?></td>
+                    <td class="offer-condition-extra"><?= escaparPdf($extra) ?></td>
                 </tr>
             <?php endforeach; ?>
         </table>
@@ -563,21 +554,21 @@ $tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['clie
             <?php endforeach; ?>
         </div>
     <?php else: ?>
-    <table style="width: 100%; margin-top: 2mm;">
+    <table class="recipe-totals-table">
         <?php if ($esTecnico): ?>
             <tr>
-                <td style="background: transparent; padding: 2mm 3mm; border-bottom: 0.35mm solid #4f4f4f;">
+                <td class="recipe-total-cell recipe-total-full">
                     <strong>Total Items:</strong> <?= $totalItems ?>
                 </td>
             </tr>
         <?php else: ?>
             <tr>
-                <td style="width: 50%; background: transparent; padding: 2mm 3mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
+                <td class="recipe-total-cell recipe-total-half">
                     <strong>Total Items:</strong> <?= $totalItems ?><br>
                     <strong>Costo Total Producto:</strong> $<?= number_format($totalProductoDolares, 2) ?><br>
                     <strong>Costo Total Servicio:</strong> $<?= number_format($totalServicioDolares, 2) ?>
                 </td>
-                <td style="width: 50%; background: transparent; padding: 2mm 3mm; border-bottom: 0.35mm solid #4f4f4f; vertical-align: top;">
+                <td class="recipe-total-cell recipe-total-half">
                     <strong>Costo Total:</strong> $<?= number_format($totalDolaresConvertidos, 2) ?><br>
                     <strong>Margen:</strong> $<?= number_format($totalMargenDolaresAll, 2) ?><br>
                     <strong>SubTotal:</strong> $<?= number_format($baseTotalDolares, 2) ?><br>
@@ -590,15 +581,15 @@ $tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['clie
     <?php endif; ?>
     
     <?php if (trim((string)($receta['observacion'] ?? '')) !== ''): ?>
-        <div style="margin-top: 6mm; margin-bottom: 6mm;">
-            <div style="padding: 2mm 0; min-height: 12mm;">
-                <div style="font-weight: 700; margin-bottom: 2mm;">Observación</div>
-                <div style="font-size: 11px; line-height: 1.2;"><?= nl2br(escaparPdf($receta['observacion'])) ?></div>
+        <div class="recipe-observation-block">
+            <div class="recipe-observation-inner">
+                <div class="recipe-observation-title">Observación</div>
+                <div class="recipe-observation-text"><?= nl2br(escaparPdf($receta['observacion'])) ?></div>
             </div>
         </div>
     <?php endif; ?>
 
-    <div style="margin-bottom: 30mm;"></div>
+    <div class="recipe-signature-spacer"></div>
 </div>
 
 <div class="pdf-footer">
@@ -614,7 +605,10 @@ $tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['clie
 $html = ob_get_clean();
 /*echo $html;
 exit;*/
-$pdf = new Dompdf();
+$options = new Options();
+$options->setChroot(ROOT);
+$pdf = new Dompdf($options);
+$pdf->setBasePath(ROOT . DIRECTORY_SEPARATOR);
 $pdf->loadHtml($html);
 $pdf->setPaper('A4', 'portrait');
 $pdf->render();

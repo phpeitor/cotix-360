@@ -19,62 +19,9 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
     <link href="./assets/css/branding.css?v=1.0" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta.css?v=1.3" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/receta_form.css?v=1.0" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
-    <style>
-        .precio-cero-label {
-            animation: precioCeroPulse 1s ease-in-out infinite;
-            border-radius: 999px;
-            display: inline-flex;
-            font-weight: 700;
-            padding: 0.15rem 0.45rem;
-        }
-
-        @keyframes precioCeroPulse {
-            0%, 100% {
-                box-shadow: 0 0 0 0 rgba(250, 92, 124, 0.55);
-                transform: scale(1);
-            }
-            50% {
-                box-shadow: 0 0 0 6px rgba(250, 92, 124, 0);
-                transform: scale(1.04);
-            }
-        }
-
-        .skeleton-item {
-            position: relative;
-            overflow: hidden;
-            background: #e2e8f0;
-            border-radius: 4px;
-        }
-
-        .skeleton-item::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            transform: translateX(-100%);
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-            animation: skeleton-shimmer 1.2s infinite;
-        }
-
-        @keyframes skeleton-shimmer {
-            100% {
-                transform: translateX(100%);
-            }
-        }
-
-        .precio-manual-icon {
-            cursor: help;
-        }
-
-        .precio-manual-icon i {
-            transition: transform 0.2s ease;
-        }
-
-        .precio-manual-icon:hover i {
-            transform: scale(1.2);
-        }
-    </style>
 </head>
 
 <body>
@@ -124,7 +71,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
                                         <p class="text-muted fs-14 mb-0" id="receta_nombre_display"></p>
                                         <button type="button" class="btn btn-sm btn-outline-secondary" id="btnEditRecetaNombre" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar nombre"><i class="ti ti-edit"></i></button>
                                     </div>
-                                    <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none" style="max-width:400px;" placeholder="Nombre de la receta">
+                                    <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none receta-nombre-input" placeholder="Nombre de la receta">
                                 </div>
 
                                 <div class="row g-3 receta-meta-row">
@@ -196,7 +143,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
                                                     <span class="tipo-cambio-label">Tipo de Cambio SUNAT (Venta)</span>
                                                     <span id="tipo_cambio_sunat" class="external-event fc-event bg-warning-subtle text-warning-emphasis tipo-cambio-pulse">0.000</span>
                                                     <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btnEditTipoCambio" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar tipo de cambio"><i class="ti ti-edit"></i></button>
-                                                    <input type="number" step="0.001" id="tipo_cambio_input" class="form-control form-control-sm d-none" style="width:110px;display:inline-block;margin-left:8px;">
+                                                    <input type="number" step="0.001" id="tipo_cambio_input" class="form-control form-control-sm d-none receta-tipo-cambio-input">
                                                 </p>
                                             </div>
                                             
@@ -290,7 +237,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
     </div>
 
     <div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="max-width: 840px;">
+        <div class="modal-dialog receta-modal-dialog-wide">
             <div class="modal-content">
                 <div class="modal-header text-bg-info border-0">
                     <h4 class="modal-title" id="info-header-modalLabel">
@@ -531,7 +478,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
                             <label class="form-label" for="tiempoEntrega">Tiempo de entrega</label>
                             <div class="input-group">
                                 <input type="number" class="form-control" id="tiempoEntrega" min="1" max="999" step="1" placeholder="Ej. 15">
-                                <select class="form-select" id="tiempoEntregaUnidad" style="max-width:120px;">
+                                <select class="form-select receta-datos-comerciales-unidad" id="tiempoEntregaUnidad">
                                     <option value="dias">días</option>
                                     <option value="semanas">semanas</option>
                                 </select>

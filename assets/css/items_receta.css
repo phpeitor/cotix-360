@@ -1,0 +1,14 @@
+.item-receta-nombre {
+    max-width: 100%;
+}
+
+.item-receta-descripcion {
+    max-height: 72px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-right: 4px;
+    line-height: 1.35;
+    scrollbar-width: thin;
+    word-break: break-word;
+    white-space: normal;
+}

@@ -15,38 +15,10 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/branding.css?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/dashboard.css?v=1.0" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
-    <style>
-        .dashboard-recent-item {
-            min-width: 0;
-        }
-
-        .dashboard-recent-content {
-            min-width: 0;
-        }
-
-        .dashboard-recent-content h5,
-        .dashboard-recent-content a,
-        .dashboard-recent-content span,
-        .dashboard-recent-content li {
-            overflow-wrap: anywhere;
-        }
-
-        .dashboard-recent-status {
-            flex: 0 0 auto;
-            position: relative;
-            z-index: 2;
-        }
-
-        .dashboard-status-badge {
-            max-width: 72px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-    </style>
 </head>
 
 <body>
@@ -385,14 +357,14 @@ require_once ROOT . '/controller/check_session.php';
 
                             <div class="card-body p-0 border-top border-dashed">
                                 <h4 class="header-title px-3 mb-2 mt-3">Recent Items:</h4>
-                                <div class="my-3 px-3" data-simplebar style="max-height: 370px;">
+                                <div class="my-3 px-3 dashboard-recent-items-scroll" data-simplebar>
                                     <div id="dashboard-items" class="timeline-alt py-0"></div>
                                 </div> 
                             </div>
 
                             <div class="card-body">
                                 <div class="card mb-0 bg-warning bg-opacity-25">
-                                    <div class="card-body" style="background-image: url(assets/images/png/arrows.svg); background-size: contain; background-repeat: no-repeat; background-position: right bottom;">
+                                    <div class="card-body dashboard-upgrade-card">
                                         <h1><i class="ti ti-receipt-tax text-warning"></i></h1>
                                         <h4 class="text-warning">Actualizar a Profesional</h4>
                                         <p class="text-warning text-opacity-75">Le recomendamos que revise sus transacciones recientes.</p>

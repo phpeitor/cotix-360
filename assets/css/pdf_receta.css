@@ -89,6 +89,12 @@ table {
     margin-bottom: 1mm;
 }
 
+.hero-logo-placeholder {
+    width: 45mm;
+    height: 13mm;
+    background: #f0f0f0;
+}
+
 .project-box {
     border: 2px solid #c41e3a;
     padding: 4mm 6mm;
@@ -139,6 +145,9 @@ table {
     width: 50%;
     vertical-align: top;
 }
+
+.panel-receta { padding-right: 6mm; }
+.panel-company { padding-left: 6mm; text-align: right; }
 
 .panel-title {
     font-size: 13px;
@@ -532,6 +541,63 @@ table {
 .offer-pdf .offer-excel-table th {
     text-align: center;
 }
+
+.offer-excel-description-col { width: 45%; }
+.offer-excel-brand-col { width: 13%; }
+.offer-excel-delivery-col { width: 17%; }
+.offer-excel-quantity-col { width: 8%; }
+.offer-excel-total-col { width: 17%; }
+
+.section-description-standard { width: 68%; }
+.section-description-technician { width: 88%; }
+.section-quantity-col { width: 12%; }
+.section-price-col { width: 10%; }
+
+.offer-summary-observations-label { width: 70%; }
+.offer-summary-subtotal-label,
+.offer-summary-subtotal-value { width: 15%; }
+
+.offer-condition-label { width: 22%; }
+.offer-condition-separator { width: 2%; }
+.offer-condition-value { width: 46%; }
+.offer-condition-extra { width: 30%; }
+
+.recipe-totals-table {
+    width: 100%;
+    margin-top: 2mm;
+}
+
+.recipe-total-cell {
+    border-bottom: .35mm solid #4f4f4f;
+    background: transparent;
+    padding: 2mm 3mm;
+    vertical-align: top;
+}
+
+.recipe-total-full { width: 100%; }
+.recipe-total-half { width: 50%; }
+
+.recipe-observation-block {
+    margin-top: 6mm;
+    margin-bottom: 6mm;
+}
+
+.recipe-observation-inner {
+    min-height: 12mm;
+    padding: 2mm 0;
+}
+
+.recipe-observation-title {
+    margin-bottom: 2mm;
+    font-weight: 700;
+}
+
+.recipe-observation-text {
+    font-size: 11px;
+    line-height: 1.2;
+}
+
+.recipe-signature-spacer { margin-bottom: 30mm; }
 
 .offer-pdf .offer-pdf-group-row td {
     text-align: center;

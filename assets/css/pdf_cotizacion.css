@@ -1,0 +1,50 @@
+body {
+    font-family: DejaVu Sans, sans-serif;
+    font-size: 10px;
+}
+
+h2 {
+    margin-bottom: 5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border: 1px solid #ccc;
+    padding: 4px;
+}
+
+th { background: #f2f2f2; }
+.right { text-align: right; }
+.center { text-align: center; }
+
+.watermark {
+    position: fixed;
+    top: 45%;
+    left: 50%;
+    z-index: -1;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    color: rgba(0, 0, 0, .08);
+    font-size: 80px;
+    font-weight: bold;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.watermark.aprobada { color: rgba(25, 135, 84, .15); }
+.watermark.anulada { color: rgba(220, 53, 69, .15); }
+
+.pdf-cotizacion-title {
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+.pdf-cotizacion-notice {
+    margin-top: 0;
+    font-size: 11px;
+    text-align: center;
+}

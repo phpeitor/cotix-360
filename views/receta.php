@@ -212,7 +212,7 @@ require_once ROOT . '/controller/check_session.php';
 
     <!-- Info Header Modal -->
     <div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="max-width: 840px;">
+        <div class="modal-dialog receta-modal-dialog-wide">
             <div class="modal-content">
                 <div class="modal-header text-bg-info border-0">
                     <h4 class="modal-title" id="info-header-modalLabel">

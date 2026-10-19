@@ -1,0 +1,35 @@
+.dashboard-recent-item,
+.dashboard-recent-content {
+    min-width: 0;
+}
+
+.dashboard-recent-content h5,
+.dashboard-recent-content a,
+.dashboard-recent-content span,
+.dashboard-recent-content li {
+    overflow-wrap: anywhere;
+}
+
+.dashboard-recent-status {
+    position: relative;
+    z-index: 2;
+    flex: 0 0 auto;
+}
+
+.dashboard-status-badge {
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dashboard-recent-items-scroll {
+    max-height: 370px;
+}
+
+.dashboard-upgrade-card {
+    background-image: url("../images/png/arrows.svg");
+    background-repeat: no-repeat;
+    background-position: right bottom;
+    background-size: contain;
+}

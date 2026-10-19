@@ -131,7 +131,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                         </div>
                                     </div>
                                     <div class="px-2 py-2 border-bottom">
-                                        <div class="input-group input-group-sm" style="max-width: 420px;">
+                                        <div class="input-group input-group-sm compras-detalle-search-group">
                                             <span class="input-group-text"><i class="ti ti-search"></i></span>
                                             <input type="search" class="form-control" id="comprasDetalleSearch" placeholder="Buscar item en compras...">
                                         </div>
@@ -479,7 +479,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     </div>
 
     <div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="max-width: 840px;">
+        <div class="modal-dialog compras-items-modal-dialog">
             <div class="modal-content">
                 <div class="modal-header text-bg-info border-0">
                     <h4 class="modal-title" id="info-header-modalLabel">Buscar item para agregar a la compra</h4>

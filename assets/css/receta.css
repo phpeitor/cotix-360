@@ -331,3 +331,6 @@
         margin-left: 0;
     }
 }
+.receta-modal-dialog-wide {
+    max-width: 840px;
+}

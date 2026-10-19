@@ -134,7 +134,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2($defaultTipo);
                                             <div class="valid-feedback">Looks good!</div>
                                         </div>
 
-                                        <div class="col-md-2 mb-3" style="display: none;">
+                                        <div class="col-md-2 mb-3 d-none">
                                             <label class="form-label" for="stock">Stock</label>
                                             <input type="number" class="form-control" id="stock" name="stock" placeholder="0" value="0" min="0" step="1" max="100">
                                             <div class="valid-feedback">Looks good!</div>

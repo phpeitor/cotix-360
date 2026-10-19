@@ -1,0 +1,96 @@
+#table-gridjs .gridjs-sort {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    margin-left: 6px;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    color: #8a929d;
+}
+
+#table-gridjs .gridjs-sort::before {
+    content: "⇅";
+    font-size: 12px;
+    line-height: 16px;
+}
+
+#table-gridjs .gridjs-sort-asc::before { content: "↑"; }
+#table-gridjs .gridjs-sort-desc::before { content: "↓"; }
+
+#table-gridjs,
+#table-gridjs .gridjs-container {
+    min-width: 0;
+    max-width: 100%;
+}
+
+#table-gridjs .gridjs-wrapper {
+    clear: both;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#table-gridjs .gridjs-footer { clear: both; }
+#table-gridjs .gridjs-table { min-width: 980px; }
+
+#table-gridjs th,
+#table-gridjs td {
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.subcat-order-list {
+    display: grid;
+    min-height: 80px;
+    gap: .5rem;
+}
+
+.subcat-order-item {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .65rem;
+    background: var(--bs-body-bg);
+    padding: .65rem .75rem;
+    cursor: grab;
+}
+
+.subcat-order-item.dragging { opacity: .55; }
+
+.subcat-order-handle {
+    color: var(--bs-secondary-color);
+    font-size: 1.15rem;
+    line-height: 1;
+    cursor: grab;
+}
+
+@media (max-width: 575.98px) {
+    .categorias-card .card-header {
+        align-items: flex-start !important;
+        gap: .75rem;
+    }
+
+    .categorias-card .card-body {
+        padding-right: .75rem;
+        padding-left: .75rem;
+    }
+
+    #table-gridjs .gridjs-search,
+    #table-gridjs .gridjs-search-input {
+        width: 100%;
+    }
+
+    #table-gridjs .gridjs-head,
+    #table-gridjs .gridjs-footer {
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    #table-gridjs .gridjs-pagination {
+        justify-content: center;
+        gap: .5rem;
+    }
+}

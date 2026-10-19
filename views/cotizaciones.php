@@ -16,6 +16,7 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/branding.css?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/cotizaciones.css?v=1.0" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
@@ -108,7 +109,7 @@ require_once ROOT . '/controller/check_session.php';
     
     <!-- Info Header Modal -->
     <div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="max-width: 760px;">
+        <div class="modal-dialog cotizacion-financiamiento-modal-dialog">
             <div class="modal-content">
                 <div class="modal-header text-bg-info border-0">
                     <h4 class="modal-title" id="info-header-modalLabel">
@@ -124,7 +125,7 @@ require_once ROOT . '/controller/check_session.php';
                             <h6 class="text-muted fw-semibold mb-2 text-center">Tasa Anual</h6>
                             <div class="input-step border bg-body-secondary p-1 rounded-pill d-flex justify-content-center overflow-visible">
                                 <button type="button" id="btn-anual-minus" class="minus bg-light text-dark border-0 rounded-circle fs-20 lh-1">-</button>
-                                <input type="number" id="input-tasa-anual" class="text-dark text-center border-0 bg-body-secondary rounded" value="25" min="1" max="50" readonly style="width:60px" />
+                                <input type="number" id="input-tasa-anual" class="text-dark text-center border-0 bg-body-secondary rounded tasa-anual-input" value="25" min="1" max="50" readonly />
                                 <button type="button" id="btn-anual-plus" class="plus bg-light text-dark border-0 rounded-circle fs-20 lh-1">+</button>
                             </div>
                         </div>
