@@ -133,19 +133,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const selectMargen = tr.querySelector(".margen-uti");
             const margenUti = selectMargen ? parseFloat(selectMargen.value) : 0.15;
 
-            const utilidad = decimalAdjust(
-                'round',
-                precioM * margenUti,
-                '-2'
-            );
-            tr.querySelector(".utilidad").textContent = format2(utilidad);
-
-            // Precio Cliente
+            // Precio Cliente: margen calculado sobre el precio de venta.
+            const divisorMargen = 1 - margenUti;
             const precioCliente = decimalAdjust(
                 'round',
-                precioM + utilidad,
+                divisorMargen > 0 ? precioM / divisorMargen : precioM,
                 '-2'
             );
+            const utilidad = decimalAdjust('round', precioCliente - precioM, '-2');
+            tr.querySelector(".utilidad").textContent = format2(utilidad);
             tr.querySelector(".precio-cliente").textContent =
                 format2(precioCliente);
         });
@@ -308,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td class="isadmin"><span class="text-muted fs-12">Factor PU</span><h5 class="fs-14 mt-1 fw-normal factor-precio">0.00</h5></td>
             <td class="isadmin"><span class="text-muted fs-12">Precio M</span><h5 class="fs-14 mt-1 fw-normal precio-m">0.00</h5></td>
             <td><span class="text-muted fs-12">Margen</span><br>
-            <select class="form-select-sm margen-uti" data-default="0.15"><option value="0.25">Lista 1</option><option value="0.30">Lista 2</option><option value="0.35">Lista 3</option><option value="0.40">Lista 4</option><option value="0.45">Lista 5</option><option value="0.50">Lista 6</option></select></td>
+            <select class="form-select-sm margen-uti" data-default="0.25"><option value="0.25">Lista 1</option><option value="0.30">Lista 2</option><option value="0.35">Lista 3</option><option value="0.40">Lista 4</option><option value="0.45">Lista 5</option><option value="0.50">Lista 6</option></select></td>
             <td class="isadmin"><span class="text-muted fs-12">Utilidad</span><h5 class="fs-14 mt-1 fw-normal utilidad">0.00</h5></td>
             <td><span class="text-muted fs-12">Precio Cliente</span><h5 class="fs-14 mt-1 fw-normal precio-cliente">0.00</h5></td>
             <td>

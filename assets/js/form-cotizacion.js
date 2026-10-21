@@ -355,20 +355,15 @@ document.addEventListener("DOMContentLoaded", () => {
             );
             totalPeruDesdeItems += totalFilaPeru;
 
-            // Utilidad
-            const utilidad = decimalAdjust(
-                'round',
-                precioM * margen_uti,
-                '-2'
-            );
-            tr.querySelector(".utilidad").textContent = format2(utilidad);
-
-            // Precio Cliente
+            // Precio Cliente: margen calculado sobre el precio de venta.
+            const divisorMargen = 1 - margen_uti;
             const precioCliente = decimalAdjust(
                 'round',
-                precioM + utilidad,
+                divisorMargen > 0 ? precioM / divisorMargen : precioM,
                 '-2'
             );
+            const utilidad = decimalAdjust('round', precioCliente - precioM, '-2');
+            tr.querySelector(".utilidad").textContent = format2(utilidad);
             tr.querySelector(".precio-cliente").textContent =
                 format2(precioCliente);
         });

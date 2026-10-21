@@ -163,7 +163,7 @@ $bases = $selects->select_bases();
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/form-calculo.js?v=3.9"></script>
+    <script src="./assets/js/form-calculo.js?v=3.10"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

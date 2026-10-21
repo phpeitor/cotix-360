@@ -22,7 +22,7 @@ $trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/branding.css?v=1.0" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/tracking.css?v=2.2" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/tracking.css?v=2.3" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -192,12 +192,12 @@ $trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
                                 <div class="tracking-phase-summary mb-2">
                                     <div class="tracking-phase-summary-heading">
                                         <strong><?= htmlspecialchars($fase, ENT_QUOTES, 'UTF-8') ?></strong>
-                                        <span class="tracking-phase-contribution">0.00% | <?= number_format($pesoFase, 2, '.', '') ?>% del proyecto</span>
+                                        <span class="tracking-phase-progress-label">0.00% de fase</span>
                                     </div>
                                     <div class="progress tracking-phase-progress-track" role="progressbar" aria-label="Avance de <?= htmlspecialchars($fase, ENT_QUOTES, 'UTF-8') ?>" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                                         <div class="progress-bar tracking-phase-progress-bar"></div>
                                     </div>
-                                    <span class="tracking-phase-progress-label">0.00% de fase</span>
+                                    <span class="tracking-phase-contribution">0.00% de <?= number_format($pesoFase, 2, '.', '') ?>% del proyecto</span>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-centered align-middle table-hover tracking-activity-table mb-0">
@@ -294,7 +294,7 @@ $trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
     <script src="./assets/js/table-gridjs-tracking.js?v=1.12"></script>
-    <script src="./assets/js/tracking-actividades.js?v=1.18"></script>
+    <script src="./assets/js/tracking-actividades.js?v=1.21"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
 </html>

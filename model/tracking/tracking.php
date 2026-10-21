@@ -506,6 +506,22 @@ class Tracking
             static fn(array $actividad): bool => $actividad['completada']
         ));
 
+        $avanceProyecto = 0.0;
+        $proyectoCompletado = false;
+        foreach ($actividadesEstado as $actividad) {
+            if (!$actividad['completada']) {
+                continue;
+            }
+            $avanceProyecto += (float)$actividad['peso_proyecto'];
+            if ($actividad['fase'] === 'Cierre' && $actividad['actividad'] === 'Final del Proyecto') {
+                $proyectoCompletado = true;
+            }
+        }
+
+        $tracking['avance_proyecto'] = $proyectoCompletado ? 100.0 : round($avanceProyecto, 2);
+        $tracking['avance_proyecto_formateado'] = number_format($tracking['avance_proyecto'], 2, '.', '') . '%';
+        $tracking['proyecto_completado'] = $proyectoCompletado;
+
         return $tracking;
     }
 
@@ -672,7 +688,7 @@ class Tracking
         }
 
         $actividadStmt = $this->conn->prepare(
-            "SELECT id, fecha FROM tracking_actividades
+            "SELECT id FROM tracking_actividades
              WHERE tracking_id = :tracking_id AND fase = :fase AND actividad = :actividad
              LIMIT 1"
         );
@@ -682,10 +698,6 @@ class Tracking
             ':actividad' => $actividad
         ]);
         $actividadGuardada = $actividadStmt->fetch(PDO::FETCH_ASSOC);
-        if ($actividadGuardada && !empty($actividadGuardada['fecha'])) {
-            $color = '#22C55E';
-        }
-
         $stmt = $this->conn->prepare(
             "INSERT INTO tracking_actividad_colores (tracking_id, fase, actividad, color, updated_by)
              VALUES (:tracking_id, :fase, :actividad, :color, :updated_by)
@@ -796,9 +808,6 @@ class Tracking
                 }
 
                 $color = trim((string)($actividad['color'] ?? self::COLOR_ACTIVIDAD_DEFAULT));
-                if ($fecha !== '') {
-                    $color = '#22c55e';
-                }
                 $this->guardarColorActividad($trackingId, 'Planificación', $nombre, $color, $usuarioId);
             }
             $this->commit();
@@ -876,9 +885,6 @@ class Tracking
                 }
 
                 $color = trim((string)($item['color'] ?? self::COLOR_ACTIVIDAD_DEFAULT));
-                if ($fecha !== '') {
-                    $color = '#22c55e';
-                }
                 $this->guardarColorActividad($trackingId, $fase, $actividad, $color, $usuarioId);
             }
 

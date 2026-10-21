@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const color = row?.querySelector("input.act-color");
             if (color && fechaInput.value) {
                 color.value = "#22c55e";
-                color.disabled = true;
+                color.disabled = false;
             } else if (color) {
                 if (color.value.toLowerCase() === "#22c55e") color.value = "#facc15";
                 color.disabled = false;
@@ -182,13 +182,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 const row = check.closest("tr");
                 const colorInput = row?.querySelector("input.act-color");
                 const colorInfo = colores.get(key);
+                const saved = popup.get(key);
                 if (colorInput) {
-                    const color = colorInfo?.color || "#facc15";
+                    const color = colorInfo?.color || (saved?.fecha ? "#22c55e" : "#facc15");
                     colorInput.value = color;
                     colorInput.dataset.savedColor = color;
                     colorInput.disabled = cerrado;
                 }
-                const saved = popup.get(key);
                 const guardadoPor = row?.querySelector(".act-guardado-por");
                 if (guardadoPor) guardadoPor.textContent = saved?.guardado_por || colorInfo?.actualizado_por || "-";
                 if (!saved) return;
@@ -200,14 +200,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const obs = row.querySelector("input.act-obs");
                 if (fecha) { fecha.value = saved.fecha || ""; fecha.disabled = cerrado || false; }
                 if (obs) { obs.value = saved.observacion || ""; obs.disabled = cerrado || false; }
-                if (fecha?.value) {
-                    const colorInput = row.querySelector("input.act-color");
-                    if (colorInput) {
-                        colorInput.value = "#22c55e";
-                        colorInput.dataset.savedColor = "#22c55e";
-                        colorInput.disabled = true;
-                    }
-                }
                 if (cerrado) check.disabled = true;
             });
 
@@ -336,7 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const trackFase = pane.querySelector(".tracking-phase-progress-track");
 
             if (aporteLabel) {
-                aporteLabel.textContent = `${aporteProyectoFase.toFixed(2)}% / ${pesoTotalFase.toFixed(2)}% del proyecto`;
+                aporteLabel.textContent = `${aporteProyectoFase.toFixed(2)}% de ${pesoTotalFase.toFixed(2)}% del proyecto`;
             }
             if (progresoLabel) {
                 progresoLabel.textContent = `${progresoFase.toFixed(2)}% de fase`;
@@ -428,10 +420,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function formatTimelineDate(str) {
-        if (!str) return '-';
+        if (!str) return '';
         const d = new Date(str.replace(' ', 'T'));
         if (isNaN(d)) return str;
         return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function timelineDateMarkup(str) {
+        const fecha = formatTimelineDate(str);
+        return fecha ? `<span class="act-fecha">${escHtml(fecha)}</span>` : '';
     }
 
     function colorHex(color) {
@@ -476,18 +473,20 @@ document.addEventListener("DOMContentLoaded", () => {
             const fechas = group.items.map(a => a.fecha).filter(Boolean);
             const rango = fechas.length === 1
                 ? formatTimelineDate(fechas[0])
-                : formatTimelineDate(fechas[0]) + ' - ' + formatTimelineDate(fechas[fechas.length - 1]);
+                : (fechas.length > 1
+                    ? formatTimelineDate(fechas[0]) + ' - ' + formatTimelineDate(fechas[fechas.length - 1])
+                    : '');
 
             const itemsHtml = group.items.map(a => {
                 let obs = a.observacion ? '<span class="act-obs">' + escHtml(a.observacion) + '</span>' : '';
-                return '<li><span class="timeline-color-indicator" data-color="' + colorHex(a.color) + '"></span><div><span class="act-title">' + escHtml(a.actividad) + '</span>' + obs + '</div><span class="act-fecha">' + formatTimelineDate(a.fecha) + '</span></li>';
+                return '<li><span class="timeline-color-indicator" data-color="' + colorHex(a.color) + '"></span><div><span class="act-title">' + escHtml(a.actividad) + '</span>' + obs + '</div>' + timelineDateMarkup(a.fecha) + '</li>';
             }).join('');
 
             const html = `
                 <div class="timeline-item ${cls}">
                     <div class="timeline-marker">${renderFaseMarker(p)}</div>
                     <div class="timeline-content">
-                        <span class="date">${rango}</span>
+                        ${rango ? `<span class="date">${escHtml(rango)}</span>` : ''}
                         <h3 class="title">${escHtml(group.fase)}</h3>
                         <ul class="fase-actividades">${itemsHtml}</ul>
                     </div>
@@ -501,7 +500,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (PHASES.some(p => normalizeFase(p.name) === key)) return;
 
             const itemsHtml = group.items.map(a => {
-                return '<li><span class="timeline-color-indicator" data-color="' + colorHex(a.color) + '"></span><div><span class="act-title">' + escHtml(a.actividad) + '</span></div><span class="act-fecha">' + formatTimelineDate(a.fecha) + '</span></li>';
+                return '<li><span class="timeline-color-indicator" data-color="' + colorHex(a.color) + '"></span><div><span class="act-title">' + escHtml(a.actividad) + '</span></div>' + timelineDateMarkup(a.fecha) + '</li>';
             }).join('');
 
             const html = `

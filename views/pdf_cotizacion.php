@@ -131,15 +131,9 @@ foreach ($detalle as &$item) {
         2
     );
 
-    $utilidad = round(
-        $precioM * $margen_uti,
-        2
-    );
-
-    $precioCliente = round(
-        $precioM + $utilidad,
-        2
-    );
+    $divisorMargen = 1 - $margen_uti;
+    $precioCliente = round($divisorMargen > 0 ? ($precioM / $divisorMargen) : $precioM, 2);
+    $utilidad = round($precioCliente - $precioM, 2);
     
     $item['margen_pct']      = $margen * 100;
     $item['margen_dscto']    = $margenDscto;

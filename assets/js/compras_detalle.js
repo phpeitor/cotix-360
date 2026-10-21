@@ -207,14 +207,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 if (color) {
                     color.value = "#22c55e";
-                    color.disabled = true;
+                    color.disabled = false;
                 }
             } else if (event.target.matches(".compras-tracking-fecha") && color) {
                 if (color.value.toLowerCase() === "#22c55e") color.value = "#facc15";
                 color.disabled = false;
-            }
-            if (event.target.matches(".compras-tracking-color") && fecha?.value) {
-                color.value = "#22c55e";
             }
         });
         fields.btnGuardarTrackingActividades?.addEventListener("click", guardarActividadesTrackingCompras);
@@ -368,8 +365,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 fecha.disabled = cerrado || !saved;
                 observacion.value = saved?.observacion || "";
                 observacion.disabled = cerrado || !saved;
-                color.value = fecha.value ? "#22c55e" : (colorInfo?.color || "#facc15");
-                color.disabled = cerrado || Boolean(fecha.value);
+                color.value = colorInfo?.color || (fecha.value ? "#22c55e" : "#facc15");
+                color.disabled = cerrado;
                 row.dataset.originalState = JSON.stringify({
                     completada: check.checked,
                     fecha: fecha.value,
