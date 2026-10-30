@@ -7,7 +7,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!dateInput || !tableContainer) return;
     const puedeVerReceta = Number(tableContainer.dataset.userCargo || 0) === 1;
 
-    const formatISO = (d) => d.toISOString().split("T")[0];
+    const formatISO = (d) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+    const formatFlatpickr = (d) => d.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const pastDate = new Date(today);
+    pastDate.setDate(pastDate.getDate() - 30);
 
     function initTooltips() {
         document.querySelectorAll('[data-bs-toggle="tooltip"], .btn-tooltip').forEach(el => {
@@ -25,8 +39,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     flatpickr(dateInput, {
         mode: "range",
-        dateFormat: "d M Y"
+        dateFormat: "d M Y",
+        defaultDate: [pastDate, today]
     });
+    dateInput.value = `${formatFlatpickr(pastDate)} to ${formatFlatpickr(today)}`;
 
     const grid = new gridjs.Grid({
         columns: [
@@ -105,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function buildUrl() {
         const fp = dateInput._flatpickr;
-        const estado = estadoSelect?.value || "abierto";
+        const estado = estadoSelect?.value || "todos";
         const cod_tracking = String(codigoInput?.value || "").trim();
         const ruc = String(rucInput?.value || "").trim();
         const params = new URLSearchParams({ estado, cod_tracking, ruc });

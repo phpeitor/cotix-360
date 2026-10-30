@@ -170,9 +170,9 @@ class Tracking
     }
 
     public function tableTracking(
-        string $fecIni,
-        string $fecFin,
-        string $estado = 'abierto',
+        ?string $fecIni,
+        ?string $fecFin,
+        string $estado = 'todos',
         string $codigoTracking = '',
         string $ruc = ''
     ): array
@@ -197,10 +197,21 @@ class Tracking
                           AND ta_final.actividad = 'Final del Proyecto'
                     ) THEN 1 ELSE 0 END AS final_proyecto_completado
                 FROM trackings t
-                WHERE t.created_at >= :fecIni
-                  AND t.created_at < DATE_ADD(:fecFin, INTERVAL 1 DAY)
+                WHERE 1 = 1
                 ";
 
+        if ($fecIni !== null && $fecFin !== null) {
+            if ($estado === 'todos') {
+                $sql .= " AND (
+                            (t.created_at >= :fecIni
+                             AND t.created_at < DATE_ADD(:fecFin, INTERVAL 1 DAY))
+                            OR LOWER(TRIM(COALESCE(t.estado, 'abierto'))) = 'abierto'
+                         )";
+            } else {
+                $sql .= " AND t.created_at >= :fecIni
+                          AND t.created_at < DATE_ADD(:fecFin, INTERVAL 1 DAY)";
+            }
+        }
         if ($estado === 'abierto' || $estado === 'cerrado') {
             $sql .= " AND LOWER(TRIM(COALESCE(t.estado, 'abierto'))) = :estado";
         }
@@ -221,8 +232,10 @@ class Tracking
         $sql .= " ORDER BY t.id DESC";
 
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':fecIni', $fecIni);
-        $stmt->bindValue(':fecFin', $fecFin);
+        if ($fecIni !== null && $fecFin !== null) {
+            $stmt->bindValue(':fecIni', $fecIni);
+            $stmt->bindValue(':fecFin', $fecFin);
+        }
         if ($estado === 'abierto' || $estado === 'cerrado') {
             $stmt->bindValue(':estado', $estado);
         }

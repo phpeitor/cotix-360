@@ -74,8 +74,8 @@ $trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
 
                                             <div class="tracking-filter-state">
                                                 <select id="filterEstado" class="form-select" aria-label="Filtrar por estado">
-                                                    <option value="todos">Todos los estados</option>
-                                                    <option value="abierto" selected>Abiertos</option>
+                                                    <option value="todos" selected>Todos los estados</option>
+                                                    <option value="abierto">Abiertos</option>
                                                     <option value="cerrado">Cerrados</option>
                                                 </select>
                                             </div>
@@ -293,7 +293,7 @@ $trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/table-gridjs-tracking.js?v=1.12"></script>
+    <script src="./assets/js/table-gridjs-tracking.js?v=1.13"></script>
     <script src="./assets/js/tracking-actividades.js?v=1.21"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
