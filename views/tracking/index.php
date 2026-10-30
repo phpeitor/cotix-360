@@ -75,7 +75,7 @@ $trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
                                             <div class="tracking-filter-state">
                                                 <select id="filterEstado" class="form-select" aria-label="Filtrar por estado">
                                                     <option value="todos">Todos los estados</option>
-                                                    <option value="abierto">Abiertos</option>
+                                                    <option value="abierto" selected>Abiertos</option>
                                                     <option value="cerrado">Cerrados</option>
                                                 </select>
                                             </div>

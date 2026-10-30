@@ -7,17 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!dateInput || !tableContainer) return;
     const puedeVerReceta = Number(tableContainer.dataset.userCargo || 0) === 1;
 
-    const today = new Date();
-    const pastDate = new Date();
-    pastDate.setDate(today.getDate() - 30);
-
     const formatISO = (d) => d.toISOString().split("T")[0];
-    const formatFlatpickr = (d) =>
-        d.toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-        });
 
     function initTooltips() {
         document.querySelectorAll('[data-bs-toggle="tooltip"], .btn-tooltip').forEach(el => {
@@ -35,11 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     flatpickr(dateInput, {
         mode: "range",
-        dateFormat: "d M Y",
-        defaultDate: [pastDate, today]
+        dateFormat: "d M Y"
     });
-
-    dateInput.value = `${formatFlatpickr(pastDate)} to ${formatFlatpickr(today)}`;
 
     const grid = new gridjs.Grid({
         columns: [
@@ -59,7 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 width: "170px",
                 formatter: (cell, row) => renderCodTracking(cell, row)
             },
-            { id: "updated_at", name: "Fecha", width: "170px" },
+            { id: "created_at", name: "Fecha creación", width: "170px" },
+            { id: "updated_at", name: "Última actualización", width: "185px" },
             {
                 id: "origen_receta",
                 name: "Origen",
@@ -117,18 +105,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function buildUrl() {
         const fp = dateInput._flatpickr;
-        let fec_ini = formatISO(pastDate);
-        let fec_fin = formatISO(today);
-
-        if (fp && fp.selectedDates.length === 2) {
-            fec_ini = formatISO(fp.selectedDates[0]);
-            fec_fin = formatISO(fp.selectedDates[1]);
-        }
-
-        const estado = estadoSelect?.value || "todos";
+        const estado = estadoSelect?.value || "abierto";
         const cod_tracking = String(codigoInput?.value || "").trim();
         const ruc = String(rucInput?.value || "").trim();
-        return "controller/tracking/table_tracking.php?" + new URLSearchParams({ fec_ini, fec_fin, estado, cod_tracking, ruc });
+        const params = new URLSearchParams({ estado, cod_tracking, ruc });
+
+        if (fp && fp.selectedDates.length === 2) {
+            params.set("fec_ini", formatISO(fp.selectedDates[0]));
+            params.set("fec_fin", formatISO(fp.selectedDates[1]));
+        }
+
+        return "controller/tracking/table_tracking.php?" + params;
     }
 
     function escapeHtml(value) {
@@ -142,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderCodTracking(cell, row) {
         const codInterno = String(cell || "");
-        const codPublico = String(row?.cells?.[10]?.data ?? "").trim();
+        const codPublico = String(row?.cells?.[11]?.data ?? "").trim();
 
         if (codPublico) {
             const partes = codInterno.split("-");
@@ -157,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderNombre(nombre, row) {
         const idReceta = String(row?.cells?.[2]?.data ?? "").trim();
-        const origenReceta = Number(row?.cells?.[7]?.data || 0) === 1;
+        const origenReceta = Number(row?.cells?.[8]?.data || 0) === 1;
 
         if (puedeVerReceta && origenReceta && idReceta && typeof md5 === "function") {
             const hash = md5(idReceta);
@@ -206,10 +193,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderAcciones(row) {
         const idTracking = String(row?.cells?.[0]?.data ?? "").trim();
         const codTracking = String(row?.cells?.[5]?.data ?? "").trim();
-        const estado = String(row?.cells?.[8]?.data ?? "").trim();
-        const codPublico = String(row?.cells?.[10]?.data ?? "").trim();
-        const totalActividades = Number(row?.cells?.[11]?.data ?? 0);
-        const finalProyectoCompletado = Number(row?.cells?.[12]?.data ?? 0) === 1;
+        const estado = String(row?.cells?.[9]?.data ?? "").trim();
+        const codPublico = String(row?.cells?.[11]?.data ?? "").trim();
+        const totalActividades = Number(row?.cells?.[12]?.data ?? 0);
+        const finalProyectoCompletado = Number(row?.cells?.[13]?.data ?? 0) === 1;
 
         const codPublicoCompleto = codPublico
             ? codTracking.substring(0, codTracking.lastIndexOf('-') + 1) + codPublico

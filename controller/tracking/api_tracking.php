@@ -1,4 +1,6 @@
 <?php
+ini_set('display_errors', '0');
+
 $allowedOrigins = [
     'http://localhost',
     'http://127.0.0.1',

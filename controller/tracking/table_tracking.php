@@ -9,18 +9,19 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 try {
-    $fecIni = $_GET['fec_ini'] ?? $_POST['fec_ini'] ?? null;
-    $fecFin = $_GET['fec_fin'] ?? $_POST['fec_fin'] ?? null;
+    $fecIni = trim((string)($_GET['fec_ini'] ?? $_POST['fec_ini'] ?? ''));
+    $fecFin = trim((string)($_GET['fec_fin'] ?? $_POST['fec_fin'] ?? ''));
+    $hayFiltroFecha = $fecIni !== '' || $fecFin !== '';
 
-    if (!$fecIni || !$fecFin) {
-        throw new Exception('Debe enviar fec_ini y fec_fin');
+    if ($hayFiltroFecha && ($fecIni === '' || $fecFin === '')) {
+        throw new Exception('Debe seleccionar un rango de fechas completo');
     }
 
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecIni) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecFin)) {
+    if ($hayFiltroFecha && (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecIni) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecFin))) {
         throw new Exception('Formato de fecha inválido (YYYY-MM-DD)');
     }
 
-    $estado = strtolower(trim((string)($_GET['estado'] ?? 'todos')));
+    $estado = strtolower(trim((string)($_GET['estado'] ?? 'abierto')));
     if (!in_array($estado, ['todos', 'abierto', 'cerrado'], true)) {
         throw new Exception('Filtro de estado inválido');
     }
@@ -32,7 +33,13 @@ try {
     }
 
     $tracking = new Tracking();
-    $data = $tracking->tableTracking($fecIni, $fecFin, $estado, $codigoTracking, $ruc);
+    $data = $tracking->tableTracking(
+        $hayFiltroFecha ? $fecIni : null,
+        $hayFiltroFecha ? $fecFin : null,
+        $estado,
+        $codigoTracking,
+        $ruc
+    );
 
     echo json_encode([
         'error' => false,

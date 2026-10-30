@@ -172,7 +172,7 @@ class Tracking
     public function tableTracking(
         string $fecIni,
         string $fecFin,
-        string $estado = 'todos',
+        string $estado = 'abierto',
         string $codigoTracking = '',
         string $ruc = ''
     ): array
@@ -197,7 +197,8 @@ class Tracking
                           AND ta_final.actividad = 'Final del Proyecto'
                     ) THEN 1 ELSE 0 END AS final_proyecto_completado
                 FROM trackings t
-                WHERE t.updated_at BETWEEN :fecIni AND DATE_ADD(:fecFin, INTERVAL 1 DAY)
+                WHERE t.created_at >= :fecIni
+                  AND t.created_at < DATE_ADD(:fecFin, INTERVAL 1 DAY)
                 ";
 
         if ($estado === 'abierto' || $estado === 'cerrado') {
@@ -509,11 +510,16 @@ class Tracking
         $avanceProyecto = 0.0;
         $proyectoCompletado = false;
         foreach ($actividadesEstado as $actividad) {
-            if (!$actividad['completada']) {
+            if (empty($actividad['completada'])) {
                 continue;
             }
-            $avanceProyecto += (float)$actividad['peso_proyecto'];
-            if ($actividad['fase'] === 'Cierre' && $actividad['actividad'] === 'Final del Proyecto') {
+            $fase = (string)($actividad['fase'] ?? '');
+            $nombreActividad = (string)($actividad['actividad'] ?? '');
+            $pesoProyecto = $actividad['peso_proyecto']
+                ?? self::PESOS_PROYECTO[$fase][$nombreActividad]
+                ?? 0;
+            $avanceProyecto += (float)$pesoProyecto;
+            if ($fase === 'Cierre' && $nombreActividad === 'Final del Proyecto') {
                 $proyectoCompletado = true;
             }
         }
@@ -651,9 +657,7 @@ class Tracking
                     'estado' => $completada ? 'completada' : 'pendiente',
                     'fecha' => $completada ? ($guardada['fecha'] ?? null) : null,
                     'observacion' => $completada ? ($guardada['observacion'] ?? null) : null,
-                    'color' => $guardada['color'] ?? $colores[$key] ?? self::COLOR_ACTIVIDAD_DEFAULT,
-                    'peso_proyecto' => (float)(self::PESOS_PROYECTO[$fase][$nombre] ?? 0),
-                    'peso_fase' => (float)(self::PESOS_FASE[$fase][$nombre] ?? 0)
+                    'color' => $guardada['color'] ?? $colores[$key] ?? self::COLOR_ACTIVIDAD_DEFAULT
                 ];
             }
         }
