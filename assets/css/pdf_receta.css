@@ -321,19 +321,6 @@ table {
     color: #222;
 }
 
-.pdf-footer {
-    position: fixed;
-    bottom: 10mm;
-    left: 15mm;
-    right: 15mm;
-    font-size: 9px;
-    color: #222121;
-    text-align: center;
-    border-top: 1px solid #e6e6e6;
-    padding-top: 4px;
-    z-index: 10;
-}
-
 .right { text-align: right; }
 .center { text-align: center; }
 
@@ -641,14 +628,6 @@ table {
     margin-top: 1.5mm;
 }
 
-.offer-pdf .pdf-footer {
-    bottom: 8mm;
-    color: #44514e;
-    border-top: 0.25mm solid #dfe8e5;
-    padding-top: 2mm;
-    background: transparent;
-}
-
 .recipe-pdf {
     color: #17212b;
     font-size: 9.5px;
@@ -754,12 +733,4 @@ table {
 .recipe-pdf .item-price {
     color: #17212b;
     font-weight: bold;
-}
-
-.recipe-pdf .pdf-footer {
-    bottom: 8mm;
-    color: #4d5a63;
-    border-top: 0.25mm solid #dbe5ec;
-    padding-top: 2mm;
-    background: transparent;
 }

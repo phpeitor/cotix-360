@@ -228,7 +228,7 @@ ob_start();
 
 <?php if ($wmClass): ?>
     <div class="watermark <?= $wmClass ?>">
-        <?= htmlspecialchars($esOferta ? 'COPIA' : ($receta['estado'] ?? '')) ?>
+        <?= htmlspecialchars($esOferta ? 'MG INDUSOL' : ($receta['estado'] ?? '')) ?>
     </div>
 <?php endif; ?>
 
@@ -239,7 +239,6 @@ ob_start();
         ? formatearFechaPdf($receta['updated_at'] ?? null)
         : '';
     $usuarioRegistro = trim((string)($receta['usuario'] ?? ''));
-    $usuarioActual = trim((string)($_SESSION['session_usuario'] ?? $receta['usu_upd'] ?? $receta['usuario'] ?? ''));
     $nombreReceta = trim((string)preg_replace('/\s*-\s*\d+$/', '', trim((string)($receta['nombre'] ?? 'RECETA'))));
     $tituloDocumento = $esOferta ? 'OFERTA ' . $nombreReceta : $nombreReceta;
     $clienteLineasOferta = array_filter([
@@ -589,14 +588,8 @@ $tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['clie
         </div>
     <?php endif; ?>
 
-    <div class="recipe-signature-spacer"></div>
 </div>
 
-<div class="pdf-footer">
-    <strong>Tipo de Cambio SUNAT:</strong> <?= number_format($tipoCambio, 3) ?> |
-    <strong>Generado por:</strong> <?= htmlspecialchars($_SESSION['session_usuario'] ?? $receta['usu_upd'] ?? $receta['usuario'] ?? 'Desconocido') ?> |
-    <strong>Fec. Impresión:</strong> <?= (new DateTime('now', new DateTimeZone('America/Lima')))->format('Y-m-d H:i:s') ?> (PET)
-</div>
 </body>
 </html>
 
