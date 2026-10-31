@@ -268,13 +268,23 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
         return $stmt->execute();
     }
 
-    public function table_receta(string $fec_ini, string $fec_fin): array
+    public function table_receta(string $fec_ini, string $fec_fin, string $subCat1 = ''): array
     {
         $sessionCargo = $_SESSION['session_cargo'] ?? null;
         $sessionId = $_SESSION['session_id'] ?? null;
         $isAdmin = in_array((int)$sessionCargo, [1, 3], true);
 
         $where = "c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)";
+
+        $subCat1 = trim($subCat1);
+        if ($subCat1 !== '') {
+            $where .= " AND EXISTS (
+                SELECT 1
+                FROM receta_detalle rfilter
+                WHERE rfilter.receta_id = c.id
+                  AND rfilter.sub_cat_1 LIKE :sub_cat_1
+            )";
+        }
 
         if (!$isAdmin) {
             if ((int)$sessionId <= 0) {
@@ -317,6 +327,9 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
         if (!$isAdmin) {
             $stmt->bindValue(':usuario_id', (int)$sessionId, PDO::PARAM_INT);
         }
+        if ($subCat1 !== '') {
+            $stmt->bindValue(':sub_cat_1', '%' . $subCat1 . '%');
+        }
         
         //echo $sql;
         $stmt->execute();
@@ -328,9 +341,20 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
         return $rows;
     }
 
-    public function tableIngenieria(string $fec_ini, string $fec_fin): array
+    public function tableIngenieria(string $fec_ini, string $fec_fin, string $subCat1 = ''): array
     {
         $this->crearTablaHistorialIngenieria();
+
+        $subCat1 = trim($subCat1);
+        $filtroSubCat1 = '';
+        if ($subCat1 !== '') {
+            $filtroSubCat1 = " AND EXISTS (
+                SELECT 1
+                FROM detalle_ingenieria ifilter
+                WHERE ifilter.receta_id = c.id
+                  AND ifilter.sub_cat_1 LIKE :sub_cat_1
+            )";
+        }
 
         $sql = "
             SELECT
@@ -362,6 +386,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
             LEFT JOIN personal p2 ON p2.IDPERSONAL = c.usuario_upd
             LEFT JOIN receta_cliente rc ON rc.id_receta = c.id_receta_duplicada
             WHERE c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)
+            $filtroSubCat1
             GROUP BY
                 c.id,
                 c.id_receta_duplicada,
@@ -380,6 +405,9 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':fec_ini', $fec_ini);
         $stmt->bindValue(':fec_fin', $fec_fin);
+        if ($subCat1 !== '') {
+            $stmt->bindValue(':sub_cat_1', '%' . $subCat1 . '%');
+        }
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];

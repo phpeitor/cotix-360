@@ -87,6 +87,10 @@ require_once ROOT . '/controller/check_session.php';
                                                 </div>
                                             </div>
 
+                                            <div class="col-sm-auto">
+                                                <input type="search" id="filterSubCat1" class="form-control" placeholder="Subcategoría 1" aria-label="Filtrar por Subcategoría 1">
+                                            </div>
+
                                             <div class="col-auto">
                                                 <a href="#" id="btn_buscar" class="btn btn-sm rounded-pill btn-info"><i class="ti ti-search fs-22"></i> Buscar</a>
                                             </div>
@@ -243,7 +247,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
-    <script src="./assets/js/table-gridjs-receta.js?v=2.6"></script>
+    <script src="./assets/js/table-gridjs-receta.js?v=2.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

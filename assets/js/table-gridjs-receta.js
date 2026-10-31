@@ -53,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const dateInput = document.getElementById("filterDate");
+    const subCat1Input = document.getElementById("filterSubCat1");
     const today = new Date();
     const pastDate = new Date();
     pastDate.setDate(today.getDate() - 7);
@@ -148,6 +149,13 @@ document.addEventListener("DOMContentLoaded", () => {
         conectarStreamRecetaList();
     });
 
+    subCat1Input?.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            document.getElementById("btn_buscar")?.click();
+        }
+    });
+
     window.addEventListener("beforeunload", () => {
         if (recetaListEventSource) {
             recetaListEventSource.close();
@@ -167,9 +175,11 @@ document.addEventListener("DOMContentLoaded", () => {
             fec_fin = formatISO(today);
         }
 
+        const sub_cat_1 = String(subCat1Input?.value || "").trim();
         return "controller/table_receta.php?" + new URLSearchParams({
             fec_ini,
-            fec_fin
+            fec_fin,
+            sub_cat_1
         });
     }
 

@@ -29,8 +29,13 @@ try {
         exit;
     }
 
+    $subCat1 = trim((string)($_GET['sub_cat_1'] ?? $_POST['sub_cat_1'] ?? ''));
+    if (mb_strlen($subCat1, 'UTF-8') > 255) {
+        throw new InvalidArgumentException('El filtro de Subcategoría 1 es demasiado largo');
+    }
+
     $receta = new Receta();
-    $data = $receta->table_receta($fec_ini, $fec_fin);
+    $data = $receta->table_receta($fec_ini, $fec_fin, $subCat1);
 
     echo json_encode(
         [
