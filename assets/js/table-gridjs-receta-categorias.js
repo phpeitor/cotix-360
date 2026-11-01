@@ -14,6 +14,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const ordenSubCatModal = ordenSubCatModalEl ? new bootstrap.Modal(ordenSubCatModalEl) : null;
 
     const endpoint = "controller/receta_item_categoria.php";
+    const ICONOS_SUBCAT1 = {
+        "ti ti-tools": "Herramientas / mantenimiento",
+        "ti ti-settings": "Mecánica / configuración",
+        "ti ti-bolt": "Electricidad",
+        "ti ti-plug": "Conexiones",
+        "ti ti-box": "Gabinetes / componentes",
+        "ti ti-package": "Materiales / embalaje",
+        "ti ti-clipboard-text": "Documentación",
+        "ti ti-truck-delivery": "Logística / transporte"
+    };
     let currentRows = [];
     let ordenRows = [];
 
@@ -157,6 +167,14 @@ document.addEventListener("DOMContentLoaded", () => {
                                     <span class="subcat-order-handle"><i class="ti ti-grip-vertical"></i></span>
                                     <span class="badge bg-primary-subtle text-primary order-number">${idx + 1}</span>
                                     <span class="fw-semibold flex-grow-1">${escapeHtml(item.sub_cat_1)}</span>
+                                    <div class="subcat-icon-picker" title="Icono para esta Subcategoría 1">
+                                        <i class="subcat-icon-preview ${iconoValido(item.icon)}"></i>
+                                        <select class="form-select form-select-sm subcat-icon-select" aria-label="Icono para ${escapeHtml(item.sub_cat_1)}">
+                                            ${Object.entries(ICONOS_SUBCAT1).map(([icon, label]) => `
+                                                <option value="${escapeHtml(icon)}" ${iconoValido(item.icon) === icon ? "selected" : ""}>${escapeHtml(label)}</option>
+                                            `).join("")}
+                                        </select>
+                                    </div>
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-light btn-order-up" title="Subir"><i class="ti ti-arrow-up"></i></button>
                                         <button type="button" class="btn btn-light btn-order-down" title="Bajar"><i class="ti ti-arrow-down"></i></button>
@@ -171,6 +189,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         ordenSubCatContent.innerHTML = html || '<div class="col-12 text-center text-muted py-4">No hay sub categorías para ordenar.</div>';
         refreshOrderNumbers();
+    }
+
+    function iconoValido(icon) {
+        return Object.prototype.hasOwnProperty.call(ICONOS_SUBCAT1, icon) ? icon : "ti ti-tools";
     }
 
     function refreshOrderNumbers() {
@@ -218,6 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     tipo: item.dataset.tipo || "",
                     sub_cat_1: item.dataset.subcat || "",
                     orden: idx + 1,
+                    icon: item.querySelector(".subcat-icon-select")?.value || "ti ti-tools"
                 });
             });
         });
@@ -281,6 +304,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (event.target.closest(".btn-order-down")) {
             moveOrderItem(item, "down");
         }
+    });
+
+    ordenSubCatContent?.addEventListener("change", event => {
+        const select = event.target.closest(".subcat-icon-select");
+        if (!select) return;
+        const preview = select.closest(".subcat-icon-picker")?.querySelector(".subcat-icon-preview");
+        if (preview) preview.className = `subcat-icon-preview ${iconoValido(select.value)}`;
     });
 
     ordenSubCatContent?.addEventListener("dragstart", (event) => {

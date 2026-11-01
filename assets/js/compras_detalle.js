@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const iconosSubCategoria1 = new Set([
+        "ti ti-tools", "ti ti-settings", "ti ti-bolt", "ti ti-plug",
+        "ti ti-box", "ti ti-package", "ti ti-clipboard-text", "ti ti-truck-delivery"
+    ]);
     const hash = new URLSearchParams(window.location.search).get("id") || "";
     const tbody = document.getElementById("comprasDetalleBody");
     const semaforoWrap = document.getElementById("semaforo-wrap");
@@ -571,6 +575,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const itemDescripcion = escapeHtml(normalizarTextoDetalle(item.descripcion) || "-");
             const detalleLinea1 = escapeHtml(formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]) || "-");
             const detalleLinea2 = escapeHtml(formatearRutaDetalle([item.marca, item.modelo, item.uni_medida]) || "-");
+            const iconoSubCategoria1 = iconosSubCategoria1.has(String(item.sub_cat_1_icon || ""))
+                ? String(item.sub_cat_1_icon)
+                : "ti ti-tools";
             const tipo = String(item.tipo || "-").toUpperCase();
             const tipoColor = tipo === "PRODUCTO" ? "text-success" : "text-info";
             const searchText = escapeHtml([
@@ -592,7 +599,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="d-flex align-items-center">
                             <div class="avatar-md flex-shrink-0 me-2">
                                 <span class="avatar-title bg-primary-subtle rounded-circle">
-                                    <img src="${getRandomLogo()}" alt="" height="22">
+                                    <i class="subcat-detail-icon ${iconoSubCategoria1}" aria-hidden="true"></i>
                                 </span>
                             </div>
                             <div class="min-w-0 w-100" style="min-width:0;">

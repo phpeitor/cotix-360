@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const iconosSubCategoria1 = new Set([
+        "ti ti-tools", "ti ti-settings", "ti ti-bolt", "ti ti-plug",
+        "ti ti-box", "ti ti-package", "ti ti-clipboard-text", "ti ti-truck-delivery"
+    ]);
     const tbody = document.querySelector("table.table tbody");
     const recetaForm = document.querySelector("form.form-receta");
 
@@ -1601,6 +1605,9 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
             const itemDescripcion = normalizarTextoDetalle(item.descripcion);
             const detalleLinea1 = formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]);
             const detalleLinea2 = [item.marca, item.modelo, item.uni_medida].filter(Boolean).join(" / ");
+            const iconoSubCategoria1 = iconosSubCategoria1.has(String(item.sub_cat_1_icon || ""))
+                ? String(item.sub_cat_1_icon)
+                : "ti ti-tools";
             const claveCambio = getClaveCambioPrecio(item);
             const cambioPrecio = cambiosPrecioByItem.get(claveCambio);
             const precioUpdatedAt = item.precio_updated_at || item.updated_at || "";
@@ -1630,7 +1637,7 @@ const iconoManual = esPrecioManual
                         <div class="d-flex align-items-center">
                             <div class="avatar-md flex-shrink-0 me-2">
                                 <span class="avatar-title bg-primary-subtle rounded-circle">
-                                    <img src="${getRandomLogo()}" alt="" height="22">
+                                    <i class="subcat-detail-icon ${iconoSubCategoria1}" aria-hidden="true"></i>
                                 </span>
                             </div>
                             <div>

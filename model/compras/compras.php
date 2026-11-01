@@ -180,7 +180,7 @@ class Compras
     {
         $this->crearTablasSiNoExisten();
 
-        $sql = "SELECT d.*
+        $sql = "SELECT d.*, o.icon AS sub_cat_1_icon
                 FROM detalle_compras d
                 INNER JOIN receta_compras c ON c.id = d.compra_id
                 LEFT JOIN vw_receta_items_orden o

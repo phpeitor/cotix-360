@@ -5,6 +5,17 @@ class Item {
     private PDO $conn;
     private string $nowLima;
 
+    public const ICONOS_SUBCAT1 = [
+        'ti ti-tools' => 'Herramientas / mantenimiento',
+        'ti ti-settings' => 'Mecánica / configuración',
+        'ti ti-bolt' => 'Electricidad',
+        'ti ti-plug' => 'Conexiones',
+        'ti ti-box' => 'Gabinetes / componentes',
+        'ti ti-package' => 'Materiales / embalaje',
+        'ti ti-clipboard-text' => 'Documentación',
+        'ti ti-truck-delivery' => 'Logística / transporte'
+    ];
+
     public function __construct() {
         $conexion = new Conexion();
         $this->conn = $conexion->conectar();
@@ -356,7 +367,8 @@ class Item {
         $sql = "SELECT
                     c.tipo,
                     c.sub_cat_1,
-                    COALESCE(o.orden, 9999) AS orden
+                    COALESCE(o.orden, 9999) AS orden,
+                    COALESCE(o.icon, 'ti ti-tools') AS icon
                 FROM (
                     SELECT tipo, sub_cat_1
                     FROM receta_item_categorias
@@ -375,10 +387,11 @@ class Item {
         $this->conn->beginTransaction();
 
         try {
-            $sql = "INSERT INTO receta_item_subcat_orden (tipo, sub_cat_1, orden, created_at, updated_at)
-                    VALUES (:tipo, :sub_cat_1, :orden, :created_at, :updated_at)
+            $sql = "INSERT INTO receta_item_subcat_orden (tipo, sub_cat_1, orden, icon, created_at, updated_at)
+                    VALUES (:tipo, :sub_cat_1, :orden, :icon, :created_at, :updated_at)
                     ON DUPLICATE KEY UPDATE
                         orden = VALUES(orden),
+                        icon = VALUES(icon),
                         updated_at = VALUES(updated_at)";
             $stmt = $this->conn->prepare($sql);
 
@@ -386,14 +399,19 @@ class Item {
                 $tipo = $this->v($item['tipo'] ?? '');
                 $subCat1 = $this->v($item['sub_cat_1'] ?? '');
                 $orden = (int)($item['orden'] ?? 0);
+                $icon = trim((string)($item['icon'] ?? 'ti ti-tools'));
 
                 if ($tipo === '' || $subCat1 === '' || $orden <= 0) {
                     continue;
+                }
+                if (!array_key_exists($icon, self::ICONOS_SUBCAT1)) {
+                    $icon = 'ti ti-tools';
                 }
 
                 $stmt->bindValue(':tipo', $tipo);
                 $stmt->bindValue(':sub_cat_1', $subCat1);
                 $stmt->bindValue(':orden', $orden, PDO::PARAM_INT);
+                $stmt->bindValue(':icon', $icon);
                 $stmt->bindValue(':created_at', $this->nowLima);
                 $stmt->bindValue(':updated_at', $this->nowLima);
                 $stmt->execute();

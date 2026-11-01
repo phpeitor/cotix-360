@@ -58,6 +58,32 @@
     cursor: grab;
 }
 
+.subcat-order-item {
+    flex-wrap: wrap;
+}
+
+.subcat-icon-picker {
+    display: flex;
+    min-width: 190px;
+    align-items: center;
+    gap: .4rem;
+}
+
+.subcat-icon-preview {
+    display: inline-flex;
+    width: 28px;
+    flex: 0 0 28px;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-primary);
+    font-size: 1.25rem;
+}
+
+.subcat-icon-select {
+    min-width: 0;
+    font-size: .78rem;
+}
+
 .subcat-order-item.dragging { opacity: .55; }
 
 .subcat-order-handle {

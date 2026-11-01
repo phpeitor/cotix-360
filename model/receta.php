@@ -476,7 +476,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     {
         $this->asegurarColumnasAdicionalesIngenieria();
 
-        $sql = "SELECT d.*
+        $sql = "SELECT d.*, o.icon AS sub_cat_1_icon
                 FROM detalle_ingenieria d
                 INNER JOIN recetas_ingenieria r ON r.id = d.receta_id
                 LEFT JOIN vw_receta_items_orden o
@@ -1248,7 +1248,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     }
 
     public function obtenerDetallePorHash(string $hash): array {
-        $sql = "SELECT a.*, b.orden, r.updated_at AS precio_updated_at
+        $sql = "SELECT a.*, b.orden, b.icon AS sub_cat_1_icon, r.updated_at AS precio_updated_at
                 FROM receta_detalle a
                 LEFT JOIN vw_receta_items_orden b on a.tipo=b.tipo and a.sub_cat_1=b.sub_cat_1
                 LEFT JOIN receta_items r on r.id = a.item_id
