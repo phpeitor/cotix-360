@@ -23,6 +23,14 @@ document.addEventListener("DOMContentLoaded", () => {
             : `<span class="badge bg-danger">SUSPENDED</span>`;
     }
 
+    function activarTooltips(container = document) {
+        container.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+            if (!bootstrap.Tooltip.getInstance(el)) {
+                new bootstrap.Tooltip(el, { trigger: "hover focus", container: "body" });
+            }
+        });
+    }
+
     function fillForm(row = null) {
         form.reset();
         form.classList.remove("was-validated");
@@ -82,12 +90,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     const id = row.cells[0].data;
                     const estado = String(row.cells[5].data);
                     const deleteBtn = estado === "1"
-                        ? `<button class="btn-delete btn btn-soft-danger btn-icon" data-id="${id}"><i class="ti ti-trash-x"></i></button>`
+                        ? `<button class="btn-delete btn btn-soft-danger btn-icon" data-id="${id}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="subcat-actions-tooltip" data-bs-title="Suspender categoría"><i class="ti ti-trash-x"></i></button>`
                         : "";
 
                     return gridjs.html(`
                         <div style="gap:.5rem;justify-content:center;">
-                            <button class="btn-edit btn btn-outline-primary btn-icon" data-id="${id}">
+                            <button class="btn-edit btn btn-outline-primary btn-icon" data-id="${id}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="subcat-actions-tooltip" data-bs-title="Editar categoría">
                                 <i class="ti ti-pencil-bolt"></i>
                             </button>
                             ${deleteBtn}
@@ -108,6 +116,13 @@ document.addEventListener("DOMContentLoaded", () => {
         sort: true,
         pagination: { enabled: true, limit: 10 }
     }).render(tableEl);
+
+    const tableTooltipObserver = new MutationObserver(() => activarTooltips(tableEl));
+    tableTooltipObserver.observe(tableEl, { childList: true, subtree: true });
+    activarTooltips(tableEl);
+
+    const tableObserver = new MutationObserver(() => activarTooltips(tableEl));
+    tableObserver.observe(tableEl, { childList: true, subtree: true });
 
     function reloadGrid() {
         grid.updateConfig({
@@ -157,12 +172,12 @@ document.addEventListener("DOMContentLoaded", () => {
                                     <span class="subcat-order-handle"><i class="ti ti-grip-vertical"></i></span>
                                     <span class="badge bg-primary-subtle text-primary order-number">${idx + 1}</span>
                                     <span class="fw-semibold flex-grow-1">${escapeHtml(item.sub_cat_1)}</span>
-                                    <button type="button" class="btn btn-sm btn-light subcat-icon-button" aria-label="Elegir icono para ${escapeHtml(item.sub_cat_1)}" title="Elegir icono">
+                                    <button type="button" class="btn btn-sm btn-light subcat-icon-button" aria-label="Elegir icono para ${escapeHtml(item.sub_cat_1)}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="subcat-actions-tooltip" data-bs-title="Seleccionar icono">
                                         <i class="subcat-icon-preview ${escapeHtml(iconoSeguro(item.icon))}" aria-hidden="true"></i>
                                     </button>
                                     <div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-light btn-order-up" title="Subir"><i class="ti ti-arrow-up"></i></button>
-                                        <button type="button" class="btn btn-light btn-order-down" title="Bajar"><i class="ti ti-arrow-down"></i></button>
+                                        <button type="button" class="btn btn-light btn-order-up" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="subcat-actions-tooltip" data-bs-title="Subir"><i class="ti ti-arrow-up"></i></button>
+                                        <button type="button" class="btn btn-light btn-order-down" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="subcat-actions-tooltip" data-bs-title="Bajar"><i class="ti ti-arrow-down"></i></button>
                                     </div>
                                 </div>
                             `).join("")}
@@ -174,6 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         ordenSubCatContent.innerHTML = html || '<div class="col-12 text-center text-muted py-4">No hay sub categorías para ordenar.</div>';
         refreshOrderNumbers();
+        activarTooltips(ordenSubCatContent);
     }
 
     function iconoSeguro(icon) {

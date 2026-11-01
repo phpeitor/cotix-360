@@ -133,6 +133,19 @@
     white-space: nowrap;
 }
 
+.subcat-actions-tooltip .tooltip-inner {
+    border-radius: 7px;
+    background: #26364a;
+    padding: .4rem .65rem;
+    box-shadow: 0 5px 16px rgba(15, 23, 42, .2);
+    font-size: .76rem;
+    font-weight: 600;
+}
+
+.subcat-actions-tooltip.bs-tooltip-top .tooltip-arrow::before {
+    border-top-color: #26364a;
+}
+
 .subcat-order-item.dragging { opacity: .55; }
 
 .subcat-order-handle {
