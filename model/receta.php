@@ -282,7 +282,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
                 SELECT 1
                 FROM receta_detalle rfilter
                 WHERE rfilter.receta_id = c.id
-                  AND rfilter.sub_cat_1 LIKE :sub_cat_1
+                  AND rfilter.sub_cat_1 = :sub_cat_1
             )";
         }
 
@@ -328,7 +328,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
             $stmt->bindValue(':usuario_id', (int)$sessionId, PDO::PARAM_INT);
         }
         if ($subCat1 !== '') {
-            $stmt->bindValue(':sub_cat_1', '%' . $subCat1 . '%');
+            $stmt->bindValue(':sub_cat_1', $subCat1);
         }
         
         //echo $sql;
@@ -339,6 +339,28 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
         }
 
         return $rows;
+    }
+
+    public function subCategoriasFiltro(string $modulo): array
+    {
+        [$tablaDetalle, $tablaMaestra] = match ($modulo) {
+            'receta' => ['receta_detalle', 'recetas'],
+            'ingenieria' => ['detalle_ingenieria', 'recetas_ingenieria'],
+            default => throw new InvalidArgumentException('Módulo no válido para cargar subcategorías')
+        };
+
+        $sql = "SELECT DISTINCT TRIM(d.sub_cat_1) AS sub_cat_1
+                FROM $tablaDetalle d
+                INNER JOIN $tablaMaestra m ON m.id = d.receta_id
+                WHERE d.sub_cat_1 IS NOT NULL
+                  AND TRIM(d.sub_cat_1) <> ''
+                ORDER BY TRIM(d.sub_cat_1) ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return array_values(array_filter(array_map(
+            static fn($row) => trim((string)($row['sub_cat_1'] ?? '')),
+            $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []
+        )));
     }
 
     public function tableIngenieria(string $fec_ini, string $fec_fin, string $subCat1 = ''): array
@@ -352,7 +374,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
                 SELECT 1
                 FROM detalle_ingenieria ifilter
                 WHERE ifilter.receta_id = c.id
-                  AND ifilter.sub_cat_1 LIKE :sub_cat_1
+                  AND ifilter.sub_cat_1 = :sub_cat_1
             )";
         }
 
@@ -406,7 +428,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
         $stmt->bindValue(':fec_ini', $fec_ini);
         $stmt->bindValue(':fec_fin', $fec_fin);
         if ($subCat1 !== '') {
-            $stmt->bindValue(':sub_cat_1', '%' . $subCat1 . '%');
+            $stmt->bindValue(':sub_cat_1', $subCat1);
         }
         $stmt->execute();
 

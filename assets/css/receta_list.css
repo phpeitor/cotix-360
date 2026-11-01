@@ -42,3 +42,10 @@
 .receta-items-hidden::-webkit-scrollbar-track {
     background: transparent;
 }
+.subcat-filter-select {
+    min-width: 240px;
+}
+
+.subcat-filter-wrap .choices {
+    min-width: 240px;
+}

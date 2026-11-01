@@ -18,7 +18,7 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/branding.css?v=1.0" rel="stylesheet" type="text/css" />
     <link href="./assets/css/cotizaciones.css?v=1.0" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/receta_list.css?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/receta_list.css?v=1.1" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -87,8 +87,10 @@ require_once ROOT . '/controller/check_session.php';
                                                 </div>
                                             </div>
 
-                                            <div class="col-sm-auto">
-                                                <input type="search" id="filterSubCat1" class="form-control" placeholder="Subcategoría 1" aria-label="Filtrar por Subcategoría 1">
+                                            <div class="col-sm-auto subcat-filter-wrap">
+                                                <select id="filterSubCat1" class="form-select subcat-filter-select" data-modulo="receta" data-choices data-search-enabled="true" aria-label="Filtrar por Subcategoría 1">
+                                                    <option value="">Todas las subcategorías 1</option>
+                                                </select>
                                             </div>
 
                                             <div class="col-auto">
@@ -247,7 +249,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
-    <script src="./assets/js/table-gridjs-receta.js?v=2.8"></script>
+    <script src="./assets/js/table-gridjs-receta.js?v=2.9"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     dateInput.value = `${formatFlatpickr(pastDate)} to ${formatFlatpickr(today)}`;
+    cargarOpcionesSubcategoria();
 
     const grid = new gridjs.Grid({
         columns: [
@@ -162,6 +163,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const sub_cat_1 = String(subCat1Input?.value || "").trim();
         return "controller/table_ingenieria.php?" + new URLSearchParams({ fec_ini, fec_fin, sub_cat_1 });
+    }
+
+    async function cargarOpcionesSubcategoria() {
+        if (!subCat1Input) return;
+        try {
+            const modulo = subCat1Input.dataset.modulo || "ingenieria";
+            const response = await fetch(`controller/get_subcategorias_filtro.php?modulo=${encodeURIComponent(modulo)}`);
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.message || "No se pudieron cargar las subcategorías");
+
+            const choices = [
+                { value: "", label: "Todas las subcategorías 1", selected: true },
+                ...(data.subcategorias || []).map(value => ({ value, label: value }))
+            ];
+            if (subCat1Input.choicesInstance) {
+                subCat1Input.choicesInstance.clearChoices();
+                subCat1Input.choicesInstance.setChoices(choices, "value", "label", true);
+            } else {
+                subCat1Input.replaceChildren(...choices.map(choice => {
+                    const option = document.createElement("option");
+                    option.value = choice.value;
+                    option.textContent = choice.label;
+                    option.selected = Boolean(choice.selected);
+                    return option;
+                }));
+            }
+        } catch (error) {
+            console.error("Subcategoría 1:", error);
+        }
     }
 
     function aprobarIngenieria(id, button) {
