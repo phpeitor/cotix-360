@@ -78,5 +78,14 @@
             "tracking_crear.php",
             "upd_item_receta.php"
         ]
+    },
+    "7": {
+        "nombre": "Vendedor",
+        "acceso": [
+            "home.php",
+            "receta.php",
+            "receta_form.php",
+            "receta_list.php"
+        ]
     }
 }

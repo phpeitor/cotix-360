@@ -1037,7 +1037,12 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     }
 
     public function obtenerPorHash(string $hash): ?array {
-        $sql = "SELECT c.*,p.usuario, p2.usuario as usu_upd,
+        $sql = "SELECT c.*,
+                       p.usuario,
+                       TRIM(CONCAT_WS(' ', NULLIF(TRIM(p.NOMBRES), ''), NULLIF(TRIM(p.APELLIDOS), ''))) AS usuario_registro_nombre,
+                       p.EMAIL AS usuario_registro_email,
+                       p.TLF AS usuario_registro_telefono,
+                       p2.usuario AS usu_upd,
                        rc.razon_social_empresa AS cliente_razon_social_empresa,
                        rc.direccion AS cliente_direccion,
                        rc.ruc AS cliente_ruc,

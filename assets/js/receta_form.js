@@ -615,13 +615,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderCondicionesModal() {
         const data = cliente || {};
+        const vendedorNombreRegistro = String(receta?.usuario_registro_nombre || "").trim();
+        const vendedorEmailRegistro = String(receta?.usuario_registro_email || "").trim();
+        const vendedorTelefonoRegistro = String(receta?.usuario_registro_telefono || "").trim();
 
         if (tiempoEntregaEl) tiempoEntregaEl.value = String(data.tiempo_entrega || "").replace(/\D/g, "");
         if (tiempoEntregaUnidadEl) tiempoEntregaUnidadEl.value = ["dias", "semanas"].includes(String(data.tiempo_entrega_unidad || "dias")) ? data.tiempo_entrega_unidad : "dias";
         if (condicionesPagoEl) condicionesPagoEl.value = data.condiciones_pago || "";
-        if (vendedorEl) vendedorEl.value = data.vendedor || "";
-        if (vendedorCorreoEl) vendedorCorreoEl.value = data.vendedor_correo || "";
-        if (vendedorTelefonoEl) vendedorTelefonoEl.value = data.vendedor_telefono || "";
+        if (vendedorEl) vendedorEl.value = data.vendedor || vendedorNombreRegistro;
+        if (vendedorCorreoEl) vendedorCorreoEl.value = data.vendedor_correo || vendedorEmailRegistro;
+        if (vendedorTelefonoEl) vendedorTelefonoEl.value = data.vendedor_telefono || vendedorTelefonoRegistro;
         if (descripcionRecetaEl) descripcionRecetaEl.value = data.descripcion || "";
         if (cantidadItemsRecetaEl) cantidadItemsRecetaEl.value = data.cantidad_items || "";
         if (condicionesEconomicasDiasEl) condicionesEconomicasDiasEl.value = data.condiciones_economicas_dias || "";
