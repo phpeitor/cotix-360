@@ -35,6 +35,14 @@ try {
         exit;
     }
 
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && $action === 'icon_list') {
+        echo json_encode([
+            'success' => true,
+            'iconos' => $item->obtenerIconosDisponibles()
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);
         echo json_encode(['ok' => false, 'message' => 'Método no permitido']);

@@ -229,11 +229,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    function getRandomLogo() {
-        const n = Math.floor(Math.random() * 9) + 1;
-        return `assets/images/products/logo/logo-${n}.svg`;
-    }
-
     function clampCantidad(value) {
         const parsed = Number.parseInt(String(value ?? "1"), 10);
         if (!Number.isFinite(parsed)) return 1;

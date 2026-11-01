@@ -1157,11 +1157,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return String(moneda || "").toUpperCase() === "DOLLAR" ? "$" : "S/.";
     }
 
-    function getRandomLogo() {
-        const n = Math.floor(Math.random() * 9) + 1;
-        return `assets/images/products/logo/logo-${n}.svg`;
-    }
-
     function normalizarTextoDetalle(valor) {
         const texto = String(valor ?? "").trim();
         return texto === "" || texto === "-" ? "" : texto;

@@ -5,16 +5,7 @@ class Item {
     private PDO $conn;
     private string $nowLima;
 
-    public const ICONOS_SUBCAT1 = [
-        'ti ti-tools' => 'Herramientas / mantenimiento',
-        'ti ti-settings' => 'Mecánica / configuración',
-        'ti ti-bolt' => 'Electricidad',
-        'ti ti-plug' => 'Conexiones',
-        'ti ti-box' => 'Gabinetes / componentes',
-        'ti ti-package' => 'Materiales / embalaje',
-        'ti ti-clipboard-text' => 'Documentación',
-        'ti ti-truck-delivery' => 'Logística / transporte'
-    ];
+    public const ICONO_SUBCAT1_DEFAULT = 'ti ti-tools';
 
     public function __construct() {
         $conexion = new Conexion();
@@ -383,7 +374,29 @@ class Item {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function obtenerIconosDisponibles(): array
+    {
+        $cssPath = __DIR__ . '/../assets/css/icons.min.css';
+        if (!is_file($cssPath) || !is_readable($cssPath)) {
+            return [];
+        }
+
+        $css = file_get_contents($cssPath);
+        if ($css === false || !preg_match_all('/\.ti-([a-z0-9-]+):before/i', $css, $matches)) {
+            return [];
+        }
+
+        $iconos = array_values(array_unique(array_map('strtolower', $matches[1])));
+        sort($iconos, SORT_NATURAL | SORT_FLAG_CASE);
+        return $iconos;
+    }
+
     public function guardarRecetaSubCat1Orden(array $items): bool {
+        $iconosPermitidos = array_fill_keys(array_map(
+            static fn($icono) => 'ti ti-' . $icono,
+            $this->obtenerIconosDisponibles()
+        ), true);
+
         $this->conn->beginTransaction();
 
         try {
@@ -399,13 +412,13 @@ class Item {
                 $tipo = $this->v($item['tipo'] ?? '');
                 $subCat1 = $this->v($item['sub_cat_1'] ?? '');
                 $orden = (int)($item['orden'] ?? 0);
-                $icon = trim((string)($item['icon'] ?? 'ti ti-tools'));
+                $icon = trim((string)($item['icon'] ?? self::ICONO_SUBCAT1_DEFAULT));
 
                 if ($tipo === '' || $subCat1 === '' || $orden <= 0) {
                     continue;
                 }
-                if (!array_key_exists($icon, self::ICONOS_SUBCAT1)) {
-                    $icon = 'ti ti-tools';
+                if (!isset($iconosPermitidos[$icon])) {
+                    $icon = self::ICONO_SUBCAT1_DEFAULT;
                 }
 
                 $stmt->bindValue(':tipo', $tipo);

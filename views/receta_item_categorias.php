@@ -13,7 +13,7 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/branding.css?v=1.0" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/receta_item_categorias.css?v=1.2" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/receta_item_categorias.css?v=1.3" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
@@ -141,11 +141,49 @@ require_once ROOT . '/controller/check_session.php';
         </div>
     </div>
 
+    <div class="modal fade" id="subcatIconPickerModal" tabindex="-1" aria-labelledby="subcatIconPickerTitle" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="subcatIconPickerTitle">Seleccionar icono</h5>
+                        <p class="text-muted mb-0 fs-13">Busca en el paquete de iconos Tabler o filtra por tipo.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-8">
+                            <input type="search" id="subcatIconSearch" class="form-control" placeholder="Buscar icono (tools, settings, box...)" aria-label="Buscar iconos">
+                        </div>
+                        <div class="col-md-4">
+                            <select id="subcatIconCategory" class="form-select" aria-label="Filtrar iconos por tipo">
+                                <option value="all">Todos los tipos</option>
+                                <option value="tools">Herramientas y mantenimiento</option>
+                                <option value="electrical">Electricidad y automatización</option>
+                                <option value="equipment">Equipos y componentes</option>
+                                <option value="logistics">Transporte y logística</option>
+                                <option value="documents">Documentos y control</option>
+                                <option value="other">Otros iconos</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="subcatIconPickerStatus" class="text-muted small mb-2" role="status"></div>
+                    <div id="subcatIconPickerGrid" class="subcat-icon-picker-grid"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php include ROOT . '/layout/theme.html'; ?>
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
-    <script src="./assets/js/table-gridjs-receta-categorias.js?v=1.3"></script>
+    <script src="./assets/js/icon-picker.js?v=1.0"></script>
+    <script src="./assets/js/table-gridjs-receta-categorias.js?v=1.5"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
 </html>
