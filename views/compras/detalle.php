@@ -312,6 +312,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                 <tr>
                                     <th>Item</th>
                                     <th>Detalle</th>
+                                    <th>Fecha</th>
                                     <th class="text-end">Cantidad</th>
                                     <th class="text-end">Precio</th>
                                     <th class="text-end">Total $</th>
@@ -348,6 +349,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                 <tr>
                                     <th>Item</th>
                                     <th>Detalle</th>
+                                    <th>Fecha</th>
                                     <th class="text-end">Cantidad</th>
                                     <th class="text-end">Precio</th>
                                     <th class="text-end">Total $</th>

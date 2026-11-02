@@ -695,7 +695,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (!items.length) {
-            bodyEl.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">Sin adicionales ${signo === "negativo" ? "negativos" : "positivos"}.</td></tr>`;
+            bodyEl.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">Sin adicionales ${signo === "negativo" ? "negativos" : "positivos"}.</td></tr>`;
             return;
         }
 
@@ -704,10 +704,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const precio = Number(item.precio || 0);
             const moneda = String(item.moneda || "").toUpperCase();
             const detalleTexto = formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]) || "-";
+            const fecha = item.created_at
+                ? new Date(String(item.created_at).replace(" ", "T")).toLocaleString("es-PE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false
+                })
+                : "-";
             return `
                 <tr>
                     <td class="fw-semibold text-wrap">${escapeHtml(item.nombre || "-")}</td>
                     <td class="text-wrap">${escapeHtml(detalleTexto)}</td>
+                    <td class="text-nowrap">${escapeHtml(fecha)}</td>
                     <td class="text-end">${cantidad}</td>
                     <td class="text-end">${monedaSimbolo(moneda)} ${money(precio)}</td>
                     <td class="text-end fw-semibold">$ ${formatNumber(montoDolares(item))}</td>
