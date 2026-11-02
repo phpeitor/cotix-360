@@ -1298,6 +1298,17 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         return $stmt->rowCount() > 0;
     }
 
+    public function perteneceAlUsuario(int $recetaId, int $usuarioId): bool
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT 1 FROM recetas WHERE id = :id AND usuario_id = :usuario_id LIMIT 1"
+        );
+        $stmt->bindValue(':id', $recetaId, PDO::PARAM_INT);
+        $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+        $stmt->execute();
+        return (bool)$stmt->fetchColumn();
+    }
+
     public function crearRecetaIngenieriaDesdeReceta(int $recetaId, int $usuarioUpd): int
     {
         $stmtExistente = $this->conn->prepare("SELECT id FROM recetas_ingenieria WHERE id_receta_duplicada = :receta_id LIMIT 1");

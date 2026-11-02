@@ -361,6 +361,9 @@ function aplicarPermisosAdmin() {
     document.querySelectorAll(".isadmin").forEach(el => {
         el.style.display = ES_ADMIN || CARGO==3 ? "" : "none";
     });
+    document.querySelectorAll(".isadmin-vendedor").forEach(el => {
+        el.style.display = ES_ADMIN || CARGO == 3 || CARGO == 7 ? "" : "none";
+    });
 }
 
 customJS();

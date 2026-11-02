@@ -18,6 +18,11 @@ try {
         exit;
     }
 
+    $cargo = (int)($_SESSION['session_cargo'] ?? 0);
+    if (!in_array($cargo, [1, 3, 7], true)) {
+        throw new Exception('No tienes permisos para aprobar o anular recetas');
+    }
+
     $id     = $_POST['id']     ?? null;
     $accion = $_POST['accion'] ?? null;
 
@@ -34,6 +39,10 @@ try {
         : 'Anulada';
 
     $receta = new Receta();
+
+    if ($cargo === 7 && !$receta->perteneceAlUsuario((int)$id, (int)$_SESSION['session_id'])) {
+        throw new Exception('Solo puedes aprobar o anular tus propias recetas');
+    }
 
     if ($accion === 'aprobar' && !$receta->recetaTieneNombre((int)$id)) {
         throw new Exception('No se puede aprobar la receta porque no tiene nombre registrado');

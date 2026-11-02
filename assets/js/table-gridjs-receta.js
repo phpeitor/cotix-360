@@ -767,7 +767,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         } else {
             botones += `
-                <button class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-estado isadmin"
+                <button class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-estado isadmin isadmin-vendedor"
                         data-id="${id}"
                         data-accion="aprobar"
                         data-bs-toggle="tooltip"
@@ -776,7 +776,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <i class="ti ti-check"></i>
                 </button>
 
-                <button class="btn btn-soft-danger btn-icon btn-sm rounded-circle btn-estado isadmin"
+                <button class="btn btn-soft-danger btn-icon btn-sm rounded-circle btn-estado isadmin isadmin-vendedor"
                         data-id="${id}"
                         data-accion="anular"
                         data-bs-toggle="tooltip"
