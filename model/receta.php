@@ -1086,6 +1086,26 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
+    public function obtenerVendedorReceta(int $recetaId): ?array
+    {
+        $sql = "SELECT
+                    rc.vendedor,
+                    rc.vendedor_correo,
+                    rc.vendedor_telefono,
+                    TRIM(CONCAT_WS(' ', NULLIF(TRIM(p.NOMBRES), ''), NULLIF(TRIM(p.APELLIDOS), ''))) AS usuario_registro_nombre,
+                    p.EMAIL AS usuario_registro_email,
+                    p.TLF AS usuario_registro_telefono
+                FROM recetas c
+                LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
+                LEFT JOIN receta_cliente rc ON rc.id_receta = c.id
+                WHERE c.id = :id
+                LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
     public function duplicarReceta(int $recetaId, int $usuarioId): int
     {
         $original = $this->obtenerPorId($recetaId);

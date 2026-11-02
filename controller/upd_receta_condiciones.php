@@ -11,7 +11,8 @@ try {
         throw new Exception('Sesión expirada o usuario no autenticado');
     }
 
-    if (!in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3], true)) {
+    $cargo = (int)($_SESSION['session_cargo'] ?? 0);
+    if (!in_array($cargo, [1, 3, 7], true)) {
         throw new Exception('No tienes permisos para actualizar estos datos');
     }
 
@@ -42,6 +43,19 @@ try {
         throw new Exception('Receta inválida');
     }
 
+    $receta = new Receta();
+    if ($cargo === 7) {
+        $vendedorReceta = $receta->obtenerVendedorReceta($recetaId) ?? [];
+        $vendedor = trim((string)($vendedorReceta['vendedor'] ?? ''))
+            ?: trim((string)($vendedorReceta['usuario_registro_nombre'] ?? ''));
+        $vendedorCorreo = trim((string)($vendedorReceta['vendedor_correo'] ?? ''))
+            ?: trim((string)($vendedorReceta['usuario_registro_email'] ?? ''));
+        $vendedorTelefono = preg_replace('/\D+/', '', (string)(
+            trim((string)($vendedorReceta['vendedor_telefono'] ?? ''))
+            ?: trim((string)($vendedorReceta['usuario_registro_telefono'] ?? ''))
+        ));
+    }
+
     if ($tiempoEntrega <= 0 || $condicionesPago === '' || $vendedor === '' || $vendedorCorreo === '' || $vendedorTelefono === '' || $descripcion === '' || $cantidadItems <= 0 || $condicionesEconomicasDias <= 0) {
         throw new Exception('Completa tiempo de entrega, vendedor, descripcion, cantidad, condiciones de pago y días de suspensión');
     }
@@ -49,8 +63,6 @@ try {
     if ($cantidadItems > 5000) {
         throw new Exception('La cantidad debe estar entre 1 y 5000');
     }
-
-    $receta = new Receta();
     $ok = $receta->guardarCondicionesComerciales([
         'receta_id' => $recetaId,
         'tiempo_entrega' => $tiempoEntrega,

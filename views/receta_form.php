@@ -2,6 +2,8 @@
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once ROOT . '/controller/check_session.php';
 $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3, 7], true);
+$puedeGestionarCategoriasReceta = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3], true);
+$esCargoVendedor = (int)($_SESSION['session_cargo'] ?? 0) === 7;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -114,8 +116,10 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
 
                                 <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end receta-header-actions">
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#cliente-modal" data-bs-title="Cliente" data-bs-placement="bottom"><i class="ti ti-user-circle fs-18"></i></button>
-                                    <?php if ($puedeGestionarDatosCliente): ?>
+                                    <?php if ($puedeGestionarCategoriasReceta): ?>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-categoria-modal" data-bs-title="Márgen" data-bs-placement="bottom"><i class="ti ti-box fs-18"></i></button>
+                                    <?php endif; ?>
+                                    <?php if ($puedeGestionarDatosCliente): ?>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#condiciones-modal" data-bs-title="Datos comerciales" data-bs-placement="bottom"><i class="ti ti-clipboard-text fs-18"></i></button>
                                     <?php endif; ?>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom"><i class="ti ti-search fs-18"></i></button>
@@ -373,7 +377,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
         </div>
     </div>
 
-    <?php if ($puedeGestionarDatosCliente): ?>
+    <?php if ($puedeGestionarCategoriasReceta): ?>
     <div id="info-categoria-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-categoria-modalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -451,7 +455,9 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
+    <?php if ($puedeGestionarDatosCliente): ?>
     <div id="condiciones-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="condiciones-modalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -464,15 +470,15 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
                     <div class="row g-3">
                         <div class="col-lg-4">
                             <label class="form-label" for="vendedor">Vendedor</label>
-                            <input type="text" class="form-control" id="vendedor" maxlength="150" placeholder="Nombre del vendedor">
+                            <input type="text" class="form-control" id="vendedor" maxlength="150" placeholder="Nombre del vendedor" <?= $esCargoVendedor ? 'readonly' : '' ?>>
                         </div>
                         <div class="col-lg-4">
                             <label class="form-label" for="vendedorCorreo">Email vendedor</label>
-                            <input type="email" class="form-control" id="vendedorCorreo" maxlength="150" placeholder="correo@empresa.com">
+                            <input type="email" class="form-control" id="vendedorCorreo" maxlength="150" placeholder="correo@empresa.com" <?= $esCargoVendedor ? 'readonly' : '' ?>>
                         </div>
                         <div class="col-lg-4">
                             <label class="form-label" for="vendedorTelefono">Teléfono vendedor</label>
-                            <input type="text" class="form-control" id="vendedorTelefono" maxlength="50" placeholder="Ej. 987654321">
+                            <input type="text" class="form-control" id="vendedorTelefono" maxlength="50" placeholder="Ej. 987654321" <?= $esCargoVendedor ? 'readonly' : '' ?>>
                         </div>
                         <div class="col-lg-6">
                             <label class="form-label" for="tiempoEntrega">Tiempo de entrega</label>
@@ -536,7 +542,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/receta_form.js?v=3.3"></script>
+    <script src="./assets/js/receta_form.js?v=3.4"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
