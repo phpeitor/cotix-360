@@ -117,12 +117,18 @@ function subcatsPresentesOfertaExcel(array $detalle): array
     return $subcatsPresentes;
 }
 
-function seccionesCondicionalesOfertaExcel(array $detalle): array
+function seccionesCondicionalesOfertaExcel(array $detalle, ?array $seccionesVisibles = null): array
 {
     $subcatsPresentes = subcatsPresentesOfertaExcel($detalle);
     $secciones = [];
+    $mostrar = static function (string $clave, array $subcats) use ($seccionesVisibles, $subcatsPresentes): bool {
+        if ($seccionesVisibles !== null) {
+            return in_array($clave, $seccionesVisibles, true);
+        }
+        return detalleTieneSubcatOfertaExcel($subcatsPresentes, $subcats);
+    };
 
-    if (detalleTieneSubcatOfertaExcel($subcatsPresentes, ['PERNERIA', 'CONSUMIBLE', 'EMBALAJE'])) {
+    if ($mostrar('perneria_embalaje', ['PERNERIA', 'CONSUMIBLE', 'EMBALAJE'])) {
         $secciones[] = [
             'titulo' => 'PERNERIA, SOPORTES, ACCESORIOS Y EMBALAJE',
             'contenido' => "* Conjunto de pernería y soporteria estructural, compuesto por pernos, tuercas, arandelas planas y de presión, espárragos, rieles y soportes metálicos, fabricados en acero galvanizado para garantizar resistencia mecánica y protección contra la corrosión.\n\n" .
@@ -132,7 +138,7 @@ function seccionesCondicionalesOfertaExcel(array $detalle): array
         ];
     }
 
-    if (detalleTieneSubcatOfertaExcel($subcatsPresentes, ['TRABAJADOR'])) {
+    if ($mostrar('servicios_ingenieria', ['TRABAJADOR'])) {
         $secciones[] = [
             'titulo' => 'SERVICIOS DE INGENIERÍA Y PRUEBAS',
             'contenido' => "El alcance de los servicios comprende la ejecución de trabajos de ingeniería de detalle, configuración y/o programación FAT, pruebas de aceptación en fábrica FAT, como se detalla a continuación\n\n" .
@@ -141,7 +147,7 @@ function seccionesCondicionalesOfertaExcel(array $detalle): array
         ];
     }
 
-    if (detalleTieneSubcatOfertaExcel($subcatsPresentes, ['INGENIERIA AL DETALLE'])) {
+    if ($mostrar('ingenieria_detalle', ['INGENIERIA AL DETALLE'])) {
         $secciones[] = [
             'titulo' => 'INGENIERÍA DE DETALLE',
             'contenido' => "Planos mecánicos de distribución de equipos.\n" .
@@ -159,7 +165,7 @@ function seccionesCondicionalesOfertaExcel(array $detalle): array
         ];
     }
 
-    if (detalleTieneSubcatOfertaExcel($subcatsPresentes, ['DOCUMENTACION DE CALIDAD'])) {
+    if ($mostrar('calidad', ['DOCUMENTACION DE CALIDAD'])) {
         $secciones[] = [
             'titulo' => 'CALIDAD',
             'contenido' => "Procedimiento de fabricación.\n" .

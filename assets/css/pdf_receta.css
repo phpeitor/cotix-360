@@ -612,6 +612,25 @@ table {
     text-align: center;
 }
 
+.offer-pdf .offer-pdf-conditional-title {
+    margin-top: 2mm;
+    padding: 1.3mm 2mm;
+    background: #92d050;
+    color: #000;
+    font-family: DejaVu Sans Mono, monospace;
+    font-size: 8.2px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.offer-pdf .offer-pdf-conditional-content {
+    padding: 1.5mm 2mm;
+    font-family: DejaVu Sans Mono, monospace;
+    font-size: 8.2px;
+    line-height: 1.35;
+    color: #000;
+}
+
 .offer-pdf .money {
     text-align: right;
     white-space: nowrap;

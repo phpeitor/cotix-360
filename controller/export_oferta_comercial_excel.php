@@ -59,7 +59,10 @@ try {
         }
     }
     $detalleAgrupado = agruparOfertaExcel($detalle);
-    $seccionesCondicionalesOferta = seccionesCondicionalesOfertaExcel($detalle);
+    $ofertaSeccionesRaw = trim((string)($_REQUEST['oferta_secciones'] ?? ''));
+    $ofertaSecciones = $ofertaSeccionesRaw !== '' ? json_decode($ofertaSeccionesRaw, true) : null;
+    $ofertaSecciones = is_array($ofertaSecciones) ? array_values(array_intersect($ofertaSecciones, ['perneria_embalaje', 'servicios_ingenieria', 'ingenieria_detalle', 'calidad'])) : null;
+    $seccionesCondicionalesOferta = seccionesCondicionalesOfertaExcel($detalle, $ofertaSecciones);
     $categoriasReceta = $recetaModel->obtenerCategoriasParaEdicion((int)$receta['id']);
     $totalesOfertaReceta = totalesOfertaExcel($categoriasReceta['rows'] ?? []);
     $totalConMargenReceta = $totalesOfertaReceta['subtotal'];

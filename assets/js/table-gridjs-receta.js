@@ -467,6 +467,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return groupCols;
     }
 
+    function getOfertaSeccionesVisibles() {
+        return Array.from(document.querySelectorAll(".oferta-seccion-check:checked"))
+            .map(check => check.value);
+    }
+
     function validarDatosOferta(json, tipoDocumento) {
         const cliente = json.cliente || {};
         const campos = [
@@ -565,6 +570,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const groupCols = getOfertaGroupCols();
+        const seccionesVisibles = getOfertaSeccionesVisibles();
 
         const form = document.createElement("form");
         form.method = "POST";
@@ -576,7 +582,8 @@ document.addEventListener("DOMContentLoaded", () => {
             ["id", ofertaActualHash],
             ["oferta", "1"],
             ["oferta_items", selectedItems.join(",")],
-            ["oferta_group_cols", JSON.stringify(groupCols)]
+            ["oferta_group_cols", JSON.stringify(groupCols)],
+            ["oferta_secciones", JSON.stringify(seccionesVisibles)]
         ].forEach(([name, value]) => {
             const input = document.createElement("input");
             input.type = "hidden";
@@ -602,6 +609,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const groupCols = getOfertaGroupCols();
+        const seccionesVisibles = getOfertaSeccionesVisibles();
 
         const form = document.createElement("form");
         form.method = "POST";
@@ -612,7 +620,8 @@ document.addEventListener("DOMContentLoaded", () => {
         [
             ["id", ofertaActualHash],
             ["oferta_items", selectedItems.join(",")],
-            ["oferta_group_cols", JSON.stringify(groupCols)]
+            ["oferta_group_cols", JSON.stringify(groupCols)],
+            ["oferta_secciones", JSON.stringify(seccionesVisibles)]
         ].forEach(([name, value]) => {
             const input = document.createElement("input");
             input.type = "hidden";

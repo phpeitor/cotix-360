@@ -201,7 +201,10 @@ if ($esOferta && !empty($ofertaItemIds)) {
     }));
 }
 $detalleOfertaAgrupado = $esOferta ? agruparOfertaExcel($detalleOfertaVisible) : [];
-$seccionesCondicionalesOferta = $esOferta ? seccionesCondicionalesOfertaExcel($detalleOfertaVisible) : [];
+$ofertaSeccionesRaw = trim((string)($_REQUEST['oferta_secciones'] ?? ''));
+$ofertaSecciones = $ofertaSeccionesRaw !== '' ? json_decode($ofertaSeccionesRaw, true) : null;
+$ofertaSecciones = is_array($ofertaSecciones) ? array_values(array_intersect($ofertaSecciones, ['perneria_embalaje', 'servicios_ingenieria', 'ingenieria_detalle', 'calidad'])) : null;
+$seccionesCondicionalesOferta = $esOferta ? seccionesCondicionalesOfertaExcel($detalleOfertaVisible, $ofertaSecciones) : [];
 ob_start();
 ?>
 <!doctype html>
@@ -423,16 +426,12 @@ $tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['clie
                         </tr>
                     <?php endforeach; ?>
                 <?php endforeach; ?>
-                <?php foreach ($seccionesCondicionalesOferta as $seccionOfertaPdf): ?>
-                    <tr class="offer-pdf-group-row">
-                        <td colspan="5"><?= escaparPdf($seccionOfertaPdf['titulo']) ?></td>
-                    </tr>
-                    <tr>
-                        <td colspan="5"><?= nl2br(escaparPdf($seccionOfertaPdf['contenido'])) ?></td>
-                    </tr>
-                <?php endforeach; ?>
             </tbody>
         </table>
+        <?php foreach ($seccionesCondicionalesOferta as $seccionOfertaPdf): ?>
+            <div class="offer-pdf-group-row offer-pdf-conditional-title"><?= escaparPdf($seccionOfertaPdf['titulo']) ?></div>
+            <div class="offer-pdf-conditional-content"><?= nl2br(escaparPdf($seccionOfertaPdf['contenido'])) ?></div>
+        <?php endforeach; ?>
     <?php elseif ($mostrarDetalle): ?>
         <table class="section-table">
             <thead>
@@ -453,8 +452,6 @@ $tiempoEntregaDiasOferta = (int)preg_replace('/\D+/', '', (string)($receta['clie
                         $cantidad = (int)($i['cantidad'] ?? 0);
                         $precioUnitario = (float)($i['precio'] ?? 0);
                         $subtotalLinea = $precioUnitario * $cantidad;
-
-                        // Mostrar precio en DÓLARES: si el item está en soles, convertir usando tipo de cambio; si ya está en dólares usar el valor real
                         $esEnSoles = strtoupper(trim((string)($i['moneda'] ?? ''))) !== 'DOLLAR';
                         if ($esEnSoles) {
                             $precioMostrado = $tipoCambio > 0 ? ($subtotalLinea / $tipoCambio) : 0;

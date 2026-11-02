@@ -233,6 +233,18 @@ require_once ROOT . '/controller/check_session.php';
                             </div>
                         </div>
                     </div>
+                    <div class="card border mb-3">
+                        <div class="card-body py-3">
+                            <h6 class="fw-semibold mb-2">Secciones adicionales de la oferta</h6>
+                            <p class="text-muted small mb-2">Elige qué secciones incluir. La selección es independiente de los items seleccionados.</p>
+                            <div class="d-flex flex-wrap gap-3">
+                                <div class="form-check"><input class="form-check-input oferta-seccion-check" type="checkbox" id="oferta-seccion-perneria" value="perneria_embalaje"><label class="form-check-label" for="oferta-seccion-perneria">Pernería, soportes, accesorios y embalaje</label></div>
+                                <div class="form-check"><input class="form-check-input oferta-seccion-check" type="checkbox" id="oferta-seccion-servicios" value="servicios_ingenieria"><label class="form-check-label" for="oferta-seccion-servicios">Servicios de ingeniería y pruebas</label></div>
+                                <div class="form-check"><input class="form-check-input oferta-seccion-check" type="checkbox" id="oferta-seccion-ingenieria" value="ingenieria_detalle"><label class="form-check-label" for="oferta-seccion-ingenieria">Ingeniería de detalle</label></div>
+                                <div class="form-check"><input class="form-check-input oferta-seccion-check" type="checkbox" id="oferta-seccion-calidad" value="calidad"><label class="form-check-label" for="oferta-seccion-calidad">Calidad</label></div>
+                            </div>
+                        </div>
+                    </div>
                     <div id="oferta-items-container"></div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
