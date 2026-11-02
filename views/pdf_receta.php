@@ -19,7 +19,7 @@ function formatearFechaPdf($fecha) {
     if (empty($fecha)) return '';
     try {
         $dt = new DateTime($fecha);
-        return $dt->format('Y-m-d H:i');
+        return $dt->format('d/m/Y');
     } catch (Exception $e) {
         return (string)$fecha;
     }
@@ -323,12 +323,10 @@ ob_start();
             </tr>
             <?php for ($idxHeader = 0; $idxHeader < 7; $idxHeader++): ?>
                 <tr>
-                    <td class="offer-label"><?= escaparPdf($clienteHeaderRows[$idxHeader][0]) ?></td>
-                    <td class="center">:</td>
-                    <td><?= escaparPdf($clienteHeaderRows[$idxHeader][1]) ?></td>
-                    <td class="offer-label"><?= escaparPdf($comercialHeaderRows[$idxHeader][0]) ?></td>
-                    <td class="center"><?= $comercialHeaderRows[$idxHeader][0] !== '' ? ':' : '' ?></td>
-                    <td colspan="2"><?= escaparPdf($comercialHeaderRows[$idxHeader][1]) ?></td>
+                    <td class="offer-label"><?= escaparPdf($clienteHeaderRows[$idxHeader][0]) ?><?= $clienteHeaderRows[$idxHeader][0] !== '' ? ':' : '' ?></td>
+                    <td colspan="2"><?= escaparPdf($clienteHeaderRows[$idxHeader][1]) ?></td>
+                    <td class="offer-label"><?= escaparPdf($comercialHeaderRows[$idxHeader][0]) ?><?= $comercialHeaderRows[$idxHeader][0] !== '' ? ':' : '' ?></td>
+                    <td colspan="3"><?= escaparPdf($comercialHeaderRows[$idxHeader][1]) ?></td>
                 </tr>
             <?php endfor; ?>
             <tr>

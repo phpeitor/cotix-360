@@ -8,9 +8,9 @@ function textoOfertaExcel($value): string
 function fechaOfertaExcel($fecha): string
 {
     try {
-        return (new DateTime((string)$fecha))->format('j/n/Y');
+        return (new DateTime((string)$fecha))->format('d/m/Y');
     } catch (Throwable $e) {
-        return (new DateTime('now', new DateTimeZone('America/Lima')))->format('j/n/Y');
+        return (new DateTime('now', new DateTimeZone('America/Lima')))->format('d/m/Y');
     }
 }
 

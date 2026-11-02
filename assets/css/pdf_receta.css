@@ -409,8 +409,9 @@ table {
 }
 
 .offer-pdf .offer-header-table td {
-    border: 0.18mm solid #7f7f7f;
-    padding: 0.9mm 1mm;
+    border: 0;
+    border-bottom: 0.15mm solid #d8dfdc;
+    padding: 1.1mm 1.3mm;
     vertical-align: middle;
     line-height: 1.2;
 }
@@ -435,17 +436,37 @@ table {
 .offer-pdf .offer-spacer {
     height: 4mm;
     padding: 0;
+    border: 0 !important;
 }
 
 .offer-pdf .offer-header-title {
     font-weight: bold;
-    border-top: 0.35mm solid #666;
-    border-bottom: 0.35mm solid #666;
+    border-top: 0.4mm solid #0b6f62 !important;
+    border-bottom: 0.4mm solid #0b6f62 !important;
+    color: #0b6f62;
+    padding-top: 1.8mm !important;
+    padding-bottom: 1.8mm !important;
 }
 
 .offer-pdf .offer-label {
-    width: 12%;
+    width: 15%;
     font-weight: bold;
+    white-space: nowrap;
+    color: #243b35;
+}
+
+.offer-pdf .offer-header-table tr:nth-child(n+4):nth-child(-n+10) td {
+    border-bottom: 0.12mm solid #e7ecea;
+}
+
+.offer-pdf .offer-header-table tr:nth-child(2) td,
+.offer-pdf .offer-header-table tr:nth-child(3) td,
+.offer-pdf .offer-header-table tr:nth-child(4) td,
+.offer-pdf .offer-header-table tr:nth-child(5) td,
+.offer-pdf .offer-header-table tr:nth-child(6) td,
+.offer-pdf .offer-header-table tr:nth-child(7) td {
+    padding-top: 1.25mm;
+    padding-bottom: 1.25mm;
 }
 
 .offer-pdf .offer-intro {
@@ -511,7 +532,8 @@ table {
 .offer-pdf .offer-excel-table td,
 .offer-pdf .offer-summary-table td,
 .offer-pdf .offer-conditions-table td {
-    border: 0.18mm solid #7f7f7f;
+    border: 0;
+    border-bottom: 0.18mm solid #d4ddd9;
     padding: 1mm 1.2mm;
     vertical-align: middle;
     line-height: 1.28;
@@ -601,7 +623,8 @@ table {
 }
 
 .offer-pdf .offer-block-title {
-    border: 0.18mm solid #7f7f7f;
+    border: 0;
+    border-bottom: 0.3mm solid #0b6f62;
     font-family: DejaVu Sans Mono, monospace;
     font-size: 8.6px;
     padding: 1mm 1.2mm;
@@ -609,7 +632,7 @@ table {
 }
 
 .offer-pdf .offer-terms {
-    border: 0.18mm solid #7f7f7f;
+    border: 0;
     border-top: 0;
     font-family: DejaVu Sans Mono, monospace;
     font-size: 7.4px;
