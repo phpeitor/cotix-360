@@ -166,8 +166,8 @@ $esCargoVendedor = (int)($_SESSION['session_cargo'] ?? 0) === 7;
                                                     <th>Detalle</th>
                                                     <th>Tipo</th>
                                                     <th class="text-center">Cant.</th>
-                                                    <th class="text-end <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>">Precio</th>
-                                                    <th class="text-end <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>">Total</th>
+                                                    <th class="text-end <?= in_array((int)$_SESSION['session_cargo'], [4, 7], true) ? 'd-none' : '' ?>">Precio</th>
+                                                    <th class="text-end <?= in_array((int)$_SESSION['session_cargo'], [4, 7], true) ? 'd-none' : '' ?>">Total</th>
                                                     <th class="text-center">Acción</th>
                                                 </tr>
                                             </thead>
@@ -310,7 +310,7 @@ $esCargoVendedor = (int)($_SESSION['session_cargo'] ?? 0) === 7;
                                         <tr>
                                             <th>Item</th>
                                             <th class="text-center">Cant.</th>
-                                            <th class="text-end <?= (int)$_SESSION['session_cargo'] === 4 ? 'd-none' : '' ?>">Precio</th>
+                                            <th class="text-end <?= in_array((int)$_SESSION['session_cargo'], [4, 7], true) ? 'd-none' : '' ?>">Precio</th>
                                             <th class="text-center">Acción</th>
                                         </tr>
                                     </thead>

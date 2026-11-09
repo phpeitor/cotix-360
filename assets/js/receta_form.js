@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const paginationList = document.getElementById("pagination_list");
 
     const userCargo = Number(recetaForm?.dataset?.userCargo || 0);
-    const isTecnico = userCargo === 4;
+    const isTecnico = [4, 7].includes(userCargo);
     const canEditDetallePrice = [1, 3].includes(userCargo);
     const btnInfoCategoriaModal = document.querySelector('[data-bs-target="#info-categoria-modal"]');
 
