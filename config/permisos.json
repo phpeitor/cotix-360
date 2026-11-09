@@ -87,5 +87,20 @@
             "receta_form.php",
             "receta_list.php"
         ]
+    },
+    "8": {
+        "nombre": "Coordinador",
+        "acceso": [
+            "add_item_receta.php",
+            "home.php",
+            "items_receta.php",
+            "pdf_cotizacion.php",
+            "pdf_receta.php",
+            "receta.php",
+            "receta_list.php",
+            "tracking.php",
+            "tracking_crear.php",
+            "upd_item_receta.php"
+        ]
     }
 }
