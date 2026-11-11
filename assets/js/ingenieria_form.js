@@ -1,8 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const iconosSubCategoria1 = new Set([
-        "ti ti-tools", "ti ti-settings", "ti ti-bolt", "ti ti-plug",
-        "ti ti-box", "ti ti-package", "ti ti-clipboard-text", "ti ti-truck-delivery"
-    ]);
+    const iconoSubCategoria1Valido = icono => /^ti ti-[a-z0-9-]+$/i.test(String(icono || "").trim());
     const hash = new URLSearchParams(window.location.search).get("id") || "";
     const tbody = document.getElementById("ingenieriaDetalleBody");
     const itemSearchBody = document.getElementById("recetaItemsTableBody");
@@ -498,8 +495,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const itemDescripcion = escapeHtml(normalizarTextoDetalle(item.descripcion) || "-");
             const detalleLinea1 = escapeHtml(formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]) || "-");
             const detalleLinea2 = escapeHtml(formatearRutaDetalle([item.marca, item.modelo, item.uni_medida]) || "-");
-            const iconoSubCategoria1 = iconosSubCategoria1.has(String(item.sub_cat_1_icon || ""))
-                ? String(item.sub_cat_1_icon)
+            const iconoSubCategoria1 = iconoSubCategoria1Valido(item.sub_cat_1_icon)
+                ? String(item.sub_cat_1_icon).trim()
                 : "ti ti-tools";
             const tipo = String(item.tipo || "-").toUpperCase();
             const tipoColor = tipo === "PRODUCTO" ? "text-success" : "text-info";

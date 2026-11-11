@@ -569,7 +569,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/compras_detalle.js?v=3.8"></script>
+    <script src="./assets/js/compras_detalle.js?v=3.9"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/compras_charts.js?v=2.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
