@@ -75,7 +75,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const userCargo = Number(recetaForm?.dataset?.userCargo || 0);
     const isTecnico = [4, 7].includes(userCargo);
-    const canEditDetallePrice = [1, 3].includes(userCargo);
+    const canViewPrices = ![3, 4, 6, 7].includes(userCargo);
+    const canEditDetallePrice = userCargo === 1;
     const btnInfoCategoriaModal = document.querySelector('[data-bs-target="#info-categoria-modal"]');
 
     if (isTecnico && btnInfoCategoriaModal) {
@@ -788,7 +789,7 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         if (!tbody) return;
 
         const filas = Math.min(Math.max(detalle.length || 6, 4), 8);
-        const ocultarPrecio = isTecnico ? "d-none" : "";
+        const ocultarPrecio = canViewPrices ? "" : "d-none";
         const celda = (w, h, extra = "") => `<div class="skeleton-item ${extra}" style="width:${w};height:${h};"></div>`;
 
         tbody.innerHTML = Array.from({ length: filas }, () => `
@@ -1681,10 +1682,10 @@ const iconoManual = esPrecioManual
                             <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center btn-qty-plus" style="width:22px;min-width:22px;height:22px;" data-id="${itemId}" ${editable ? "" : "disabled"}>+</button>
                         </div>
                     </td>
-                    <td class="text-end precio-tooltip ${isTecnico ? "d-none" : ""}" data-bs-toggle="tooltip" data-bs-title="${tooltipPrecio}">
+                    <td class="text-end precio-tooltip ${canViewPrices ? "" : "d-none"}" data-bs-toggle="tooltip" data-bs-title="${tooltipPrecio}">
                         ${precioCell}
                     </td>
-                    <td class="text-end ${isTecnico ? "d-none" : ""}">
+                    <td class="text-end ${canViewPrices ? "" : "d-none"}">
                         <span class="text-muted fs-12">${monedaSimbolo}</span>
                         <h5 class="fs-14 mt-1 fw-normal mb-0 item-subtotal-value">${format2(subtotal)}</h5>
                     </td>
@@ -2296,7 +2297,7 @@ const submitBtn = recetaForm?.querySelector("[type='submit']");
 
     function renderItemsTable(rows, emptyMessage = "No hay items para mostrar con los filtros actuales.") {
         if (!itemsTableBody) return;
-        const precioColumnHidden = isTecnico;
+        const precioColumnHidden = !canViewPrices;
 
         if (itemsResultCount) {
             itemsResultCount.textContent = `${rows.length} resultado${rows.length === 1 ? "" : "s"}`;
