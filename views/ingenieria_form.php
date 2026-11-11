@@ -131,6 +131,12 @@ $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), 
                                         </div>
                                     </div>
 
+                                    <div class="px-2 py-2 border-bottom">
+                                        <div class="input-group input-group-sm" style="max-width: 420px;">
+                                            <span class="input-group-text"><i class="ti ti-search"></i></span>
+                                            <input type="search" class="form-control" id="ingenieriaSubcat1Search" placeholder="Buscar por subcategoría 1..." aria-label="Buscar items por subcategoría 1">
+                                        </div>
+                                    </div>
                                     <div class="table-responsive">
                                         <table class="table table-custom table-centered table-sm table-hover mb-0 ingenieria-detalle-table">
                                             <thead class="table-light">
@@ -400,6 +406,6 @@ $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="./assets/js/ingenieria_form.js?v=3.0"></script>
+    <script src="./assets/js/ingenieria_form.js?v=3.1"></script>
 </body>
 </html>

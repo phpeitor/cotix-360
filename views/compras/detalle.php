@@ -133,7 +133,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                     <div class="px-2 py-2 border-bottom">
                                         <div class="input-group input-group-sm compras-detalle-search-group">
                                             <span class="input-group-text"><i class="ti ti-search"></i></span>
-                                            <input type="search" class="form-control" id="comprasDetalleSearch" placeholder="Buscar item en compras...">
+                                            <input type="search" class="form-control" id="comprasDetalleSearch" placeholder="Buscar item o subcategoría 1 en compras..." aria-label="Buscar item o subcategoría 1 en compras">
                                         </div>
                                     </div>
                                     <div class="table-responsive">
@@ -569,7 +569,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/compras_detalle.js?v=3.9"></script>
+    <script src="./assets/js/compras_detalle.js?v=4.0"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/compras_charts.js?v=2.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>

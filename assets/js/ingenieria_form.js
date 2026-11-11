@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const productoFiltersWrap = document.getElementById("productoFiltersWrap");
     const marcaSelect = document.getElementById("filterMarca");
     const modeloSelect = document.getElementById("filterModelo");
+    const ingenieriaSubcat1Search = document.getElementById("ingenieriaSubcat1Search");
 
     const fields = {
         form: document.querySelector("form.form-ingenieria"),
@@ -87,6 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
         subCat2Select?.addEventListener("change", onSubCat2Change);
         marcaSelect?.addEventListener("change", cargarItems);
         modeloSelect?.addEventListener("change", cargarItems);
+        ingenieriaSubcat1Search?.addEventListener("input", renderDetalle);
 
         fields.btnNombre?.addEventListener("click", () => toggleNombre());
         fields.nombreInput?.addEventListener("keydown", event => {
@@ -478,7 +480,17 @@ document.addEventListener("DOMContentLoaded", () => {
         let totalDolares = 0;
         let totalItems = 0;
 
-        tbody.innerHTML = detalle.map(item => {
+        const querySubcat1 = String(ingenieriaSubcat1Search?.value || "").trim().toLocaleLowerCase("es");
+        const detalleFiltrado = querySubcat1
+            ? detalle.filter(item => String(item.sub_cat_1 || "").toLocaleLowerCase("es").includes(querySubcat1))
+            : detalle;
+
+        if (!detalleFiltrado.length) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">${detalle.length ? "No hay items en esa subcategoría 1." : "Sin items para mostrar."}</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = detalleFiltrado.map(item => {
             const cantidad = Number(item.cantidad || 0);
             const precio = Number(item.precio || 0);
             const adicional = esAdicional(item);

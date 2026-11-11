@@ -158,6 +158,12 @@ $esCargoVendedor = (int)($_SESSION['session_cargo'] ?? 0) === 7;
 
                                         </div>
                                     </div>
+                                    <div class="px-2 py-2 border-bottom">
+                                        <div class="input-group input-group-sm" style="max-width: 420px;">
+                                            <span class="input-group-text"><i class="ti ti-search"></i></span>
+                                            <input type="search" class="form-control" id="recetaSubcat1Search" placeholder="Buscar por subcategoría 1..." aria-label="Buscar items por subcategoría 1">
+                                        </div>
+                                    </div>
                                     <div class="table-responsive">
                                         <table class="table table-custom table-centered table-sm table-nowrap table-hover mb-0">
                                             <thead class="table-light">
@@ -542,7 +548,7 @@ $esCargoVendedor = (int)($_SESSION['session_cargo'] ?? 0) === 7;
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/receta_form.js?v=3.5"></script>
+    <script src="./assets/js/receta_form.js?v=3.6"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

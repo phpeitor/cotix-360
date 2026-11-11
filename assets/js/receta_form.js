@@ -56,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const condicionesEconomicasDiasEl = document.getElementById("condicionesEconomicasDias");
     const condicionesEconomicasVisibleEl = document.getElementById("condicionesEconomicasVisible");
     const observacionesComercialesEl = document.getElementById("observacionesComerciales");
+    const recetaSubcat1Search = document.getElementById("recetaSubcat1Search");
 
     const baseSelect = document.getElementById("filterBase");
     const categoriaSelect = document.getElementById("categoria");
@@ -389,6 +390,11 @@ document.addEventListener("DOMContentLoaded", () => {
         subCat2Select?.addEventListener("change", onSubCat2Change);
         marcaSelect?.addEventListener("change", onMarcaChange);
         modeloSelect?.addEventListener("change", onModeloChange);
+        recetaSubcat1Search?.addEventListener("input", () => {
+            currentPage = 1;
+            renderBody();
+            renderPagination();
+        });
 
         recetaForm?.addEventListener("submit", guardarReceta);
         btnReloadPrecios?.addEventListener("click", sincronizarPrecios);
@@ -1491,8 +1497,15 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
     }
 
     function getVisibleRows() {
+        const filtered = getFilteredRows();
         const startIndex = (currentPage - 1) * PAGE_SIZE;
-        return detalle.slice(startIndex, startIndex + PAGE_SIZE);
+        return filtered.slice(startIndex, startIndex + PAGE_SIZE);
+    }
+
+    function getFilteredRows() {
+        const query = String(recetaSubcat1Search?.value || "").trim().toLocaleLowerCase("es");
+        if (!query) return detalle;
+        return detalle.filter(item => String(item.sub_cat_1 || "").toLocaleLowerCase("es").includes(query));
     }
 
     function actualizarCantidad(itemId, delta) {
@@ -1591,7 +1604,9 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         const rows = getVisibleRows();
 
         if (!rows.length) {
-            renderEmptyState("No hay items para mostrar.");
+            renderEmptyState(recetaSubcat1Search?.value.trim()
+                ? "No hay items en esa subcategoría 1."
+                : "No hay items para mostrar.");
             return;
         }
 
@@ -1761,7 +1776,7 @@ const iconoManual = esPrecioManual
     }
 
     function renderPagination() {
-        const totalRows = detalle.length;
+        const totalRows = getFilteredRows().length;
         const totalPages = Math.max(1, Math.ceil(totalRows / PAGE_SIZE));
 
         if (currentPage > totalPages) {
