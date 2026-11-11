@@ -272,7 +272,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
     {
         $sessionCargo = $_SESSION['session_cargo'] ?? null;
         $sessionId = $_SESSION['session_id'] ?? null;
-        $isAdmin = in_array((int)$sessionCargo, [1, 3], true);
+        $isAdmin = in_array((int)$sessionCargo, [1, 8], true);
 
         $where = "c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)";
 
@@ -990,7 +990,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     {
         $sessionCargo = $_SESSION['session_cargo'] ?? null;
         $sessionId = $_SESSION['session_id'] ?? null;
-        $isAdmin = in_array((int)$sessionCargo, [1, 3], true);
+        $isAdmin = in_array((int)$sessionCargo, [1, 8], true);
 
         $where = "c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)";
 
