@@ -34,7 +34,7 @@ try {
     $itemModel = new Item();
     $rows = $itemModel->obtenerTodosRecetaItems();
 
-    $ocultarPrecio = in_array((int)($_SESSION['session_cargo'] ?? 0), [4, 6], true);
+    $ocultarPrecio = in_array((int)($_SESSION['session_cargo'] ?? 0), [3, 4, 6], true);
 
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();

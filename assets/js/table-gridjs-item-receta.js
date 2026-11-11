@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const tableEl = document.getElementById("table-gridjs");
     const alertPrecioCambio = document.getElementById("alertPrecioCambio");
     const userCargo = Number(tableEl?.dataset?.userCargo || 0);
-    const ocultaPrecios = [4, 6].includes(userCargo);
+    const ocultaPrecios = [3, 4, 6].includes(userCargo);
     let precioCeroEventSource = null;
     let precioCeroSignature = "";
 

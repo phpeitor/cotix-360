@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once ROOT . '/controller/check_session.php';
-$esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
+$ocultarPreciosIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), [3, 6], true);
 $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3], true);
 ?>
 <!DOCTYPE html>
@@ -145,8 +145,8 @@ $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), 
                                                     <th>Detalle</th>
                                                     <th>Tipo</th>
                                                     <th class="text-center">Cant.</th>
-                                                    <th class="text-end <?= $esCargoIngenieria ? 'd-none' : '' ?>">Precio</th>
-                                                    <th class="text-end <?= $esCargoIngenieria ? 'd-none' : '' ?>">Total</th>
+                                                    <th class="text-end <?= $ocultarPreciosIngenieria ? 'd-none' : '' ?>">Precio</th>
+                                                    <th class="text-end <?= $ocultarPreciosIngenieria ? 'd-none' : '' ?>">Total</th>
                                                     <th class="text-center">Acción</th>
                                                 </tr>
                                             </thead>
@@ -406,6 +406,6 @@ $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="./assets/js/ingenieria_form.js?v=3.1"></script>
+    <script src="./assets/js/ingenieria_form.js?v=3.2"></script>
 </body>
 </html>

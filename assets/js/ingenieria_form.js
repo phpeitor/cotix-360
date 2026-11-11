@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let cliente = null;
     const MAX_CANTIDAD = 5000;
     const userCargo = Number(fields.form?.dataset?.userCargo || 0);
-    const esCargoIngenieria = userCargo === 6;
+    const ocultarPreciosIngenieria = [3, 6].includes(userCargo);
     const HISTORIAL_PAGE_SIZE = 10;
     let historialPage = 1;
     const cantidadTimers = new Map();
@@ -552,7 +552,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <button type="button" class="plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:22px;min-width:22px;height:22px;" data-qty-detalle="${item.id}" data-delta="1" ${isIngenieriaAprobada() ? "disabled" : ""}>+</button>
                         </div>
                     </td>
-                    ${esCargoIngenieria ? "" : `
+                    ${ocultarPreciosIngenieria ? "" : `
                         <td class="text-end">
                             <span class="text-muted fs-12">${simbolo}</span>
                             <h5 class="fs-14 mt-1 fw-normal mb-0">${money(precio)}</h5>
@@ -573,7 +573,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }).join("");
 
         if (!detalle.length) {
-            tbody.innerHTML = `<tr><td colspan="${esCargoIngenieria ? 5 : 7}" class="text-center text-muted py-4">Sin detalle registrado</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${ocultarPreciosIngenieria ? 5 : 7}" class="text-center text-muted py-4">Sin detalle registrado</td></tr>`;
         }
 
         setText(fields.totalItem, String(totalItems));
@@ -644,7 +644,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!tbody) return;
 
         const filas = Math.min(Math.max(detalle.length || 6, 4), 8);
-        const ocultarPrecio = esCargoIngenieria ? "d-none" : "";
+        const ocultarPrecio = ocultarPreciosIngenieria ? "d-none" : "";
         const celda = (w, h, extra = "") => `<div class="skeleton-item ${extra}" style="width:${w};height:${h};"></div>`;
 
         tbody.innerHTML = Array.from({ length: filas }, () => `
@@ -1015,7 +1015,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderItemsDisponibles(items) {
         itemsResultCount.textContent = `${items.length} resultados`;
         if (!items.length) {
-            itemSearchBody.innerHTML = `<tr><td colspan="${esCargoIngenieria ? 3 : 4}" class="text-center text-muted py-4">Sin items disponibles.</td></tr>`;
+            itemSearchBody.innerHTML = `<tr><td colspan="${ocultarPreciosIngenieria ? 3 : 4}" class="text-center text-muted py-4">Sin items disponibles.</td></tr>`;
             return;
         }
         itemSearchBody.innerHTML = items.map(item => {
@@ -1043,7 +1043,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <button type="button" class="qty-plus bg-light text-dark border-0 rounded-circle fs-16 lh-1 d-inline-flex align-items-center justify-content-center" style="width:20px;min-width:20px;height:20px;">+</button>
                         </div>
                     </td>
-                    ${esCargoIngenieria ? "" : `<td class="text-end ${precioCero ? "text-warning fw-semibold" : ""}">${simbolo} ${money(precio)}</td>`}
+                    ${ocultarPreciosIngenieria ? "" : `<td class="text-end ${precioCero ? "text-warning fw-semibold" : ""}">${simbolo} ${money(precio)}</td>`}
                     <td class="text-center"><button type="button" class="btn btn-sm ${precioCero ? "btn-secondary" : "btn-primary"}" data-add-item="${item.id}" data-precio-cero="${precioCero ? "1" : "0"}" ${isIngenieriaAprobada() || precioCero ? "disabled" : ""} data-bs-toggle="tooltip" data-bs-title="${precioCero ? "No se puede agregar con precio 0" : "Agregar"}"><i class="ti ${precioCero ? "ti-lock" : "ti-plus"}"></i></button></td>
                 </tr>
             `;
