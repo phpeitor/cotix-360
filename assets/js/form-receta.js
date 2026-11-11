@@ -334,7 +334,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 modelo: item.modelo,
                 nombre: item.nombre,
                 moneda: item.moneda,
-                tipo: item.tipo
+                tipo: item.tipo,
+                sub_cat_1_icon: item.sub_cat_1_icon
             }));
 
             return `
@@ -686,13 +687,16 @@ document.addEventListener("DOMContentLoaded", () => {
         tr.dataset.modelo = item.modelo;
         tr.dataset.unimedida = item.uni_medida;
         tr.dataset.tipo = item.tipo;
+        const iconoSubcat = /^ti ti-[a-z0-9-]+$/i.test(String(item.sub_cat_1_icon || "").trim())
+            ? String(item.sub_cat_1_icon).trim()
+            : "ti ti-tools";
 
         tr.innerHTML = `
             <td>
                 <div class="d-flex align-items-center">
                     <div class="avatar-md flex-shrink-0 me-2">
                         <span class="avatar-title bg-primary-subtle rounded-circle">
-                            <img src="${getRandomLogo()}" alt="" height="22">
+                            <i class="subcat-detail-icon ${iconoSubcat}" aria-hidden="true"></i>
                         </span>
                     </div>
                     <div>

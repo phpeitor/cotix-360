@@ -585,22 +585,26 @@ class Item {
                     i.marca,
                     i.modelo,
                     i.estado,
+                    COALESCE(o.icon, 'ti ti-tools') AS sub_cat_1_icon,
                     p_cre.usuario AS usuario_cre_nombre,
                     p_upd.usuario AS usuario_upd_nombre,
                     i.usuario_id,
                     i.usuario_upd
                 FROM receta_items i
+                LEFT JOIN vw_receta_items_orden o
+                    ON o.tipo COLLATE utf8mb4_unicode_ci = i.tipo COLLATE utf8mb4_unicode_ci
+                   AND o.sub_cat_1 COLLATE utf8mb4_unicode_ci = i.sub_cat_1 COLLATE utf8mb4_unicode_ci
                 LEFT JOIN personal p_cre ON p_cre.IDPERSONAL = i.usuario_id
                 LEFT JOIN personal p_upd ON p_upd.IDPERSONAL = i.usuario_upd
                 WHERE 1 = 1";
         $params = [];
 
-        $this->agregarFiltroReceta($sql, $params, 'tipo', $tipo);
-        $this->agregarFiltroReceta($sql, $params, 'categoria', $categoria);
-        $this->agregarFiltroReceta($sql, $params, 'sub_cat_1', $subCat1);
-        $this->agregarFiltroReceta($sql, $params, 'sub_cat_2', $subCat2);
-        $this->agregarFiltroReceta($sql, $params, 'marca', $marca);
-        $this->agregarFiltroReceta($sql, $params, 'modelo', $modelo);
+        $this->agregarFiltroReceta($sql, $params, 'i.tipo', $tipo, 'tipo');
+        $this->agregarFiltroReceta($sql, $params, 'i.categoria', $categoria, 'categoria');
+        $this->agregarFiltroReceta($sql, $params, 'i.sub_cat_1', $subCat1, 'sub_cat_1');
+        $this->agregarFiltroReceta($sql, $params, 'i.sub_cat_2', $subCat2, 'sub_cat_2');
+        $this->agregarFiltroReceta($sql, $params, 'i.marca', $marca, 'marca');
+        $this->agregarFiltroReceta($sql, $params, 'i.modelo', $modelo, 'modelo');
 
         $sql .= " ORDER BY i.id DESC";
 
