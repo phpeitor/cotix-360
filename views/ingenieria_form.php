@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once ROOT . '/controller/check_session.php';
 $ocultarPreciosIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), [3, 6], true);
-$puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3], true);
+$puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 8], true);
 ?>
 <!DOCTYPE html>
 <html lang="en">

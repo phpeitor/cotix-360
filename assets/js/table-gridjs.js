@@ -52,6 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     ? `<span class="badge badge-outline-success rounded-pill">Ingeniería</span>`
                     : cargo == 7
                     ? `<span class="badge badge-outline-primary rounded-pill">Vendedor</span>`
+                    : cargo == 8
+                    ? `<span class="badge badge-outline-info rounded-pill">Coordinador</span>`
                     : cargo == 3
                     ? `<span class="badge badge-outline-danger rounded-pill">Supervisor</span>`
                     : `<span class="badge badge-outline-secondary rounded-pill">Gestor</span>`;
