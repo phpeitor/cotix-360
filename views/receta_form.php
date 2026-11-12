@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once ROOT . '/controller/check_session.php';
-$puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3, 7], true);
-$puedeGestionarCategoriasReceta = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3], true);
+$puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 7, 8], true);
+$puedeGestionarCategoriasReceta = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 8], true);
 $ocultarPreciosReceta = in_array((int)($_SESSION['session_cargo'] ?? 0), [3, 4, 6, 7], true);
 $esCargoVendedor = (int)($_SESSION['session_cargo'] ?? 0) === 7;
 ?>

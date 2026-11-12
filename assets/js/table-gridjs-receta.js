@@ -698,6 +698,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const id = row.cells[0].data;
         const estado = row.cells[5].data;
         const hashId = md5(String(id));
+        const cargoActual = Number(window.PERMISOS_STATE?.cargo ?? (typeof CARGO !== "undefined" ? CARGO : 0));
 
         let botones = `
             <a href="receta_form.php?id=${hashId}" 
@@ -717,6 +718,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 <i class="ti ti-copy"></i>
             </button>
 
+        `;
+
+        if (cargoActual !== 3) {
+            botones += `
             <a href="pdf_receta.php?id=${hashId}&oferta=1"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -728,6 +733,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <i class="ti ti-file-dollar"></i>
             </a>
         `;
+        }
 
         if (estado === "Aprobada") {
             const mostrarExcel = !(typeof CARGO !== 'undefined' && Number(CARGO) === 4);
@@ -774,7 +780,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <i class="ti ti-file"></i>
                 </a>
             `;
-        } else {
+        } else if (cargoActual !== 3) {
             botones += `
                 <button class="btn btn-soft-success btn-icon btn-sm rounded-circle btn-estado isadmin isadmin-vendedor"
                         data-id="${id}"
