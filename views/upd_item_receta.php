@@ -145,7 +145,7 @@ $sub_cat_2 = $selects->obtenerRecetaSubCategorias2();
                                             </div>
                                         </div>
 
-                                        <?php if (!in_array((int)$_SESSION['session_cargo'], [4, 6], true)): ?>
+                                        <?php if (!in_array((int)$_SESSION['session_cargo'], [3, 4, 6], true)): ?>
                                         <div class="col-md-2 mb-3">
                                             <label class="form-label" for="precio">Precio </label>
                                             <input type="number" class="form-control" id="precio" name="precio" placeholder="100.00" required="" min="0" max="9999999" step="0.01" <?= ((int)$_SESSION['session_cargo'] === 3) ? 'disabled' : '' ?>>
