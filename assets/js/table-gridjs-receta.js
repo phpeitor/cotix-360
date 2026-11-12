@@ -720,7 +720,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         `;
 
-        if (cargoActual !== 3) {
+        if (![3, 6].includes(cargoActual)) {
             botones += `
             <a href="pdf_receta.php?id=${hashId}&oferta=1"
                 target="_blank"
