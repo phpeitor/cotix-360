@@ -58,7 +58,7 @@ require_once ROOT . '/controller/check_session.php';
                                     <div class="row">
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label" for="descripcion">Descripcion</label>
-                                            <input type="text" class="form-control" id="descripcion" name="descripcion" placeholder="ZB H 50PPR DUAL CHNL" required="" maxlength="150">
+                                            <textarea class="form-control" id="descripcion" name="descripcion" placeholder="Descripción del item" rows="4" required maxlength="900"></textarea>
                                             <div class="invalid-feedback">Please provide a descripcion.</div>
                                         </div>
 

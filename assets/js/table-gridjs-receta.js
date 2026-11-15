@@ -53,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const dateInput = document.getElementById("filterDate");
-    const subCat1Input = document.getElementById("filterSubCat1");
     const today = new Date();
     const pastDate = new Date();
     pastDate.setDate(today.getDate() - 7);
@@ -76,7 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     dateInput.value = defaultRangeText;
-    cargarOpcionesSubcategoria();
 
     /* ---------------------------------------------------
        📊 GRID
@@ -150,13 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
         conectarStreamRecetaList();
     });
 
-    subCat1Input?.addEventListener("keydown", event => {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            document.getElementById("btn_buscar")?.click();
-        }
-    });
-
     window.addEventListener("beforeunload", () => {
         if (recetaListEventSource) {
             recetaListEventSource.close();
@@ -176,41 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fec_fin = formatISO(today);
         }
 
-        const sub_cat_1 = String(subCat1Input?.value || "").trim();
-        return "controller/table_receta.php?" + new URLSearchParams({
-            fec_ini,
-            fec_fin,
-            sub_cat_1
-        });
-    }
-
-    async function cargarOpcionesSubcategoria() {
-        if (!subCat1Input) return;
-        try {
-            const modulo = subCat1Input.dataset.modulo || "receta";
-            const response = await fetch(`controller/get_subcategorias_filtro.php?modulo=${encodeURIComponent(modulo)}`);
-            const data = await response.json();
-            if (!response.ok || !data.success) throw new Error(data.message || "No se pudieron cargar las subcategorías");
-
-            const choices = [
-                { value: "", label: "Todas las subcategorías 1", selected: true },
-                ...(data.subcategorias || []).map(value => ({ value, label: value }))
-            ];
-            if (subCat1Input.choicesInstance) {
-                subCat1Input.choicesInstance.clearChoices();
-                subCat1Input.choicesInstance.setChoices(choices, "value", "label", true);
-            } else {
-                subCat1Input.replaceChildren(...choices.map(choice => {
-                    const option = document.createElement("option");
-                    option.value = choice.value;
-                    option.textContent = choice.label;
-                    option.selected = Boolean(choice.selected);
-                    return option;
-                }));
-            }
-        } catch (error) {
-            console.error("Subcategoría 1:", error);
-        }
+        return "controller/table_receta.php?" + new URLSearchParams({ fec_ini, fec_fin });
     }
 
     function getCurrentDateRangeIso() {

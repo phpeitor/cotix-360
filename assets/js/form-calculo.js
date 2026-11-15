@@ -12,6 +12,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalFactorEl = document.getElementById("total_factor");
     const LIMITE_PESO = 100;
 
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function descripcionCorta(value, limite = 100) {
+        const caracteres = Array.from(String(value ?? "").trim());
+        return caracteres.length > limite ? `${caracteres.slice(0, limite).join("").trimEnd()}…` : caracteres.join("");
+    }
+
     let fleteTable = [];
 
     fetch("controller/get_flete.php")
@@ -167,7 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             choices.setChoices(
                 data.map(i => {
-                    const descripcionValida = i.descripcion && i.descripcion.trim() && i.descripcion.trim() !== "-";
                     const pesoRaw = i.peso;
                     const pesoTexto = pesoRaw !== null && pesoRaw !== undefined && String(pesoRaw).trim() !== ""
                         ? String(pesoRaw).trim()
@@ -180,7 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     return {
                         value: i.modelo,
                         label: i.modelo
-                            + (descripcionValida ? ` ⮞ ${i.descripcion}` : "")
                             + (pesoTexto ? ` ⮞ <span class="${pesoClass}">${pesoTexto}</span>` : ""),
                         customProperties: {
                             id: i.id,
@@ -257,6 +269,10 @@ document.addEventListener("DOMContentLoaded", () => {
         tr.dataset.precio = item.precio;
         tr.dataset.grupo = item.grupo;
         tr.dataset.pais   = item.pais;
+        tr.dataset.descripcion = String(item.descripcion || "");
+        const descripcionCompleta = String(item.descripcion || "").trim();
+        const descripcionVisible = descripcionCorta(descripcionCompleta);
+        const descripcionTooltip = Array.from(descripcionCompleta).length > 100;
 
         tr.innerHTML = `
             <td>
@@ -268,7 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div>
                         <span class="text-muted fs-12">${modelo}</span><br>
-                        <h5 class="fs-14 mt-1 item-description">${item.descripcion}</h5>
+                        <h5 class="fs-14 mt-1 item-description calculo-description-preview" ${descripcionTooltip ? `data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="calculo-description-tooltip" data-bs-title="${escapeHtml(descripcionCompleta)}" tabindex="0"` : ""}>${escapeHtml(descripcionVisible || "-")}</h5>
                     </div>
                 </div>
             </td>
@@ -316,6 +332,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         tbody.appendChild(tr);
         validarTdAdmin(tr);
+        const descripcionTooltipEl = tr.querySelector('[data-bs-toggle="tooltip"]');
+        if (descripcionTooltipEl && window.bootstrap?.Tooltip) {
+            bootstrap.Tooltip.getOrCreateInstance(descripcionTooltipEl, {
+                trigger: "hover focus",
+                container: "body"
+            });
+        }
         alertify.success("Item agregado");
         recalculateTotals();
     });
@@ -409,7 +432,7 @@ document.addEventListener("DOMContentLoaded", () => {
             items.push({
                 item_id: tr.dataset.itemId, 
                 modelo: tr.dataset.modelo,
-                descripcion: tr.querySelector("h5").innerText,
+                descripcion: tr.dataset.descripcion || "",
                 categoria: tr.querySelector("td:nth-child(2) span").innerText,
                 grupo: tr.dataset.grupo,
                 cantidad: parseInt(tr.querySelector("input").value),
