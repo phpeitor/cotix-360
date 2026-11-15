@@ -1,0 +1,29 @@
+#table-gridjs .items-description-preview {
+    display: -webkit-box;
+    max-width: 220px;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+#table-gridjs .items-description-preview[data-bs-toggle="tooltip"] {
+    cursor: help;
+    text-decoration: underline dotted rgba(108, 117, 125, 0.55);
+    text-underline-offset: 3px;
+}
+
+.tooltip.items-description-tooltip .tooltip-inner {
+    max-width: 480px;
+    padding: 0.65rem 0.8rem;
+    border-radius: 0.55rem;
+    background: #202a35;
+    color: #fff;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    text-align: left;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    box-shadow: 0 0.4rem 1.2rem rgba(16, 24, 40, 0.22);
+}

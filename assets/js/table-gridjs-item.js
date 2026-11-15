@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const filterCategoria = document.getElementById("filterCategoria");
     const filtrosRow = document.getElementById("filtros");
     const filterMd5Input = document.getElementById("filterMd5");
+    const tableContainer = document.getElementById("table-gridjs");
     const urlParams = new URLSearchParams(window.location.search);
     const hashParam = urlParams.get("id");
 
@@ -19,6 +20,25 @@ document.addEventListener("DOMContentLoaded", () => {
         clase: "Clase Producto",
         categoria: "Categoría Producto"
     };
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function initDescriptionTooltips() {
+        if (!window.bootstrap?.Tooltip) return;
+        tableContainer?.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(element => {
+            bootstrap.Tooltip.getOrCreateInstance(element, {
+                trigger: "hover focus",
+                container: "body"
+            });
+        });
+    }
 
     function getSelectValues(selectEl) {
         if (!selectEl) return [];
@@ -160,7 +180,20 @@ document.addEventListener("DOMContentLoaded", () => {
             {
                 id: "descripcion",
                 name: "Descripción",
-                width: "200px"
+                width: "220px",
+                formatter: cell => {
+                    const descripcion = String(cell ?? "").trim();
+                    if (!descripcion) return gridjs.html('<span class="text-muted">-</span>');
+
+                    const caracteres = Array.from(descripcion);
+                    const excede = caracteres.length > 140;
+                    const visible = excede ? `${caracteres.slice(0, 140).join("").trimEnd()}…` : descripcion;
+                    return gridjs.html(`
+                        <span class="items-description-preview" ${excede ? `data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="items-description-tooltip" data-bs-title="${escapeHtml(descripcion)}" tabindex="0" aria-label="Descripción completa disponible al pasar el cursor"` : ""}>
+                            ${escapeHtml(visible)}
+                        </span>
+                    `);
+                }
             },
             {
                 id: "moneda",
@@ -256,7 +289,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     })
-    .render(document.getElementById("table-gridjs"));
+    .render(tableContainer);
+
+    if (tableContainer) {
+        const tooltipObserver = new MutationObserver(initDescriptionTooltips);
+        tooltipObserver.observe(tableContainer, { childList: true, subtree: true });
+        initDescriptionTooltips();
+    }
 
     document.addEventListener("click", async (e) => {
 
