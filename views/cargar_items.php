@@ -17,6 +17,7 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/branding.css?v=1.5" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/cargar_items.css?v=1.0" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -47,64 +48,61 @@ require_once ROOT . '/controller/check_session.php';
 
                 <div class="row">
                     <div class="col-lg-12">
-                        <div class="card">
-                            <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
-                                <h4 class="header-title mb-0">Cargar Items</h4>
+                        <div class="card cargar-items-card">
+                            <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div>
+                                    <h4 class="header-title mb-1">Carga masiva de items</h4>
+                                    <span class="text-muted fs-13">Importa o actualiza el catálogo usando una plantilla Excel.</span>
+                                </div>
+                                <span class="badge rounded-pill bg-primary-subtle text-primary"><i class="ti ti-file-spreadsheet me-1"></i>Excel .xls / .xlsx</span>
                             </div>
 
-                            <div class="card-body"> 
-                                <form class="needs-validation form-cargar-item" novalidate="">
-                                    <div class="row">
-                                        <div class="col-md-8 mb-3">
-                                            <input class="form-control" type="file" id="fileItems" name="fileItems" accept=".xls,.xlsx" required>
-                                            <div class="invalid-feedback">Please provide a document.</div>
-                                        </div>                                        
-                                        <div class="col-md-4 mb-3">
-                                            <button type="submit" class="btn btn-soft-success btn-icon"><i class="ti ti-upload fs-20"></i> </button>
+                            <div class="card-body">
+                                <form class="form-cargar-item" novalidate>
+                                    <input class="visually-hidden" type="file" id="fileItems" name="fileItems" accept=".xls,.xlsx" aria-label="Seleccionar archivo Excel">
+                                    <div class="cargar-items-dropzone" id="cargarItemsDropzone" role="group" tabindex="0" aria-label="Seleccionar o arrastrar archivo Excel">
+                                        <div class="cargar-items-dropzone-icon"><i class="ti ti-cloud-upload"></i></div>
+                                        <div class="cargar-items-dropzone-copy">
+                                            <h5 class="mb-1">Arrastra tu archivo aquí</h5>
+                                            <p class="text-muted mb-0">o selecciona un archivo Excel desde tu equipo</p>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-primary" id="btnSeleccionarArchivo"><i class="ti ti-folder-open me-1"></i>Elegir archivo</button>
+                                    </div>
+
+                                    <div class="cargar-items-file d-none" id="cargarItemsFileInfo">
+                                        <div class="cargar-items-file-icon"><i class="ti ti-file-spreadsheet"></i></div>
+                                        <div class="min-w-0 flex-grow-1">
+                                            <strong class="d-block text-truncate" id="cargarItemsFileName"></strong>
+                                            <small class="text-muted" id="cargarItemsFileSize"></small>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-light btn-icon" id="btnQuitarArchivo" aria-label="Quitar archivo" title="Quitar archivo"><i class="ti ti-x"></i></button>
+                                    </div>
+
+                                    <div class="d-flex justify-content-end mt-3">
+                                        <button type="submit" class="btn btn-success" id="btnSubirItems" disabled>
+                                            <i class="ti ti-upload me-1"></i><span>Iniciar carga</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="cargar-items-progress d-none" id="cargarItemsProgress" aria-live="polite">
+                                        <div class="d-flex justify-content-between gap-2 mb-2">
+                                            <span id="cargarItemsProgressText">Preparando archivo…</span>
+                                            <span class="fw-semibold" id="cargarItemsProgressPercent">0%</span>
+                                        </div>
+                                        <div class="progress" role="progressbar" aria-label="Progreso de carga" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" id="cargarItemsProgressBar" style="width:0%"></div>
                                         </div>
                                     </div>
                                 </form>
 
-                                <div class="border border-dashed p-2 rounded text-center">
-                                    <div class="row">
-                                        <div class="col-lg-1 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">MODELO</p>
-                                        </div>
-                                        <div class="col-lg-1 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">PRECIO UN.</p>
-                                        </div>
-                                        <div class="col-lg-1 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">MONEDA</p>
-                                        </div>
-                                        <div class="col-lg-1 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">GRUPO DSCTO</p>
-                                        </div>
-                                        <div class="col-lg-1 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">DESCRIPCION</p>
-                                        </div>
-                                        <div class="col-lg-1 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">CATEGORIA</p>
-                                        </div>
-                                        <div class="col-lg-1 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">CLASE</p>
-                                        </div>
-                                        <div class="col-lg-1 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">PAIS</p>
-                                        </div>
-                                        <div class="col-lg-1 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">PESO</p>
-                                        </div>
-                                        <div class="col-lg-1 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">STATUS</p>
-                                        </div>
-                                        <div class="col-lg-1 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">PROVEEDOR</p>
-                                        </div>
-                                        <div class="col-lg-1 col-4 border-end">
-                                            <p class="text-muted fw-medium fs-10 mb-0"><span class="text-dark">ORIGEN</p>
-                                        </div>
+                                <details class="cargar-items-schema mt-4">
+                                    <summary><span><i class="ti ti-list-details me-2"></i>Formato requerido del Excel</span><span class="text-muted small">12 columnas, en este orden</span></summary>
+                                    <div class="cargar-items-schema-grid">
+                                        <?php foreach (["MODELO", "PRECIO UNITARIO", "MONEDA", "GRUPO DE DESCUENTO", "DESCRIPCION", "CATEGORIA DE PRODUCTO", "CLASE DE PRODUCTO", "PAIS DE ORIGEN", "PESO EN KG", "STATUS", "PROVEEDOR", "ORIGEN"] as $index => $columna): ?>
+                                            <div class="cargar-items-schema-field"><span><?= $index + 1 ?></span><code><?= htmlspecialchars($columna, ENT_QUOTES, 'UTF-8') ?></code></div>
+                                        <?php endforeach; ?>
                                     </div>
-                                </div>
+                                </details>
                             </div>
                         </div>
                     </div>
@@ -117,11 +115,32 @@ require_once ROOT . '/controller/check_session.php';
             <?php include ROOT . '/layout/footer.html'; ?>
         </div>
     </div>
+    <div class="modal fade" id="modalErroresCarga" tabindex="-1" aria-labelledby="modalErroresCargaTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <div>
+                        <h5 class="modal-title" id="modalErroresCargaTitle">Filas con errores</h5>
+                        <p class="text-muted small mb-0" id="modalErroresCargaSubtitle"></p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body pt-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light"><tr><th>Fila Excel</th><th>Modelo</th><th>Error detectado</th></tr></thead>
+                            <tbody id="erroresCargaBody"><tr><td colspan="3" class="text-center text-muted py-4">Cargando errores…</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <?php include ROOT . '/layout/theme.html'; ?>
 
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
-    <script src="./assets/js/form-carga.js?v=1.0"></script>
+    <script src="./assets/js/form-carga.js?v=2.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

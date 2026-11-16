@@ -33,3 +33,16 @@
     background-position: right bottom;
     background-size: contain;
 }
+.dashboard-card-change {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: help;
+}
+
+.dashboard-card-change i {
+    font-size: 0.9rem;
+}

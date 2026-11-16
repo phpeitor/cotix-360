@@ -97,8 +97,7 @@ require_once ROOT . '/controller/check_session.php';
                                             <h3 id="total_user" class="mb-0 fw-bold">0</h3>
                                         </div>
                                         <p class="mb-0 text-muted">
-                                            <span class="text-danger me-2"><i class="ti ti-caret-down-filled"></i> 9.19%</span>
-                                            <span class="text-nowrap"></span>
+                                            <span class="dashboard-card-change" data-dashboard-variation="usuarios" title="Variación de usuarios en los últimos 7 días frente a los 7 días anteriores"></span>
                                         </p>
                                     </div>
                                 </div>
@@ -117,8 +116,7 @@ require_once ROOT . '/controller/check_session.php';
                                             <h3 id="total_cotizacion" class="mb-0 fw-bold">0</h3>
                                         </div>
                                         <p class="mb-0 text-muted">
-                                            <span class="text-success me-2"><i class="ti ti-caret-up-filled"></i> 26.87%</span>
-                                            <span class="text-nowrap"></span>
+                                            <span class="dashboard-card-change" data-dashboard-variation="cotizaciones" title="Variación de cotizaciones en los últimos 7 días frente a los 7 días anteriores"></span>
                                         </p>
                                     </div>
                                 </div>
@@ -137,8 +135,7 @@ require_once ROOT . '/controller/check_session.php';
                                             <h3 id="total_item" class="mb-0 fw-bold">0</h3>
                                         </div>
                                         <p class="mb-0 text-muted">
-                                            <span class="text-success me-2"><i class="ti ti-caret-up-filled"></i> 3.51%</span>
-                                            <span class="text-nowrap"></span>
+                                            <span class="dashboard-card-change" data-dashboard-variation="items" title="Variación de ítems en los últimos 7 días frente a los 7 días anteriores"></span>
                                         </p>
                                     </div>
                                 </div>
@@ -157,8 +154,7 @@ require_once ROOT . '/controller/check_session.php';
                                             <h3 id="total_carga" class="mb-0 fw-bold">0</h3>
                                         </div>
                                         <p class="mb-0 text-muted">
-                                            <span class="text-danger me-2"><i class="ti ti-caret-down-filled"></i> 1.05%</span>
-                                            <span class="text-nowrap"></span>
+                                            <span class="dashboard-card-change" data-dashboard-variation="carga" title="Variación de cargas en los últimos 7 días frente a los 7 días anteriores"></span>
                                         </p>
                                     </div>
                                 </div>
@@ -388,7 +384,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
     <script src="./assets/js/dashboard-sales.js"></script>
-    <script src="./assets/js/dashboard.js?v=1.1"></script>
+    <script src="./assets/js/dashboard.js?v=1.2"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

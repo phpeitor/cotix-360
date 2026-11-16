@@ -40,6 +40,11 @@ vistas, endpoints, modelos y assets específicos, con reglas compartidas documen
 - Compras derivadas de ingeniería validada, con semáforo comparativo y gráficos.
 - Exportaciones PDF y Excel para documentos comerciales y técnicos.
 
+El dashboard calcula la variación de los cards de usuarios, ítems, cotizaciones y cargas
+comparando los registros creados en los últimos 7 días contra los 7 días inmediatamente
+anteriores. Cuando el período anterior no tiene registros, muestra `Nuevo` en lugar de una
+variación artificial.
+
 ## Stack tecnológico
 
 | Área | Tecnología |

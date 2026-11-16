@@ -691,6 +691,46 @@ class Item {
         return $stmt->execute();
     }
 
+    public function registrarErroresCarga(int $idCarga, array $errores): void
+    {
+        if ($idCarga <= 0 || !$errores) return;
+        $this->asegurarTablaErroresCarga();
+        $sql = "INSERT INTO carga_errores (carga_id, fila_excel, modelo, mensaje, created_at)
+                VALUES (:carga_id, :fila_excel, :modelo, :mensaje, :created_at)";
+        $stmt = $this->conn->prepare($sql);
+        foreach ($errores as $error) {
+            $stmt->bindValue(':carga_id', $idCarga, PDO::PARAM_INT);
+            $stmt->bindValue(':fila_excel', (int)($error['fila_excel'] ?? 0), PDO::PARAM_INT);
+            $stmt->bindValue(':modelo', mb_substr(trim((string)($error['modelo'] ?? '')), 0, 255, 'UTF-8'));
+            $stmt->bindValue(':mensaje', mb_substr(trim((string)($error['mensaje'] ?? 'Error de validación')), 0, 2000, 'UTF-8'));
+            $stmt->bindValue(':created_at', $this->nowLima);
+            $stmt->execute();
+        }
+    }
+
+    public function obtenerErroresCarga(int $idCarga): array
+    {
+        $this->asegurarTablaErroresCarga();
+        $stmt = $this->conn->prepare("SELECT fila_excel, modelo, mensaje, created_at FROM carga_errores WHERE carga_id = :carga_id ORDER BY fila_excel, id");
+        $stmt->bindValue(':carga_id', $idCarga, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    private function asegurarTablaErroresCarga(): void
+    {
+        $this->conn->exec("CREATE TABLE IF NOT EXISTS carga_errores (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            carga_id INT NOT NULL,
+            fila_excel INT NOT NULL,
+            modelo VARCHAR(255) NOT NULL DEFAULT '',
+            mensaje TEXT NOT NULL,
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            KEY idx_carga_errores_carga_fila (carga_id, fila_excel)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+
     public function actualizar_estado(int $id, string $estado): bool {
         $sql = "UPDATE carga 
                 SET estado = :estado

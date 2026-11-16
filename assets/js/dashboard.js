@@ -61,6 +61,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             contItemReceta.textContent = formatInt(contadores.receta_items ?? 0);
             contRecetaProducto.textContent = formatInt(contadores.receta_productos ?? 0);
             contRecetaServicio.textContent = formatInt(contadores.receta_servicios ?? 0);
+            renderCardVariation("usuarios", contadores.usuarios_periodo_actual, contadores.usuarios_periodo_anterior);
+            renderCardVariation("items", contadores.items_periodo_actual, contadores.items_periodo_anterior);
+            renderCardVariation("cotizaciones", contadores.cotizaciones_periodo_actual, contadores.cotizaciones_periodo_anterior);
+            renderCardVariation("carga", contadores.carga_periodo_actual, contadores.carga_periodo_anterior);
         }
 
         /* =====================================================
@@ -249,6 +253,40 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         return `<span class="text-muted fs-10">${items[0]}</span>`;
+    }
+
+    function renderCardVariation(key, currentValue, previousValue) {
+        const element = document.querySelector(`[data-dashboard-variation="${key}"]`);
+        if (!element) return;
+
+        const current = Number(currentValue ?? 0);
+        const previous = Number(previousValue ?? 0);
+        element.classList.remove("text-success", "text-danger", "text-muted");
+
+        if (previous === 0) {
+            if (current === 0) {
+                element.classList.add("text-muted");
+                element.innerHTML = '<i class="ti ti-minus"></i><span>0.00%</span>';
+                element.title = "Sin variación en los períodos comparados";
+            } else {
+                element.classList.add("text-success");
+                element.innerHTML = '<i class="ti ti-sparkles"></i><span>Nuevo</span>';
+                element.title = "Actividad nueva: no hubo registros en los 7 días anteriores";
+            }
+            return;
+        }
+
+        const variation = ((current - previous) / previous) * 100;
+        const roundedVariation = Math.abs(variation).toFixed(2);
+        const isIncrease = variation > 0;
+        const isDecrease = variation < 0;
+
+        element.classList.add(isIncrease ? "text-success" : isDecrease ? "text-danger" : "text-muted");
+        element.innerHTML = `
+            <i class="ti ${isIncrease ? "ti-caret-up-filled" : isDecrease ? "ti-caret-down-filled" : "ti-minus"}"></i>
+            <span>${isIncrease ? "+" : isDecrease ? "-" : ""}${roundedVariation}%</span>
+        `;
+        element.title = `Variación de ${roundedVariation}% frente a los 7 días anteriores`;
     }
 
 });

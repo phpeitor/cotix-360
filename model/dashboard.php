@@ -95,7 +95,29 @@ class Dashboard {
             (SELECT COUNT(*) FROM recetas) AS recetas,
             (SELECT COUNT(*) FROM receta_items WHERE estado = 1) AS receta_items,
             (SELECT COUNT(*) FROM receta_items WHERE estado = 1 AND UPPER(TRIM(tipo)) = 'PRODUCTO') AS receta_productos,
-            (SELECT COUNT(*) FROM receta_items WHERE estado = 1 AND UPPER(TRIM(tipo)) = 'SERVICIO') AS receta_servicios;
+            (SELECT COUNT(*) FROM receta_items WHERE estado = 1 AND UPPER(TRIM(tipo)) = 'SERVICIO') AS receta_servicios,
+            (SELECT COUNT(*) FROM personal
+                WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) AS usuarios_periodo_actual,
+            (SELECT COUNT(*) FROM personal
+                WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+                  AND fecha_registro < DATE_SUB(NOW(), INTERVAL 7 DAY)) AS usuarios_periodo_anterior,
+            (SELECT COUNT(*) FROM item i
+                INNER JOIN carga c ON c.id = i.id_carga
+                WHERE c.fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) AS items_periodo_actual,
+            (SELECT COUNT(*) FROM item i
+                INNER JOIN carga c ON c.id = i.id_carga
+                WHERE c.fecha_registro >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+                  AND c.fecha_registro < DATE_SUB(NOW(), INTERVAL 7 DAY)) AS items_periodo_anterior,
+            (SELECT COUNT(*) FROM cotizaciones
+                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)) AS cotizaciones_periodo_actual,
+            (SELECT COUNT(*) FROM cotizaciones
+                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+                  AND created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)) AS cotizaciones_periodo_anterior,
+            (SELECT COUNT(*) FROM carga
+                WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) AS carga_periodo_actual,
+            (SELECT COUNT(*) FROM carga
+                WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+                  AND fecha_registro < DATE_SUB(NOW(), INTERVAL 7 DAY)) AS carga_periodo_anterior;
         ";
 
         $stmt = $this->conn->prepare($sql);
