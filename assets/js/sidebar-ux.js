@@ -51,7 +51,6 @@
                 if (!link || !label) return;
                 if (compact) {
                     link.removeAttribute("title");
-                    link.setAttribute("data-bs-toggle", "tooltip");
                     link.setAttribute("data-bs-placement", "right");
                     link.setAttribute("data-bs-custom-class", "cotix-sidebar-tooltip");
                     link.setAttribute("data-bs-title", label);
@@ -61,7 +60,6 @@
                 } else {
                     window.bootstrap?.Tooltip?.getInstance(link)?.dispose();
                     link.removeAttribute("title");
-                    link.removeAttribute("data-bs-toggle");
                     link.removeAttribute("data-bs-placement");
                     link.removeAttribute("data-bs-custom-class");
                     link.removeAttribute("data-bs-title");
@@ -111,6 +109,30 @@
 
         const allCollapses = Array.from(nav.querySelectorAll(".collapse"));
         const ownLabel = item => normalize(item.querySelector(":scope > .side-nav-link .menu-text")?.textContent);
+
+        nav.addEventListener("click", event => {
+            const control = event.target.closest('.side-nav-link[data-bs-toggle="collapse"]');
+            if (!control || !nav.contains(control)) return;
+
+            const selector = control.getAttribute("data-bs-target") || control.getAttribute("href");
+            if (!selector?.startsWith("#")) return;
+            const panel = document.querySelector(selector);
+            if (!panel) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            const shouldOpen = !panel.classList.contains("show");
+            if (window.bootstrap?.Collapse) {
+                const collapse = bootstrap.Collapse.getOrCreateInstance(panel, { toggle: false });
+                shouldOpen ? collapse.show() : collapse.hide();
+            } else {
+                panel.classList.toggle("show", shouldOpen);
+            }
+            control.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+            if (window.location.hash === selector) {
+                history.replaceState(null, "", `${location.pathname}${location.search}`);
+            }
+        });
 
         function setCollapse(collapse, open) {
             collapse.classList.toggle("show", open);

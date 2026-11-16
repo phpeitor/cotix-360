@@ -15,7 +15,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/config.js"></script>
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
-    <link href="./assets/css/branding.css?v=1.3" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/branding.css?v=1.4" rel="stylesheet" type="text/css" />
     <link href="./assets/css/cotizaciones.css?v=1.0" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta_list.css?v=1.1" rel="stylesheet" type="text/css" />

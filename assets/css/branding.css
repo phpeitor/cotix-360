@@ -128,18 +128,18 @@ html.cotix-sidebar-resizable:not([data-sidenav-size="condensed"]):not([data-side
     align-items: center;
     gap: 9px;
     padding: 0 10px;
-    border: 1px solid rgba(255,255,255,.09);
+    border: 1px solid #30333b;
     border-radius: 12px;
-    color: #8792a3;
-    background: rgba(255,255,255,.06);
+    color: #98a2b3;
+    background: #202228;
     cursor: text;
     transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
 }
 
 .cotix-sidebar-search:focus-within {
-    border-color: rgba(77, 190, 141, .55);
-    background: rgba(255,255,255,.09);
-    box-shadow: 0 0 0 3px rgba(77, 190, 141, .1);
+    border-color: #4dbe8d;
+    background: #24272e;
+    box-shadow: 0 0 0 2px rgba(77, 190, 141, .14);
 }
 
 .cotix-sidebar-search > i {
@@ -167,7 +167,7 @@ html.cotix-sidebar-resizable:not([data-sidenav-size="condensed"]):not([data-side
     border: 1px solid rgba(255,255,255,.14);
     border-radius: 5px;
     color: #aeb7c5;
-    background: rgba(0,0,0,.15);
+    background: #17191f;
     font-family: inherit;
     font-size: 11px;
     line-height: 1.3;
