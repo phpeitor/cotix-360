@@ -24,14 +24,16 @@ try {
         exit;
     }
 
-    if (!isset($_POST['items'])) {
-        throw new Exception('No se enviaron items');
+    $items = json_decode((string)($_POST['items'] ?? '[]'), true);
+    if (!is_array($items)) throw new Exception('Items inválidos');
+    $asignadoUsuarioId = (int)($_POST['usuario_ingenieria_id'] ?? 0);
+
+    $receta = new Receta();
+    if ($asignadoUsuarioId > 0 && !$receta->esUsuarioIngenieriaActivo($asignadoUsuarioId)) {
+        throw new Exception('El usuario asignado no pertenece a Ingeniería o está inactivo');
     }
-
-    $items = json_decode((string)$_POST['items'], true);
-
-    if (!is_array($items) || empty($items)) {
-        throw new Exception('Items inválidos');
+    if (!$items && $asignadoUsuarioId <= 0) {
+        throw new Exception('Agrega al menos un item o asigna la receta a un usuario de Ingeniería');
     }
 
     $tipoCambio = isset($_POST['tipo_cambio']) ? (float)$_POST['tipo_cambio'] : 0;
@@ -69,11 +71,12 @@ try {
         throw new Exception('El celular del contacto debe contener 9 dígitos numéricos');
     }
 
-    $receta = new Receta();
+    $receta->prepararAsignacionReceta();
     $receta->begin();
 
     $recetaId = $receta->guardarCabecera([
         'usuario_id' => (int)$_SESSION['session_id'],
+        'asignado_usuario_id' => $asignadoUsuarioId > 0 ? $asignadoUsuarioId : null,
         'estado' => 'Enviada',
         'usuario_upd' => null,
         'tipo_cambio' => $tipoCambio,
@@ -120,6 +123,15 @@ try {
             'tipo' => $item['tipo'] ?? '',
             'cantidad' => $cantidad,
         ]);
+    }
+
+    if ($asignadoUsuarioId > 0) {
+        $receta->notificarRecetaAsignada(
+            $recetaId,
+            $asignadoUsuarioId,
+            (string)($_SESSION['session_usuario'] ?? 'Sistema'),
+            $motivoSolicitud
+        );
     }
 
     $receta->commit();

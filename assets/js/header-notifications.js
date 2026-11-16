@@ -27,6 +27,13 @@
         const meta = parseMeta(item.meta_json || item.meta);
         const tipo = String(item.tipo || '').trim();
 
+        if (tipo === 'receta_asignada') {
+            const recetaId = item.receta_id || meta.receta_id;
+            return recetaId && typeof md5 === 'function'
+                ? `receta_form.php?id=${md5(String(recetaId))}`
+                : '';
+        }
+
         if (tipo === 'receta') {
             const cargo = Number(window.PERMISOS_STATE?.cargo ?? (typeof CARGO !== 'undefined' ? CARGO : 0));
             const recetaId = item.receta_id || meta.receta_id;
@@ -132,8 +139,8 @@
         const tone = escapeHtml(item.tone || 'secondary');
         const url = notificationUrl(item);
         const attrs = url ? ` role="button" data-href="${escapeHtml(url)}" style="cursor:pointer;"` : '';
-        const recetaMeta = item.tipo === 'receta' && item.receta_id
-            ? `#${escapeHtml(item.receta_id)} | Total items: ${escapeHtml(item.total_items ?? 0)} | `
+        const recetaMeta = ['receta', 'receta_asignada'].includes(item.tipo) && (item.receta_id || parseMeta(item.meta_json).receta_id)
+            ? `#${escapeHtml(item.receta_id || parseMeta(item.meta_json).receta_id)}${item.total_items !== undefined ? ` | Total items: ${escapeHtml(item.total_items)}` : ''} | `
             : '';
 
         return `

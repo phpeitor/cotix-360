@@ -17,7 +17,7 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/branding.css?v=1.0" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/receta.css?v=1.2" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/receta.css?v=1.3" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -74,64 +74,46 @@ require_once ROOT . '/controller/check_session.php';
                             </div>
                             <form class="needs-validation form-receta" novalidate="" data-user-cargo="<?= (int)$_SESSION['session_cargo'] ?>">
                                 <div class="card-body p-0">
-                                    <div class="p-3 border-bottom bg-body-tertiary">
-                                        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
-                                            <h5 class="mb-0">Datos del cliente</h5>
-                                            <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
-                                                <span class="text-muted fs-12">Completa esta información antes de guardar la receta.</span>
-                                                <button type="button" id="btnToggleDatosCliente" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#datosClienteCollapse" aria-expanded="true" aria-controls="datosClienteCollapse">
-                                                    <i class="ti ti-chevron-up me-1"></i><span>Colapsar</span>
-                                                </button>
+                                    <div class="p-3 border-bottom bg-body-tertiary receta-creation-tabs-wrap">
+                                        <ul class="nav nav-pills nav-fill gap-2 mb-3" id="recetaCreationTabs" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link active" id="cliente-tab" data-bs-toggle="pill" data-bs-target="#cliente-pane" type="button" role="tab" aria-controls="cliente-pane" aria-selected="true"><i class="ti ti-user me-1"></i>Cliente</button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="receta-tab" data-bs-toggle="pill" data-bs-target="#receta-pane" type="button" role="tab" aria-controls="receta-pane" aria-selected="false"><i class="ti ti-notes me-1"></i>Receta</button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="asignar-tab" data-bs-toggle="pill" data-bs-target="#asignar-pane" type="button" role="tab" aria-controls="asignar-pane" aria-selected="false"><i class="ti ti-user-share me-1"></i>Asignar</button>
+                                            </li>
+                                        </ul>
+                                        <div class="tab-content receta-creation-tab-content">
+                                            <div class="tab-pane fade show active" id="cliente-pane" role="tabpanel" aria-labelledby="cliente-tab" tabindex="0">
+                                                <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
+                                                    <div><h5 class="mb-1">Datos del cliente</h5><span class="text-muted fs-12">Información de contacto y facturación.</span></div>
+                                                </div>
+                                                <div class="row g-3">
+                                                    <div class="col-lg-4 col-md-6"><label class="form-label" for="ruc_cliente">RUC</label><input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente" maxlength="11" minlength="11" pattern="[0-9]{11}" inputmode="numeric" required><div class="invalid-feedback">Ingresa un RUC válido de 11 dígitos.</div></div>
+                                                    <div class="col-lg-4 col-md-6"><label class="form-label" for="razon_social_empresa">Nombre (Razón Social de la Empresa)</label><input type="text" class="form-control" id="razon_social_empresa" name="razon_social_empresa" maxlength="200" required><div class="invalid-feedback">Ingresa la razón social de la empresa.</div></div>
+                                                    <div class="col-lg-4 col-md-6"><label class="form-label" for="direccion_cliente">Dirección</label><input type="text" class="form-control" id="direccion_cliente" name="direccion_cliente" maxlength="250" required><div class="invalid-feedback">Ingresa la dirección del cliente.</div></div>
+                                                    <div class="col-lg-4 col-md-6"><label class="form-label" for="nombre_completo_contacto">Nombre completo</label><input type="text" class="form-control" id="nombre_completo_contacto" name="nombre_completo_contacto" maxlength="200" required><div class="invalid-feedback">Ingresa el nombre completo de la persona de contacto.</div></div>
+                                                    <div class="col-lg-4 col-md-6"><label class="form-label" for="correo_contacto">Correo</label><input type="email" class="form-control" id="correo_contacto" name="correo_contacto" maxlength="150" required><div class="invalid-feedback">Ingresa un correo válido.</div></div>
+                                                    <div class="col-lg-4 col-md-6"><label class="form-label" for="celular_contacto">Celular</label><input type="text" class="form-control" id="celular_contacto" name="celular_contacto" maxlength="9" minlength="9" pattern="[0-9]{9}" inputmode="numeric" required><div class="invalid-feedback">Ingresa un celular válido de 9 dígitos.</div></div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="collapse show" id="datosClienteCollapse">
-                                        <div class="row g-3">
-                                            <div class="col-lg-4 col-md-6">
-                                                <label class="form-label" for="ruc_cliente">RUC</label>
-                                                <input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente" maxlength="11" minlength="11" pattern="[0-9]{11}" inputmode="numeric" required>
-                                                <div class="invalid-feedback">Ingresa un RUC válido de 11 dígitos.</div>
+                                            <div class="tab-pane fade" id="receta-pane" role="tabpanel" aria-labelledby="receta-tab" tabindex="0">
+                                                <div class="mb-3"><h5 class="mb-1">Datos de la receta</h5><span class="text-muted fs-12">Describe la solicitud y la cantidad requerida.</span></div>
+                                                <div class="row g-3">
+                                                    <div class="col-12"><label class="form-label" for="motivo_solicitud">Motivo (nombre de la solicitud)</label><input type="text" class="form-control" id="motivo_solicitud" name="motivo_solicitud" maxlength="200" required><div class="invalid-feedback">Ingresa el motivo o nombre de la solicitud.</div></div>
+                                                    <div class="col-lg-8"><label class="form-label" for="descripcion_receta">Descripción de la receta</label><textarea class="form-control" id="descripcion_receta" name="descripcion_receta" placeholder="Describe brevemente la necesidad del cliente" rows="4" maxlength="800" required></textarea><div class="invalid-feedback">Ingresa la descripción de la receta.</div></div>
+                                                    <div class="col-lg-4"><label class="form-label" for="cantidad_items_receta">Cantidad de items</label><input type="number" class="form-control" id="cantidad_items_receta" name="cantidad_items_receta" min="1" max="5000" step="1" required><div class="invalid-feedback">Ingresa la cantidad de items.</div></div>
+                                                </div>
                                             </div>
-                                            <div class="col-lg-4 col-md-6">
-                                                <label class="form-label" for="razon_social_empresa">Nombre (Razón Social de la Empresa)</label>
-                                                <input type="text" class="form-control" id="razon_social_empresa" name="razon_social_empresa" maxlength="200" required>
-                                                <div class="invalid-feedback">Ingresa la razón social de la empresa.</div>
+                                            <div class="tab-pane fade" id="asignar-pane" role="tabpanel" aria-labelledby="asignar-tab" tabindex="0">
+                                                <div class="mb-3"><h5 class="mb-1">Asignar a Ingeniería</h5><span class="text-muted fs-12">El usuario asignado recibirá una notificación y podrá completar el detalle de items.</span></div>
+                                                <div class="row g-3 align-items-end">
+                                                    <div class="col-lg-8"><select class="form-select" id="usuario_ingenieria_id" name="usuario_ingenieria_id"><option value="">Sin asignar</option></select><div class="form-text">Si asignas la receta, puedes guardarla sin agregar items; Ingeniería completará ese paso.</div></div>
+                                                </div>
                                             </div>
-                                            <div class="col-lg-4 col-md-6">
-                                                <label class="form-label" for="direccion_cliente">Dirección</label>
-                                                <input type="text" class="form-control" id="direccion_cliente" name="direccion_cliente" maxlength="250" required>
-                                                <div class="invalid-feedback">Ingresa la dirección del cliente.</div>
-                                            </div>
-                                            <div class="col-lg-4 col-md-6">
-                                                <label class="form-label" for="nombre_completo_contacto">Nombre completo</label>
-                                                <input type="text" class="form-control" id="nombre_completo_contacto" name="nombre_completo_contacto" maxlength="200" required>
-                                                <div class="invalid-feedback">Ingresa el nombre completo de la persona de contacto.</div>
-                                            </div>
-                                            <div class="col-lg-4 col-md-6">
-                                                <label class="form-label" for="correo_contacto">Correo</label>
-                                                <input type="email" class="form-control" id="correo_contacto" name="correo_contacto" maxlength="150" required>
-                                                <div class="invalid-feedback">Ingresa un correo válido.</div>
-                                            </div>
-                                            <div class="col-lg-4 col-md-6">
-                                                <label class="form-label" for="celular_contacto">Celular</label>
-                                                <input type="text" class="form-control" id="celular_contacto" name="celular_contacto" maxlength="9" minlength="9" pattern="[0-9]{9}" inputmode="numeric" required>
-                                                <div class="invalid-feedback">Ingresa un celular válido de 9 dígitos.</div>
-                                            </div>
-                                            <div class="col-lg-12 col-md-12">
-                                                <label class="form-label" for="motivo_solicitud">Motivo (nombre de la solicitud)</label>
-                                                <input type="text" class="form-control" id="motivo_solicitud" name="motivo_solicitud" maxlength="200" required>
-                                                <div class="invalid-feedback">Ingresa el motivo o nombre de la solicitud.</div>
-                                            </div>
-                                            <div class="col-lg-8 col-md-12">
-                                                <label class="form-label" for="descripcion_receta">Descripcion de la receta</label>
-                                                <textarea class="form-control" id="descripcion_receta" name="descripcion_receta" placeholder="Suministro de un Tablero Micro-Control  MG-C250GG, con características de gestión de grupos electrógenos marca Cummins, ejecución de lógica de operación entre grupos  con PCC 3.3 con función MLD (No aplica control con utilidad) aplicable para 4-5 grupos electrógenos, con protocolo de comunicación Modbus RTU" rows="5" maxlength="800" required></textarea>
-                                                <div class="invalid-feedback">Ingresa la descripcion de la receta.</div>
-                                            </div>
-                                            <div class="col-lg-4 col-md-12">
-                                                <label class="form-label" for="cantidad_items_receta">Cantidad items</label>
-                                                <input type="number" class="form-control" id="cantidad_items_receta" name="cantidad_items_receta" min="1" max="5000" step="1" required>
-                                                <div class="invalid-feedback">Ingresa la cantidad de items.</div>
-                                            </div>
-                                        </div>
                                         </div>
                                     </div>
 
@@ -340,7 +322,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/form-receta.js?v=1.8"></script>
+    <script src="./assets/js/form-receta.js?v=1.9"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

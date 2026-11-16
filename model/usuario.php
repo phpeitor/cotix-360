@@ -94,14 +94,46 @@ class Usuario {
     }
 
     public function table_personal(): array{
+         $this->asegurarTablaPresencia();
+         $onlineSince = (new DateTimeImmutable('now', new DateTimeZone('America/Lima')))
+             ->sub(new DateInterval('PT3M'))
+             ->format('Y-m-d H:i:s');
          $sql = "SELECT
-                *,
-                CONCAT(nombres,' ',apellidos) AS nombre_completo
-                FROM personal
-                ORDER BY idpersonal DESC";
+                    p.*,
+                    CONCAT(p.nombres,' ',p.apellidos) AS nombre_completo,
+                    CASE WHEN p.IDESTADO = 1 AND up.ultima_actividad >= :online_since THEN 1 ELSE 0 END AS online
+                 FROM personal p
+                 LEFT JOIN usuario_presencia up ON up.usuario_id = p.IDPERSONAL
+                 ORDER BY p.IDPERSONAL DESC";
         $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':online_since', $onlineSince);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function registrarPresencia(int $usuarioId): void
+    {
+        if ($usuarioId <= 0) return;
+        $this->asegurarTablaPresencia();
+        $sql = "INSERT INTO usuario_presencia (usuario_id, ultima_actividad)
+                SELECT IDPERSONAL, :ultima_actividad
+                FROM personal
+                WHERE IDPERSONAL = :usuario_id AND IDESTADO = 1
+                ON DUPLICATE KEY UPDATE ultima_actividad = VALUES(ultima_actividad)";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':ultima_actividad', $this->nowLima);
+        $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
+    private function asegurarTablaPresencia(): void
+    {
+        $this->conn->exec("CREATE TABLE IF NOT EXISTS usuario_presencia (
+            usuario_id INT NOT NULL,
+            ultima_actividad DATETIME NOT NULL,
+            PRIMARY KEY (usuario_id),
+            KEY idx_usuario_presencia_actividad (ultima_actividad)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     }
 
     public function obtenerPorHash(string $hash): ?array {

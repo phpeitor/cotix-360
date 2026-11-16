@@ -39,6 +39,49 @@
     font-weight: 600;
 }
 
+.receta-creation-tabs-wrap {
+    background: var(--bs-body-bg) !important;
+}
+
+.receta-creation-tabs-wrap .nav-pills {
+    padding: .35rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .8rem;
+    background: var(--bs-tertiary-bg);
+}
+
+.receta-creation-tabs-wrap .nav-link {
+    color: var(--bs-secondary-color);
+    font-weight: 600;
+    border-radius: .6rem;
+    transition: background-color .18s ease, color .18s ease, box-shadow .18s ease;
+}
+
+.receta-creation-tabs-wrap .nav-link:not(.active):hover {
+    color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), .08);
+}
+
+.receta-creation-tabs-wrap .nav-link.active {
+    box-shadow: 0 .2rem .55rem rgba(16, 24, 40, .12);
+}
+
+.receta-creation-tab-content {
+    min-height: 220px;
+    padding: .4rem .25rem .2rem;
+}
+
+.receta-creation-tab-content .tab-pane h5 {
+    font-weight: 700;
+}
+
+@media (max-width: 575.98px) {
+    .receta-creation-tabs-wrap .nav-link {
+        padding: .55rem .4rem;
+        font-size: .82rem;
+    }
+}
+
 .receta-items-table-wrap {
     max-height: 44vh;
     overflow: auto;

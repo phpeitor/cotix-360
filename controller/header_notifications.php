@@ -2,6 +2,10 @@
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../model/dashboard.php';
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
 try {
     $dashboard = new Dashboard();
     $notifications = $dashboard->headerNotifications(10);

@@ -27,8 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const previewTotalSolesEl = document.getElementById("previewTotalSoles");
     const previewTotalDolaresEl = document.getElementById("previewTotalDolares");
     const previewTotalPEEl = document.getElementById("previewTotalPE");
-    const datosClienteCollapseEl = document.getElementById("datosClienteCollapse");
-    const btnToggleDatosCliente = document.getElementById("btnToggleDatosCliente");
+    const usuarioIngenieriaSelect = document.getElementById("usuario_ingenieria_id");
     const recetaForm = document.querySelector("form.form-receta");
     const paginationFromEl = document.getElementById("pagination_from");
     const paginationToEl = document.getElementById("pagination_to");
@@ -194,20 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-
-    datosClienteCollapseEl?.addEventListener("shown.bs.collapse", () => {
-        btnToggleDatosCliente?.setAttribute("aria-expanded", "true");
-        if (btnToggleDatosCliente) {
-            btnToggleDatosCliente.innerHTML = '<i class="ti ti-chevron-up me-1"></i><span>Colapsar</span>';
-        }
-    });
-
-    datosClienteCollapseEl?.addEventListener("hidden.bs.collapse", () => {
-        btnToggleDatosCliente?.setAttribute("aria-expanded", "false");
-        if (btnToggleDatosCliente) {
-            btnToggleDatosCliente.innerHTML = '<i class="ti ti-chevron-down me-1"></i><span>Expandir</span>';
-        }
-    });
 
     function createQtyStep(initialValue = 1) {
         const wrapper = document.createElement("div");
@@ -515,6 +500,32 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    async function cargarUsuariosIngenieria() {
+        if (!usuarioIngenieriaSelect) return;
+        try {
+            const res = await fetch("controller/get_usuarios_ingenieria.php");
+            const data = await res.json();
+            if (!res.ok || !data.ok || !Array.isArray(data.usuarios)) {
+                throw new Error(data.message || "No se pudieron cargar los usuarios de Ingeniería");
+            }
+
+            usuarioIngenieriaSelect.replaceChildren(new Option("Sin asignar", ""));
+            data.usuarios.forEach(usuario => {
+                const nombre = String(usuario.nombre || usuario.usuario || `Usuario ${usuario.id}`).trim();
+                const detalleUsuario = usuario.usuario ? ` · ${usuario.usuario}` : "";
+                usuarioIngenieriaSelect.add(new Option(`${nombre}${detalleUsuario}`, String(usuario.id)));
+            });
+            usuarioIngenieriaSelect.disabled = data.usuarios.length === 0;
+            if (!data.usuarios.length) {
+                usuarioIngenieriaSelect.replaceChildren(new Option("No hay usuarios activos de Ingeniería", ""));
+            }
+        } catch (error) {
+            console.error(error);
+            usuarioIngenieriaSelect.replaceChildren(new Option("No se pudieron cargar usuarios", ""));
+            usuarioIngenieriaSelect.disabled = true;
+        }
+    }
+
     async function cargarCategoriasReceta() {
         const { tipo } = getFiltrosReceta();
 
@@ -654,6 +665,7 @@ document.addEventListener("DOMContentLoaded", () => {
     configurarConsultaRuc(rucClienteInput, razonSocialEmpresaInput, direccionClienteInput);
 
     cargarBasesReceta();
+    cargarUsuariosIngenieria();
 
     function agregarItemReceta(item, qtyInicial = 1) {
         const itemId = item.id;
@@ -976,9 +988,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const items = getItemsParaGuardarReceta();
+        const usuarioAsignado = String(usuarioIngenieriaSelect?.value || "").trim();
 
-        if (!items.length) {
-            alertify.error("Agrega al menos un item antes de guardar la receta");
+        if (!items.length && !usuarioAsignado) {
+            alertify.error("Agrega al menos un item o asigna la receta a un usuario de Ingeniería");
+            return;
+        }
+
+        const campoInvalido = recetaForm.querySelector(":invalid");
+        if (campoInvalido) {
+            const pane = campoInvalido.closest(".tab-pane");
+            const tabButton = pane ? recetaForm.querySelector(`[data-bs-target="#${pane.id}"]`) : null;
+            if (tabButton && window.bootstrap?.Tab) {
+                bootstrap.Tab.getOrCreateInstance(tabButton).show();
+            }
+            recetaForm.classList.add("was-validated");
+            window.setTimeout(() => campoInvalido.focus(), 80);
+            alertify.error("Completa los campos obligatorios antes de guardar la receta");
             return;
         }
 

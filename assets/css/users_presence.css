@@ -1,0 +1,46 @@
+.user-presence-cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .45rem;
+    min-width: 0;
+}
+
+.user-presence-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.user-presence-status {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    flex: 0 0 auto;
+    padding: .18rem .4rem;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.user-presence-status.is-online {
+    color: #18794e;
+    background: #e8f7ef;
+}
+
+.user-presence-status.is-offline {
+    color: #b42318;
+    background: #fff0ee;
+}
+
+.user-presence-dot {
+    width: .45rem;
+    height: .45rem;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.user-presence-status.is-online .user-presence-dot {
+    box-shadow: 0 0 0 3px rgba(24, 121, 78, .12);
+}

@@ -68,7 +68,19 @@ document.addEventListener("DOMContentLoaded", () => {
             {
                 id: "USUARIO",
                 name: "Usuario",
-                width: "160px"
+                width: "190px",
+                formatter: (cell, row) => {
+                    const online = String(row?.cells?.[10]?.data ?? "0") === "1";
+                    const label = online ? "En línea" : "Desconectado";
+                    return gridjs.html(`
+                        <div class="user-presence-cell">
+                            <span class="user-presence-name">${escapeHtml(cell || "-")}</span>
+                            <span class="user-presence-status ${online ? "is-online" : "is-offline"}" title="${label}" aria-label="${label}">
+                                <span class="user-presence-dot"></span>${label}
+                            </span>
+                        </div>
+                    `);
+                }
             },
             {
                 id: "DOC",
@@ -163,6 +175,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     `);
                 }
+            },
+            {
+                id: "online",
+                name: "Online",
+                hidden: true
             }
         ],
 
@@ -182,6 +199,8 @@ document.addEventListener("DOMContentLoaded", () => {
     .render(document.getElementById("table-gridjs"));
 
     grid.on("ready", initTooltips);
+    const presenceRefreshTimer = window.setInterval(() => grid.forceRender(), 60000);
+    window.addEventListener("beforeunload", () => window.clearInterval(presenceRefreshTimer), { once: true });
 
     document.addEventListener("click", async (e) => {
 

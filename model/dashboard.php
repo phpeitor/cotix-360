@@ -175,9 +175,11 @@ class Dashboard {
 
     public function headerNotifications(int $limit = 10): array
     {
+        $this->asegurarColumnaDestinatarioNotificaciones();
         $cutoff = (new DateTimeImmutable('now', new DateTimeZone('America/Lima')))
             ->sub(new DateInterval('PT5H'))
             ->format('Y-m-d H:i:s');
+        $usuarioActual = (int)($_SESSION['session_id'] ?? 0);
 
         $sql = "
             SELECT
@@ -193,12 +195,14 @@ class Dashboard {
             FROM header_notifications
             WHERE estado = 1
               AND created_at >= :cutoff
+              AND (destinatario_id IS NULL OR destinatario_id = :destinatario_id)
             ORDER BY created_at DESC, id DESC
             LIMIT :limit
         ";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':cutoff', $cutoff);
+        $stmt->bindValue(':destinatario_id', $usuarioActual, PDO::PARAM_INT);
         $stmt->bindValue(':limit', max(1, $limit), PDO::PARAM_INT);
         $stmt->execute();
 
@@ -221,6 +225,16 @@ class Dashboard {
         unset($row);
 
         return $rows;
+    }
+
+    private function asegurarColumnaDestinatarioNotificaciones(): void
+    {
+        $stmt = $this->conn->prepare("SHOW COLUMNS FROM header_notifications LIKE 'destinatario_id'");
+        $stmt->execute();
+        if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+            $this->conn->exec("ALTER TABLE header_notifications ADD COLUMN destinatario_id INT NULL DEFAULT NULL AFTER usuario_id");
+            $this->conn->exec("ALTER TABLE header_notifications ADD KEY idx_header_notifications_destinatario_created (destinatario_id, created_at)");
+        }
     }
 
     public function headerNotificationsSignature(): array

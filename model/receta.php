@@ -35,8 +35,10 @@ class Receta {
 
     public function guardarCabecera(array $data): int
     {
+        $this->asegurarColumnaAsignacionReceta();
         $sql = "INSERT INTO recetas (
                     usuario_id,
+                    asignado_usuario_id,
                     estado,
                     created_at,
                     updated_at,
@@ -44,6 +46,7 @@ class Receta {
                     tipo_cambio
                 ) VALUES (
                     :usuario_id,
+                    :asignado_usuario_id,
                     :estado,
                     :created_at,
                     :updated_at,
@@ -53,6 +56,12 @@ class Receta {
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':usuario_id', (int)($data['usuario_id'] ?? 0), PDO::PARAM_INT);
+        $asignadoUsuarioId = (int)($data['asignado_usuario_id'] ?? 0);
+        if ($asignadoUsuarioId > 0) {
+            $stmt->bindValue(':asignado_usuario_id', $asignadoUsuarioId, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':asignado_usuario_id', null, PDO::PARAM_NULL);
+        }
         $stmt->bindValue(':estado', (string)($data['estado'] ?? 'Enviada'), PDO::PARAM_STR);
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->bindValue(':updated_at', $this->nowLima);
@@ -270,11 +279,18 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
 
     public function table_receta(string $fec_ini, string $fec_fin, string $subCat1 = ''): array
     {
+        $this->asegurarColumnaAsignacionReceta();
         $sessionCargo = $_SESSION['session_cargo'] ?? null;
         $sessionId = $_SESSION['session_id'] ?? null;
         $isAdmin = in_array((int)$sessionCargo, [1, 3, 8], true);
+        $esIngenieria = (int)$sessionCargo === 6;
 
         $where = "c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)";
+
+        if (!$isAdmin && $esIngenieria) {
+            $where = "((c.usuario_id = :usuario_id AND c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY))
+                       OR c.asignado_usuario_id = :asignado_usuario_id)";
+        }
 
         $subCat1 = trim($subCat1);
         if ($subCat1 !== '') {
@@ -291,7 +307,9 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
                 return [];
             }
 
-            $where .= " AND c.usuario_id = :usuario_id";
+            if (!$esIngenieria) {
+                $where .= " AND c.usuario_id = :usuario_id";
+            }
         }
 
         $sql = "
@@ -326,6 +344,9 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
 
         if (!$isAdmin) {
             $stmt->bindValue(':usuario_id', (int)$sessionId, PDO::PARAM_INT);
+            if ($esIngenieria) {
+                $stmt->bindValue(':asignado_usuario_id', (int)$sessionId, PDO::PARAM_INT);
+            }
         }
         if ($subCat1 !== '') {
             $stmt->bindValue(':sub_cat_1', $subCat1);
@@ -938,6 +959,73 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         }
     }
 
+    private function asegurarColumnaAsignacionReceta(): void
+    {
+        $this->asegurarColumna(
+            'recetas',
+            'asignado_usuario_id',
+            "ALTER TABLE recetas ADD COLUMN asignado_usuario_id INT NULL DEFAULT NULL AFTER usuario_id"
+        );
+    }
+
+    public function prepararAsignacionReceta(): void
+    {
+        $this->asegurarColumnaAsignacionReceta();
+        $this->asegurarColumna(
+            'header_notifications',
+            'destinatario_id',
+            "ALTER TABLE header_notifications ADD COLUMN destinatario_id INT NULL DEFAULT NULL AFTER usuario_id"
+        );
+    }
+
+    public function obtenerUsuariosIngenieriaActivos(): array
+    {
+        $sql = "SELECT IDPERSONAL AS id,
+                       TRIM(CONCAT_WS(' ', NULLIF(TRIM(NOMBRES), ''), NULLIF(TRIM(APELLIDOS), ''))) AS nombre,
+                       USUARIO AS usuario
+                FROM personal
+                WHERE CARGO = 6 AND IDESTADO = 1
+                ORDER BY NOMBRES, APELLIDOS";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function esUsuarioIngenieriaActivo(int $usuarioId): bool
+    {
+        if ($usuarioId <= 0) return false;
+        $stmt = $this->conn->prepare("SELECT 1 FROM personal WHERE IDPERSONAL = :id AND CARGO = 6 AND IDESTADO = 1 LIMIT 1");
+        $stmt->bindValue(':id', $usuarioId, PDO::PARAM_INT);
+        $stmt->execute();
+        return (bool)$stmt->fetchColumn();
+    }
+
+    public function notificarRecetaAsignada(int $recetaId, int $destinatarioId, string $usuarioActor, string $motivo): void
+    {
+        if ($recetaId <= 0 || $destinatarioId <= 0) return;
+
+        $this->asegurarColumna(
+            'header_notifications',
+            'destinatario_id',
+            "ALTER TABLE header_notifications ADD COLUMN destinatario_id INT NULL DEFAULT NULL AFTER usuario_id"
+        );
+
+        $sql = "INSERT INTO header_notifications (
+                    tipo, usuario_id, destinatario_id, usuario, titulo, detalle, icon, tone, meta_json, estado, created_at
+                ) VALUES (
+                    'receta_asignada', :usuario_id, :destinatario_id, :usuario, :titulo, :detalle, 'ti-clipboard-check', 'primary', :meta_json, 1, :created_at
+                )";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':usuario_id', (int)($_SESSION['session_id'] ?? 0), PDO::PARAM_INT);
+        $stmt->bindValue(':destinatario_id', $destinatarioId, PDO::PARAM_INT);
+        $stmt->bindValue(':usuario', $usuarioActor !== '' ? $usuarioActor : 'Sistema');
+        $stmt->bindValue(':titulo', 'Te asignaron una receta');
+        $stmt->bindValue(':detalle', 'Receta #' . $recetaId . ($motivo !== '' ? ' · ' . $motivo : ''));
+        $stmt->bindValue(':meta_json', json_encode(['receta_id' => $recetaId], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $stmt->bindValue(':created_at', $this->nowLima);
+        $stmt->execute();
+    }
+
     public function listarHistorialIngenieriaPorHash(string $hash, int $page = 1, int $perPage = 10): array
     {
         $this->crearTablaHistorialIngenieria();
@@ -988,11 +1076,18 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
 
     public function firmaListaReceta(string $fec_ini, string $fec_fin): array
     {
+        $this->asegurarColumnaAsignacionReceta();
         $sessionCargo = $_SESSION['session_cargo'] ?? null;
         $sessionId = $_SESSION['session_id'] ?? null;
         $isAdmin = in_array((int)$sessionCargo, [1, 3, 8], true);
+        $esIngenieria = (int)$sessionCargo === 6;
 
         $where = "c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)";
+
+        if (!$isAdmin && $esIngenieria) {
+            $where = "((c.usuario_id = :usuario_id AND c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY))
+                       OR c.asignado_usuario_id = :asignado_usuario_id)";
+        }
 
         if (!$isAdmin) {
             if ((int)$sessionId <= 0) {
@@ -1003,7 +1098,9 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                 ];
             }
 
-            $where .= " AND c.usuario_id = :usuario_id";
+            if (!$esIngenieria) {
+                $where .= " AND c.usuario_id = :usuario_id";
+            }
         }
 
         $sql = "SELECT
@@ -1024,6 +1121,9 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
 
         if (!$isAdmin) {
             $stmt->bindValue(':usuario_id', (int)$sessionId, PDO::PARAM_INT);
+            if ($esIngenieria) {
+                $stmt->bindValue(':asignado_usuario_id', (int)$sessionId, PDO::PARAM_INT);
+            }
         }
 
         $stmt->execute();
@@ -1037,6 +1137,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     }
 
     public function obtenerPorHash(string $hash): ?array {
+        $this->asegurarColumnaAsignacionReceta();
         $sql = "SELECT c.*,
                        p.usuario,
                        TRIM(CONCAT_WS(' ', NULLIF(TRIM(p.NOMBRES), ''), NULLIF(TRIM(p.APELLIDOS), ''))) AS usuario_registro_nombre,
