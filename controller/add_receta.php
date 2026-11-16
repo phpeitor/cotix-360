@@ -62,12 +62,16 @@ try {
     $nombreCompletoContacto = trim((string)($_POST['nombre_completo_contacto'] ?? ''));
     $correoContacto = trim((string)($_POST['correo_contacto'] ?? ''));
     $celularContacto = trim((string)($_POST['celular_contacto'] ?? ''));
+    $nombreReceta = trim((string)($_POST['nombre_receta'] ?? ''));
     $motivoSolicitud = trim((string)($_POST['motivo_solicitud'] ?? ''));
     $descripcionReceta = trim((string)($_POST['descripcion_receta'] ?? ''));
     $cantidadItemsReceta = isset($_POST['cantidad_items_receta']) ? (int)$_POST['cantidad_items_receta'] : 0;
 
-    if ($razonSocialEmpresa === '' || $direccionCliente === '' || $rucCliente === '' || $nombreCompletoContacto === '' || $correoContacto === '' || $celularContacto === '' || $motivoSolicitud === '' || $descripcionReceta === '') {
-        throw new Exception('Completa los datos del cliente y de la receta antes de guardar');
+    if ($razonSocialEmpresa === '' || $direccionCliente === '' || $rucCliente === '' || $nombreCompletoContacto === '' || $correoContacto === '' || $celularContacto === '' || $nombreReceta === '' || $motivoSolicitud === '' || $descripcionReceta === '') {
+        throw new Exception('Completa el nombre de la receta, los datos del cliente y la descripción antes de guardar');
+    }
+    if (mb_strlen($nombreReceta, 'UTF-8') > 100) {
+        throw new Exception('El nombre de la receta no puede superar los 100 caracteres');
     }
 
     if ($cantidadItemsReceta < 1 || $cantidadItemsReceta > 5000) {
@@ -107,6 +111,7 @@ try {
     $recetaId = $receta->guardarCabecera([
         'usuario_id' => (int)$_SESSION['session_id'],
         'asignado_usuario_id' => $asignadoUsuarioId > 0 ? $asignadoUsuarioId : null,
+        'nombre' => $nombreReceta,
         'estado' => 'Enviada',
         'usuario_upd' => null,
         'tipo_cambio' => $tipoCambio,

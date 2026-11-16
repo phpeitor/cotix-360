@@ -17,6 +17,11 @@ try {
         exit;
     }
 
+    if ((int)($_SESSION['session_cargo'] ?? 0) !== 1) {
+        http_response_code(403);
+        throw new RuntimeException('Solo el Administrador puede modificar el nombre de una receta');
+    }
+
     $hash = trim((string)($_POST['hash'] ?? ''));
     $nombre = trim((string)($_POST['nombre'] ?? ''));
 
@@ -34,6 +39,9 @@ try {
             'message' => 'Debe ingresar un nombre para la receta'
         ]);
         exit;
+    }
+    if (mb_strlen($nombre, 'UTF-8') > 100) {
+        throw new InvalidArgumentException('El nombre de la receta no puede superar los 100 caracteres');
     }
 
     $usuarioUpd = isset($_SESSION['session_id']) ? (int)$_SESSION['session_id'] : null;
@@ -55,7 +63,7 @@ try {
         'message' => $ok ? 'Nombre de receta actualizado' : 'No se realizaron cambios'
     ]);
 } catch (Throwable $e) {
-    http_response_code(500);
+    if (http_response_code() < 400) http_response_code(500);
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()

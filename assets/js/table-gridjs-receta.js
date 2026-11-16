@@ -853,8 +853,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // Si el usuario es técnico (cargo === 4) no mostrar modal, abrir PDF directamente
-            if (typeof CARGO !== 'undefined' && Number(CARGO) === 4) {
+            // Solo Admin puede definir/modificar el nombre desde este flujo.
+            const cargoActual = Number(window.PERMISOS_STATE?.cargo ?? (typeof CARGO !== 'undefined' ? CARGO : 0));
+            if (cargoActual !== 1) {
                 if (!await confirmarPdfDetalle()) return;
                 abrirPdfReceta(hash);
                 return;

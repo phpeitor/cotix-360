@@ -39,6 +39,7 @@ class Receta {
         $sql = "INSERT INTO recetas (
                     usuario_id,
                     asignado_usuario_id,
+                    nombre,
                     estado,
                     created_at,
                     updated_at,
@@ -47,6 +48,7 @@ class Receta {
                 ) VALUES (
                     :usuario_id,
                     :asignado_usuario_id,
+                    :nombre,
                     :estado,
                     :created_at,
                     :updated_at,
@@ -62,6 +64,7 @@ class Receta {
         } else {
             $stmt->bindValue(':asignado_usuario_id', null, PDO::PARAM_NULL);
         }
+        $stmt->bindValue(':nombre', mb_strtoupper(trim((string)($data['nombre'] ?? '')), 'UTF-8'));
         $stmt->bindValue(':estado', (string)($data['estado'] ?? 'Enviada'), PDO::PARAM_STR);
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->bindValue(':updated_at', $this->nowLima);

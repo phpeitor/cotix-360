@@ -5,6 +5,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
 $puedeGestionarCategoriasReceta = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 8], true);
 $ocultarPreciosReceta = in_array((int)($_SESSION['session_cargo'] ?? 0), [3, 4, 6, 7], true);
 $esCargoVendedor = (int)($_SESSION['session_cargo'] ?? 0) === 7;
+$puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -72,9 +73,11 @@ $esCargoVendedor = (int)($_SESSION['session_cargo'] ?? 0) === 7;
                                     <h4 class="header-title mb-0">Receta #<span id="receta_id"></span></h4>
                                     <div class="d-flex align-items-center gap-2 flex-wrap receta-name-row">
                                         <p class="text-muted fs-14 mb-0" id="receta_nombre_display"></p>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnEditRecetaNombre" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar nombre"><i class="ti ti-edit"></i></button>
+                                         <?php if ($puedeEditarNombreReceta): ?>
+                                         <button type="button" class="btn btn-sm btn-outline-secondary" id="btnEditRecetaNombre" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar nombre"><i class="ti ti-edit"></i></button>
+                                         <?php endif; ?>
                                     </div>
-                                    <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none receta-nombre-input" placeholder="Nombre de la receta">
+                                     <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none receta-nombre-input" placeholder="Nombre de la receta" <?= $puedeEditarNombreReceta ? '' : 'readonly' ?>>
                                 </div>
 
                                 <div class="row g-3 receta-meta-row">

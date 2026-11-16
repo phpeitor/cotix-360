@@ -29,8 +29,15 @@ try {
     $receta = new Receta();
 
     if ($field === 'nombre') {
+        if ((int)($_SESSION['session_cargo'] ?? 0) !== 1) {
+            http_response_code(403);
+            throw new Exception('Solo el Administrador puede modificar el nombre de la receta');
+        }
         if ($value === '') {
             throw new Exception('El nombre no puede estar vacío');
+        }
+        if (mb_strlen($value, 'UTF-8') > 100) {
+            throw new Exception('El nombre de la receta no puede superar los 100 caracteres');
         }
         $ok = $receta->actualizarNombreIngenieria($hash, $value);
     } elseif ($field === 'tipo_cambio') {
@@ -79,6 +86,6 @@ try {
         $receta->rollback();
     }
 
-    http_response_code(400);
+    if (http_response_code() < 400) http_response_code(400);
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
