@@ -192,14 +192,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       items.forEach(carga => {
           const active = Number(carga.estado) === 1;
+          const statusClass = active ? 'is-active' : 'is-annulled';
           const errores = Number(carga.errores || 0);
           const card = `
             <div class="col-sm-6 col-xl-3">
-                <article class="card cargar-items-history-card h-100">
+                <article class="card cargar-items-history-card ${active ? '' : 'is-annulled'} h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
-                            <span class="cargar-items-history-icon ${active ? 'is-active' : 'is-inactive'}"><i class="ti ti-file-spreadsheet"></i></span>
-                            <span class="badge rounded-pill ${active ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'}">${active ? 'Activa' : 'Anulada'}</span>
+                            <span class="cargar-items-history-icon ${statusClass}"><i class="ti ti-file-spreadsheet"></i></span>
+                            <span class="badge rounded-pill ${active ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}">${active ? 'Activa' : 'Anulada'}</span>
                             <button type="button" class="btn btn-sm btn-light btn-icon btn-estado ms-auto" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${active ? 'Anular esta carga' : 'Reactivar esta carga'}" aria-label="${active ? 'Anular esta carga' : 'Reactivar esta carga'}" data-id="${escapeHtml(carga.id)}" data-estado="${escapeHtml(carga.estado)}">
                                 <i class="ti ${active ? 'ti-x' : 'ti-restore'}"></i>
                             </button>

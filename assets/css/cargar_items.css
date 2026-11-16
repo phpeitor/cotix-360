@@ -154,7 +154,25 @@
 }
 
 .cargar-items-history-icon { width: 42px; height: 42px; border-radius: 12px; font-size: 20px; }
-.cargar-items-history-icon.is-inactive { color: #667085; background: #f0f2f5; }
+.cargar-items-history-card.is-annulled {
+    border-color: #f3b8c2;
+    background: linear-gradient(180deg, #fffafa 0%, #fff5f6 100%);
+}
+
+.cargar-items-history-card.is-annulled:hover {
+    border-color: #e98d9b;
+    box-shadow: 0 .55rem 1.3rem rgba(220, 53, 69, .14);
+}
+
+.cargar-items-history-icon.is-inactive,
+.cargar-items-history-icon.is-annulled {
+    color: #c24153;
+    background: #fde7eb;
+}
+
+.cargar-items-history-card.is-annulled .cargar-items-file-title {
+    color: #8f3543;
+}
 .cargar-items-file-title { overflow: hidden; margin-bottom: .35rem; font-size: .98rem; text-overflow: ellipsis; white-space: nowrap; }
 
 .cargar-items-stats {

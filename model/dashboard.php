@@ -130,7 +130,27 @@ class Dashboard {
             (SELECT COUNT(*) FROM carga
                 WHERE fecha_registro >= :actual_inicio_carga AND fecha_registro < :actual_fin_carga) AS carga_actual,
             (SELECT COUNT(*) FROM carga
-                WHERE fecha_registro >= :anterior_inicio_carga AND fecha_registro < :anterior_fin_carga) AS carga_anterior
+                WHERE fecha_registro >= :anterior_inicio_carga AND fecha_registro < :anterior_fin_carga) AS carga_anterior,
+            (SELECT COUNT(*) FROM recetas
+                WHERE created_at >= :actual_inicio_recetas AND created_at < :actual_fin_recetas) AS recetas_actual,
+            (SELECT COUNT(*) FROM recetas
+                WHERE created_at >= :anterior_inicio_recetas AND created_at < :anterior_fin_recetas) AS recetas_anterior,
+            (SELECT COUNT(*) FROM receta_items
+                WHERE estado = 1 AND created_at >= :actual_inicio_receta_items AND created_at < :actual_fin_receta_items) AS receta_items_actual,
+            (SELECT COUNT(*) FROM receta_items
+                WHERE estado = 1 AND created_at >= :anterior_inicio_receta_items AND created_at < :anterior_fin_receta_items) AS receta_items_anterior,
+            (SELECT COUNT(*) FROM receta_items
+                WHERE estado = 1 AND UPPER(TRIM(tipo)) = 'PRODUCTO'
+                  AND created_at >= :actual_inicio_productos AND created_at < :actual_fin_productos) AS productos_actual,
+            (SELECT COUNT(*) FROM receta_items
+                WHERE estado = 1 AND UPPER(TRIM(tipo)) = 'PRODUCTO'
+                  AND created_at >= :anterior_inicio_productos AND created_at < :anterior_fin_productos) AS productos_anterior,
+            (SELECT COUNT(*) FROM receta_items
+                WHERE estado = 1 AND UPPER(TRIM(tipo)) = 'SERVICIO'
+                  AND created_at >= :actual_inicio_servicios AND created_at < :actual_fin_servicios) AS servicios_actual,
+            (SELECT COUNT(*) FROM receta_items
+                WHERE estado = 1 AND UPPER(TRIM(tipo)) = 'SERVICIO'
+                  AND created_at >= :anterior_inicio_servicios AND created_at < :anterior_fin_servicios) AS servicios_anterior
         ";
 
         $stmt = $this->conn->prepare($sql);
@@ -141,22 +161,26 @@ class Dashboard {
         $anteriorFin = $inicio->format('Y-m-d H:i:s');
 
         foreach ([
-            'actual_inicio', 'actual_inicio_items', 'actual_inicio_cotizaciones', 'actual_inicio_carga'
+            'actual_inicio', 'actual_inicio_items', 'actual_inicio_cotizaciones', 'actual_inicio_carga',
+            'actual_inicio_recetas', 'actual_inicio_receta_items', 'actual_inicio_productos', 'actual_inicio_servicios'
         ] as $parameter) {
             $stmt->bindValue(':' . $parameter, $actualInicio);
         }
         foreach ([
-            'actual_fin', 'actual_fin_items', 'actual_fin_cotizaciones', 'actual_fin_carga'
+            'actual_fin', 'actual_fin_items', 'actual_fin_cotizaciones', 'actual_fin_carga',
+            'actual_fin_recetas', 'actual_fin_receta_items', 'actual_fin_productos', 'actual_fin_servicios'
         ] as $parameter) {
             $stmt->bindValue(':' . $parameter, $actualFin);
         }
         foreach ([
-            'anterior_inicio', 'anterior_inicio_items', 'anterior_inicio_cotizaciones', 'anterior_inicio_carga'
+            'anterior_inicio', 'anterior_inicio_items', 'anterior_inicio_cotizaciones', 'anterior_inicio_carga',
+            'anterior_inicio_recetas', 'anterior_inicio_receta_items', 'anterior_inicio_productos', 'anterior_inicio_servicios'
         ] as $parameter) {
             $stmt->bindValue(':' . $parameter, $anteriorInicio);
         }
         foreach ([
-            'anterior_fin', 'anterior_fin_items', 'anterior_fin_cotizaciones', 'anterior_fin_carga'
+            'anterior_fin', 'anterior_fin_items', 'anterior_fin_cotizaciones', 'anterior_fin_carga',
+            'anterior_fin_recetas', 'anterior_fin_receta_items', 'anterior_fin_productos', 'anterior_fin_servicios'
         ] as $parameter) {
             $stmt->bindValue(':' . $parameter, $anteriorFin);
         }
@@ -179,6 +203,22 @@ class Dashboard {
             'carga' => [
                 'actual' => (int)($result['carga_actual'] ?? 0),
                 'anterior' => (int)($result['carga_anterior'] ?? 0),
+            ],
+            'recetas' => [
+                'actual' => (int)($result['recetas_actual'] ?? 0),
+                'anterior' => (int)($result['recetas_anterior'] ?? 0),
+            ],
+            'receta_items' => [
+                'actual' => (int)($result['receta_items_actual'] ?? 0),
+                'anterior' => (int)($result['receta_items_anterior'] ?? 0),
+            ],
+            'productos' => [
+                'actual' => (int)($result['productos_actual'] ?? 0),
+                'anterior' => (int)($result['productos_anterior'] ?? 0),
+            ],
+            'servicios' => [
+                'actual' => (int)($result['servicios_actual'] ?? 0),
+                'anterior' => (int)($result['servicios_anterior'] ?? 0),
             ],
             'periodo' => [
                 'inicio' => $inicio->format('Y-m-d'),

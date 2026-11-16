@@ -308,7 +308,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const result = await response.json();
             if (result.error || !result.data) throw new Error(result.message || "No se pudieron cargar las variaciones");
 
-            ["usuarios", "items", "cotizaciones", "carga"].forEach((key) => {
+            ["usuarios", "items", "cotizaciones", "carga", "recetas", "receta_items", "productos", "servicios"].forEach((key) => {
                 renderCardVariation(key, result.data[key].actual, result.data[key].anterior);
             });
 

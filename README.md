@@ -40,7 +40,8 @@ vistas, endpoints, modelos y assets específicos, con reglas compartidas documen
 - Compras derivadas de ingeniería validada, con semáforo comparativo y gráficos.
 - Exportaciones PDF y Excel para documentos comerciales y técnicos.
 
-El dashboard calcula la variación de los cards de usuarios, ítems, cotizaciones y cargas
+El dashboard calcula la variación de los cards de usuarios, ítems, cotizaciones, cargas,
+recetas, ítems de receta, productos y servicios
 según el rango seleccionado en el calendario. La comparación se realiza contra el período
 inmediatamente anterior de igual duración. El valor inicial es el mes actual hasta hoy y el
 selector permite analizar otros rangos sin recargar la página.

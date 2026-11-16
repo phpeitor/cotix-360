@@ -172,6 +172,9 @@ require_once ROOT . '/controller/check_session.php';
                                             </div>
                                             <h3 id="total_receta" class="mb-0 fw-bold">0</h3>
                                         </div>
+                                        <p class="mb-0 text-muted">
+                                            <span class="dashboard-card-change" data-dashboard-variation="recetas" title="Variación del período seleccionado"></span>
+                                        </p>
                                     </div>
                                 </div>
                             </div><!-- end col -->
@@ -188,6 +191,9 @@ require_once ROOT . '/controller/check_session.php';
                                             </div>
                                             <h3 id="total_item_receta" class="mb-0 fw-bold">0</h3>
                                         </div>
+                                        <p class="mb-0 text-muted">
+                                            <span class="dashboard-card-change" data-dashboard-variation="receta_items" title="Variación del período seleccionado"></span>
+                                        </p>
                                     </div>
                                 </div>
                             </div><!-- end col -->
@@ -204,6 +210,9 @@ require_once ROOT . '/controller/check_session.php';
                                             </div>
                                             <h3 id="total_receta_producto" class="mb-0 fw-bold">0</h3>
                                         </div>
+                                        <p class="mb-0 text-muted">
+                                            <span class="dashboard-card-change" data-dashboard-variation="productos" title="Variación del período seleccionado"></span>
+                                        </p>
                                     </div>
                                 </div>
                             </div><!-- end col -->
@@ -220,6 +229,9 @@ require_once ROOT . '/controller/check_session.php';
                                             </div>
                                             <h3 id="total_receta_servicio" class="mb-0 fw-bold">0</h3>
                                         </div>
+                                        <p class="mb-0 text-muted">
+                                            <span class="dashboard-card-change" data-dashboard-variation="servicios" title="Variación del período seleccionado"></span>
+                                        </p>
                                     </div>
                                 </div>
                             </div><!-- end col -->
@@ -384,7 +396,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
     <script src="./assets/js/dashboard-sales.js"></script>
-    <script src="./assets/js/dashboard.js?v=1.3"></script>
+    <script src="./assets/js/dashboard.js?v=1.4"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
