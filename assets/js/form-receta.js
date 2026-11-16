@@ -513,7 +513,8 @@ document.addEventListener("DOMContentLoaded", () => {
             data.usuarios.forEach(usuario => {
                 const nombre = String(usuario.nombre || usuario.usuario || `Usuario ${usuario.id}`).trim();
                 const detalleUsuario = usuario.usuario ? ` · ${usuario.usuario}` : "";
-                usuarioIngenieriaSelect.add(new Option(`${nombre}${detalleUsuario}`, String(usuario.id)));
+                const estadoPresencia = Number(usuario.online) === 1 ? "🟢 EN LÍNEA" : "🔴 DESCONECTADO";
+                usuarioIngenieriaSelect.add(new Option(`${nombre}${detalleUsuario} · ${estadoPresencia}`, String(usuario.id)));
             });
             usuarioIngenieriaSelect.disabled = data.usuarios.length === 0;
             if (!data.usuarios.length) {

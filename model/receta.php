@@ -980,13 +980,25 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
 
     public function obtenerUsuariosIngenieriaActivos(): array
     {
-        $sql = "SELECT IDPERSONAL AS id,
-                       TRIM(CONCAT_WS(' ', NULLIF(TRIM(NOMBRES), ''), NULLIF(TRIM(APELLIDOS), ''))) AS nombre,
-                       USUARIO AS usuario
-                FROM personal
-                WHERE CARGO = 6 AND IDESTADO = 1
-                ORDER BY NOMBRES, APELLIDOS";
+        $this->conn->exec("CREATE TABLE IF NOT EXISTS usuario_presencia (
+            usuario_id INT NOT NULL,
+            ultima_actividad DATETIME NOT NULL,
+            PRIMARY KEY (usuario_id),
+            KEY idx_usuario_presencia_actividad (ultima_actividad)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        $onlineSince = (new DateTimeImmutable('now', new DateTimeZone('America/Lima')))
+            ->sub(new DateInterval('PT3M'))
+            ->format('Y-m-d H:i:s');
+        $sql = "SELECT p.IDPERSONAL AS id,
+                       TRIM(CONCAT_WS(' ', NULLIF(TRIM(p.NOMBRES), ''), NULLIF(TRIM(p.APELLIDOS), ''))) AS nombre,
+                       p.USUARIO AS usuario,
+                       CASE WHEN up.ultima_actividad >= :online_since THEN 1 ELSE 0 END AS online
+                FROM personal p
+                LEFT JOIN usuario_presencia up ON up.usuario_id = p.IDPERSONAL
+                WHERE p.CARGO = 6 AND p.IDESTADO = 1
+                ORDER BY p.NOMBRES, p.APELLIDOS";
         $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':online_since', $onlineSince);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
