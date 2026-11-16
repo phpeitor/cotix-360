@@ -75,6 +75,36 @@
     font-weight: 700;
 }
 
+.import-addition-table-wrap {
+    max-height: 48vh;
+    overflow: auto;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .6rem;
+}
+
+.import-addition-table {
+    min-width: 760px;
+    table-layout: fixed;
+}
+
+.import-addition-table th:first-child,
+.import-addition-table td:first-child { width: 54px; }
+
+.import-addition-table th:nth-child(2),
+.import-addition-table td:nth-child(2) { width: 38%; }
+
+.import-addition-item strong,
+.import-addition-item small {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.import-addition-item small {
+    margin-top: .15rem;
+    color: var(--bs-secondary-color);
+    line-height: 1.35;
+}
+
 @media (max-width: 575.98px) {
     .receta-creation-tabs-wrap .nav-link {
         padding: .55rem .4rem;

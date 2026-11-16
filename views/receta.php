@@ -17,7 +17,7 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/branding.css?v=1.5" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/receta.css?v=1.3" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/receta.css?v=1.4" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -68,6 +68,7 @@ require_once ROOT . '/controller/check_session.php';
                                     <button type="button" class="btn btn-outline-info me-2" id="btnPreviewReceta" data-bs-toggle="modal" data-bs-target="#previewRecetaModal">
                                         <i class="ti ti-eye me-1" data-bs-toggle="tooltip" data-bs-title="Vista previa" data-bs-placement="top"></i> Preview
                                     </button>
+                                    <button type="button" class="btn btn-dark btn-icon" id="btnAbrirImportarAdicionales" data-bs-toggle="modal" data-bs-target="#importarAdicionalesPositivosModal" data-bs-title="Importar adicionales positivos" data-bs-placement="bottom" aria-label="Importar adicionales positivos"><i class="ti ti-file-import fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal"><i class="ti ti-search fs-18" data-bs-toggle="tooltip" data-bs-title="Buscar" data-bs-placement="bottom"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" onclick="window.history.back();"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                                 </div>
@@ -282,6 +283,55 @@ require_once ROOT . '/controller/check_session.php';
         </div>
     </div><!--modal -->
 
+    <div class="modal fade" id="importarAdicionalesPositivosModal" tabindex="-1" aria-labelledby="importarAdicionalesPositivosTitle" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header text-bg-primary border-0">
+                    <div>
+                        <h4 class="modal-title" id="importarAdicionalesPositivosTitle"><i class="ti ti-file-import me-2"></i>Importar adicionales positivos</h4>
+                        <small class="text-white-50">Copia productos o servicios adicionales desde Compras a esta receta.</small>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info py-2 mb-3">Solo se muestran recetas con adicionales positivos registrados en Compras. Los items importados se agregan al detalle actual y puedes ajustar sus cantidades.</div>
+                    <div class="row g-3 align-items-end mb-3">
+                        <div class="col-lg-9">
+                            <label class="form-label" for="recetaOrigenAdicionalesSelect">Receta de origen</label>
+                            <select class="form-select" id="recetaOrigenAdicionalesSelect">
+                                <option value="">Cargando recetas...</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3 text-lg-end">
+                            <span class="badge bg-primary-subtle text-primary fs-12" id="adicionalesPositivosCount">0 adicionales</span>
+                        </div>
+                    </div>
+                    <div class="table-responsive import-addition-table-wrap">
+                        <table class="table table-sm table-hover align-middle mb-0 import-addition-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-center"><input class="form-check-input" type="checkbox" id="checkAllAdicionalesPositivos" aria-label="Seleccionar todos los adicionales"></th>
+                                    <th>Producto / Servicio</th>
+                                    <th>Detalle</th>
+                                    <th>Tipo</th>
+                                    <th class="text-end">Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adicionalesPositivosImportBody">
+                                <tr><td colspan="5" class="text-center text-muted py-4">Selecciona una receta de origen para cargar sus adicionales positivos.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <span class="text-muted me-auto" id="adicionalesPositivosSelectedCount">0 seleccionados</span>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnImportarAdicionalesPositivos" disabled><i class="ti ti-download me-1"></i>Importar seleccionados</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade preview-modal" id="previewRecetaModal" tabindex="-1" aria-labelledby="previewRecetaModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-xl">
             <div class="modal-content">
@@ -322,7 +372,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/form-receta.js?v=2.0"></script>
+    <script src="./assets/js/form-receta.js?v=2.2"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

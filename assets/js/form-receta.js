@@ -28,6 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const previewTotalDolaresEl = document.getElementById("previewTotalDolares");
     const previewTotalPEEl = document.getElementById("previewTotalPE");
     const usuarioIngenieriaSelect = document.getElementById("usuario_ingenieria_id");
+    const recetaOrigenAdicionalesSelect = document.getElementById("recetaOrigenAdicionalesSelect");
+    const adicionalesPositivosImportBody = document.getElementById("adicionalesPositivosImportBody");
+    const adicionalesPositivosCount = document.getElementById("adicionalesPositivosCount");
+    const adicionalesPositivosSelectedCount = document.getElementById("adicionalesPositivosSelectedCount");
+    const checkAllAdicionalesPositivos = document.getElementById("checkAllAdicionalesPositivos");
+    const btnImportarAdicionalesPositivos = document.getElementById("btnImportarAdicionalesPositivos");
     const recetaForm = document.querySelector("form.form-receta");
     const paginationFromEl = document.getElementById("pagination_from");
     const paginationToEl = document.getElementById("pagination_to");
@@ -42,6 +48,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const PAGE_SIZE = 15;
     const MAX_CANTIDAD = 5000;
     let currentPage = 1;
+    let recetasConAdicionalesPositivos = [];
+    let adicionalesPositivosDisponibles = [];
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
 
     function normalizarTextoDetalle(valor) {
         const texto = String(valor ?? "").trim();
@@ -527,6 +544,133 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    async function cargarRecetasConAdicionalesPositivos() {
+        if (!recetaOrigenAdicionalesSelect) return;
+        recetaOrigenAdicionalesSelect.replaceChildren(new Option("Cargando recetas...", ""));
+        try {
+            const res = await fetch("controller/receta_adicionales_positivos.php");
+            const data = await res.json();
+            if (!res.ok || !data.ok || !Array.isArray(data.recetas)) {
+                throw new Error(data.message || "No se pudieron cargar las recetas de origen");
+            }
+
+            recetasConAdicionalesPositivos = data.recetas;
+            recetaOrigenAdicionalesSelect.replaceChildren(new Option("-- Selecciona una receta --", ""));
+            recetasConAdicionalesPositivos.forEach(recetaOrigen => {
+                const numero = `Receta #${recetaOrigen.receta_id}`;
+                const referencia = String(recetaOrigen.motivo || recetaOrigen.receta_nombre || "").trim();
+                const cliente = String(recetaOrigen.cliente || "").trim();
+                const piezas = `${Number(recetaOrigen.cantidad_adicionales || 0)} adicionales`;
+                const label = [numero, referencia, cliente, piezas].filter(Boolean).join(" · ");
+                recetaOrigenAdicionalesSelect.add(new Option(label, String(recetaOrigen.receta_id)));
+            });
+            recetaOrigenAdicionalesSelect.disabled = recetasConAdicionalesPositivos.length === 0;
+            if (!recetasConAdicionalesPositivos.length) {
+                recetaOrigenAdicionalesSelect.replaceChildren(new Option("No hay recetas con adicionales positivos", ""));
+                if (adicionalesPositivosImportBody) {
+                    adicionalesPositivosImportBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No se encontraron adicionales positivos registrados en Compras.</td></tr>';
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            recetaOrigenAdicionalesSelect.replaceChildren(new Option("Error al cargar recetas", ""));
+            recetaOrigenAdicionalesSelect.disabled = true;
+            alertify.error(error.message || "No se pudieron cargar las recetas de origen");
+        }
+        actualizarSeleccionAdicionalesPositivos();
+    }
+
+    async function cargarAdicionalesPositivosDeReceta(recetaOrigenId) {
+        if (!adicionalesPositivosImportBody) return;
+        adicionalesPositivosDisponibles = [];
+        if (!recetaOrigenId) {
+            adicionalesPositivosImportBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Selecciona una receta de origen para cargar sus adicionales positivos.</td></tr>';
+            actualizarSeleccionAdicionalesPositivos();
+            return;
+        }
+
+        adicionalesPositivosImportBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4"><span class="spinner-border spinner-border-sm me-2" role="status"></span>Cargando adicionales...</td></tr>';
+        try {
+            const query = new URLSearchParams({ receta_id: String(recetaOrigenId) });
+            const res = await fetch(`controller/receta_adicionales_positivos.php?${query.toString()}`);
+            const data = await res.json();
+            if (!res.ok || !data.ok || !Array.isArray(data.adicionales)) {
+                throw new Error(data.message || "No se pudieron cargar los adicionales positivos");
+            }
+            adicionalesPositivosDisponibles = data.adicionales;
+
+            if (!adicionalesPositivosDisponibles.length) {
+                adicionalesPositivosImportBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Esta receta ya no tiene adicionales positivos disponibles.</td></tr>';
+                actualizarSeleccionAdicionalesPositivos();
+                return;
+            }
+
+            adicionalesPositivosImportBody.innerHTML = adicionalesPositivosDisponibles.map(item => {
+                const id = Number(item.compra_detalle_id || 0);
+                const nombre = escapeHtml(item.nombre || item.modelo || "Item sin nombre");
+                const descripcion = escapeHtml(normalizarTextoDetalle(item.descripcion) || "");
+                const detalle = escapeHtml(formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]) || "-");
+                const rutaMarca = escapeHtml(formatearRutaDetalle([item.marca, item.modelo, item.uni_medida]) || "");
+                const tipo = escapeHtml(item.tipo || "-");
+                return `
+                    <tr>
+                        <td class="text-center"><input class="form-check-input adicional-positivo-check" type="checkbox" value="${id}" checked aria-label="Seleccionar ${nombre}"></td>
+                        <td class="import-addition-item"><strong>${nombre}</strong>${descripcion ? `<small>${descripcion}</small>` : ""}${rutaMarca ? `<small>${rutaMarca}</small>` : ""}</td>
+                        <td>${detalle}</td>
+                        <td>${tipo}</td>
+                        <td class="text-end">${Number(item.cantidad || 0)}</td>
+                    </tr>
+                `;
+            }).join("");
+            checkAllAdicionalesPositivos.checked = true;
+        } catch (error) {
+            console.error(error);
+            adicionalesPositivosImportBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">${escapeHtml(error.message || "Error al cargar adicionales")}</td></tr>`;
+        }
+        actualizarSeleccionAdicionalesPositivos();
+    }
+
+    function actualizarSeleccionAdicionalesPositivos() {
+        const checks = Array.from(adicionalesPositivosImportBody?.querySelectorAll(".adicional-positivo-check") || []);
+        const seleccionados = checks.filter(check => check.checked).length;
+        if (adicionalesPositivosCount) adicionalesPositivosCount.textContent = `${adicionalesPositivosDisponibles.length} adicionales`;
+        if (adicionalesPositivosSelectedCount) adicionalesPositivosSelectedCount.textContent = `${seleccionados} seleccionados`;
+        if (btnImportarAdicionalesPositivos) btnImportarAdicionalesPositivos.disabled = seleccionados === 0;
+        if (checkAllAdicionalesPositivos) {
+            checkAllAdicionalesPositivos.checked = checks.length > 0 && seleccionados === checks.length;
+            checkAllAdicionalesPositivos.indeterminate = seleccionados > 0 && seleccionados < checks.length;
+            checkAllAdicionalesPositivos.disabled = checks.length === 0;
+        }
+    }
+
+    function importarAdicionalesPositivosSeleccionados() {
+        const recetaOrigenId = Number(recetaOrigenAdicionalesSelect?.value || 0);
+        const seleccionados = new Set(Array.from(adicionalesPositivosImportBody?.querySelectorAll(".adicional-positivo-check:checked") || [])
+            .map(check => Number(check.value)));
+        const items = adicionalesPositivosDisponibles.filter(item => seleccionados.has(Number(item.compra_detalle_id || 0)));
+        if (!recetaOrigenId || !items.length) {
+            alertify.error("Selecciona una receta y al menos un adicional positivo");
+            return;
+        }
+
+        let agregados = 0;
+        items.forEach(item => {
+            const detalleCompraId = Number(item.compra_detalle_id || 0);
+            const agregado = agregarItemReceta({
+                ...item,
+                id: `adicional-compra-${detalleCompraId}`,
+                import_source_detail_id: detalleCompraId,
+                import_source_recipe_id: recetaOrigenId
+            }, item.cantidad);
+            if (agregado) agregados += 1;
+        });
+
+        if (agregados > 0) {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("importarAdicionalesPositivosModal")).hide();
+            alertify.success(`${agregados} adicional${agregados === 1 ? "" : "es"} positivo${agregados === 1 ? "" : "s"} importado${agregados === 1 ? "" : "s"}`);
+        }
+    }
+
     async function cargarCategoriasReceta() {
         const { tipo } = getFiltrosReceta();
 
@@ -667,28 +811,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
     cargarBasesReceta();
     cargarUsuariosIngenieria();
+    cargarRecetasConAdicionalesPositivos();
+    recetaOrigenAdicionalesSelect?.addEventListener("change", () => cargarAdicionalesPositivosDeReceta(recetaOrigenAdicionalesSelect.value));
+    adicionalesPositivosImportBody?.addEventListener("change", event => {
+        if (event.target.matches(".adicional-positivo-check")) actualizarSeleccionAdicionalesPositivos();
+    });
+    checkAllAdicionalesPositivos?.addEventListener("change", () => {
+        adicionalesPositivosImportBody?.querySelectorAll(".adicional-positivo-check").forEach(check => {
+            check.checked = checkAllAdicionalesPositivos.checked;
+        });
+        actualizarSeleccionAdicionalesPositivos();
+    });
+    btnImportarAdicionalesPositivos?.addEventListener("click", importarAdicionalesPositivosSeleccionados);
 
     function agregarItemReceta(item, qtyInicial = 1) {
-        const itemId = item.id;
+        const sourcePositiveId = Number(item?.import_source_detail_id || 0);
+        const itemId = sourcePositiveId > 0 ? `compra-adicional-${sourcePositiveId}` : item?.id;
         const qtyNormalizada = clampCantidad(qtyInicial);
 
         if (!item) {
             alertify.error("El item no contiene información válida");
-            return;
+            return false;
         }
 
         if (!Number.isInteger(qtyNormalizada) || qtyNormalizada < 1 || qtyNormalizada > 5000) {
             alertify.error("Ingrese una cantidad valida (1 a 5000)");
-            return;
+            return false;
         }
 
         if (itemAlreadyAdded(tbody, itemId)) {
             alertify.error("Este item ya fue agregado");
-            return;
+            return false;
         }
 
         const tr = document.createElement("tr");
         tr.dataset.itemId  = itemId;
+        tr.dataset.catalogItemId = String(item.item_id || (sourcePositiveId > 0 ? "" : item.id) || "");
+        tr.dataset.compraDetalleId = sourcePositiveId > 0 ? String(sourcePositiveId) : "";
+        tr.dataset.recetaOrigenId = sourcePositiveId > 0 ? String(item.import_source_recipe_id || "") : "";
         tr.dataset.precio = item.precio;
         tr.dataset.moneda = item.moneda;
         tr.dataset.nombre = item.nombre;
@@ -703,6 +863,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const iconoSubcat = /^ti ti-[a-z0-9-]+$/i.test(String(item.sub_cat_1_icon || "").trim())
             ? String(item.sub_cat_1_icon).trim()
             : "ti ti-tools";
+        const nombreHtml = escapeHtml(item.nombre || "-");
+        const descripcionHtml = escapeHtml(item.descripcion || "");
+        const categoriaHtml = escapeHtml(item.categoria || "");
+        const subCat1Html = escapeHtml(item.sub_cat_1 || "");
+        const subCat2Html = escapeHtml(item.sub_cat_2 || "");
+        const marcaHtml = escapeHtml(item.marca || "");
+        const modeloHtml = escapeHtml(item.modelo || "");
+        const unidadHtml = escapeHtml(item.uni_medida || "");
+        const tipoHtml = escapeHtml(item.tipo || "-");
+        const etiquetaAdicional = sourcePositiveId > 0
+            ? '<span class="badge bg-success-subtle text-success ms-1">Adicional +</span>'
+            : "";
 
         tr.innerHTML = `
             <td>
@@ -713,28 +885,28 @@ document.addEventListener("DOMContentLoaded", () => {
                         </span>
                     </div>
                     <div>
-                        <span class="text-muted fs-12">${item.nombre}</span><br>
-                        <h5 class="fs-14 mt-1 item-description">${item.descripcion}</h5>
+                        <span class="text-muted fs-12">${nombreHtml}${etiquetaAdicional}</span><br>
+                        <h5 class="fs-14 mt-1 item-description">${descripcionHtml}</h5>
                     </div>
                 </div>
             </td>
 
             <td>
-                <span class="text-muted fs-12">${item.categoria}</span>
-                <h5 class="fs-14 mt-1 fw-normal isadmin">${item.sub_cat_1}</h5>
-                <h5 class="fs-11 mt-1 fw-normal">${item.sub_cat_2}</h5>
+                <span class="text-muted fs-12">${categoriaHtml}</span>
+                <h5 class="fs-14 mt-1 fw-normal isadmin">${subCat1Html}</h5>
+                <h5 class="fs-11 mt-1 fw-normal">${subCat2Html}</h5>
             </td>
              <td>
-                <span class="text-muted fs-12">${item.marca}</span>
-                <h5 class="fs-14 mt-1 fw-normal isadmin">${item.modelo}</h5>
-                <h5 class="fs-14 mt-1 fw-normal">${item.uni_medida}</h5>
+                <span class="text-muted fs-12">${marcaHtml}</span>
+                <h5 class="fs-14 mt-1 fw-normal isadmin">${modeloHtml}</h5>
+                <h5 class="fs-14 mt-1 fw-normal">${unidadHtml}</h5>
             </td>
 
             <td>
                 <span class="text-muted fs-12">Tipo</span>
                 <h5 class="fs-14 mt-1 fw-normal">
-                    <i class="ti ti-circle-filled fs-12 ${item.tipo === "PRODUCTO" ? "text-success" : "text-info"}"></i>
-                    ${item.tipo}
+                    <i class="ti ti-circle-filled fs-12 ${String(item.tipo || "").toUpperCase() === "PRODUCTO" ? "text-success" : "text-info"}"></i>
+                    ${tipoHtml}
                 </h5>
             </td>
 
@@ -758,7 +930,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         tbody.appendChild(tr);
         validarTdAdmin(tr);
-        alertify.success("Item agregado");
+        if (sourcePositiveId <= 0) alertify.success("Item agregado");
         currentPage = Math.ceil(getRows().length / PAGE_SIZE);
         calcularTotales();
 
@@ -802,6 +974,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 () => {}
             );
         });
+
+        return true;
     }
 
     function getRows() {
@@ -957,7 +1131,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getItemsParaGuardarReceta() {
         return getRows().map(tr => ({
-            item_id: parseInt(tr.dataset.itemId, 10) || 0,
+            item_id: parseInt(tr.dataset.catalogItemId || tr.dataset.itemId, 10) || 0,
+            compra_detalle_id: parseInt(tr.dataset.compraDetalleId, 10) || 0,
+            receta_origen_id: parseInt(tr.dataset.recetaOrigenId, 10) || 0,
             categoria: tr.dataset.categoria || "",
             sub_cat_1: tr.dataset.subcat1 || "",
             sub_cat_2: tr.dataset.subcat2 || "",
@@ -1009,7 +1185,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (items.some(item => !item.item_id || item.cantidad < 1)) {
+        if (items.some(item => (!item.item_id && !item.compra_detalle_id) || item.cantidad < 1)) {
             alertify.error("Hay items inválidos en la receta");
             return;
         }

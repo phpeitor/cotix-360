@@ -258,7 +258,12 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':receta_id', (int)($data['receta_id'] ?? 0), PDO::PARAM_INT);
-        $stmt->bindValue(':item_id', (int)($data['item_id'] ?? 0), PDO::PARAM_INT);
+        $itemId = (int)($data['item_id'] ?? 0);
+        if ($itemId > 0) {
+            $stmt->bindValue(':item_id', $itemId, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':item_id', null, PDO::PARAM_NULL);
+        }
         $stmt->bindValue(':categoria', (string)($data['categoria'] ?? ''));
         $stmt->bindValue(':sub_cat_1', (string)($data['sub_cat_1'] ?? ''));
         $stmt->bindValue(':sub_cat_2', (string)($data['sub_cat_2'] ?? ''));

@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../model/receta.php';
+require_once __DIR__ . '/../model/compras/compras.php';
 
 try {
     if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -27,13 +28,27 @@ try {
     $items = json_decode((string)($_POST['items'] ?? '[]'), true);
     if (!is_array($items)) throw new Exception('Items inválidos');
     $asignadoUsuarioId = (int)($_POST['usuario_ingenieria_id'] ?? 0);
+    $itemsCatalogo = [];
+    $adicionalesPorRecetaOrigen = [];
+    $cantidadAdicionalPorRecetaOrigen = [];
+    foreach ($items as $item) {
+        $detalleCompraId = (int)($item['compra_detalle_id'] ?? 0);
+        if ($detalleCompraId > 0) {
+            $recetaOrigenId = (int)($item['receta_origen_id'] ?? 0);
+            if ($recetaOrigenId <= 0) throw new Exception('No se identificó la receta de origen del adicional');
+            $adicionalesPorRecetaOrigen[$recetaOrigenId][] = $detalleCompraId;
+            $cantidadAdicionalPorRecetaOrigen[$recetaOrigenId][$detalleCompraId] = (int)($item['cantidad'] ?? 0);
+            continue;
+        }
+        $itemsCatalogo[] = $item;
+    }
 
     $receta = new Receta();
     if ($asignadoUsuarioId > 0 && !$receta->esUsuarioIngenieriaActivo($asignadoUsuarioId)) {
         throw new Exception('El usuario asignado no pertenece a Ingeniería o está inactivo');
     }
-    if (!$items && $asignadoUsuarioId <= 0) {
-        throw new Exception('Agrega al menos un item o asigna la receta a un usuario de Ingeniería');
+    if (!$itemsCatalogo && !$adicionalesPorRecetaOrigen && $asignadoUsuarioId <= 0) {
+        throw new Exception('Agrega al menos un item, importa adicionales positivos o asigna la receta a Ingeniería');
     }
 
     $tipoCambio = isset($_POST['tipo_cambio']) ? (float)$_POST['tipo_cambio'] : 0;
@@ -71,6 +86,21 @@ try {
         throw new Exception('El celular del contacto debe contener 9 dígitos numéricos');
     }
 
+    $adicionalesImportados = [];
+    if ($adicionalesPorRecetaOrigen) {
+        $compras = new Compras();
+        foreach ($adicionalesPorRecetaOrigen as $recetaOrigenId => $idsDetalleCompra) {
+            foreach ($compras->adicionalesPositivosPorIds((int)$recetaOrigenId, $idsDetalleCompra) as $adicionalImportado) {
+                $cantidadImportada = (int)($cantidadAdicionalPorRecetaOrigen[$recetaOrigenId][(int)$adicionalImportado['id']] ?? 0);
+                if ($cantidadImportada < 1 || $cantidadImportada > 5000) {
+                    throw new Exception('Cantidad inválida para un adicional positivo importado');
+                }
+                $adicionalImportado['cantidad'] = $cantidadImportada;
+                $adicionalesImportados[] = $adicionalImportado;
+            }
+        }
+    }
+
     $receta->prepararAsignacionReceta();
     $receta->begin();
 
@@ -95,7 +125,7 @@ try {
         'cantidad_items' => $cantidadItemsReceta,
     ]);
 
-    foreach ($items as $item) {
+    foreach ($itemsCatalogo as $item) {
         $itemId = (int)($item['item_id'] ?? 0);
         $cantidad = (int)($item['cantidad'] ?? 0);
 
@@ -122,6 +152,25 @@ try {
             'moneda' => $item['moneda'] ?? '',
             'tipo' => $item['tipo'] ?? '',
             'cantidad' => $cantidad,
+        ]);
+    }
+
+    foreach ($adicionalesImportados as $item) {
+        $receta->guardarDetalle([
+            'receta_id' => $recetaId,
+            'item_id' => (int)($item['item_id'] ?? 0),
+            'categoria' => $item['categoria'] ?? '',
+            'sub_cat_1' => $item['sub_cat_1'] ?? '',
+            'sub_cat_2' => $item['sub_cat_2'] ?? '',
+            'marca' => $item['marca'] ?? '',
+            'modelo' => $item['modelo'] ?? '',
+            'nombre' => $item['nombre'] ?? '',
+            'descripcion' => $item['descripcion'] ?? '',
+            'uni_medida' => $item['uni_medida'] ?? '',
+            'precio' => (float)($item['precio'] ?? 0),
+            'moneda' => $item['moneda'] ?? '',
+            'tipo' => $item['tipo'] ?? '',
+            'cantidad' => (int)($item['cantidad'] ?? 0),
         ]);
     }
 

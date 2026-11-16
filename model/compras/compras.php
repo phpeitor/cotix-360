@@ -195,6 +195,95 @@ class Compras
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
+    public function recetasConAdicionalesPositivos(): array
+    {
+        $this->crearTablasSiNoExisten();
+        $sql = "SELECT r.id AS receta_id,
+                       COALESCE(NULLIF(TRIM(r.nombre), ''), CONCAT('Receta #', r.id)) AS receta_nombre,
+                       rc.razon_social_empresa AS cliente,
+                       rc.motivo,
+                       COUNT(DISTINCT d.id) AS cantidad_adicionales,
+                       MAX(c.updated_at) AS ultima_actualizacion
+                FROM recetas r
+                INNER JOIN receta_compras c ON c.id_receta_duplicada = r.id
+                INNER JOIN detalle_compras d ON d.compra_id = c.id
+                LEFT JOIN receta_cliente rc ON rc.id_receta = r.id
+                WHERE COALESCE(d.es_adicional, 0) = 1
+                  AND COALESCE(d.adicional_signo, 'positivo') = 'positivo'
+                GROUP BY r.id, r.nombre, rc.razon_social_empresa, rc.motivo
+                ORDER BY r.id DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function adicionalesPositivosPorReceta(int $recetaId): array
+    {
+        $this->crearTablasSiNoExisten();
+        if ($recetaId <= 0) return [];
+
+        $sql = "SELECT d.id AS compra_detalle_id,
+                       c.id_receta_duplicada AS receta_origen_id,
+                       d.item_id,
+                       d.categoria,
+                       d.sub_cat_1,
+                       d.sub_cat_2,
+                       d.marca,
+                       d.modelo,
+                       d.nombre,
+                       d.descripcion,
+                       d.uni_medida,
+                       d.precio,
+                       d.moneda,
+                       d.tipo,
+                       d.cantidad,
+                       COALESCE(o.icon, 'ti ti-tools') AS sub_cat_1_icon
+                FROM receta_compras c
+                INNER JOIN detalle_compras d ON d.compra_id = c.id
+                LEFT JOIN vw_receta_items_orden o
+                    ON o.tipo COLLATE utf8mb4_unicode_ci = d.tipo COLLATE utf8mb4_unicode_ci
+                   AND o.sub_cat_1 COLLATE utf8mb4_unicode_ci = d.sub_cat_1 COLLATE utf8mb4_unicode_ci
+                WHERE c.id_receta_duplicada = :receta_id
+                  AND COALESCE(d.es_adicional, 0) = 1
+                  AND COALESCE(d.adicional_signo, 'positivo') = 'positivo'
+                ORDER BY d.tipo ASC, d.sub_cat_1 ASC, d.nombre ASC, d.id ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function adicionalesPositivosPorIds(int $recetaOrigenId, array $detalleCompraIds): array
+    {
+        $this->crearTablasSiNoExisten();
+        $ids = array_values(array_unique(array_filter(array_map('intval', $detalleCompraIds), static fn($id) => $id > 0)));
+        if ($recetaOrigenId <= 0 || !$ids) return [];
+
+        $placeholders = [];
+        foreach ($ids as $index => $id) {
+            $placeholders[] = ':detalle_' . $index;
+        }
+
+        $sql = "SELECT d.*
+                FROM detalle_compras d
+                INNER JOIN receta_compras c ON c.id = d.compra_id
+                WHERE c.id_receta_duplicada = :receta_origen_id
+                  AND COALESCE(d.es_adicional, 0) = 1
+                  AND COALESCE(d.adicional_signo, 'positivo') = 'positivo'
+                  AND d.id IN (" . implode(', ', $placeholders) . ")";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':receta_origen_id', $recetaOrigenId, PDO::PARAM_INT);
+        foreach ($ids as $index => $id) {
+            $stmt->bindValue(':detalle_' . $index, $id, PDO::PARAM_INT);
+        }
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        if (count($rows) !== count($ids)) {
+            throw new InvalidArgumentException('Uno o más items ya no corresponden a adicionales positivos de la receta seleccionada');
+        }
+        return $rows;
+    }
+
     public function totalCompraDolaresPorHash(string $hash): float
     {
         $sql = "SELECT ROUND(COALESCE(SUM(
