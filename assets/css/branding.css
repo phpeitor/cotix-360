@@ -231,6 +231,271 @@ html.cotix-sidebar-resizable:not([data-sidenav-size="condensed"]):not([data-side
 
 .sidenav-menu .sub-menu .side-nav-link {
     min-height: 36px;
+}
+
+/* Responsive shell shared by all application views. */
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.page-content,
+.page-container,
+.page-title-head,
+.card,
+.card-body,
+.card-header,
+.row,
+[class*="col-"] {
+    min-width: 0;
+}
+
+.table-responsive,
+.gridjs-wrapper {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive > table,
+.gridjs-table {
+    min-width: max-content;
+}
+
+.btn,
+.form-control,
+.form-select {
+    max-width: 100%;
+}
+
+.btn-group {
+    flex-wrap: wrap;
+}
+
+.page-title-head .breadcrumb {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 767.98px) {
+    :root {
+        --cotix-sidebar-width: min(280px, 85vw);
+    }
+
+    .app-topbar {
+        min-height: 64px;
+    }
+
+    .topbar-menu {
+        min-height: 64px;
+        flex-wrap: wrap;
+        padding: .5rem .75rem;
+    }
+
+    .topbar-menu > .d-flex {
+        min-width: 0;
+    }
+
+    .topbar-menu > .d-flex:last-child {
+        margin-left: auto;
+    }
+
+    .topbar-menu .topbar-item {
+        flex: 0 0 auto;
+    }
+
+    .topbar-menu .topbar-link {
+        max-width: 100%;
+    }
+
+    .topbar-menu .topbar-link .d-lg-flex {
+        max-width: 96px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .topbar-menu .dropdown-menu {
+        max-width: calc(100vw - 1rem);
+    }
+
+    .page-content {
+        padding-top: .5rem;
+    }
+
+    .page-container {
+        width: 100%;
+        max-width: 100%;
+        padding-right: .75rem;
+        padding-left: .75rem;
+    }
+
+    .page-title-head {
+        align-items: flex-start !important;
+        gap: .75rem;
+        padding: .5rem 0;
+    }
+
+    .page-title-head > .text-end,
+    .page-title-head > .mt-3 {
+        width: 100%;
+        margin-top: 0 !important;
+        text-align: left !important;
+    }
+
+    .page-title-head .breadcrumb {
+        justify-content: flex-start;
+        font-size: .75rem;
+    }
+
+    .card-header {
+        align-items: flex-start !important;
+        flex-wrap: wrap;
+        gap: .75rem;
+    }
+
+    .card-header > * {
+        max-width: 100%;
+    }
+
+    .card-header .btn,
+    .card-header .btn-group {
+        width: auto;
+        max-width: 100%;
+    }
+
+    .row {
+        --bs-gutter-x: .75rem;
+        --bs-gutter-y: .75rem;
+    }
+
+    .modal-dialog {
+        width: auto;
+        max-width: calc(100vw - 1rem);
+        margin: .5rem;
+    }
+
+    .modal-body {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .modal-footer,
+    .input-group,
+    .form-actions,
+    .d-flex.justify-content-end {
+        flex-wrap: wrap;
+    }
+
+    .modal-footer > .btn,
+    .form-actions > .btn {
+        flex: 1 1 100%;
+    }
+
+    .input-group > .form-control,
+    .input-group > .form-select {
+        min-width: 0;
+    }
+
+    .table-responsive {
+        margin-right: -.25rem;
+        margin-left: -.25rem;
+    }
+
+    .gridjs-container {
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
+    .gridjs-wrapper {
+        border-radius: .5rem;
+    }
+
+    .dropdown-menu {
+        max-width: calc(100vw - 1rem);
+        overflow-x: hidden;
+    }
+
+    .sidenav-menu > a.logo .logo-lg img {
+        max-width: 190px;
+    }
+
+    .sidenav-menu .side-nav-link {
+        white-space: normal;
+    }
+
+    .btn-toolbar,
+    .d-flex.gap-2,
+    .d-flex.gap-3 {
+        flex-wrap: wrap;
+    }
+
+    .btn-toolbar > *,
+    .d-flex.gap-2 > .btn,
+    .d-flex.gap-3 > .btn {
+        flex: 0 1 auto;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .topbar-menu {
+        gap: .35rem !important;
+    }
+
+    .topbar-menu > .d-flex:first-child {
+        flex: 1 1 100%;
+        justify-content: space-between;
+    }
+
+    .topbar-menu > .d-flex:last-child {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .topbar-menu .topbar-item.d-none.d-sm-flex {
+        display: block !important;
+    }
+
+    .topbar-menu .topbar-item.d-none.d-sm-flex .topbar-link {
+        width: 40px;
+        height: 40px;
+    }
+
+    .topbar-menu .topbar-item:last-child .topbar-link {
+        padding-right: .5rem;
+        padding-left: .5rem;
+    }
+
+    .topbar-menu .topbar-link .d-lg-flex {
+        max-width: 78px;
+    }
+
+    .page-container {
+        padding-right: .5rem;
+        padding-left: .5rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .card-header {
+        padding: .85rem 1rem;
+    }
+
+    .btn:not(.btn-icon) {
+        min-height: 38px;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 40px;
+    }
+
+    .semaforo-main,
+    .compras-semaforo-badge {
+        white-space: normal;
+    }
     padding: 7px 10px;
     font-size: 13px;
     white-space: normal;
