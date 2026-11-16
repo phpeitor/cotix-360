@@ -19,7 +19,7 @@ $bases = $selects->select_bases();
     <script src="./assets/js/config.js"></script>
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
-    <link href="./assets/css/branding.css?v=1.4" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/branding.css?v=1.5" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/calculo.css?v=1.1" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>

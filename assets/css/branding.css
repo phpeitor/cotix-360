@@ -119,7 +119,7 @@ html.cotix-sidebar-resizable:not([data-sidenav-size="condensed"]):not([data-side
     z-index: 5;
     top: 0;
     padding: 8px 0 12px;
-    background: var(--ct-menu-bg, #17191f);
+    background: #000;
 }
 
 .cotix-sidebar-search {
@@ -128,18 +128,19 @@ html.cotix-sidebar-resizable:not([data-sidenav-size="condensed"]):not([data-side
     align-items: center;
     gap: 9px;
     padding: 0 10px;
-    border: 1px solid #30333b;
+    border: 1px solid #292c33;
     border-radius: 12px;
     color: #98a2b3;
-    background: #202228;
+    background: #111216;
+    box-shadow: none !important;
     cursor: text;
-    transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+    transition: border-color .15s ease;
 }
 
 .cotix-sidebar-search:focus-within {
-    border-color: #4dbe8d;
-    background: #24272e;
-    box-shadow: 0 0 0 2px rgba(77, 190, 141, .14);
+    border-color: #596273;
+    background: #111216;
+    box-shadow: none !important;
 }
 
 .cotix-sidebar-search > i {
