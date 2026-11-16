@@ -36,10 +36,12 @@ class Receta {
     public function guardarCabecera(array $data): int
     {
         $this->asegurarColumnaAsignacionReceta();
+        $this->asegurarColumnaNombreInternoReceta();
         $sql = "INSERT INTO recetas (
                     usuario_id,
                     asignado_usuario_id,
                     nombre,
+                    nombre_interno,
                     estado,
                     created_at,
                     updated_at,
@@ -49,6 +51,7 @@ class Receta {
                     :usuario_id,
                     :asignado_usuario_id,
                     :nombre,
+                    :nombre_interno,
                     :estado,
                     :created_at,
                     :updated_at,
@@ -65,6 +68,8 @@ class Receta {
             $stmt->bindValue(':asignado_usuario_id', null, PDO::PARAM_NULL);
         }
         $stmt->bindValue(':nombre', mb_strtoupper(trim((string)($data['nombre'] ?? '')), 'UTF-8'));
+        $nombreInterno = trim((string)($data['nombre_interno'] ?? ''));
+        $stmt->bindValue(':nombre_interno', $nombreInterno !== '' ? $nombreInterno : null, $nombreInterno !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
         $stmt->bindValue(':estado', (string)($data['estado'] ?? 'Enviada'), PDO::PARAM_STR);
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->bindValue(':updated_at', $this->nowLima);
@@ -979,10 +984,20 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     public function prepararAsignacionReceta(): void
     {
         $this->asegurarColumnaAsignacionReceta();
+        $this->asegurarColumnaNombreInternoReceta();
         $this->asegurarColumna(
             'header_notifications',
             'destinatario_id',
             "ALTER TABLE header_notifications ADD COLUMN destinatario_id INT NULL DEFAULT NULL AFTER usuario_id"
+        );
+    }
+
+    private function asegurarColumnaNombreInternoReceta(): void
+    {
+        $this->asegurarColumna(
+            'recetas',
+            'nombre_interno',
+            "ALTER TABLE recetas ADD COLUMN nombre_interno VARCHAR(150) NULL DEFAULT NULL AFTER nombre"
         );
     }
 
@@ -1158,6 +1173,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
 
     public function obtenerPorHash(string $hash): ?array {
         $this->asegurarColumnaAsignacionReceta();
+        $this->asegurarColumnaNombreInternoReceta();
         $sql = "SELECT c.*,
                        p.usuario,
                        TRIM(CONCAT_WS(' ', NULLIF(TRIM(p.NOMBRES), ''), NULLIF(TRIM(p.APELLIDOS), ''))) AS usuario_registro_nombre,
@@ -1739,6 +1755,33 @@ $stmtDetalle->execute();
         $stmt->execute();
 
         return $stmt->rowCount() > 0;
+    }
+
+    public function actualizarNombreInternoPorHash(string $hash, string $nombreInterno, ?int $usuarioUpd = null): bool
+    {
+        $this->asegurarColumnaNombreInternoReceta();
+        $sql = "UPDATE recetas
+                SET nombre_interno = :nombre_interno,
+                    updated_at = :updated_at,
+                    usuario_upd = :usuario_upd
+                WHERE MD5(id) = :hash";
+        $stmt = $this->conn->prepare($sql);
+        $nombreInterno = trim($nombreInterno);
+        $stmt->bindValue(':nombre_interno', $nombreInterno !== '' ? $nombreInterno : null, $nombreInterno !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':updated_at', $this->nowLima);
+        if ($usuarioUpd !== null && $usuarioUpd > 0) {
+            $stmt->bindValue(':usuario_upd', $usuarioUpd, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':usuario_upd', null, PDO::PARAM_NULL);
+        }
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) return true;
+        $exists = $this->conn->prepare("SELECT 1 FROM recetas WHERE MD5(id) = :hash LIMIT 1");
+        $exists->bindValue(':hash', $hash);
+        $exists->execute();
+        return (bool)$exists->fetchColumn();
     }
 
     public function actualizarObservacionPorHash(string $hash, string $observacion, ?int $usuarioUpd = null): bool

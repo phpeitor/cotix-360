@@ -77,7 +77,15 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
                                          <button type="button" class="btn btn-sm btn-outline-secondary" id="btnEditRecetaNombre" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar nombre"><i class="ti ti-edit"></i></button>
                                          <?php endif; ?>
                                     </div>
-                                     <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none receta-nombre-input" placeholder="Nombre de la receta" <?= $puedeEditarNombreReceta ? '' : 'readonly' ?>>
+                                         <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none receta-nombre-input" placeholder="Nombre de la receta" <?= $puedeEditarNombreReceta ? '' : 'readonly' ?>>
+                                         <div class="d-flex align-items-center gap-2 flex-wrap mt-1 receta-internal-name-row">
+                                             <span class="text-muted fs-12">Nombre Interno:</span>
+                                             <span class="text-dark fs-12" id="recetaNombreInternoDisplay">(Sin especificar)</span>
+                                             <?php if ($puedeEditarNombreReceta): ?>
+                                             <button type="button" class="btn btn-sm btn-outline-secondary btn-receta-internal-name" id="btnEditNombreInternoReceta" aria-label="Editar nombre interno" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar nombre interno"><i class="ti ti-edit"></i></button>
+                                             <?php endif; ?>
+                                         </div>
+                                         <input type="text" id="inputNombreInternoReceta" class="form-control form-control-sm d-none mt-1 receta-nombre-interno-input" maxlength="150" placeholder="Código o identificador interno del proyecto" <?= $puedeEditarNombreReceta ? '' : 'readonly' ?>>
                                 </div>
 
                                 <div class="row g-3 receta-meta-row">
@@ -552,7 +560,7 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/receta_form.js?v=3.6"></script>
+    <script src="./assets/js/receta_form.js?v=3.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

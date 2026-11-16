@@ -157,6 +157,71 @@ class Usuario {
         return $data ?: null;
     }
 
+    public function obtenerPerfil(int $id): ?array
+    {
+        $sql = "SELECT
+                    IDPERSONAL,
+                    DOC,
+                    NOMBRES,
+                    APELLIDOS,
+                    EMAIL,
+                    TLF,
+                    SEXO,
+                    USUARIO,
+                    CARGO
+                FROM personal
+                WHERE IDPERSONAL = :id AND IDESTADO = 1
+                LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $data ?: null;
+    }
+
+    public function actualizarPerfil(int $id, array $data): bool
+    {
+        $sql = "UPDATE personal
+                SET NOMBRES = :nombres,
+                    APELLIDOS = :apellidos,
+                    EMAIL = :email,
+                    TLF = :telefono,
+                    SEXO = :sexo";
+
+        if (($data['nueva_password'] ?? '') !== '') {
+            $sql .= ", PASSWORD = :password";
+        }
+
+        $sql .= " WHERE IDPERSONAL = :id AND IDESTADO = 1";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':nombres', $this->upper((string)($data['nombres'] ?? '')));
+        $stmt->bindValue(':apellidos', $this->upper((string)($data['apellidos'] ?? '')));
+        $stmt->bindValue(':email', trim((string)($data['email'] ?? '')));
+        $stmt->bindValue(':telefono', trim((string)($data['telefono'] ?? '')));
+        $stmt->bindValue(':sexo', (int)($data['sexo'] ?? 0), PDO::PARAM_INT);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        if (($data['nueva_password'] ?? '') !== '') {
+            $stmt->bindValue(':password', md5((string)$data['nueva_password']));
+        }
+
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
+    }
+
+    public function validarPassword(int $id, string $password): bool
+    {
+        $sql = "SELECT 1 FROM personal
+                WHERE IDPERSONAL = :id AND PASSWORD = :password AND IDESTADO = 1
+                LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->bindValue(':password', md5($password));
+        $stmt->execute();
+        return (bool)$stmt->fetchColumn();
+    }
+
     public function acceso_user(array $data):  ?array {
         $sql = "SELECT 
                     IDPERSONAL,

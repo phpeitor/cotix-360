@@ -264,7 +264,7 @@
                     <div class="dropdown-header noti-title">
                         <h6 class="text-overflow m-0">Bienvenido !</h6>
                     </div>
-                    <a href="javascript:void(0);" class="dropdown-item">
+                    <a href="perfil.php" class="dropdown-item">
                         <i class="ti ti-user-hexagon me-1 fs-17 align-middle"></i>
                         <span class="align-middle">Mi cuenta</span>
                     </a>

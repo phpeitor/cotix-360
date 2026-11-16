@@ -34,6 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const categoriaDetalleTotalGeneralEl = document.getElementById("categoriaDetalleTotalGeneral");
     const inputRecetaNombre = document.getElementById("inputRecetaNombre");
     const btnEditRecetaNombre = document.getElementById("btnEditRecetaNombre");
+    const recetaNombreInternoDisplayEl = document.getElementById("recetaNombreInternoDisplay");
+    const inputNombreInternoReceta = document.getElementById("inputNombreInternoReceta");
+    const btnEditNombreInternoReceta = document.getElementById("btnEditNombreInternoReceta");
     const clienteModalEl = document.getElementById("cliente-modal");
     const btnGuardarCliente = document.getElementById("btnGuardarCliente");
     const clienteRazonSocialEl = document.getElementById("clienteRazonSocial");
@@ -344,6 +347,70 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
     }
+
+    function cerrarEdicionNombreInterno() {
+        inputNombreInternoReceta?.classList.add("d-none");
+        recetaNombreInternoDisplayEl?.classList.remove("d-none");
+        if (inputNombreInternoReceta) inputNombreInternoReceta.value = String(receta?.nombre_interno || "");
+        if (btnEditNombreInternoReceta) btnEditNombreInternoReceta.innerHTML = '<i class="ti ti-edit"></i>';
+    }
+
+    async function toggleEditNombreInterno() {
+        if (!receta || !inputNombreInternoReceta || !recetaNombreInternoDisplayEl || !btnEditNombreInternoReceta) return;
+        const editing = !inputNombreInternoReceta.classList.contains("d-none");
+        if (!editing) {
+            inputNombreInternoReceta.value = String(receta.nombre_interno || "");
+            recetaNombreInternoDisplayEl.classList.add("d-none");
+            inputNombreInternoReceta.classList.remove("d-none");
+            inputNombreInternoReceta.focus();
+            inputNombreInternoReceta.select();
+            btnEditNombreInternoReceta.innerHTML = '<i class="ti ti-check"></i>';
+            return;
+        }
+
+        const nombreInterno = String(inputNombreInternoReceta.value || "").trim();
+        if (Array.from(nombreInterno).length > 150) {
+            alertify.error("El Nombre Interno no puede superar los 150 caracteres");
+            inputNombreInternoReceta.focus();
+            return;
+        }
+        if (nombreInterno === String(receta.nombre_interno || "").trim()) {
+            cerrarEdicionNombreInterno();
+            return;
+        }
+
+        btnEditNombreInternoReceta.disabled = true;
+        try {
+            const res = await fetch("controller/upd_nombre_interno_receta.php", {
+                method: "POST",
+                body: new URLSearchParams({
+                    hash: String(hash || ""),
+                    nombre_interno: nombreInterno
+                })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.message || "No se pudo actualizar el Nombre Interno");
+
+            receta.nombre_interno = data.nombre_interno || "";
+            recetaNombreInternoDisplayEl.textContent = receta.nombre_interno || "(Sin especificar)";
+            alertify.success("Nombre Interno actualizado");
+        } catch (error) {
+            alertify.error(error.message || "No se pudo actualizar el Nombre Interno");
+        } finally {
+            btnEditNombreInternoReceta.disabled = false;
+            cerrarEdicionNombreInterno();
+        }
+    }
+
+    btnEditNombreInternoReceta?.addEventListener("click", toggleEditNombreInterno);
+    inputNombreInternoReceta?.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            if (!inputNombreInternoReceta.classList.contains("d-none")) toggleEditNombreInterno();
+        } else if (event.key === "Escape") {
+            cerrarEdicionNombreInterno();
+        }
+    });
 
     if (btnEditTipoCambio) {
         btnEditTipoCambio.addEventListener('click', (e) => {
@@ -741,6 +808,9 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
             raw = raw.replace(/(?:-\d+)+$/, '');
             recetaNombreDisplayEl.textContent = raw || "(Sin nombre)";
         }
+        if (recetaNombreInternoDisplayEl) {
+            recetaNombreInternoDisplayEl.textContent = String(receta.nombre_interno || "").trim() || "(Sin especificar)";
+        }
         if (usuarioEl) usuarioEl.textContent = receta.usuario ?? "";
         if (fechaEl) fechaEl.textContent = receta.created_at ?? "";
         if (estadoEl) estadoEl.textContent = receta.estado ?? "";
@@ -752,6 +822,7 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
             raw = raw.replace(/(?:-\d+)+$/, '');
             inputRecetaNombre.value = raw;
         }
+        if (inputNombreInternoReceta) inputNombreInternoReceta.value = String(receta.nombre_interno || "");
 
         setEstadoIcon(receta.estado);
     }

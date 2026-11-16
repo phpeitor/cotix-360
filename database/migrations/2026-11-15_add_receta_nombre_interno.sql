@@ -1,0 +1,2 @@
+ALTER TABLE recetas
+    ADD COLUMN nombre_interno VARCHAR(150) NULL DEFAULT NULL AFTER nombre;

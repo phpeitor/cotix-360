@@ -10,7 +10,8 @@
             "cotizaciones.php",
             "form_cotizacion.php",
             "home.php",
-            "pdf_cotizacion.php"
+            "pdf_cotizacion.php",
+            "perfil.php"
         ]
     },
     "3": {
@@ -32,7 +33,8 @@
             "receta_list.php",
             "tracking.php",
             "tracking_crear.php",
-            "upd_item_receta.php"
+            "upd_item_receta.php",
+            "perfil.php"
         ]
     },
     "4": {
@@ -47,7 +49,8 @@
             "receta_list.php",
             "tracking.php",
             "tracking_crear.php",
-            "upd_item_receta.php"
+            "upd_item_receta.php",
+            "perfil.php"
         ]
     },
     "5": {
@@ -65,7 +68,8 @@
             "pdf_receta.php",
             "receta_form.php",
             "receta_item_categorias.php",
-            "upd_item_receta.php"
+            "upd_item_receta.php",
+            "perfil.php"
         ]
     },
     "6": {
@@ -82,7 +86,8 @@
             "receta_list.php",
             "tracking.php",
             "tracking_crear.php",
-            "upd_item_receta.php"
+            "upd_item_receta.php",
+            "perfil.php"
         ]
     },
     "7": {
@@ -91,7 +96,8 @@
             "home.php",
             "receta.php",
             "receta_form.php",
-            "receta_list.php"
+            "receta_list.php",
+            "perfil.php"
         ]
     },
     "8": {
@@ -111,7 +117,8 @@
             "receta_list.php",
             "tracking.php",
             "tracking_crear.php",
-            "upd_item_receta.php"
+            "upd_item_receta.php",
+            "perfil.php"
         ]
     }
 }

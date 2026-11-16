@@ -63,6 +63,7 @@ try {
     $correoContacto = trim((string)($_POST['correo_contacto'] ?? ''));
     $celularContacto = trim((string)($_POST['celular_contacto'] ?? ''));
     $nombreReceta = trim((string)($_POST['nombre_receta'] ?? ''));
+    $nombreInterno = trim((string)($_POST['nombre_interno'] ?? ''));
     $motivoSolicitud = trim((string)($_POST['motivo_solicitud'] ?? ''));
     $descripcionReceta = trim((string)($_POST['descripcion_receta'] ?? ''));
     $cantidadItemsReceta = isset($_POST['cantidad_items_receta']) ? (int)$_POST['cantidad_items_receta'] : 0;
@@ -72,6 +73,9 @@ try {
     }
     if (mb_strlen($nombreReceta, 'UTF-8') > 100) {
         throw new Exception('El nombre de la receta no puede superar los 100 caracteres');
+    }
+    if (mb_strlen($nombreInterno, 'UTF-8') > 150) {
+        throw new Exception('El Nombre Interno no puede superar los 150 caracteres');
     }
 
     if ($cantidadItemsReceta < 1 || $cantidadItemsReceta > 5000) {
@@ -112,6 +116,7 @@ try {
         'usuario_id' => (int)$_SESSION['session_id'],
         'asignado_usuario_id' => $asignadoUsuarioId > 0 ? $asignadoUsuarioId : null,
         'nombre' => $nombreReceta,
+        'nombre_interno' => $nombreInterno,
         'estado' => 'Enviada',
         'usuario_upd' => null,
         'tipo_cambio' => $tipoCambio,

@@ -175,6 +175,12 @@ Al agregar estados nuevos, revisar enums SQL, validaciones de controllers, badge
 
 - `controller/acceso.php`
 - `controller/logout.php`
+- `controller/get_perfil.php`
+- `controller/upd_perfil.php`
+
+La opción **Mi cuenta** (`perfil.php`) permite al usuario autenticado actualizar sus nombres,
+apellidos, correo, teléfono y sexo. El cambio de contraseña requiere la contraseña actual;
+el cargo, estado, documento y usuario no se pueden modificar desde este flujo.
 
 ### Recetas
 
