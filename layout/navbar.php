@@ -268,7 +268,10 @@
                         <i class="ti ti-user-hexagon me-1 fs-17 align-middle"></i>
                         <span class="align-middle">Mi cuenta</span>
                     </a>
-                    <a href="javascript:void(0);" class="dropdown-item">
+                    <a href="#theme-settings-offcanvas"
+                       class="dropdown-item"
+                       data-bs-toggle="offcanvas"
+                       aria-controls="theme-settings-offcanvas">
                         <i class="ti ti-settings me-1 fs-17 align-middle"></i>
                         <span class="align-middle">Settings</span>
                     </a>

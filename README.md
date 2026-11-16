@@ -182,6 +182,11 @@ La opción **Mi cuenta** (`perfil.php`) permite al usuario autenticado actualiza
 apellidos, correo, teléfono y sexo. El cambio de contraseña requiere la contraseña actual;
 el cargo, estado, documento y usuario no se pueden modificar desde este flujo.
 
+La opción **Settings** abre el panel de configuración visual compartido (`theme.html`), desde
+donde el usuario puede cambiar tema claro/oscuro, colores de barra superior y menú, y tamaño
+del menú lateral. La configuración se conserva durante la sesión del navegador y puede
+restaurarse con **Reset**.
+
 ### Recetas
 
 - `controller/table_receta.php`

@@ -89,6 +89,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 width: "220px",
                 formatter: (cell, row) => renderRecetaCliente(cell, row)
             },
+            {
+                id: "nombre_interno",
+                name: "Nombre Interno",
+                width: "170px",
+                formatter: cell => {
+                    const nombreInterno = String(cell || "").trim();
+                    return nombreInterno
+                        ? gridjs.html(`<span class="badge bg-light text-dark border">${escapeHtml(nombreInterno)}</span>`)
+                        : gridjs.html('<span class="text-muted">-</span>');
+                }
+            },
             { id: "cliente_ruc", name: "RUC", hidden: true },
             { id: "cliente_razon_social_empresa", name: "Razón Social", hidden: true },
             {
@@ -259,8 +270,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderRecetaCliente(nombre, row) {
         const recetaNombre = String(nombre ?? "").trim().replace(/\s*-\s*\d+$/, "").trim();
-        const ruc = String(row?.cells?.[3]?.data ?? "").trim();
-        const razonSocial = String(row?.cells?.[4]?.data ?? "").trim();
+        const ruc = String(row?.cells?.[4]?.data ?? "").trim();
+        const razonSocial = String(row?.cells?.[5]?.data ?? "").trim();
         const cliente = [ruc, razonSocial].filter(Boolean).join(" - ");
 
         if (!recetaNombre && !cliente) {
@@ -279,7 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!items) return "";
 
         const arr = items.split("|").map(i => i.trim());
-        const total = Number(row?.cells?.[7]?.data ?? arr.length);
+        const total = Number(row?.cells?.[8]?.data ?? arr.length);
         const recipeId = String(row?.cells?.[0]?.data ?? "").trim();
 
         if (total === 1) {
@@ -653,7 +664,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderAcciones(_, row) {
         const id = row.cells[0].data;
-        const estado = row.cells[5].data;
+        const estado = row.cells[6].data;
         const hashId = md5(String(id));
         const cargoActual = Number(window.PERMISOS_STATE?.cargo ?? (typeof CARGO !== "undefined" ? CARGO : 0));
 

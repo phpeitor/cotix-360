@@ -293,6 +293,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
     public function table_receta(string $fec_ini, string $fec_fin, string $subCat1 = ''): array
     {
         $this->asegurarColumnaAsignacionReceta();
+        $this->asegurarColumnaNombreInternoReceta();
         $sessionCargo = $_SESSION['session_cargo'] ?? null;
         $sessionId = $_SESSION['session_id'] ?? null;
         $isAdmin = in_array((int)$sessionCargo, [1, 3, 8], true);
@@ -330,6 +331,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
                 c.id,
                 p.usuario,
                 c.nombre,
+                c.nombre_interno,
                 rc.ruc AS cliente_ruc,
                 rc.razon_social_empresa AS cliente_razon_social_empresa,
                 c.estado,
@@ -347,7 +349,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
             LEFT JOIN receta_cliente rc ON rc.id_receta = c.id
             WHERE $where
             GROUP BY
-                c.id, p.usuario, c.nombre, rc.ruc, rc.razon_social_empresa, c.estado, c.created_at, c.updated_at
+                c.id, p.usuario, c.nombre, c.nombre_interno, rc.ruc, rc.razon_social_empresa, c.estado, c.created_at, c.updated_at
             ORDER BY c.id DESC
         ";
 
