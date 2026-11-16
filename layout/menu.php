@@ -11,15 +11,20 @@
         </span>
     </a>
 
-    <button class="button-sm-hover">
-        <i class="ti ti-circle align-middle"></i>
-    </button>
-
     <button class="button-close-fullsidebar">
         <i class="ti ti-x align-middle"></i>
     </button>
 
-    <div data-simplebar>
+    <div class="cotix-sidebar-scroll" data-simplebar>
+        <div class="cotix-sidebar-search-wrap">
+            <label class="cotix-sidebar-search" for="cotixSidebarSearch">
+                <i class="ti ti-search" aria-hidden="true"></i>
+                <input type="search" id="cotixSidebarSearch" placeholder="Buscar menú..." autocomplete="off" aria-label="Buscar en el menú">
+                <kbd>/</kbd>
+                <button type="button" id="cotixSidebarSearchClear" aria-label="Limpiar búsqueda" title="Limpiar búsqueda"><i class="ti ti-x"></i></button>
+            </label>
+            <div class="cotix-sidebar-search-empty d-none" id="cotixSidebarSearchEmpty">No se encontraron opciones</div>
+        </div>
         <ul class="side-nav">
 
             <li class="side-nav-item">
@@ -141,4 +146,5 @@
         </ul>
         <div class="clearfix"></div>
     </div>
+    <div class="cotix-sidebar-resize-handle" id="cotixSidebarResize" role="separator" aria-orientation="vertical" aria-label="Cambiar ancho del menú" tabindex="0"></div>
 </div>

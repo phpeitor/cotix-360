@@ -17,7 +17,7 @@ $puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), 
     <script src="./assets/js/config.js"></script>
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
-    <link href="./assets/css/branding.css?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/branding.css?v=1.3" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta.css?v=1.6" rel="stylesheet" type="text/css" />
     <link href="./assets/css/ingenieria_form.css?v=1.0" rel="stylesheet" type="text/css" />
