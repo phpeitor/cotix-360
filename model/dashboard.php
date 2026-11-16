@@ -95,34 +95,98 @@ class Dashboard {
             (SELECT COUNT(*) FROM recetas) AS recetas,
             (SELECT COUNT(*) FROM receta_items WHERE estado = 1) AS receta_items,
             (SELECT COUNT(*) FROM receta_items WHERE estado = 1 AND UPPER(TRIM(tipo)) = 'PRODUCTO') AS receta_productos,
-            (SELECT COUNT(*) FROM receta_items WHERE estado = 1 AND UPPER(TRIM(tipo)) = 'SERVICIO') AS receta_servicios,
-            (SELECT COUNT(*) FROM personal
-                WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) AS usuarios_periodo_actual,
-            (SELECT COUNT(*) FROM personal
-                WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 14 DAY)
-                  AND fecha_registro < DATE_SUB(NOW(), INTERVAL 7 DAY)) AS usuarios_periodo_anterior,
-            (SELECT COUNT(*) FROM item i
-                INNER JOIN carga c ON c.id = i.id_carga
-                WHERE c.fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) AS items_periodo_actual,
-            (SELECT COUNT(*) FROM item i
-                INNER JOIN carga c ON c.id = i.id_carga
-                WHERE c.fecha_registro >= DATE_SUB(NOW(), INTERVAL 14 DAY)
-                  AND c.fecha_registro < DATE_SUB(NOW(), INTERVAL 7 DAY)) AS items_periodo_anterior,
-            (SELECT COUNT(*) FROM cotizaciones
-                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)) AS cotizaciones_periodo_actual,
-            (SELECT COUNT(*) FROM cotizaciones
-                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
-                  AND created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)) AS cotizaciones_periodo_anterior,
-            (SELECT COUNT(*) FROM carga
-                WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)) AS carga_periodo_actual,
-            (SELECT COUNT(*) FROM carga
-                WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 14 DAY)
-                  AND fecha_registro < DATE_SUB(NOW(), INTERVAL 7 DAY)) AS carga_periodo_anterior;
+            (SELECT COUNT(*) FROM receta_items WHERE estado = 1 AND UPPER(TRIM(tipo)) = 'SERVICIO') AS receta_servicios;
         ";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function variaciones(string $fechaInicio, string $fechaFin): array
+    {
+        $inicio = new DateTimeImmutable($fechaInicio . ' 00:00:00', new DateTimeZone('America/Lima'));
+        $finExclusivo = new DateTimeImmutable($fechaFin . ' 00:00:00', new DateTimeZone('America/Lima'));
+        $finExclusivo = $finExclusivo->modify('+1 day');
+        $dias = (int)$inicio->diff($finExclusivo)->format('%a');
+        $anteriorInicio = $inicio->modify('-' . $dias . ' days');
+
+        $sql = "
+            SELECT
+            (SELECT COUNT(*) FROM personal
+                WHERE fecha_registro >= :actual_inicio AND fecha_registro < :actual_fin) AS usuarios_actual,
+            (SELECT COUNT(*) FROM personal
+                WHERE fecha_registro >= :anterior_inicio AND fecha_registro < :anterior_fin) AS usuarios_anterior,
+            (SELECT COUNT(*) FROM item i
+                INNER JOIN carga c ON c.id = i.id_carga
+                WHERE c.fecha_registro >= :actual_inicio_items AND c.fecha_registro < :actual_fin_items) AS items_actual,
+            (SELECT COUNT(*) FROM item i
+                INNER JOIN carga c ON c.id = i.id_carga
+                WHERE c.fecha_registro >= :anterior_inicio_items AND c.fecha_registro < :anterior_fin_items) AS items_anterior,
+            (SELECT COUNT(*) FROM cotizaciones
+                WHERE created_at >= :actual_inicio_cotizaciones AND created_at < :actual_fin_cotizaciones) AS cotizaciones_actual,
+            (SELECT COUNT(*) FROM cotizaciones
+                WHERE created_at >= :anterior_inicio_cotizaciones AND created_at < :anterior_fin_cotizaciones) AS cotizaciones_anterior,
+            (SELECT COUNT(*) FROM carga
+                WHERE fecha_registro >= :actual_inicio_carga AND fecha_registro < :actual_fin_carga) AS carga_actual,
+            (SELECT COUNT(*) FROM carga
+                WHERE fecha_registro >= :anterior_inicio_carga AND fecha_registro < :anterior_fin_carga) AS carga_anterior
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $actualInicio = $inicio->format('Y-m-d H:i:s');
+        $actualFin = $finExclusivo->format('Y-m-d H:i:s');
+        $anteriorInicioDate = $anteriorInicio;
+        $anteriorInicio = $anteriorInicioDate->format('Y-m-d H:i:s');
+        $anteriorFin = $inicio->format('Y-m-d H:i:s');
+
+        foreach ([
+            'actual_inicio', 'actual_inicio_items', 'actual_inicio_cotizaciones', 'actual_inicio_carga'
+        ] as $parameter) {
+            $stmt->bindValue(':' . $parameter, $actualInicio);
+        }
+        foreach ([
+            'actual_fin', 'actual_fin_items', 'actual_fin_cotizaciones', 'actual_fin_carga'
+        ] as $parameter) {
+            $stmt->bindValue(':' . $parameter, $actualFin);
+        }
+        foreach ([
+            'anterior_inicio', 'anterior_inicio_items', 'anterior_inicio_cotizaciones', 'anterior_inicio_carga'
+        ] as $parameter) {
+            $stmt->bindValue(':' . $parameter, $anteriorInicio);
+        }
+        foreach ([
+            'anterior_fin', 'anterior_fin_items', 'anterior_fin_cotizaciones', 'anterior_fin_carga'
+        ] as $parameter) {
+            $stmt->bindValue(':' . $parameter, $anteriorFin);
+        }
+
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        return [
+            'usuarios' => [
+                'actual' => (int)($result['usuarios_actual'] ?? 0),
+                'anterior' => (int)($result['usuarios_anterior'] ?? 0),
+            ],
+            'items' => [
+                'actual' => (int)($result['items_actual'] ?? 0),
+                'anterior' => (int)($result['items_anterior'] ?? 0),
+            ],
+            'cotizaciones' => [
+                'actual' => (int)($result['cotizaciones_actual'] ?? 0),
+                'anterior' => (int)($result['cotizaciones_anterior'] ?? 0),
+            ],
+            'carga' => [
+                'actual' => (int)($result['carga_actual'] ?? 0),
+                'anterior' => (int)($result['carga_anterior'] ?? 0),
+            ],
+            'periodo' => [
+                'inicio' => $inicio->format('Y-m-d'),
+                'fin' => $finExclusivo->modify('-1 day')->format('Y-m-d'),
+                'anterior_inicio' => $anteriorInicioDate->format('Y-m-d'),
+                'anterior_fin' => $inicio->modify('-1 day')->format('Y-m-d'),
+            ],
+        ];
     }
 
     public function header(): array

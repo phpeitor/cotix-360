@@ -41,9 +41,9 @@ vistas, endpoints, modelos y assets específicos, con reglas compartidas documen
 - Exportaciones PDF y Excel para documentos comerciales y técnicos.
 
 El dashboard calcula la variación de los cards de usuarios, ítems, cotizaciones y cargas
-comparando los registros creados en los últimos 7 días contra los 7 días inmediatamente
-anteriores. Cuando el período anterior no tiene registros, muestra `Nuevo` en lugar de una
-variación artificial.
+según el rango seleccionado en el calendario. La comparación se realiza contra el período
+inmediatamente anterior de igual duración. El valor inicial es el mes actual hasta hoy y el
+selector permite analizar otros rangos sin recargar la página.
 
 ## Stack tecnológico
 
@@ -216,6 +216,7 @@ un botón o una columna en la interfaz nunca reemplaza la autorización del endp
 
 - `controller/acceso.php`: autenticación.
 - `controller/logout.php`: cierre de sesión.
+- `controller/dashboard_variaciones.php`: variaciones del dashboard según el rango seleccionado.
 - `controller/get_perfil.php`: consulta el perfil del usuario autenticado.
 - `controller/upd_perfil.php`: actualiza datos permitidos y contraseña.
 - `controller/presence_ping.php`: actualiza presencia.

@@ -15,8 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const dateInput = document.getElementById("filterDate");
 
     const today = new Date();
-    const pastDate = new Date();
-    pastDate.setDate(today.getDate() - 7);
+    const periodStart = new Date(today.getFullYear(), today.getMonth(), 1);
 
     const formatFlatpickr = (d) =>
         d.toLocaleDateString("en-GB", {
@@ -25,16 +24,29 @@ document.addEventListener("DOMContentLoaded", async () => {
             year: "numeric"
         });
 
+    const toApiDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+
     const defaultRangeText =
-        `${formatFlatpickr(pastDate)} to ${formatFlatpickr(today)}`;
+        `${formatFlatpickr(periodStart)} to ${formatFlatpickr(today)}`;
 
     flatpickr(dateInput, {
         mode: "range",
         dateFormat: "d M",
-        defaultDate: [pastDate, today]
+        defaultDate: [periodStart, today],
+        onChange: (selectedDates) => {
+            if (selectedDates.length === 2) {
+                loadVariations(selectedDates[0], selectedDates[1]);
+            }
+        }
     });
 
     dateInput.value = defaultRangeText;
+    loadVariations(periodStart, today);
 
     try {
         const res  = await fetch("controller/dashboard.php");
@@ -61,10 +73,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             contItemReceta.textContent = formatInt(contadores.receta_items ?? 0);
             contRecetaProducto.textContent = formatInt(contadores.receta_productos ?? 0);
             contRecetaServicio.textContent = formatInt(contadores.receta_servicios ?? 0);
-            renderCardVariation("usuarios", contadores.usuarios_periodo_actual, contadores.usuarios_periodo_anterior);
-            renderCardVariation("items", contadores.items_periodo_actual, contadores.items_periodo_anterior);
-            renderCardVariation("cotizaciones", contadores.cotizaciones_periodo_actual, contadores.cotizaciones_periodo_anterior);
-            renderCardVariation("carga", contadores.carga_periodo_actual, contadores.carga_periodo_anterior);
         }
 
         /* =====================================================
@@ -287,6 +295,30 @@ document.addEventListener("DOMContentLoaded", async () => {
             <span>${isIncrease ? "+" : isDecrease ? "-" : ""}${roundedVariation}%</span>
         `;
         element.title = `Variación de ${roundedVariation}% frente a los 7 días anteriores`;
+    }
+
+    async function loadVariations(startDate, endDate) {
+        const query = new URLSearchParams({
+            fecha_inicio: toApiDate(startDate),
+            fecha_fin: toApiDate(endDate)
+        });
+
+        try {
+            const response = await fetch(`controller/dashboard_variaciones.php?${query.toString()}`);
+            const result = await response.json();
+            if (result.error || !result.data) throw new Error(result.message || "No se pudieron cargar las variaciones");
+
+            ["usuarios", "items", "cotizaciones", "carga"].forEach((key) => {
+                renderCardVariation(key, result.data[key].actual, result.data[key].anterior);
+            });
+
+            const period = result.data.periodo;
+            document.querySelectorAll("[data-dashboard-variation]").forEach((element) => {
+                element.title = `${element.title.split(".")[0]}. Período: ${period.inicio} al ${period.fin}; comparación: ${period.anterior_inicio} al ${period.anterior_fin}.`;
+            });
+        } catch (error) {
+            console.error("Dashboard variations:", error);
+        }
     }
 
 });
