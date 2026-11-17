@@ -44,8 +44,8 @@ try {
     }
 
     $receta = new Receta();
-    if ($asignadoUsuarioId > 0 && !$receta->esUsuarioIngenieriaActivo($asignadoUsuarioId)) {
-        throw new Exception('El usuario asignado no pertenece a Ingeniería o está inactivo');
+    if ($asignadoUsuarioId > 0 && !$receta->esUsuarioAsignableReceta($asignadoUsuarioId)) {
+        throw new Exception('El usuario asignado no pertenece a Supervisión o Ingeniería, o está inactivo');
     }
     if (!$itemsCatalogo && !$adicionalesPorRecetaOrigen && $asignadoUsuarioId <= 0) {
         throw new Exception('Agrega al menos un item, importa adicionales positivos o asigna la receta a Ingeniería');

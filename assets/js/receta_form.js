@@ -1057,7 +1057,7 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
                     <td class="text-end">${format2(decimalAdjust("round", cantidad, "-2"))}</td>
                     <td class="text-end">${monedaSimbolo} ${format2(decimalAdjust("round", subtotal, "-2"))}</td>
                     <td class="text-center">
-                        <div class="input-step border bg-body-secondary p-1 rounded-pill d-inline-flex align-items-center overflow-visible" style="min-width:140px;">
+                            <div class="input-step border bg-body-secondary p-1 rounded-pill d-inline-flex align-items-center overflow-visible receta-margen-step">
                             <button type="button" class="btn-margen-minus bg-light text-dark border-0 rounded-circle fs-18 lh-1" data-bs-title="Disminuir margen" data-bs-placement="top" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">−</button>
                             <input type="number" class="input-margen-categoria text-dark text-center border-0 bg-body-secondary rounded" value="${margen.toFixed(2)}" min="0" max="5000" step="0.01" style="width:70px;height:26px;font-size:14px;">
                             <button type="button" class="btn-margen-plus bg-light text-dark border-0 rounded-circle fs-18 lh-1" data-bs-title="Aumentar margen" data-bs-placement="top" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;">+</button>
@@ -1241,11 +1241,17 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
                 const precio = Number(item.precio) || 0;
                 const precioDolares = moneda === "DOLLAR" ? precio : precio / tipoCambio;
                 const total = cantidad * precioDolares;
+                const descripcion = String(item.descripcion || "-").trim() || "-";
+                const descripcionChars = Array.from(descripcion);
+                const descripcionLarga = descripcionChars.length > 100;
+                const descripcionVisible = descripcionLarga
+                    ? `${descripcionChars.slice(0, 100).join("").trimEnd()}…`
+                    : descripcion;
                 totalGeneral += total;
                 return `
                     <tr>
                         <td class="fw-semibold">${escapeHtml(item.nombre || "-")}</td>
-                        <td>${escapeHtml(item.descripcion || "-")}</td>
+                        <td><div class="receta-detalle-descripcion" ${descripcionLarga ? `data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="receta-detalle-tooltip" data-bs-title="${escapeAttr(descripcion)}" tabindex="0"` : ""}>${escapeHtml(descripcionVisible)}</div></td>
                         <td>${escapeHtml(item.marca || "-")}</td>
                         <td class="text-end">${Math.round(cantidad)}</td>
                         <td class="text-end">$ ${format2(precioDolares)}</td>
@@ -1263,6 +1269,7 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
             if (categoriaDetalleTotalGeneralEl) categoriaDetalleTotalGeneralEl.textContent = format2(totalGeneral);
         }
 
+        initTooltips(categoriaDetalleTableBody);
         bootstrap.Modal.getOrCreateInstance(categoriaDetalleModalEl).show();
     }
 

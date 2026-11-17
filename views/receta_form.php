@@ -23,7 +23,7 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
     <link href="./assets/css/branding.css?v=1.6" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta.css?v=1.6" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/receta_form.css?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/receta_form.css?v=1.3" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -397,7 +397,7 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
 
     <?php if ($puedeGestionarCategoriasReceta): ?>
     <div id="info-categoria-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-categoria-modalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" role="document">
             <div class="modal-content">
                 <div class="modal-header text-bg-warning border-0">
                     <h4 class="modal-title" id="info-categoria-modalLabel">
@@ -409,8 +409,8 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
                 <div class="modal-body">
                     <div id="alertCategoriaReceta" class="alert alert-info d-none" role="alert"></div>
 
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover align-middle mb-0">
+                    <div class="table-responsive receta-margenes-table-wrap">
+                        <table class="table table-sm table-hover align-middle mb-0 receta-margenes-table">
                             <thead class="table-light">
                                 <tr>
                                     <th>Categoría</th>
@@ -443,15 +443,15 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
     </div>
 
     <div id="categoria-detalle-modal" class="modal fade" tabindex="-1" aria-labelledby="categoria-detalle-modalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable receta-detalle-modal-dialog">
             <div class="modal-content">
                 <div class="modal-header text-bg-info border-0">
                     <h4 class="modal-title" id="categoria-detalle-modalLabel">Detalle de categoría</h4>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover align-middle mb-0">
+                    <div class="table-responsive receta-categoria-detalle-wrap">
+                        <table class="table table-sm table-hover align-middle mb-0 receta-categoria-detalle-table">
                             <thead class="table-light">
                                 <tr>
                                     <th>Nombre</th>
@@ -459,10 +459,11 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
                                     <th>Marca</th>
                                     <th class="text-end">Cantidad</th>
                                     <th class="text-end">Precio</th>
+                                    <th class="text-end">Total</th>
                                 </tr>
                             </thead>
                             <tbody id="categoriaDetalleTableBody">
-                                <tr><td colspan="5" class="text-center text-muted py-4">Selecciona una categoría.</td></tr>
+                                <tr><td colspan="6" class="text-center text-muted py-4">Selecciona una categoría.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -560,7 +561,7 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/receta_form.js?v=3.7"></script>
+    <script src="./assets/js/receta_form.js?v=3.9"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

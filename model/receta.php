@@ -1003,7 +1003,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         );
     }
 
-    public function obtenerUsuariosIngenieriaActivos(): array
+    public function obtenerUsuariosAsignablesReceta(): array
     {
         $this->conn->exec("CREATE TABLE IF NOT EXISTS usuario_presencia (
             usuario_id INT NOT NULL,
@@ -1017,10 +1017,11 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         $sql = "SELECT p.IDPERSONAL AS id,
                        TRIM(CONCAT_WS(' ', NULLIF(TRIM(p.NOMBRES), ''), NULLIF(TRIM(p.APELLIDOS), ''))) AS nombre,
                        p.USUARIO AS usuario,
+                       p.CARGO AS cargo,
                        CASE WHEN up.ultima_actividad >= :online_since THEN 1 ELSE 0 END AS online
                 FROM personal p
                 LEFT JOIN usuario_presencia up ON up.usuario_id = p.IDPERSONAL
-                WHERE p.CARGO = 6 AND p.IDESTADO = 1
+                WHERE p.CARGO IN (3, 6) AND p.IDESTADO = 1
                 ORDER BY p.NOMBRES, p.APELLIDOS";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':online_since', $onlineSince);
@@ -1028,10 +1029,10 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
-    public function esUsuarioIngenieriaActivo(int $usuarioId): bool
+    public function esUsuarioAsignableReceta(int $usuarioId): bool
     {
         if ($usuarioId <= 0) return false;
-        $stmt = $this->conn->prepare("SELECT 1 FROM personal WHERE IDPERSONAL = :id AND CARGO = 6 AND IDESTADO = 1 LIMIT 1");
+        $stmt = $this->conn->prepare("SELECT 1 FROM personal WHERE IDPERSONAL = :id AND CARGO IN (3, 6) AND IDESTADO = 1 LIMIT 1");
         $stmt->bindValue(':id', $usuarioId, PDO::PARAM_INT);
         $stmt->execute();
         return (bool)$stmt->fetchColumn();

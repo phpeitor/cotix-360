@@ -68,7 +68,7 @@ require_once ROOT . '/controller/check_session.php';
                                     <button type="button" class="btn btn-outline-info me-2" id="btnPreviewReceta" data-bs-toggle="modal" data-bs-target="#previewRecetaModal">
                                         <i class="ti ti-eye me-1" data-bs-toggle="tooltip" data-bs-title="Vista previa" data-bs-placement="top"></i> Preview
                                     </button>
-                                    <button type="button" class="btn btn-dark btn-icon" id="btnAbrirImportarAdicionales" data-bs-toggle="modal" data-bs-target="#importarAdicionalesPositivosModal" data-bs-title="Importar adicionales positivos" data-bs-placement="bottom" aria-label="Importar adicionales positivos"><i class="ti ti-file-import fs-18"></i></button>
+                                    <button type="button" class="btn btn-dark btn-icon" id="btnAbrirImportarAdicionales" data-bs-toggle="modal" data-bs-target="#importarAdicionalesPositivosModal" data-bs-title="Importar" data-bs-placement="bottom" aria-label="Importar adicionales"><i class="ti ti-file-import fs-18" data-bs-toggle="tooltip" data-bs-title="Importar" data-bs-placement="bottom"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal"><i class="ti ti-search fs-18" data-bs-toggle="tooltip" data-bs-title="Buscar" data-bs-placement="bottom"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" onclick="window.history.back();"><i class="ti ti-corner-up-left-double fs-18"></i> </button>
                                 </div>
@@ -112,9 +112,9 @@ require_once ROOT . '/controller/check_session.php';
                                                 </div>
                                             </div>
                                             <div class="tab-pane fade" id="asignar-pane" role="tabpanel" aria-labelledby="asignar-tab" tabindex="0">
-                                                <div class="mb-3"><h5 class="mb-1">Asignar a Ingeniería</h5><span class="text-muted fs-12">El usuario asignado recibirá una notificación y podrá completar el detalle de items.</span></div>
+                                                <div class="mb-3"><h5 class="mb-1">Asignar a Supervisión o Ingeniería</h5><span class="text-muted fs-12">El usuario asignado recibirá una notificación y podrá completar el detalle de items.</span></div>
                                                 <div class="row g-3 align-items-end">
-                                                    <div class="col-lg-8"><select class="form-select" id="usuario_ingenieria_id" name="usuario_ingenieria_id"><option value="">Sin asignar</option></select><div class="form-text">Si asignas la receta, puedes guardarla sin agregar items; Ingeniería completará ese paso.</div></div>
+                                                    <div class="col-lg-8"><label class="form-label" for="usuario_ingenieria_id">Usuario responsable</label><select class="form-select" id="usuario_ingenieria_id" name="usuario_ingenieria_id"><option value="">Sin asignar</option></select><div class="form-text">Puedes asignarla a un Supervisor o a un usuario de Ingeniería. Si la asignas, puedes guardarla sin agregar items.</div></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -374,7 +374,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/form-receta.js?v=2.2"></script>
+    <script src="./assets/js/form-receta.js?v=2.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

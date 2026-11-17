@@ -15,7 +15,7 @@ try {
     $receta = new Receta();
     echo json_encode([
         'ok' => true,
-        'usuarios' => $receta->obtenerUsuariosIngenieriaActivos(),
+        'usuarios' => $receta->obtenerUsuariosAsignablesReceta(),
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
     if (http_response_code() < 400) http_response_code(500);
