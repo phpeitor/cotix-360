@@ -1339,6 +1339,15 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
+    public function obtenerCamposComercialesProtegidos(int $recetaId): array
+    {
+        $stmt = $this->conn->prepare("SELECT condiciones_pago, condiciones_economicas_dias, condiciones_economicas_visible
+                                      FROM receta_cliente WHERE id_receta = :id LIMIT 1");
+        $stmt->bindValue(':id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+    }
+
     public function duplicarReceta(int $recetaId, int $usuarioId): int
     {
         $original = $this->obtenerPorId($recetaId);

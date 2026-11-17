@@ -5,6 +5,7 @@ $puedeGestionarDatosCliente = in_array((int)($_SESSION['session_cargo'] ?? 0), [
 $puedeGestionarCategoriasReceta = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 8], true);
 $ocultarPreciosReceta = in_array((int)($_SESSION['session_cargo'] ?? 0), [3, 4, 6, 7], true);
 $esCargoVendedor = (int)($_SESSION['session_cargo'] ?? 0) === 7;
+$esCargoCoordinador = (int)($_SESSION['session_cargo'] ?? 0) === 8;
 $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
 ?>
 <!DOCTYPE html>
@@ -521,7 +522,8 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
                         
                         <div class="col-12">
                             <label class="form-label" for="condicionesPago">Condiciones de pago</label>
-                            <textarea class="form-control" id="condicionesPago" rows="3" maxlength="200" placeholder="Ej. 50% adelanto, 50% contra entrega"></textarea>
+                            <textarea class="form-control" id="condicionesPago" rows="3" maxlength="200" placeholder="Ej. 50% adelanto, 50% contra entrega" <?= $esCargoCoordinador ? 'readonly' : '' ?>></textarea>
+                            <?php if ($esCargoCoordinador): ?><div class="form-text"><i class="ti ti-lock me-1"></i>Solo Administrador puede modificar las condiciones de pago.</div><?php endif; ?>
                         </div>
                         <div class="col-12">
                             <label class="form-label" for="observacionesComerciales">Observaciones</label>
@@ -532,17 +534,20 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
                                 <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2">
                                     <div class="commercial-conditions-title mb-0">Condiciones Económicas por Suspensión de Servicio:</div>
                                     <div class="form-check form-switch mb-0">
-                                        <input class="form-check-input" type="checkbox" id="condicionesEconomicasVisible">
+                                        <input class="form-check-input" type="checkbox" id="condicionesEconomicasVisible" <?= $esCargoCoordinador ? 'disabled' : '' ?>>
                                         <label class="form-check-label" for="condicionesEconomicasVisible">Mostrar en oferta</label>
                                     </div>
                                 </div>
                                 <p class="commercial-conditions-text">
                                     En caso de que el servicio sea pausado o suspendido por un periodo superior a
                                     <span class="commercial-days-input">
-                                        <input type="number" class="form-control form-control-sm" id="condicionesEconomicasDias" min="1" max="999" step="1" placeholder="10">
+                                        <input type="number" class="form-control form-control-sm" id="condicionesEconomicasDias" min="1" max="999" step="1" placeholder="10" <?= $esCargoCoordinador ? 'readonly' : '' ?>>
                                         <span>días</span>
                                     </span>, debido a causas no imputables a nuestra empresa, y en concordancia con los principios generales establecidos, la propuesta inicial comercial perderá su vigencia. La reanudación del servicio estará sujeta a una reformulación de la oferta comercial que reconozca los costos directos e indirectos derivados de la postergación, tales como la reposición, adquisición o sustitución de materiales y componentes afectados por deterioro o caducidad, así como los costos de renovación de acreditaciones, homologaciones e inducciones del personal y demás requisitos técnicos o administrativos exigidos para la operatividad del proyecto.
                                 </p>
+                                <?php if ($esCargoCoordinador): ?>
+                                    <div class="small text-muted mt-2"><i class="ti ti-lock me-1"></i>Los días y la opción “Mostrar en oferta” solo pueden ser modificados por Administración.</div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

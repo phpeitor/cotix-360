@@ -12,7 +12,7 @@ try {
     }
 
     $cargo = (int)($_SESSION['session_cargo'] ?? 0);
-    if (!in_array($cargo, [1, 3, 7], true)) {
+    if (!in_array($cargo, [1, 3, 7, 8], true)) {
         throw new Exception('No tienes permisos para actualizar estos datos');
     }
 
@@ -44,6 +44,12 @@ try {
     }
 
     $receta = new Receta();
+    if ($cargo === 8) {
+        $camposProtegidos = $receta->obtenerCamposComercialesProtegidos($recetaId);
+        $condicionesPago = (string)($camposProtegidos['condiciones_pago'] ?? '');
+        $condicionesEconomicasDias = (int)($camposProtegidos['condiciones_economicas_dias'] ?? 0);
+        $condicionesEconomicasVisible = (int)($camposProtegidos['condiciones_economicas_visible'] ?? 0);
+    }
     if ($cargo === 7) {
         $vendedorReceta = $receta->obtenerVendedorReceta($recetaId) ?? [];
         $vendedor = trim((string)($vendedorReceta['vendedor'] ?? ''))
@@ -56,7 +62,8 @@ try {
         ));
     }
 
-    if ($tiempoEntrega <= 0 || $condicionesPago === '' || $vendedor === '' || $vendedorCorreo === '' || $vendedorTelefono === '' || $descripcion === '' || $cantidadItems <= 0 || $condicionesEconomicasDias <= 0) {
+    $faltanCamposEditables = $tiempoEntrega <= 0 || $vendedor === '' || $vendedorCorreo === '' || $vendedorTelefono === '' || $descripcion === '' || $cantidadItems <= 0;
+    if ($faltanCamposEditables || ($cargo !== 8 && ($condicionesPago === '' || $condicionesEconomicasDias <= 0))) {
         throw new Exception('Completa tiempo de entrega, vendedor, descripcion, cantidad, condiciones de pago y días de suspensión');
     }
 
