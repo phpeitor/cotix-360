@@ -710,9 +710,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (estado === "Aprobada") {
-            const mostrarExcel = !(typeof CARGO !== 'undefined' && Number(CARGO) === 4);
-
-            botones += `
+            if (cargoActual !== 7) {
+                botones += `
                 <a href="pdf_receta.php?id=${hashId}"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -723,8 +722,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 data-hash="${hashId}">
                     <i class="ti ti-file"></i>
                 </a>`
+            }
 
-            if (mostrarExcel) {
+            if (![4, 7].includes(cargoActual)) {
                 botones += `
                 <a href="controller/export_receta_excel.php?id=${hashId}"
                 target="_blank"
@@ -737,12 +737,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     <i class="ti ti-file-spreadsheet"></i>
                 </a>
             `;
-                botones = botones.replace(/\s*<a href="controller\/export_receta_excel\.php\?id=\$\{hashId\}"[\s\S]*?<\/a>\s*/,
-                    "");
             }
 
         } else if (estado === "Anulada") {
-            botones += `
+            if (cargoActual !== 7) botones += `
                 <a href="pdf_receta.php?id=${hashId}"
                 target="_blank"
                 rel="noopener noreferrer"
