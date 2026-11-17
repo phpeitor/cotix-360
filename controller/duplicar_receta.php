@@ -33,7 +33,12 @@ try {
 
     $sessionCargo = (int)($_SESSION['session_cargo'] ?? 0);
     $sessionId = (int)$_SESSION['session_id'];
-    $isAdmin = in_array($sessionCargo, [1, 3], true);
+    $isAdmin = $sessionCargo === 1;
+    if (!$isAdmin && $sessionCargo !== 7) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'message' => 'Solo Admin y Vendedor pueden duplicar recetas']);
+        exit;
+    }
 
     if (!$isAdmin && (int)($original['usuario_id'] ?? 0) !== $sessionId) {
         http_response_code(403);
@@ -41,15 +46,11 @@ try {
         exit;
     }
 
-    $receta->begin();
-    $nuevoId = $receta->duplicarReceta($id, $sessionId);
-    $receta->commit();
-
     echo json_encode([
         'ok' => true,
-        'id' => $nuevoId,
-        'hash' => md5((string)$nuevoId),
-        'message' => 'Receta duplicada correctamente'
+        'id' => $id,
+        'hash' => md5((string)$id),
+        'message' => 'Receta cargada en el formulario. Completa los datos y guárdala para crear la copia.'
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
     if (isset($receta)) {

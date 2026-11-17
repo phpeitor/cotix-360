@@ -680,16 +680,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 <i class="ti ti-eye"></i>
             </a>
 
-            <button type="button"
-                    class="btn btn-soft-secondary btn-icon btn-sm rounded-circle btn-duplicar-receta"
-                    data-id="${id}"
-                    data-bs-toggle="tooltip"
-                    data-bs-title="Duplicar"
-                    title="Duplicar">
-                <i class="ti ti-copy"></i>
-            </button>
-
         `;
+
+        if ([1, 7].includes(cargoActual)) {
+            botones += `
+                <button type="button"
+                        class="btn btn-soft-secondary btn-icon btn-sm rounded-circle btn-duplicar-receta"
+                        data-id="${id}"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="Duplicar y editar datos">
+                    <i class="ti ti-copy"></i>
+                </button>
+            `;
+        }
 
         if (![3, 6].includes(cargoActual)) {
             botones += `
@@ -807,7 +810,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const confirmed = await new Promise(resolve => {
             alertify.confirm(
                 "Duplicar receta",
-                "¿Deseas duplicar esta receta?",
+                "Se abrirá una nueva receta con los datos y productos de esta como base. Podrás completar las pestañas Cliente, Receta y Asignar antes de guardarla. ¿Continuar?",
                 () => resolve(true),
                 () => resolve(false)
             );
@@ -829,8 +832,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            alertify.success(json.message || "Receta duplicada correctamente");
-            grid.forceRender();
+            alertify.success(json.message || "Receta cargada para duplicar");
+            window.location.href = `receta.php?duplicar=${encodeURIComponent(json.hash || md5(String(id)))}`;
         } catch (error) {
             alertify.error("Error de conexión al duplicar receta");
         } finally {

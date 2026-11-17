@@ -43,7 +43,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const razonSocialEmpresaInput = document.getElementById("razon_social_empresa");
     const direccionClienteInput = document.getElementById("direccion_cliente");
     const celularContactoInput = document.getElementById("celular_contacto");
+    const recetaCreationTitle = document.getElementById("recetaCreationTitle");
     const userCargo = Number(recetaForm?.dataset?.userCargo || 0);
+    const duplicateHash = new URLSearchParams(window.location.search).get("duplicar") || "";
     const isTecnico = userCargo === 4;
     const PAGE_SIZE = 15;
     const MAX_CANTIDAD = 5000;
@@ -545,6 +547,63 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    async function cargarDatosRecetaDuplicada(hash) {
+        if (!/^[a-f0-9]{32}$/i.test(hash)) {
+            alertify.error("El identificador de la receta a duplicar no es válido");
+            return;
+        }
+
+        if (recetaCreationTitle) recetaCreationTitle.textContent = "Crear receta a partir de una existente";
+        try {
+            const res = await fetch(`controller/get_receta.php?id=${encodeURIComponent(hash)}&duplicar=1`);
+            const data = await res.json();
+            if (!res.ok || data.error || !data.receta) {
+                throw new Error(data.message || "No se pudo cargar la receta de origen");
+            }
+
+            const original = data.receta;
+            const cliente = data.cliente || {};
+            const setValue = (id, value) => {
+                const input = document.getElementById(id);
+                if (input) input.value = String(value ?? "");
+            };
+
+            const originalNombre = String(original.nombre || "").trim();
+            const nombreCopia = originalNombre && !/^COPIA\s*-/i.test(originalNombre)
+                ? `COPIA - ${originalNombre}`
+                : originalNombre || `COPIA - Receta ${original.id}`;
+            setValue("nombre_receta", Array.from(nombreCopia).slice(0, 100).join(""));
+            setValue("nombre_interno", "");
+            setValue("ruc_cliente", cliente.ruc || original.cliente_ruc || "");
+            setValue("razon_social_empresa", cliente.razon_social_empresa || original.cliente_razon_social_empresa || "");
+            setValue("direccion_cliente", cliente.direccion || original.cliente_direccion || "");
+            setValue("nombre_completo_contacto", cliente.nombre_completo || original.cliente_nombre_completo || "");
+            setValue("correo_contacto", cliente.correo || original.cliente_correo || "");
+            setValue("celular_contacto", cliente.celular || original.cliente_celular || "");
+            setValue("motivo_solicitud", cliente.motivo || original.cliente_motivo || "");
+            setValue("descripcion_receta", cliente.descripcion || original.cliente_descripcion || "");
+            setValue("cantidad_items_receta", cliente.cantidad_items || original.cliente_cantidad_items || "");
+            if (Number(original.tipo_cambio) > 0 && tipoCambioInput) {
+                tipoCambioInput.value = Number(original.tipo_cambio).toFixed(3);
+            }
+            if (usuarioIngenieriaSelect) usuarioIngenieriaSelect.value = "";
+
+            tbody.innerHTML = "";
+            const detalleOrigen = Array.isArray(data.detalle) ? data.detalle : [];
+            detalleOrigen.forEach(item => {
+                const itemId = Number(item.item_id) || (Number(item.compra_detalle_origen_id) > 0 ? `adicional-${item.compra_detalle_origen_id}` : 0);
+                if (!itemId) return;
+                agregarItemReceta({ ...item, id: itemId }, item.cantidad || 1, true);
+            });
+            currentPage = 1;
+            calcularTotales();
+            alertify.success(`Se cargó la receta #${original.id}. Revisa las pestañas Cliente, Receta y Asignar antes de guardar.`);
+        } catch (error) {
+            console.error(error);
+            alertify.error(error.message || "No se pudo preparar la receta duplicada");
+        }
+    }
+
     async function cargarRecetasConAdicionalesPositivos() {
         if (!recetaOrigenAdicionalesSelect) return;
         recetaOrigenAdicionalesSelect.replaceChildren(new Option("Cargando recetas...", ""));
@@ -813,6 +872,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cargarBasesReceta();
     cargarUsuariosIngenieria();
     cargarRecetasConAdicionalesPositivos();
+    if (duplicateHash) cargarDatosRecetaDuplicada(duplicateHash);
     recetaOrigenAdicionalesSelect?.addEventListener("change", () => cargarAdicionalesPositivosDeReceta(recetaOrigenAdicionalesSelect.value));
     adicionalesPositivosImportBody?.addEventListener("change", event => {
         if (event.target.matches(".adicional-positivo-check")) actualizarSeleccionAdicionalesPositivos();
@@ -825,7 +885,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     btnImportarAdicionalesPositivos?.addEventListener("click", importarAdicionalesPositivosSeleccionados);
 
-    function agregarItemReceta(item, qtyInicial = 1) {
+    function agregarItemReceta(item, qtyInicial = 1, quiet = false) {
         const sourcePositiveId = Number(item?.import_source_detail_id || item?.compra_detalle_origen_id || 0);
         const sourceRecipeId = Number(item?.import_source_recipe_id || item?.receta_origen_id || 0);
         const esImportadoAdicional = sourcePositiveId > 0 || Number(item?.es_adicional_positivo_importado || 0) === 1;
@@ -934,7 +994,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         tbody.appendChild(tr);
         validarTdAdmin(tr);
-        if (sourcePositiveId <= 0) alertify.success("Item agregado");
+        if (!quiet && sourcePositiveId <= 0) alertify.success("Item agregado");
         currentPage = Math.ceil(getRows().length / PAGE_SIZE);
         calcularTotales();
 

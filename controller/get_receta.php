@@ -21,6 +21,20 @@ try {
         exit;
     }
 
+    if ((string)($_GET['duplicar'] ?? '') === '1') {
+        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+        $cargo = (int)($_SESSION['session_cargo'] ?? 0);
+        $usuarioId = (int)($_SESSION['session_id'] ?? 0);
+        if (!in_array($cargo, [1, 7], true)) {
+            http_response_code(403);
+            throw new RuntimeException('Solo Admin y Vendedor pueden duplicar recetas');
+        }
+        if ($cargo === 7 && !$recetaModel->perteneceAlUsuario((int)$receta['id'], $usuarioId)) {
+            http_response_code(403);
+            throw new RuntimeException('El Vendedor solo puede duplicar sus propias recetas');
+        }
+    }
+
     $detalle = $recetaModel->obtenerDetallePorHash($hash);
     $cambiosPrecio = $recetaModel->obtenerCambiosPrecio((int)$receta['id']);
     $categorias = $recetaModel->obtenerCategoriasParaEdicion((int)$receta['id']);
@@ -71,7 +85,7 @@ try {
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 } catch (Throwable $e) {
-    http_response_code(500);
+    if (http_response_code() < 400) http_response_code(500);
     echo json_encode([
         'error' => true,
         'message' => $e->getMessage()

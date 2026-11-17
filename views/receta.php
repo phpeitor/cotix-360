@@ -63,7 +63,7 @@ require_once ROOT . '/controller/check_session.php';
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header border-bottom border-dashed d-flex justify-content-between align-items-center">
-                                <h4 class="header-title mb-0">Plantilla de Receta</h4>
+                                    <h4 class="header-title mb-0" id="recetaCreationTitle">Plantilla de Receta</h4>
                                 <div class="d-flex align-items-center gap-2">
                                     <button type="button" class="btn btn-outline-info me-2" id="btnPreviewReceta" data-bs-toggle="modal" data-bs-target="#previewRecetaModal">
                                         <i class="ti ti-eye me-1" data-bs-toggle="tooltip" data-bs-title="Vista previa" data-bs-placement="top"></i> Preview
@@ -374,7 +374,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/form-receta.js?v=2.4"></script>
+    <script src="./assets/js/form-receta.js?v=2.6"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
