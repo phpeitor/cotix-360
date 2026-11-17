@@ -16,8 +16,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnOfertarReceta = document.getElementById("btn-ofertar-receta");
     const btnGenerarOfertaPdf = document.getElementById("btn-generar-oferta-pdf");
     const btnGenerarOfertaExcel = document.getElementById("btn-generar-oferta-excel");
+    const recetaVersionModalEl = document.getElementById("recetaVersionModal");
+    const recetaVersionSourceSelect = document.getElementById("recetaVersionSourceSelect");
+    const recetaVersionNextInfo = document.getElementById("recetaVersionNextInfo");
+    const recetaVersionOptions = document.getElementById("recetaVersionOptions");
+    const duplicacionNormalRadio = document.getElementById("duplicacionNormal");
+    const duplicacionVersionRadio = document.getElementById("duplicacionVersion");
+    const btnContinuarDuplicarReceta = document.getElementById("btnContinuarDuplicarReceta");
+    const recetaVersionModal = recetaVersionModalEl ? new bootstrap.Modal(recetaVersionModalEl) : null;
     let ofertaActualHash = "";
     let ofertaActualEstado = "";
+    let versionDuplicacionPendiente = null;
 
     function confirmarPdfDetalle() {
         return new Promise(resolve => {
@@ -81,7 +90,12 @@ document.addEventListener("DOMContentLoaded", () => {
     --------------------------------------------------- */
     const grid = new gridjs.Grid({
         columns: [
-            { id: "id", name: "ID", width: "70px" },
+            {
+                id: "id",
+                name: "ID / Versión",
+                width: "100px",
+                formatter: (cell, row) => gridjs.html(`<span class="fw-semibold">${escapeHtml(row?.cells?.[12]?.data || cell)}</span>`)
+            },
             { id: "usuario", name: "Usuario", width: "80px" },
             {
                 id: "nombre",
@@ -126,7 +140,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 sort: false,
                 formatter: renderAcciones
             },
-            { id: "adicionales_positivos_importados", name: "", hidden: true }
+            { id: "adicionales_positivos_importados", name: "", hidden: true },
+            { id: "version_label", name: "", hidden: true }
         ],
         server: {
             url: buildUrl(),
@@ -830,13 +845,62 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            alertify.success(json.message || "Receta cargada para duplicar");
-            window.location.href = `receta.php?duplicar=${encodeURIComponent(json.hash || md5(String(id)))}`;
+            const versiones = Array.isArray(json.versiones) ? json.versiones : [];
+            if (!versiones.length || !recetaVersionModal || !recetaVersionSourceSelect) {
+                throw new Error("No se encontraron versiones disponibles para duplicar");
+            }
+
+            versionDuplicacionPendiente = {
+                origenId: Number(id),
+                raizId: Number(json.raiz_id || 0),
+                siguienteVersion: Number(json.siguiente_version || 1)
+            };
+            recetaVersionSourceSelect.replaceChildren();
+            versiones.forEach(version => {
+                recetaVersionSourceSelect.add(new Option(String(version.label || `Receta #${version.id}`), String(version.id)));
+            });
+            recetaVersionSourceSelect.value = versiones.some(version => Number(version.id) === Number(id))
+                ? String(id)
+                : String(versiones[0].id);
+            if (recetaVersionNextInfo) {
+                recetaVersionNextInfo.textContent = `La nueva copia quedará como Receta #${versionDuplicacionPendiente.raizId}.${versionDuplicacionPendiente.siguienteVersion}.`;
+            }
+            if (duplicacionNormalRadio) duplicacionNormalRadio.checked = true;
+            recetaVersionOptions?.classList.add("d-none");
+            recetaVersionModal.show();
         } catch (error) {
             alertify.error("Error de conexión al duplicar receta");
         } finally {
             btn.disabled = false;
         }
+    });
+
+    [duplicacionNormalRadio, duplicacionVersionRadio].forEach(radio => {
+        radio?.addEventListener("change", () => {
+            recetaVersionOptions?.classList.toggle("d-none", !duplicacionVersionRadio?.checked);
+        });
+    });
+
+    btnContinuarDuplicarReceta?.addEventListener("click", () => {
+        const modo = duplicacionVersionRadio?.checked ? "version" : "normal";
+        const sourceId = modo === "version"
+            ? Number(recetaVersionSourceSelect?.value || 0)
+            : Number(versionDuplicacionPendiente?.origenId || 0);
+        if (!sourceId || !versionDuplicacionPendiente) {
+            alertify.error("Selecciona una opción válida para duplicar");
+            return;
+        }
+
+        const params = new URLSearchParams({ duplicar: md5(String(sourceId)), modo_duplicacion: modo });
+        if (modo === "version") {
+            if (!versionDuplicacionPendiente.raizId) {
+                alertify.error("No se pudo identificar la receta raíz de la versión");
+                return;
+            }
+            params.set("version_raiz", String(versionDuplicacionPendiente.raizId));
+            params.set("version_numero", String(versionDuplicacionPendiente.siguienteVersion));
+        }
+        window.location.href = `receta.php?${params.toString()}`;
     });
 
     document.addEventListener("click", async (e) => {

@@ -186,6 +186,43 @@ require_once ROOT . '/controller/check_session.php';
     </div>
     <?php include ROOT . '/layout/theme.html'; ?>
 
+    <div id="recetaVersionModal" class="modal fade" tabindex="-1" aria-labelledby="recetaVersionModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header text-bg-primary border-0">
+                    <div>
+                        <h5 class="modal-title" id="recetaVersionModalTitle"><i class="ti ti-copy me-2"></i>Duplicar receta</h5>
+                        <small class="text-white-50">Elige si deseas una copia normal o una nueva versión correlativa.</small>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-grid gap-2 mb-3">
+                        <label class="form-check border rounded-3 p-3 ps-5 mb-0">
+                            <input class="form-check-input" type="radio" name="modoDuplicacionReceta" id="duplicacionNormal" value="normal" checked>
+                            <span class="fw-semibold d-block">Duplicar normal</span>
+                            <span class="text-muted small">Crea una copia independiente con los datos y productos como base.</span>
+                        </label>
+                        <label class="form-check border rounded-3 p-3 ps-5 mb-0">
+                            <input class="form-check-input" type="radio" name="modoDuplicacionReceta" id="duplicacionVersion" value="version">
+                            <span class="fw-semibold d-block">Crear versión correlativa</span>
+                            <span class="text-muted small">Crea una revisión numerada dentro de la familia de recetas.</span>
+                        </label>
+                    </div>
+                    <div class="d-none" id="recetaVersionOptions">
+                        <div class="alert alert-info py-2 mb-3" id="recetaVersionNextInfo"></div>
+                        <label class="form-label" for="recetaVersionSourceSelect">Versión que usarás como base</label>
+                        <select class="form-select" id="recetaVersionSourceSelect"></select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnContinuarDuplicarReceta"><i class="ti ti-arrow-right me-1"></i>Continuar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="success-alert-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-sm">
             <div class="modal-content modal-filled bg-success">
@@ -255,7 +292,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
-    <script src="./assets/js/table-gridjs-receta.js?v=3.8"></script>
+    <script src="./assets/js/table-gridjs-receta.js?v=4.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

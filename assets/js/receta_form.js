@@ -802,7 +802,7 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
     function renderHeader() {
         if (!receta) return;
 
-        if (recetaIdEl) recetaIdEl.textContent = receta.id ?? "";
+        if (recetaIdEl) recetaIdEl.textContent = receta.version_label || receta.id || "";
         if (recetaNombreDisplayEl) {
             let raw = String(receta?.nombre || "").trim();
             raw = raw.replace(/^PROY-?/i, '').replace(/^PRO-?/i, '');

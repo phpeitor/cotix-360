@@ -46,11 +46,16 @@ try {
         exit;
     }
 
+    $contextoVersion = $receta->contextoVersionParaDuplicar($id, $sessionId, $isAdmin);
+
     echo json_encode([
         'ok' => true,
         'id' => $id,
         'hash' => md5((string)$id),
-        'message' => 'Receta cargada en el formulario. Completa los datos y guárdala para crear la copia.'
+        'raiz_id' => $contextoVersion['raiz_id'],
+        'siguiente_version' => $contextoVersion['siguiente_version'],
+        'versiones' => $contextoVersion['versiones'],
+        'message' => 'Selecciona la versión que usarás como base para la nueva copia.'
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
     if (isset($receta)) {

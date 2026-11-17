@@ -44,8 +44,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const direccionClienteInput = document.getElementById("direccion_cliente");
     const celularContactoInput = document.getElementById("celular_contacto");
     const recetaCreationTitle = document.getElementById("recetaCreationTitle");
+    const duplicarOrigenInput = document.getElementById("duplicar_origen_id");
+    const modoDuplicacionInput = document.getElementById("modo_duplicacion");
+    const versionRaizInput = document.getElementById("version_raiz_id");
+    const versionNumeroInput = document.getElementById("version_numero");
+    const versionRecetaPreview = document.getElementById("versionRecetaPreview");
     const userCargo = Number(recetaForm?.dataset?.userCargo || 0);
-    const duplicateHash = new URLSearchParams(window.location.search).get("duplicar") || "";
+    const urlParams = new URLSearchParams(window.location.search);
+    const duplicateHash = urlParams.get("duplicar") || "";
     const isTecnico = userCargo === 4;
     const PAGE_SIZE = 15;
     const MAX_CANTIDAD = 5000;
@@ -563,6 +569,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const original = data.receta;
             const cliente = data.cliente || {};
+            const modoDuplicacion = String(urlParams.get("modo_duplicacion") || "normal");
+            const versionada = modoDuplicacion === "version";
+            const raizId = versionada ? Number(urlParams.get("version_raiz") || 0) : 0;
+            const siguienteVersion = versionada ? Number(urlParams.get("version_numero") || 0) : 0;
+            if (duplicarOrigenInput) duplicarOrigenInput.value = String(original.id || "");
+            if (modoDuplicacionInput) modoDuplicacionInput.value = modoDuplicacion;
+            if (versionRaizInput) versionRaizInput.value = String(raizId || "");
+            if (versionNumeroInput) versionNumeroInput.value = String(siguienteVersion || "");
+            if (raizId > 0 && siguienteVersion > 0) {
+                if (versionRecetaPreview) {
+                    versionRecetaPreview.textContent = `Esta copia se guardará como la versión ${raizId}.${siguienteVersion}.`;
+                    versionRecetaPreview.classList.remove("d-none");
+                }
+                if (recetaCreationTitle) recetaCreationTitle.textContent = `Crear versión ${raizId}.${siguienteVersion}`;
+            } else if (recetaCreationTitle) {
+                recetaCreationTitle.textContent = "Crear copia de receta";
+            }
             const setValue = (id, value) => {
                 const input = document.getElementById(id);
                 if (input) input.value = String(value ?? "");

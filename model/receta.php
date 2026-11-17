@@ -38,12 +38,16 @@ class Receta {
         $this->asegurarColumnaAsignacionReceta();
         $this->asegurarColumnaNombreInternoReceta();
         $this->asegurarColumnaAdicionalesImportadosReceta();
+        $this->asegurarColumnasVersionReceta();
         $sql = "INSERT INTO recetas (
                     usuario_id,
                     asignado_usuario_id,
                     nombre,
                     nombre_interno,
                     adicionales_positivos_importados,
+                    id_receta_duplicada,
+                    version_raiz_id,
+                    version_numero,
                     estado,
                     created_at,
                     updated_at,
@@ -55,6 +59,9 @@ class Receta {
                     :nombre,
                     :nombre_interno,
                     :adicionales_positivos_importados,
+                    :id_receta_duplicada,
+                    :version_raiz_id,
+                    :version_numero,
                     :estado,
                     :created_at,
                     :updated_at,
@@ -74,6 +81,12 @@ class Receta {
         $nombreInterno = trim((string)($data['nombre_interno'] ?? ''));
         $stmt->bindValue(':nombre_interno', $nombreInterno !== '' ? $nombreInterno : null, $nombreInterno !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
         $stmt->bindValue(':adicionales_positivos_importados', !empty($data['adicionales_positivos_importados']) ? 1 : 0, PDO::PARAM_INT);
+        $recetaDuplicadaDe = (int)($data['id_receta_duplicada'] ?? 0);
+        $versionRaizId = (int)($data['version_raiz_id'] ?? 0);
+        $versionNumero = (int)($data['version_numero'] ?? 0);
+        $stmt->bindValue(':id_receta_duplicada', $recetaDuplicadaDe > 0 ? $recetaDuplicadaDe : null, $recetaDuplicadaDe > 0 ? PDO::PARAM_INT : PDO::PARAM_NULL);
+        $stmt->bindValue(':version_raiz_id', $versionRaizId > 0 ? $versionRaizId : null, $versionRaizId > 0 ? PDO::PARAM_INT : PDO::PARAM_NULL);
+        $stmt->bindValue(':version_numero', $versionNumero > 0 ? $versionNumero : null, $versionNumero > 0 ? PDO::PARAM_INT : PDO::PARAM_NULL);
         $stmt->bindValue(':estado', (string)($data['estado'] ?? 'Enviada'), PDO::PARAM_STR);
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->bindValue(':updated_at', $this->nowLima);
@@ -320,6 +333,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
         $this->asegurarColumnaAsignacionReceta();
         $this->asegurarColumnaNombreInternoReceta();
         $this->asegurarColumnaAdicionalesImportadosReceta();
+        $this->asegurarColumnasVersionReceta();
         $sessionCargo = $_SESSION['session_cargo'] ?? null;
         $sessionId = $_SESSION['session_id'] ?? null;
         $isAdmin = in_array((int)$sessionCargo, [1, 3, 8], true);
@@ -352,9 +366,11 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
             }
         }
 
+        $versionLabelSql = $this->etiquetaVersionSql('c');
         $sql = "
             SELECT
                 c.id,
+                {$versionLabelSql} AS version_label,
                 p.usuario,
                 c.nombre,
                 c.nombre_interno,
@@ -376,7 +392,9 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
             LEFT JOIN receta_cliente rc ON rc.id_receta = c.id
             WHERE $where
             GROUP BY
-                c.id, p.usuario, c.nombre, c.nombre_interno, c.adicionales_positivos_importados, rc.ruc, rc.razon_social_empresa, c.estado, c.created_at, c.updated_at
+                c.id, c.id_receta_duplicada, c.version_raiz_id, c.version_numero,
+                p.usuario, c.nombre, c.nombre_interno, c.adicionales_positivos_importados,
+                rc.ruc, rc.razon_social_empresa, c.estado, c.created_at, c.updated_at
             ORDER BY c.id DESC
         ";
 
@@ -1016,7 +1034,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         $this->asegurarColumnaNombreInternoReceta();
         $this->asegurarColumnaAdicionalesImportadosReceta();
         $this->asegurarColumnasAdicionalesImportadosRecetaDetalle();
-        $this->asegurarColumnasAdicionalesImportadosRecetaDetalle();
+        $this->asegurarColumnasVersionReceta();
         $this->asegurarColumna(
             'header_notifications',
             'destinatario_id',
@@ -1040,6 +1058,165 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
             'adicionales_positivos_importados',
             "ALTER TABLE recetas ADD COLUMN adicionales_positivos_importados TINYINT(1) NOT NULL DEFAULT 0 AFTER nombre_interno"
         );
+    }
+
+    private function asegurarColumnasVersionReceta(): void
+    {
+        $this->asegurarColumna(
+            'recetas',
+            'id_receta_duplicada',
+            "ALTER TABLE recetas ADD COLUMN id_receta_duplicada INT NULL DEFAULT NULL AFTER usuario_id"
+        );
+        $this->asegurarColumna(
+            'recetas',
+            'version_raiz_id',
+            "ALTER TABLE recetas ADD COLUMN version_raiz_id INT NULL DEFAULT NULL AFTER id_receta_duplicada"
+        );
+        $this->asegurarColumna(
+            'recetas',
+            'version_numero',
+            "ALTER TABLE recetas ADD COLUMN version_numero INT NULL DEFAULT NULL AFTER version_raiz_id"
+        );
+    }
+
+    private function etiquetaVersionSql(string $alias = 'c'): string
+    {
+        return "CASE
+                    WHEN {$alias}.version_raiz_id IS NOT NULL AND {$alias}.version_numero IS NOT NULL
+                        THEN CONCAT({$alias}.version_raiz_id, '.', {$alias}.version_numero)
+                    WHEN {$alias}.id_receta_duplicada IS NOT NULL
+                        THEN CONCAT({$alias}.id_receta_duplicada, '.', (
+                            SELECT COUNT(*) FROM recetas sib
+                            WHERE sib.id_receta_duplicada = {$alias}.id_receta_duplicada AND sib.id <= {$alias}.id
+                        ))
+                    ELSE CAST({$alias}.id AS CHAR)
+                END";
+    }
+
+    public function raizVersionReceta(int $recetaId): int
+    {
+        $this->asegurarColumnasVersionReceta();
+        $actual = $recetaId;
+        $visitados = [];
+        while ($actual > 0 && !isset($visitados[$actual])) {
+            $visitados[$actual] = true;
+            $stmt = $this->conn->prepare("SELECT id_receta_duplicada, version_raiz_id FROM recetas WHERE id = :id LIMIT 1");
+            $stmt->bindValue(':id', $actual, PDO::PARAM_INT);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row) throw new RuntimeException('Receta de origen no encontrada');
+
+            $raizGuardada = (int)($row['version_raiz_id'] ?? 0);
+            if ($raizGuardada > 0) return $raizGuardada;
+
+            $padre = (int)($row['id_receta_duplicada'] ?? 0);
+            if ($padre <= 0) return $actual;
+            $actual = $padre;
+        }
+
+        if ($actual > 0 && isset($visitados[$actual])) return $actual;
+        throw new RuntimeException('No se pudo determinar la receta raíz de versiones');
+    }
+
+    public function contextoVersionParaDuplicar(int $recetaOrigenId, int $usuarioId, bool $esAdmin): array
+    {
+        $this->asegurarColumnasVersionReceta();
+        $raizId = $this->raizVersionReceta($recetaOrigenId);
+        $raizStmt = $this->conn->prepare("SELECT id, usuario_id, nombre FROM recetas WHERE id = :id LIMIT 1");
+        $raizStmt->bindValue(':id', $raizId, PDO::PARAM_INT);
+        $raizStmt->execute();
+        $raiz = $raizStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$raiz) throw new RuntimeException('Receta raíz no encontrada');
+
+        $rowsById = [$raizId => $raiz + [
+            'id_receta_duplicada' => null,
+            'version_raiz_id' => null,
+            'version_numero' => null,
+            'created_at' => '',
+        ]];
+        $frontier = [$raizId];
+        while ($frontier) {
+            $parentId = array_shift($frontier);
+            $stmt = $this->conn->prepare("SELECT id, usuario_id, nombre, created_at, id_receta_duplicada, version_raiz_id, version_numero
+                                          FROM recetas WHERE id_receta_duplicada = :parent_id ORDER BY id ASC");
+            $stmt->bindValue(':parent_id', $parentId, PDO::PARAM_INT);
+            $stmt->execute();
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $child) {
+                $childId = (int)$child['id'];
+                if (isset($rowsById[$childId])) continue;
+                $rowsById[$childId] = $child;
+                $frontier[] = $childId;
+            }
+        }
+
+        $explicitVersions = [];
+        foreach ($rowsById as $id => $row) {
+            if ((int)$id === $raizId) continue;
+            $version = (int)($row['version_numero'] ?? 0);
+            if ($version > 0) $explicitVersions[$id] = $version;
+        }
+
+        $usedNumbers = array_fill_keys(array_values($explicitVersions), true);
+        $nextLegacyNumber = 1;
+        $versiones = [[
+            'id' => $raizId,
+            'version_numero' => 0,
+            'label' => 'Receta #' . $raizId . ' · Original',
+            'nombre' => (string)($raiz['nombre'] ?? ''),
+        ]];
+        $children = array_values(array_filter($rowsById, static fn($row) => (int)($row['id'] ?? 0) !== $raizId));
+        usort($children, static fn($a, $b) => (int)$a['id'] <=> (int)$b['id']);
+
+        foreach ($children as $child) {
+            $childId = (int)$child['id'];
+            $version = $explicitVersions[$childId] ?? 0;
+            if ($version <= 0) {
+                while (isset($usedNumbers[$nextLegacyNumber])) $nextLegacyNumber++;
+                $version = $nextLegacyNumber++;
+                $usedNumbers[$version] = true;
+            }
+            $child['version_resuelta'] = $version;
+            $child['_label'] = 'Receta #' . $raizId . '.' . $version;
+        }
+
+        foreach ($children as $child) {
+            $version = (int)($child['version_resuelta'] ?? 0);
+            if (!$esAdmin && (int)($child['usuario_id'] ?? 0) !== $usuarioId && (int)$child['id'] !== $recetaOrigenId) continue;
+            $versiones[] = [
+                'id' => (int)$child['id'],
+                'version_numero' => $version,
+                'label' => (string)$child['_label'],
+                'nombre' => (string)($child['nombre'] ?? ''),
+            ];
+        }
+
+        if (!$esAdmin) {
+            $versiones = array_values(array_filter($versiones, static function ($version) use ($raizId, $recetaOrigenId, $usuarioId, $rowsById) {
+                $id = (int)$version['id'];
+                if ($id === $raizId && (int)($rowsById[$id]['usuario_id'] ?? 0) === $usuarioId) return true;
+                if ($id === $recetaOrigenId) return true;
+                return (int)($rowsById[$id]['usuario_id'] ?? 0) === $usuarioId;
+            }));
+        }
+
+        $numeroSiguiente = $usedNumbers ? max(array_keys($usedNumbers)) + 1 : 1;
+        return [
+            'raiz_id' => $raizId,
+            'siguiente_version' => $numeroSiguiente,
+            'versiones' => $versiones,
+        ];
+    }
+
+    public function siguienteNumeroVersionReceta(int $raizId): int
+    {
+        $this->asegurarColumnasVersionReceta();
+        $lock = $this->conn->prepare("SELECT id FROM recetas WHERE id = :id FOR UPDATE");
+        $lock->bindValue(':id', $raizId, PDO::PARAM_INT);
+        $lock->execute();
+        if (!$lock->fetchColumn()) throw new RuntimeException('Receta raíz no encontrada');
+
+        $contexto = $this->contextoVersionParaDuplicar($raizId, 0, true);
+        return (int)($contexto['siguiente_version'] ?? 1);
     }
 
     private function asegurarColumnasAdicionalesImportadosRecetaDetalle(): void
@@ -1270,7 +1447,10 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         $this->asegurarColumnaAsignacionReceta();
         $this->asegurarColumnaNombreInternoReceta();
         $this->asegurarColumnaAdicionalesImportadosReceta();
+        $this->asegurarColumnasVersionReceta();
+        $versionLabelSql = $this->etiquetaVersionSql('c');
         $sql = "SELECT c.*,
+                       {$versionLabelSql} AS version_label,
                        p.usuario,
                        TRIM(CONCAT_WS(' ', NULLIF(TRIM(p.NOMBRES), ''), NULLIF(TRIM(p.APELLIDOS), ''))) AS usuario_registro_nombre,
                        p.EMAIL AS usuario_registro_email,

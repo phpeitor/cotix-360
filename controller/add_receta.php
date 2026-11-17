@@ -28,6 +28,9 @@ try {
     $items = json_decode((string)($_POST['items'] ?? '[]'), true);
     if (!is_array($items)) throw new Exception('Items inválidos');
     $asignadoUsuarioId = (int)($_POST['usuario_ingenieria_id'] ?? 0);
+    $duplicarOrigenId = (int)($_POST['duplicar_origen_id'] ?? 0);
+    $modoDuplicacion = trim((string)($_POST['modo_duplicacion'] ?? ''));
+    $versionRaizParam = (int)($_POST['version_raiz_id'] ?? 0);
     $itemsCatalogo = [];
     $adicionalesPorRecetaOrigen = [];
     $cantidadAdicionalPorRecetaOrigen = [];
@@ -44,6 +47,31 @@ try {
     }
 
     $receta = new Receta();
+    if ($duplicarOrigenId > 0) {
+        if (!in_array($modoDuplicacion, ['normal', 'version'], true)) {
+            throw new Exception('Selecciona si deseas duplicar normalmente o crear una versión');
+        }
+        $cargoActual = (int)($_SESSION['session_cargo'] ?? 0);
+        if (!in_array($cargoActual, [1, 7], true)) {
+            throw new Exception('Solo Admin y Vendedor pueden duplicar recetas');
+        }
+        $origenDuplicado = $receta->obtenerPorId($duplicarOrigenId);
+        if (!$origenDuplicado) throw new Exception('La receta de origen no existe');
+        if ($cargoActual === 7 && (int)($origenDuplicado['usuario_id'] ?? 0) !== (int)$_SESSION['session_id']) {
+            throw new Exception('El Vendedor solo puede crear versiones de sus propias recetas');
+        }
+        if ($modoDuplicacion === 'version') {
+            $raizReal = $receta->raizVersionReceta($duplicarOrigenId);
+            if ($versionRaizParam !== $raizReal) {
+                throw new Exception('La versión seleccionada no pertenece a la receta raíz');
+            }
+        } elseif ($versionRaizParam > 0) {
+            throw new Exception('Una duplicación normal no debe incluir datos de versión');
+        }
+    } elseif ($versionRaizParam > 0 || $modoDuplicacion !== '') {
+        throw new Exception('Falta la receta de origen para duplicar');
+    }
+
     if ($asignadoUsuarioId > 0 && !$receta->esUsuarioAsignableReceta($asignadoUsuarioId)) {
         throw new Exception('El usuario asignado no pertenece a Supervisión o Ingeniería, o está inactivo');
     }
@@ -112,12 +140,19 @@ try {
     $receta->prepararAsignacionReceta();
     $receta->begin();
 
+    $numeroVersion = $duplicarOrigenId > 0 && $modoDuplicacion === 'version'
+        ? $receta->siguienteNumeroVersionReceta($versionRaizParam)
+        : 0;
+
     $recetaId = $receta->guardarCabecera([
         'usuario_id' => (int)$_SESSION['session_id'],
         'asignado_usuario_id' => $asignadoUsuarioId > 0 ? $asignadoUsuarioId : null,
         'nombre' => $nombreReceta,
         'nombre_interno' => $nombreInterno,
         'adicionales_positivos_importados' => !empty($adicionalesImportados),
+        'id_receta_duplicada' => $numeroVersion > 0 ? $duplicarOrigenId : null,
+        'version_raiz_id' => $numeroVersion > 0 ? $versionRaizParam : null,
+        'version_numero' => $numeroVersion > 0 ? $numeroVersion : null,
         'estado' => 'Enviada',
         'usuario_upd' => null,
         'tipo_cambio' => $tipoCambio,

@@ -74,6 +74,10 @@ require_once ROOT . '/controller/check_session.php';
                                 </div>
                             </div>
                             <form class="needs-validation form-receta" novalidate="" data-user-cargo="<?= (int)$_SESSION['session_cargo'] ?>">
+                                <input type="hidden" id="duplicar_origen_id" name="duplicar_origen_id" value="">
+                                <input type="hidden" id="modo_duplicacion" name="modo_duplicacion" value="">
+                                <input type="hidden" id="version_raiz_id" name="version_raiz_id" value="">
+                                <input type="hidden" id="version_numero" name="version_numero" value="">
                                 <div class="card-body p-0">
                                     <div class="p-3 border-bottom bg-body-tertiary receta-creation-tabs-wrap">
                                         <ul class="nav nav-pills nav-fill gap-2 mb-3" id="recetaCreationTabs" role="tablist">
@@ -103,6 +107,7 @@ require_once ROOT . '/controller/check_session.php';
                                             </div>
                                             <div class="tab-pane fade" id="receta-pane" role="tabpanel" aria-labelledby="receta-tab" tabindex="0">
                                                 <div class="mb-3"><h5 class="mb-1">Datos de la receta</h5><span class="text-muted fs-12">Describe la solicitud y la cantidad requerida.</span></div>
+                                                <div class="alert alert-info py-2 d-none" id="versionRecetaPreview"></div>
                                                 <div class="row g-3">
                                                     <div class="col-12"><label class="form-label" for="nombre_receta">Nombre de la receta</label><input type="text" class="form-control" id="nombre_receta" name="nombre_receta" maxlength="100" placeholder="Ej. Tablero de control de grupos electrógenos" required><div class="form-text">El nombre lo define quien crea la receta y solo Administración podrá cambiarlo después.</div><div class="invalid-feedback">Ingresa el nombre de la receta.</div></div>
                                                     <div class="col-12"><label class="form-label" for="nombre_interno">Nombre Interno <span class="text-muted fw-normal">(opcional)</span></label><input type="text" class="form-control" id="nombre_interno" name="nombre_interno" maxlength="150" placeholder="Código o identificador interno del proyecto"><div class="form-text">No es obligatorio para enviar la receta. Solo Administración podrá editarlo después.</div></div>
@@ -374,7 +379,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/form-receta.js?v=2.6"></script>
+    <script src="./assets/js/form-receta.js?v=2.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
