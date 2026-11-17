@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const recetaNombreInternoDisplayEl = document.getElementById("recetaNombreInternoDisplay");
     const inputNombreInternoReceta = document.getElementById("inputNombreInternoReceta");
     const btnEditNombreInternoReceta = document.getElementById("btnEditNombreInternoReceta");
+    const badgeAdicionalesPositivosImportados = document.getElementById("badgeAdicionalesPositivosImportados");
     const clienteModalEl = document.getElementById("cliente-modal");
     const btnGuardarCliente = document.getElementById("btnGuardarCliente");
     const clienteRazonSocialEl = document.getElementById("clienteRazonSocial");
@@ -811,6 +812,7 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         if (recetaNombreInternoDisplayEl) {
             recetaNombreInternoDisplayEl.textContent = String(receta.nombre_interno || "").trim() || "(Sin especificar)";
         }
+        badgeAdicionalesPositivosImportados?.classList.toggle("d-none", Number(receta.adicionales_positivos_importados || 0) !== 1);
         if (usuarioEl) usuarioEl.textContent = receta.usuario ?? "";
         if (fechaEl) fechaEl.textContent = receta.created_at ?? "";
         if (estadoEl) estadoEl.textContent = receta.estado ?? "";
@@ -1587,13 +1589,19 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         return detalle.filter(item => String(item.sub_cat_1 || "").toLocaleLowerCase("es").includes(query));
     }
 
+    function getDetalleItemKey(item) {
+        const compraDetalleId = Number(item?.compra_detalle_origen_id || 0);
+        if (compraDetalleId > 0) return `compra-adicional-${compraDetalleId}`;
+        return String(Number(item?.item_id) || Number(item?.id) || 0);
+    }
+
     function actualizarCantidad(itemId, delta) {
         if (!isRecetaEditable()) {
             alertify.error("Solo se puede modificar recetas con estado Enviada");
             return;
         }
 
-        const idx = detalle.findIndex(x => Number(x.item_id) === Number(itemId));
+        const idx = detalle.findIndex(item => getDetalleItemKey(item) === String(itemId));
         if (idx < 0) return;
 
         const nueva = clampCantidad((Number(detalle[idx].cantidad) || 1) + delta);
@@ -1609,7 +1617,7 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         const row = tbody.querySelector(`tr[data-item-id="${CSS.escape(String(itemId))}"]`);
         if (!row) return;
 
-        const item = detalle.find(x => Number(x.item_id) === Number(itemId));
+        const item = detalle.find(rowItem => getDetalleItemKey(rowItem) === String(itemId));
         if (!item) return;
 
         const subtotal = getSubtotal({ ...item, cantidad: cantidad ?? item.cantidad });
@@ -1629,7 +1637,7 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
             return;
         }
 
-        const idx = detalle.findIndex(x => Number(x.item_id) === Number(itemId));
+        const idx = detalle.findIndex(item => getDetalleItemKey(item) === String(itemId));
         if (idx < 0) return;
 
         const nueva = clampCantidad(value);
@@ -1649,7 +1657,7 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
             return;
         }
 
-        const idx = detalle.findIndex(x => Number(x.item_id) === Number(itemId));
+        const idx = detalle.findIndex(item => getDetalleItemKey(item) === String(itemId));
         if (idx < 0) return;
 
         detalle[idx].precio = normalizarPrecio(value);
@@ -1665,7 +1673,7 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
             return;
         }
 
-        detalle = detalle.filter(x => Number(x.item_id) !== Number(itemId));
+        detalle = detalle.filter(item => getDetalleItemKey(item) !== String(itemId));
 
         if (!detalle.length) {
             renderEmptyState("No hay items para mostrar.");
@@ -1691,12 +1699,16 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
 
         tbody.innerHTML = rows.map(item => {
             const editable = isRecetaEditable();
-            const itemId = Number(item.item_id) || Number(item.id) || 0;
+            const itemId = getDetalleItemKey(item);
             const cantidad = Number(item.cantidad) || 0;
             const precio = Number(item.precio) || 0;
             const subtotal = getSubtotal(item);
             const monedaSimbolo = getMonedaSimbolo(item.moneda);
             const itemDescripcion = normalizarTextoDetalle(item.descripcion);
+            const adicionalPositivoImportado = Number(item.es_adicional_positivo_importado || 0) === 1;
+            const badgeAdicionalImportado = adicionalPositivoImportado
+                ? '<span class="badge bg-info-subtle text-info ms-1">Adicional positivo importado</span>'
+                : "";
             const detalleLinea1 = formatearRutaDetalle([item.categoria, item.sub_cat_1, item.sub_cat_2]);
             const detalleLinea2 = [item.marca, item.modelo, item.uni_medida].filter(Boolean).join(" / ");
             const iconoSubCategoria1 = iconoSubCategoria1Valido(item.sub_cat_1_icon)
@@ -1735,7 +1747,7 @@ const iconoManual = esPrecioManual
                                 </span>
                             </div>
                             <div>
-                                <span class="text-muted fs-12">${item.nombre || ""}
+                                <span class="text-muted fs-12">${item.nombre || ""} ${badgeAdicionalImportado}
                                     ${cambioPrecio ? `<span class="ms-1" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-precio-cambio" data-bs-title="${tooltipCambioPrecio}"><i class="ti ti-alert-circle text-warning fs-16"></i></span>` : ""}
                                 </span><br>
                                 <h5 class="fs-14 mt-1 item-description">${itemDescripcion}</h5>
@@ -1955,7 +1967,9 @@ const submitBtn = recetaForm?.querySelector("[type='submit']");
 
         try {
             const payloadItems = detalle.map(item => ({
-                item_id: Number(item.item_id) || Number(item.id) || 0,
+                item_id: Number(item.item_id) || 0,
+                compra_detalle_id: Number(item.compra_detalle_origen_id) || 0,
+                receta_origen_id: Number(item.receta_origen_id) || 0,
                 categoria: item.categoria || "",
                 sub_cat_1: item.sub_cat_1 || "",
                 sub_cat_2: item.sub_cat_2 || "",

@@ -37,11 +37,13 @@ class Receta {
     {
         $this->asegurarColumnaAsignacionReceta();
         $this->asegurarColumnaNombreInternoReceta();
+        $this->asegurarColumnaAdicionalesImportadosReceta();
         $sql = "INSERT INTO recetas (
                     usuario_id,
                     asignado_usuario_id,
                     nombre,
                     nombre_interno,
+                    adicionales_positivos_importados,
                     estado,
                     created_at,
                     updated_at,
@@ -52,6 +54,7 @@ class Receta {
                     :asignado_usuario_id,
                     :nombre,
                     :nombre_interno,
+                    :adicionales_positivos_importados,
                     :estado,
                     :created_at,
                     :updated_at,
@@ -70,6 +73,7 @@ class Receta {
         $stmt->bindValue(':nombre', mb_strtoupper(trim((string)($data['nombre'] ?? '')), 'UTF-8'));
         $nombreInterno = trim((string)($data['nombre_interno'] ?? ''));
         $stmt->bindValue(':nombre_interno', $nombreInterno !== '' ? $nombreInterno : null, $nombreInterno !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':adicionales_positivos_importados', !empty($data['adicionales_positivos_importados']) ? 1 : 0, PDO::PARAM_INT);
         $stmt->bindValue(':estado', (string)($data['estado'] ?? 'Enviada'), PDO::PARAM_STR);
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->bindValue(':updated_at', $this->nowLima);
@@ -228,6 +232,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
 
     public function guardarDetalle(array $data): bool
     {
+        $this->asegurarColumnasAdicionalesImportadosRecetaDetalle();
         $sql = "INSERT INTO receta_detalle (
                     receta_id,
                     item_id,
@@ -244,7 +249,10 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
                     moneda,
                     tipo,
                     created_at,
-                    cantidad
+                    cantidad,
+                    es_adicional_positivo_importado,
+                    compra_detalle_origen_id,
+                    receta_origen_id
                 ) VALUES (
                     :receta_id,
                     :item_id,
@@ -261,7 +269,10 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
                     :moneda,
                     :tipo,
                     :created_at,
-                    :cantidad
+                    :cantidad,
+                    :es_adicional_positivo_importado,
+                    :compra_detalle_origen_id,
+                    :receta_origen_id
                 )";
 
         $stmt = $this->conn->prepare($sql);
@@ -286,6 +297,20 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
         $stmt->bindValue(':tipo', (string)($data['tipo'] ?? ''));
         $stmt->bindValue(':created_at', $this->nowLima);
         $stmt->bindValue(':cantidad', (int)($data['cantidad'] ?? 0), PDO::PARAM_INT);
+        $importado = !empty($data['es_adicional_positivo_importado']);
+        $stmt->bindValue(':es_adicional_positivo_importado', $importado ? 1 : 0, PDO::PARAM_INT);
+        $compraDetalleOrigenId = (int)($data['compra_detalle_origen_id'] ?? 0);
+        if ($importado && $compraDetalleOrigenId > 0) {
+            $stmt->bindValue(':compra_detalle_origen_id', $compraDetalleOrigenId, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':compra_detalle_origen_id', null, PDO::PARAM_NULL);
+        }
+        $recetaOrigenId = (int)($data['receta_origen_id'] ?? 0);
+        if ($importado && $recetaOrigenId > 0) {
+            $stmt->bindValue(':receta_origen_id', $recetaOrigenId, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':receta_origen_id', null, PDO::PARAM_NULL);
+        }
 
         return $stmt->execute();
     }
@@ -294,6 +319,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
     {
         $this->asegurarColumnaAsignacionReceta();
         $this->asegurarColumnaNombreInternoReceta();
+        $this->asegurarColumnaAdicionalesImportadosReceta();
         $sessionCargo = $_SESSION['session_cargo'] ?? null;
         $sessionId = $_SESSION['session_id'] ?? null;
         $isAdmin = in_array((int)$sessionCargo, [1, 3, 8], true);
@@ -332,6 +358,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
                 p.usuario,
                 c.nombre,
                 c.nombre_interno,
+                c.adicionales_positivos_importados,
                 rc.ruc AS cliente_ruc,
                 rc.razon_social_empresa AS cliente_razon_social_empresa,
                 c.estado,
@@ -349,7 +376,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
             LEFT JOIN receta_cliente rc ON rc.id_receta = c.id
             WHERE $where
             GROUP BY
-                c.id, p.usuario, c.nombre, c.nombre_interno, rc.ruc, rc.razon_social_empresa, c.estado, c.created_at, c.updated_at
+                c.id, p.usuario, c.nombre, c.nombre_interno, c.adicionales_positivos_importados, rc.ruc, rc.razon_social_empresa, c.estado, c.created_at, c.updated_at
             ORDER BY c.id DESC
         ";
 
@@ -987,6 +1014,9 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     {
         $this->asegurarColumnaAsignacionReceta();
         $this->asegurarColumnaNombreInternoReceta();
+        $this->asegurarColumnaAdicionalesImportadosReceta();
+        $this->asegurarColumnasAdicionalesImportadosRecetaDetalle();
+        $this->asegurarColumnasAdicionalesImportadosRecetaDetalle();
         $this->asegurarColumna(
             'header_notifications',
             'destinatario_id',
@@ -1001,6 +1031,68 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
             'nombre_interno',
             "ALTER TABLE recetas ADD COLUMN nombre_interno VARCHAR(150) NULL DEFAULT NULL AFTER nombre"
         );
+    }
+
+    private function asegurarColumnaAdicionalesImportadosReceta(): void
+    {
+        $this->asegurarColumna(
+            'recetas',
+            'adicionales_positivos_importados',
+            "ALTER TABLE recetas ADD COLUMN adicionales_positivos_importados TINYINT(1) NOT NULL DEFAULT 0 AFTER nombre_interno"
+        );
+    }
+
+    private function asegurarColumnasAdicionalesImportadosRecetaDetalle(): void
+    {
+        $this->asegurarColumna(
+            'receta_detalle',
+            'es_adicional_positivo_importado',
+            "ALTER TABLE receta_detalle ADD COLUMN es_adicional_positivo_importado TINYINT(1) NOT NULL DEFAULT 0 AFTER cantidad"
+        );
+        $this->asegurarColumna(
+            'receta_detalle',
+            'compra_detalle_origen_id',
+            "ALTER TABLE receta_detalle ADD COLUMN compra_detalle_origen_id INT NULL DEFAULT NULL AFTER es_adicional_positivo_importado"
+        );
+        $this->asegurarColumna(
+            'receta_detalle',
+            'receta_origen_id',
+            "ALTER TABLE receta_detalle ADD COLUMN receta_origen_id INT NULL DEFAULT NULL AFTER compra_detalle_origen_id"
+        );
+    }
+
+    public function recetaTieneAdicionalesPositivosImportados(int $recetaId): bool
+    {
+        $this->asegurarColumnaAdicionalesImportadosReceta();
+        $stmt = $this->conn->prepare("SELECT COALESCE(adicionales_positivos_importados, 0) FROM recetas WHERE id = :id LIMIT 1");
+        $stmt->bindValue(':id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn() === 1;
+    }
+
+    public function actualizarFlagAdicionalesPositivosImportados(int $recetaId): bool
+    {
+        $this->asegurarColumnaAdicionalesImportadosReceta();
+        $this->asegurarColumnasAdicionalesImportadosRecetaDetalle();
+        $stmt = $this->conn->prepare("UPDATE recetas r
+            SET r.adicionales_positivos_importados = EXISTS (
+                SELECT 1 FROM receta_detalle d
+                WHERE d.receta_id = r.id AND COALESCE(d.es_adicional_positivo_importado, 0) = 1
+            )
+            WHERE r.id = :id");
+        $stmt->bindValue(':id', $recetaId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function recetaTieneDetalleParaIngenieria(int $recetaId): bool
+    {
+        $this->asegurarColumnasAdicionalesImportadosRecetaDetalle();
+        $stmt = $this->conn->prepare("SELECT 1 FROM receta_detalle
+            WHERE receta_id = :id AND COALESCE(es_adicional_positivo_importado, 0) = 0
+            LIMIT 1");
+        $stmt->bindValue(':id', $recetaId, PDO::PARAM_INT);
+        $stmt->execute();
+        return (bool)$stmt->fetchColumn();
     }
 
     public function obtenerUsuariosAsignablesReceta(): array
@@ -1177,6 +1269,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     public function obtenerPorHash(string $hash): ?array {
         $this->asegurarColumnaAsignacionReceta();
         $this->asegurarColumnaNombreInternoReceta();
+        $this->asegurarColumnaAdicionalesImportadosReceta();
         $sql = "SELECT c.*,
                        p.usuario,
                        TRIM(CONCAT_WS(' ', NULLIF(TRIM(p.NOMBRES), ''), NULLIF(TRIM(p.APELLIDOS), ''))) AS usuario_registro_nombre,
@@ -1413,6 +1506,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     }
 
     public function obtenerDetallePorHash(string $hash): array {
+        $this->asegurarColumnasAdicionalesImportadosRecetaDetalle();
         $sql = "SELECT a.*, b.orden, b.icon AS sub_cat_1_icon, r.updated_at AS precio_updated_at
                 FROM receta_detalle a
                 LEFT JOIN vw_receta_items_orden b on a.tipo=b.tipo and a.sub_cat_1=b.sub_cat_1
@@ -1451,6 +1545,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
 
     public function crearRecetaIngenieriaDesdeReceta(int $recetaId, int $usuarioUpd): int
     {
+        $this->asegurarColumnasAdicionalesImportadosRecetaDetalle();
         $stmtExistente = $this->conn->prepare("SELECT id FROM recetas_ingenieria WHERE id_receta_duplicada = :receta_id LIMIT 1");
         $stmtExistente->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
         $stmtExistente->execute();
@@ -1527,8 +1622,9 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                            tipo,
                            :created_at,
                            cantidad
-                       FROM receta_detalle
-                       WHERE receta_id = :receta_id";
+                        FROM receta_detalle
+                        WHERE receta_id = :receta_id
+                          AND COALESCE(es_adicional_positivo_importado, 0) = 0";
 
         $stmtDetalle = $this->conn->prepare($sqlDetalle);
         $stmtDetalle->bindValue(':ingenieria_id', $ingenieriaId, PDO::PARAM_INT);
@@ -1852,6 +1948,7 @@ INNER JOIN receta_items r ON r.id = d.item_id
 
     public function obtenerDetallePorId(int $recetaId): array
     {
+        $this->asegurarColumnasAdicionalesImportadosRecetaDetalle();
         $sql = "SELECT *
                 FROM receta_detalle
                 WHERE receta_id = :receta_id";

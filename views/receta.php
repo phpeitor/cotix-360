@@ -15,7 +15,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/config.js"></script>
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
-    <link href="./assets/css/branding.css?v=1.6" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/branding.css?v=1.7" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta.css?v=1.4" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
@@ -374,7 +374,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/form-receta.js?v=2.3"></script>
+    <script src="./assets/js/form-receta.js?v=2.4"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

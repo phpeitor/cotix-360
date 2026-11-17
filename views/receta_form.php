@@ -20,7 +20,7 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
     <script src="./assets/js/config.js"></script>
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
-    <link href="./assets/css/branding.css?v=1.6" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/branding.css?v=1.7" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta.css?v=1.6" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta_form.css?v=1.3" rel="stylesheet" type="text/css" />
@@ -86,6 +86,7 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
                                              <?php endif; ?>
                                          </div>
                                          <input type="text" id="inputNombreInternoReceta" class="form-control form-control-sm d-none mt-1 receta-nombre-interno-input" maxlength="150" placeholder="Código o identificador interno del proyecto" <?= $puedeEditarNombreReceta ? '' : 'readonly' ?>>
+                                         <span id="badgeAdicionalesPositivosImportados" class="badge bg-info-subtle text-info mt-1 d-none"><i class="ti ti-file-import me-1"></i>Incluye adicionales positivos importados de Compras; esos items no se reenvían a Ingeniería ni a una nueva compra.</span>
                                 </div>
 
                                 <div class="row g-3 receta-meta-row">
@@ -561,7 +562,7 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/receta_form.js?v=3.9"></script>
+    <script src="./assets/js/receta_form.js?v=4.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

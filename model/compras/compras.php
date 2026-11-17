@@ -264,7 +264,7 @@ class Compras
             $placeholders[] = ':detalle_' . $index;
         }
 
-        $sql = "SELECT d.*
+        $sql = "SELECT d.*, c.id_receta_duplicada AS receta_origen_id
                 FROM detalle_compras d
                 INNER JOIN receta_compras c ON c.id = d.compra_id
                 WHERE c.id_receta_duplicada = :receta_origen_id

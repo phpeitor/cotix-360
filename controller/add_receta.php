@@ -117,6 +117,7 @@ try {
         'asignado_usuario_id' => $asignadoUsuarioId > 0 ? $asignadoUsuarioId : null,
         'nombre' => $nombreReceta,
         'nombre_interno' => $nombreInterno,
+        'adicionales_positivos_importados' => !empty($adicionalesImportados),
         'estado' => 'Enviada',
         'usuario_upd' => null,
         'tipo_cambio' => $tipoCambio,
@@ -181,6 +182,9 @@ try {
             'moneda' => $item['moneda'] ?? '',
             'tipo' => $item['tipo'] ?? '',
             'cantidad' => (int)($item['cantidad'] ?? 0),
+            'es_adicional_positivo_importado' => 1,
+            'compra_detalle_origen_id' => (int)($item['id'] ?? 0),
+            'receta_origen_id' => (int)($item['id_receta_duplicada'] ?? 0),
         ]);
     }
 

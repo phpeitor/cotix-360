@@ -60,6 +60,7 @@ try {
         throw new Exception('No se puede aprobar la receta porque hay categorías sin margen o con margen 0');
     }
 
+    $receta->prepararAsignacionReceta();
     $receta->begin();
 
     $ok = $receta->actualizar_estado((int)$id, $estado,(int)$_SESSION['session_id']);
@@ -70,7 +71,9 @@ throw new Exception("No se pudo actualizar el estado");
 
     $ingenieriaId = null;
     if ($accion === 'aprobar') {
-        $ingenieriaId = $receta->crearRecetaIngenieriaDesdeReceta((int)$id, (int)$_SESSION['session_id']);
+        if ($receta->recetaTieneDetalleParaIngenieria((int)$id)) {
+            $ingenieriaId = $receta->crearRecetaIngenieriaDesdeReceta((int)$id, (int)$_SESSION['session_id']);
+        }
 
         $trackingId = $receta->crearTrackingDesdeReceta((int)$id);
     }

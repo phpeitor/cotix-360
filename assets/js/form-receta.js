@@ -826,7 +826,9 @@ document.addEventListener("DOMContentLoaded", () => {
     btnImportarAdicionalesPositivos?.addEventListener("click", importarAdicionalesPositivosSeleccionados);
 
     function agregarItemReceta(item, qtyInicial = 1) {
-        const sourcePositiveId = Number(item?.import_source_detail_id || 0);
+        const sourcePositiveId = Number(item?.import_source_detail_id || item?.compra_detalle_origen_id || 0);
+        const sourceRecipeId = Number(item?.import_source_recipe_id || item?.receta_origen_id || 0);
+        const esImportadoAdicional = sourcePositiveId > 0 || Number(item?.es_adicional_positivo_importado || 0) === 1;
         const itemId = sourcePositiveId > 0 ? `compra-adicional-${sourcePositiveId}` : item?.id;
         const qtyNormalizada = clampCantidad(qtyInicial);
 
@@ -848,8 +850,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const tr = document.createElement("tr");
         tr.dataset.itemId  = itemId;
         tr.dataset.catalogItemId = String(item.item_id || (sourcePositiveId > 0 ? "" : item.id) || "");
-        tr.dataset.compraDetalleId = sourcePositiveId > 0 ? String(sourcePositiveId) : "";
-        tr.dataset.recetaOrigenId = sourcePositiveId > 0 ? String(item.import_source_recipe_id || "") : "";
+        tr.dataset.compraDetalleId = esImportadoAdicional && sourcePositiveId > 0 ? String(sourcePositiveId) : "";
+        tr.dataset.recetaOrigenId = esImportadoAdicional && sourceRecipeId > 0 ? String(sourceRecipeId) : "";
+        tr.dataset.esAdicionalPositivoImportado = esImportadoAdicional ? "1" : "0";
         tr.dataset.precio = item.precio;
         tr.dataset.moneda = item.moneda;
         tr.dataset.nombre = item.nombre;
@@ -873,7 +876,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const modeloHtml = escapeHtml(item.modelo || "");
         const unidadHtml = escapeHtml(item.uni_medida || "");
         const tipoHtml = escapeHtml(item.tipo || "-");
-        const etiquetaAdicional = sourcePositiveId > 0
+        const etiquetaAdicional = esImportadoAdicional
             ? '<span class="badge bg-success-subtle text-success ms-1">Adicional +</span>'
             : "";
 
@@ -1135,6 +1138,7 @@ document.addEventListener("DOMContentLoaded", () => {
             item_id: parseInt(tr.dataset.catalogItemId || tr.dataset.itemId, 10) || 0,
             compra_detalle_id: parseInt(tr.dataset.compraDetalleId, 10) || 0,
             receta_origen_id: parseInt(tr.dataset.recetaOrigenId, 10) || 0,
+            es_adicional_positivo_importado: Number(tr.dataset.esAdicionalPositivoImportado || 0) === 1,
             categoria: tr.dataset.categoria || "",
             sub_cat_1: tr.dataset.subcat1 || "",
             sub_cat_2: tr.dataset.subcat2 || "",

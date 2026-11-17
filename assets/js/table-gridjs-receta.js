@@ -125,7 +125,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 width: "210px",
                 sort: false,
                 formatter: renderAcciones
-            }
+            },
+            { id: "adicionales_positivos_importados", name: "", hidden: true }
         ],
         server: {
             url: buildUrl(),
@@ -272,6 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const recetaNombre = String(nombre ?? "").trim().replace(/\s*-\s*\d+$/, "").trim();
         const ruc = String(row?.cells?.[4]?.data ?? "").trim();
         const razonSocial = String(row?.cells?.[5]?.data ?? "").trim();
+        const tieneImportados = Number(row?.cells?.[11]?.data ?? 0) === 1;
         const cliente = [ruc, razonSocial].filter(Boolean).join(" - ");
 
         if (!recetaNombre && !cliente) {
@@ -281,6 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return gridjs.html(`
             <div class="lh-sm">
                 <span>${escapeHtml(recetaNombre)}</span>
+                ${tieneImportados ? '<span class="badge bg-info-subtle text-info mt-1 d-inline-flex"><i class="ti ti-file-import me-1"></i>Adicionales positivos importados</span>' : ""}
                 ${cliente ? `<small class="d-block text-muted mt-1">${escapeHtml(cliente)}</small>` : ""}
             </div>
         `);
