@@ -25,7 +25,17 @@ function numeroOfertaExcel(array $receta): string
         }
     }
 
-    return sprintf('%05d-%s', (int)($receta['id'] ?? 0), $year);
+    $versionLabel = trim((string)($receta['version_label'] ?? ''));
+    if ($versionLabel !== '' && preg_match('/^(\d+)(?:\.(\d+))?$/', $versionLabel, $matches)) {
+        $versionNumber = sprintf('%05d', (int)$matches[1]);
+        if (isset($matches[2]) && $matches[2] !== '') {
+            $versionNumber .= '.' . $matches[2];
+        }
+    } else {
+        $versionNumber = sprintf('%05d', (int)($receta['id'] ?? 0));
+    }
+
+    return $versionNumber . '-' . $year;
 }
 
 function agruparOfertaExcel(array $detalle): array

@@ -179,3 +179,39 @@
 }
 .receta-datos-comerciales-unidad { max-width: 120px; }
 .receta-modal-dialog-wide { max-width: 840px; }
+
+.form-receta .table-responsive .table {
+    table-layout: fixed;
+    min-width: 1100px;
+}
+
+.form-receta .table-responsive .table th,
+.form-receta .table-responsive .table td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    vertical-align: middle;
+}
+
+.receta-item-description-wrap,
+.receta-item-description-wrap .item-description {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.35;
+}
+
+.form-receta .table-responsive .table th:nth-child(1),
+.form-receta .table-responsive .table td:nth-child(1) { width: 28%; }
+.form-receta .table-responsive .table th:nth-child(2),
+.form-receta .table-responsive .table td:nth-child(2) { width: 20%; }
+.form-receta .table-responsive .table th:nth-child(3),
+.form-receta .table-responsive .table td:nth-child(3) { width: 10%; }
+.form-receta .table-responsive .table th:nth-child(4),
+.form-receta .table-responsive .table td:nth-child(4) { width: 12%; }
+.form-receta .table-responsive .table th:nth-child(5),
+.form-receta .table-responsive .table td:nth-child(5),
+.form-receta .table-responsive .table th:nth-child(6),
+.form-receta .table-responsive .table td:nth-child(6) { width: 11%; }
+.form-receta .table-responsive .table th:nth-child(7),
+.form-receta .table-responsive .table td:nth-child(7) { width: 8%; }

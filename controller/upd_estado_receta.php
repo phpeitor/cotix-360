@@ -70,12 +70,13 @@ throw new Exception("No se pudo actualizar el estado");
     }
 
     $ingenieriaId = null;
+    $trackingId = null;
     if ($accion === 'aprobar') {
-        if ($receta->recetaTieneDetalleParaIngenieria((int)$id)) {
+        $tieneItemsPorValidar = $receta->recetaTieneDetalleParaIngenieria((int)$id);
+        if ($tieneItemsPorValidar) {
             $ingenieriaId = $receta->crearRecetaIngenieriaDesdeReceta((int)$id, (int)$_SESSION['session_id']);
+            $trackingId = $receta->crearTrackingDesdeReceta((int)$id);
         }
-
-        $trackingId = $receta->crearTrackingDesdeReceta((int)$id);
     }
 
     $receta->commit();

@@ -157,6 +157,14 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
                                             </div>
 
                                             <div class="col-lg-3 col-6 border-end">
+                                                <label class="text-dark fw-medium fs-12 mb-1" for="monedaVistaReceta">Mostrar precios en</label>
+                                                <select class="form-select form-select-sm mx-auto" id="monedaVistaReceta" style="max-width: 120px;">
+                                                    <option value="SOL">Soles (S/.)</option>
+                                                    <option value="DOLLAR">Dólares ($)</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-lg-3 col-6 border-end">
                                                 <p class="tipo-cambio-highlight text-muted fw-medium fs-12 mb-1">
                                                     <span class="tipo-cambio-label">Tipo de Cambio SUNAT (Venta)</span>
                                                     <span id="tipo_cambio_sunat" class="external-event fc-event bg-warning-subtle text-warning-emphasis tipo-cambio-pulse">0.000</span>

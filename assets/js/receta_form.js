@@ -16,6 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const tipoCambioEl = document.getElementById("tipo_cambio_sunat");
     const btnEditTipoCambio = document.getElementById("btnEditTipoCambio");
     const tipoCambioInputEl = document.getElementById("tipo_cambio_input");
+    const monedaVistaRecetaEl = document.getElementById("monedaVistaReceta");
+    let monedaVistaReceta = "SOL";
     const btnReloadPrecios = document.getElementById("btnReloadPrecios");
     const alertPrecioCambioEl = document.getElementById("alertPrecioCambio");
     const infoCategoriaModalEl = document.getElementById("info-categoria-modal");
@@ -459,6 +461,10 @@ document.addEventListener("DOMContentLoaded", () => {
         subCat2Select?.addEventListener("change", onSubCat2Change);
         marcaSelect?.addEventListener("change", onMarcaChange);
         modeloSelect?.addEventListener("change", onModeloChange);
+        monedaVistaRecetaEl?.addEventListener("change", () => {
+            monedaVistaReceta = monedaVistaRecetaEl.value === "DOLLAR" ? "DOLLAR" : "SOL";
+            renderBody();
+        });
         recetaSubcat1Search?.addEventListener("input", () => {
             currentPage = 1;
             renderBody();
@@ -1466,6 +1472,17 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         return String(moneda || "").toUpperCase() === "DOLLAR" ? "$" : "S/.";
     }
 
+    function convertirPrecioMonedaVista(precio, monedaOrigen) {
+        const tipoCambio = Number(receta?.tipo_cambio) > 0 ? Number(receta.tipo_cambio) : 1;
+        const monto = Number(precio) || 0;
+        const enSoles = String(monedaOrigen || "").toUpperCase() === "DOLLAR" ? monto * tipoCambio : monto;
+        return monedaVistaReceta === "DOLLAR" ? enSoles / tipoCambio : enSoles;
+    }
+
+    function getSimboloMonedaVista() {
+        return monedaVistaReceta === "DOLLAR" ? "$" : "S/.";
+    }
+
     function formatMoneda(moneda, monto) {
         return `${getMonedaSimbolo(moneda)} ${format2(Number(monto) || 0)}`;
     }
@@ -1620,7 +1637,7 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         const item = detalle.find(rowItem => getDetalleItemKey(rowItem) === String(itemId));
         if (!item) return;
 
-        const subtotal = getSubtotal({ ...item, cantidad: cantidad ?? item.cantidad });
+        const subtotal = convertirPrecioMonedaVista(item.precio, item.moneda) * (Number(cantidad ?? item.cantidad) || 0);
         const subtotalEl = row.querySelector(".item-subtotal-value");
         if (subtotalEl) {
             subtotalEl.textContent = format2(subtotal);
@@ -1660,7 +1677,11 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         const idx = detalle.findIndex(item => getDetalleItemKey(item) === String(itemId));
         if (idx < 0) return;
 
-        detalle[idx].precio = normalizarPrecio(value);
+        const precioVista = normalizarPrecio(value);
+        const tipoCambio = Number(receta?.tipo_cambio) > 0 ? Number(receta.tipo_cambio) : 1;
+        const monedaOriginal = String(detalle[idx].moneda || "").toUpperCase();
+        const precioSoles = monedaVistaReceta === "DOLLAR" ? precioVista * tipoCambio : precioVista;
+        detalle[idx].precio = monedaOriginal === "DOLLAR" ? precioSoles / tipoCambio : precioSoles;
         detalle[idx].precio_manual = 1;
         quitarCambioPrecioManual(detalle[idx]);
         actualizarSubtotalFila(itemId);
@@ -1701,9 +1722,9 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
             const editable = isRecetaEditable();
             const itemId = getDetalleItemKey(item);
             const cantidad = Number(item.cantidad) || 0;
-            const precio = Number(item.precio) || 0;
-            const subtotal = getSubtotal(item);
-            const monedaSimbolo = getMonedaSimbolo(item.moneda);
+            const precio = convertirPrecioMonedaVista(item.precio, item.moneda);
+            const subtotal = precio * cantidad;
+            const monedaSimbolo = getSimboloMonedaVista();
             const itemDescripcion = normalizarTextoDetalle(item.descripcion);
             const adicionalPositivoImportado = Number(item.es_adicional_positivo_importado || 0) === 1;
             const badgeAdicionalImportado = adicionalPositivoImportado
@@ -1746,7 +1767,7 @@ const iconoManual = esPrecioManual
                                     <i class="subcat-detail-icon ${iconoSubCategoria1}" aria-hidden="true"></i>
                                 </span>
                             </div>
-                            <div>
+                            <div class="receta-item-description-wrap">
                                 <span class="text-muted fs-12">${item.nombre || ""} ${badgeAdicionalImportado}
                                     ${cambioPrecio ? `<span class="ms-1" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-precio-cambio" data-bs-title="${tooltipCambioPrecio}"><i class="ti ti-alert-circle text-warning fs-16"></i></span>` : ""}
                                 </span><br>
