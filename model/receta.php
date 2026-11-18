@@ -1170,7 +1170,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         $children = array_values(array_filter($rowsById, static fn($row) => (int)($row['id'] ?? 0) !== $raizId));
         usort($children, static fn($a, $b) => (int)$a['id'] <=> (int)$b['id']);
 
-        foreach ($children as $child) {
+        foreach ($children as &$child) {
             $childId = (int)$child['id'];
             $version = $explicitVersions[$childId] ?? 0;
             if ($version <= 0) {
@@ -1181,6 +1181,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
             $child['version_resuelta'] = $version;
             $child['_label'] = 'Receta #' . $raizId . '.' . $version;
         }
+        unset($child);
 
         foreach ($children as $child) {
             $version = (int)($child['version_resuelta'] ?? 0);

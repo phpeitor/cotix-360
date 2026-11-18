@@ -893,7 +893,8 @@ document.addEventListener("DOMContentLoaded", () => {
             recetaVersionOptions?.classList.add("d-none");
             recetaVersionModal.show();
         } catch (error) {
-            alertify.error("Error de conexión al duplicar receta");
+            console.error("Error al preparar duplicación:", error);
+            alertify.error(error.message || "Error de conexión al duplicar receta");
         } finally {
             btn.disabled = false;
         }
