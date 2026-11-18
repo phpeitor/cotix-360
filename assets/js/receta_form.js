@@ -1763,7 +1763,7 @@ const iconoManual = esPrecioManual
                         ${iconoManual}
                    </div>`
                 : `<div class="d-flex align-items-center justify-content-end gap-1">
-                    <select class="form-select form-select-sm item-currency-select" aria-label="Moneda de este item" data-id="${itemId}" style="width:76px;padding:.2rem .35rem;">
+                    <select class="form-select form-select-sm item-currency-select" aria-label="Moneda de este item" data-id="${itemId}" style="width:76px;padding:.2rem .35rem;" ${editable && canEditDetallePrice ? "" : "disabled"}>
                         <option value="SOL" ${String(item.moneda || "").toUpperCase() !== "DOLLAR" ? "selected" : ""}>S/.</option>
                         <option value="DOLLAR" ${String(item.moneda || "").toUpperCase() === "DOLLAR" ? "selected" : ""}>$</option>
                     </select>
