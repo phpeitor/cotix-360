@@ -461,10 +461,12 @@ document.addEventListener("DOMContentLoaded", () => {
         subCat2Select?.addEventListener("change", onSubCat2Change);
         marcaSelect?.addEventListener("change", onMarcaChange);
         modeloSelect?.addEventListener("change", onModeloChange);
-        monedaVistaRecetaEl?.addEventListener("change", () => {
+        const actualizarMonedaVistaReceta = () => {
             monedaVistaReceta = monedaVistaRecetaEl.value === "DOLLAR" ? "DOLLAR" : "SOL";
             renderBody();
-        });
+            renderPagination();
+        };
+        monedaVistaRecetaEl?.addEventListener("change", actualizarMonedaVistaReceta);
         recetaSubcat1Search?.addEventListener("input", () => {
             currentPage = 1;
             renderBody();
@@ -1472,15 +1474,15 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         return String(moneda || "").toUpperCase() === "DOLLAR" ? "$" : "S/.";
     }
 
-    function convertirPrecioMonedaVista(precio, monedaOrigen) {
+    function getMonedaVistaItem(item) {
+        return monedaVistaReceta;
+    }
+
+    function convertirPrecioAmoneda(precio, monedaOrigen, monedaDestino) {
         const tipoCambio = Number(receta?.tipo_cambio) > 0 ? Number(receta.tipo_cambio) : 1;
         const monto = Number(precio) || 0;
         const enSoles = String(monedaOrigen || "").toUpperCase() === "DOLLAR" ? monto * tipoCambio : monto;
-        return monedaVistaReceta === "DOLLAR" ? enSoles / tipoCambio : enSoles;
-    }
-
-    function getSimboloMonedaVista() {
-        return monedaVistaReceta === "DOLLAR" ? "$" : "S/.";
+        return monedaDestino === "DOLLAR" ? enSoles / tipoCambio : enSoles;
     }
 
     function formatMoneda(moneda, monto) {
@@ -1637,7 +1639,7 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         const item = detalle.find(rowItem => getDetalleItemKey(rowItem) === String(itemId));
         if (!item) return;
 
-        const subtotal = convertirPrecioMonedaVista(item.precio, item.moneda) * (Number(cantidad ?? item.cantidad) || 0);
+        const subtotal = convertirPrecioAmoneda(item.precio, item.moneda, getMonedaVistaItem(item)) * (Number(cantidad ?? item.cantidad) || 0);
         const subtotalEl = row.querySelector(".item-subtotal-value");
         if (subtotalEl) {
             subtotalEl.textContent = format2(subtotal);
@@ -1680,7 +1682,8 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
         const precioVista = normalizarPrecio(value);
         const tipoCambio = Number(receta?.tipo_cambio) > 0 ? Number(receta.tipo_cambio) : 1;
         const monedaOriginal = String(detalle[idx].moneda || "").toUpperCase();
-        const precioSoles = monedaVistaReceta === "DOLLAR" ? precioVista * tipoCambio : precioVista;
+        const monedaDestino = getMonedaVistaItem(detalle[idx]);
+        const precioSoles = monedaDestino === "DOLLAR" ? precioVista * tipoCambio : precioVista;
         detalle[idx].precio = monedaOriginal === "DOLLAR" ? precioSoles / tipoCambio : precioSoles;
         detalle[idx].precio_manual = 1;
         quitarCambioPrecioManual(detalle[idx]);
@@ -1722,9 +1725,10 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
             const editable = isRecetaEditable();
             const itemId = getDetalleItemKey(item);
             const cantidad = Number(item.cantidad) || 0;
-            const precio = convertirPrecioMonedaVista(item.precio, item.moneda);
+            const monedaItemVista = getMonedaVistaItem(item);
+            const precio = convertirPrecioAmoneda(item.precio, item.moneda, monedaItemVista);
             const subtotal = precio * cantidad;
-            const monedaSimbolo = getSimboloMonedaVista();
+            const monedaSimbolo = getMonedaSimbolo(monedaItemVista);
             const itemDescripcion = normalizarTextoDetalle(item.descripcion);
             const adicionalPositivoImportado = Number(item.es_adicional_positivo_importado || 0) === 1;
             const badgeAdicionalImportado = adicionalPositivoImportado
@@ -1751,12 +1755,20 @@ const iconoManual = esPrecioManual
                 : "";
             const precioCell = precioEditable
                 ? `<div class="d-inline-flex align-items-center justify-content-end gap-1">
-                        <span class="text-muted fs-12">${monedaSimbolo}</span>
-                        <input type="number" class="form-control form-control-sm text-end item-price-input" style="width:96px;" min="0" step="0.01" value="${precio.toFixed(2)}" data-id="${itemId}">
+                        <select class="form-select form-select-sm item-currency-select" aria-label="Moneda de este item" data-id="${itemId}" style="width:76px;padding:.2rem .35rem;">
+                            <option value="SOL" ${String(item.moneda || "").toUpperCase() !== "DOLLAR" ? "selected" : ""}>S/.</option>
+                            <option value="DOLLAR" ${String(item.moneda || "").toUpperCase() === "DOLLAR" ? "selected" : ""}>$</option>
+                        </select>
+                        <input type="number" class="form-control form-control-sm text-end item-price-input" style="width:78px;" min="0" step="0.01" value="${precio.toFixed(2)}" data-id="${itemId}">
                         ${iconoManual}
                    </div>`
-                : `<span class="text-muted fs-12">${monedaSimbolo}</span>
-                   <h5 class="fs-14 mt-1 fw-normal mb-0">${format2(precio)}${iconoManual}</h5>`;
+                : `<div class="d-flex align-items-center justify-content-end gap-1">
+                    <select class="form-select form-select-sm item-currency-select" aria-label="Moneda de este item" data-id="${itemId}" style="width:76px;padding:.2rem .35rem;">
+                        <option value="SOL" ${String(item.moneda || "").toUpperCase() !== "DOLLAR" ? "selected" : ""}>S/.</option>
+                        <option value="DOLLAR" ${String(item.moneda || "").toUpperCase() === "DOLLAR" ? "selected" : ""}>$</option>
+                    </select>
+                    <h5 class="fs-14 mt-1 fw-normal mb-0">${format2(precio)}${iconoManual}</h5>
+                   </div>`;
 
             return `
                 <tr data-item-id="${itemId}" data-cantidad="${cantidad}" class="${cambioPrecio ? "table-warning" : ""}">
@@ -1855,6 +1867,22 @@ const iconoManual = esPrecioManual
                     actualizarPrecioDesdeInput(input.dataset.id, precio);
                     input.blur();
                 }
+            });
+        });
+
+        tbody.querySelectorAll(".item-currency-select").forEach(select => {
+            select.addEventListener("change", () => {
+                const item = detalle.find(rowItem => getDetalleItemKey(rowItem) === String(select.dataset.id));
+                if (!item) return;
+                const nuevaMoneda = select.value === "DOLLAR" ? "DOLLAR" : "SOL";
+                if (String(item.moneda || "").toUpperCase() !== nuevaMoneda) {
+                    item.precio = convertirPrecioAmoneda(item.precio, item.moneda, nuevaMoneda);
+                    item.moneda = nuevaMoneda;
+                    item.precio_manual = 1;
+                    quitarCambioPrecioManual(item);
+                }
+                renderBody();
+                calcularTotales();
             });
         });
 

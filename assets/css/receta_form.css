@@ -210,8 +210,8 @@
 .form-receta .table-responsive .table th:nth-child(4),
 .form-receta .table-responsive .table td:nth-child(4) { width: 12%; }
 .form-receta .table-responsive .table th:nth-child(5),
-.form-receta .table-responsive .table td:nth-child(5),
+.form-receta .table-responsive .table td:nth-child(5) { width: 15%; }
 .form-receta .table-responsive .table th:nth-child(6),
-.form-receta .table-responsive .table td:nth-child(6) { width: 11%; }
+.form-receta .table-responsive .table td:nth-child(6) { width: 9%; }
 .form-receta .table-responsive .table th:nth-child(7),
-.form-receta .table-responsive .table td:nth-child(7) { width: 8%; }
+.form-receta .table-responsive .table td:nth-child(7) { width: 6%; }
