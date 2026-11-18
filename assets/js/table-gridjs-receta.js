@@ -137,8 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             { id: "adicionales_positivos_importados", name: "", hidden: true },
             { id: "version_label", name: "", hidden: true },
-            { id: "usuario_asignado", name: "", hidden: true },
-            { id: "cargo_asignado", name: "", hidden: true }
+            { id: "usuario_asignado", name: "", hidden: true }
         ],
         server: {
             url: buildUrl(),
@@ -306,17 +305,15 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderResponsables(usuarioCreador, row) {
         const creador = String(usuarioCreador ?? "").trim();
         const asignado = String(row?.cells?.[13]?.data ?? "").trim();
-        const cargoAsignado = Number(row?.cells?.[14]?.data ?? 0);
         if (!asignado) {
             return gridjs.html(`
                 <div class="receta-responsables-cell">
                     <small><i class="ti ti-user me-1"></i>Creó</small>
-                    <span class="receta-responsable-user" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Creó: ${escapeHtml(creador || "-")}">${escapeHtml(creador || "-")}</span>
+                    <span class="receta-responsable-user" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Usuario creador: ${escapeHtml(creador || "-")}">${escapeHtml(creador || "-")}</span>
                 </div>
             `);
         }
 
-        const rol = cargoAsignado === 3 ? "Supervisor" : cargoAsignado === 6 ? "Ingeniería" : "Asignado";
         return gridjs.html(`
             <div class="receta-responsables-cell">
                 <div class="receta-responsable-block">
@@ -324,8 +321,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="receta-responsable-user" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Creó: ${escapeHtml(creador || "-")}">${escapeHtml(creador || "-")}</span>
                 </div>
                 <div class="receta-responsable-block is-asignado">
-                    <small><i class="ti ti-user-share me-1"></i>${rol}</small>
-                    <span class="receta-responsable-user" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Asignado a: ${escapeHtml(asignado)} · ${escapeHtml(rol)}">${escapeHtml(asignado)}</span>
+                    <small><i class="ti ti-user-share me-1"></i>Asignado</small>
+                    <span class="receta-responsable-user" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Usuario asignado: ${escapeHtml(asignado)}">${escapeHtml(asignado)}</span>
                 </div>
             </div>
         `);

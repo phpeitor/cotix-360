@@ -373,7 +373,6 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
                 {$versionLabelSql} AS version_label,
                 p.usuario,
                 asignado.usuario AS usuario_asignado,
-                asignado.CARGO AS cargo_asignado,
                 c.nombre,
                 c.nombre_interno,
                 c.adicionales_positivos_importados,
@@ -396,7 +395,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
             WHERE $where
             GROUP BY
                 c.id, c.id_receta_duplicada, c.version_raiz_id, c.version_numero,
-                p.usuario, asignado.usuario, asignado.CARGO,
+                p.usuario, asignado.usuario,
                 c.nombre, c.nombre_interno, c.adicionales_positivos_importados,
                 rc.ruc, rc.razon_social_empresa, c.estado, c.created_at, c.updated_at
             ORDER BY c.id DESC
