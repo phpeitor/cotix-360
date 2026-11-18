@@ -49,3 +49,52 @@
 .subcat-filter-wrap .choices {
     min-width: 240px;
 }
+
+.receta-responsables-cell {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .45rem;
+    line-height: 1.2;
+}
+
+.receta-responsable-block {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .12rem;
+}
+
+.receta-responsable-block > small {
+    color: #7b8794;
+    font-size: .66rem;
+    font-weight: 700;
+    letter-spacing: .035em;
+    text-transform: uppercase;
+}
+
+.receta-responsable-user {
+    display: -webkit-box;
+    max-width: 100%;
+    overflow: hidden;
+    color: #344054;
+    font-size: .82rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.receta-responsable-block.is-asignado .receta-responsable-user {
+    color: #18794e;
+}
+
+.receta-nombre-interno-chip {
+    max-width: 100%;
+    padding: .15rem .4rem;
+    border-radius: 999px;
+    color: #526174;
+    background: #f1f4f7;
+    font-size: .7rem;
+    overflow-wrap: anywhere;
+}

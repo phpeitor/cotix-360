@@ -96,24 +96,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 width: "100px",
                 formatter: (cell, row) => gridjs.html(`<span class="fw-semibold">${escapeHtml(row?.cells?.[12]?.data || cell)}</span>`)
             },
-            { id: "usuario", name: "Usuario", width: "80px" },
+            {
+                id: "usuario",
+                name: "Responsables",
+                width: "190px",
+                formatter: (cell, row) => renderResponsables(cell, row)
+            },
             {
                 id: "nombre",
                 name: "Receta",
                 width: "220px",
                 formatter: (cell, row) => renderRecetaCliente(cell, row)
             },
-            {
-                id: "nombre_interno",
-                name: "Nombre Interno",
-                width: "170px",
-                formatter: cell => {
-                    const nombreInterno = String(cell || "").trim();
-                    return nombreInterno
-                        ? gridjs.html(`<span class="badge bg-light text-dark border">${escapeHtml(nombreInterno)}</span>`)
-                        : gridjs.html('<span class="text-muted">-</span>');
-                }
-            },
+            { id: "nombre_interno", name: "Nombre Interno", hidden: true },
             { id: "cliente_ruc", name: "RUC", hidden: true },
             { id: "cliente_razon_social_empresa", name: "Razón Social", hidden: true },
             {
@@ -141,7 +136,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 formatter: renderAcciones
             },
             { id: "adicionales_positivos_importados", name: "", hidden: true },
-            { id: "version_label", name: "", hidden: true }
+            { id: "version_label", name: "", hidden: true },
+            { id: "usuario_asignado", name: "", hidden: true },
+            { id: "cargo_asignado", name: "", hidden: true }
         ],
         server: {
             url: buildUrl(),
@@ -286,12 +283,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderRecetaCliente(nombre, row) {
         const recetaNombre = String(nombre ?? "").trim().replace(/\s*-\s*\d+$/, "").trim();
+        const nombreInterno = String(row?.cells?.[3]?.data ?? "").trim();
         const ruc = String(row?.cells?.[4]?.data ?? "").trim();
         const razonSocial = String(row?.cells?.[5]?.data ?? "").trim();
         const tieneImportados = Number(row?.cells?.[11]?.data ?? 0) === 1;
         const cliente = [ruc, razonSocial].filter(Boolean).join(" - ");
 
-        if (!recetaNombre && !cliente) {
+        if (!recetaNombre && !cliente && !nombreInterno) {
             return gridjs.html("<span></span>");
         }
 
@@ -300,6 +298,35 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span>${escapeHtml(recetaNombre)}</span>
                 ${tieneImportados ? '<span class="badge bg-info-subtle text-info mt-1 d-inline-flex"><i class="ti ti-file-import me-1"></i>Adicionales positivos importados</span>' : ""}
                 ${cliente ? `<small class="d-block text-muted mt-1">${escapeHtml(cliente)}</small>` : ""}
+                ${nombreInterno ? `<small class="d-inline-flex align-items-center gap-1 receta-nombre-interno-chip mt-1"><i class="ti ti-hash"></i><span>Interno: ${escapeHtml(nombreInterno)}</span></small>` : ""}
+            </div>
+        `);
+    }
+
+    function renderResponsables(usuarioCreador, row) {
+        const creador = String(usuarioCreador ?? "").trim();
+        const asignado = String(row?.cells?.[13]?.data ?? "").trim();
+        const cargoAsignado = Number(row?.cells?.[14]?.data ?? 0);
+        if (!asignado) {
+            return gridjs.html(`
+                <div class="receta-responsables-cell">
+                    <small><i class="ti ti-user me-1"></i>Creó</small>
+                    <span class="receta-responsable-user" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Creó: ${escapeHtml(creador || "-")}">${escapeHtml(creador || "-")}</span>
+                </div>
+            `);
+        }
+
+        const rol = cargoAsignado === 3 ? "Supervisor" : cargoAsignado === 6 ? "Ingeniería" : "Asignado";
+        return gridjs.html(`
+            <div class="receta-responsables-cell">
+                <div class="receta-responsable-block">
+                    <small><i class="ti ti-user me-1"></i>Creó</small>
+                    <span class="receta-responsable-user" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Creó: ${escapeHtml(creador || "-")}">${escapeHtml(creador || "-")}</span>
+                </div>
+                <div class="receta-responsable-block is-asignado">
+                    <small><i class="ti ti-user-share me-1"></i>${rol}</small>
+                    <span class="receta-responsable-user" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Asignado a: ${escapeHtml(asignado)} · ${escapeHtml(rol)}">${escapeHtml(asignado)}</span>
+                </div>
             </div>
         `);
     }
