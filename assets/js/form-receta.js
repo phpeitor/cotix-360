@@ -561,7 +561,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (recetaCreationTitle) recetaCreationTitle.textContent = "Crear receta a partir de una existente";
         try {
-            const res = await fetch(`controller/get_receta.php?id=${encodeURIComponent(hash)}&duplicar=1`);
+            const duplicateId = Number(urlParams.get("duplicar_id") || 0);
+            const duplicateQuery = duplicateId > 0 ? `&receta_id=${duplicateId}` : "";
+            const res = await fetch(`controller/get_receta.php?id=${encodeURIComponent(hash)}&duplicar=1${duplicateQuery}`);
             const data = await res.json();
             if (!res.ok || data.error || !data.receta) {
                 throw new Error(data.message || "No se pudo cargar la receta de origen");

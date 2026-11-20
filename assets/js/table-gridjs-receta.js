@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const recetaVersionSourceSelect = document.getElementById("recetaVersionSourceSelect");
     const recetaVersionNextInfo = document.getElementById("recetaVersionNextInfo");
     const recetaVersionOptions = document.getElementById("recetaVersionOptions");
+    const recetaVersionLoading = document.getElementById("recetaVersionLoading");
     const duplicacionNormalRadio = document.getElementById("duplicacionNormal");
     const duplicacionVersionRadio = document.getElementById("duplicacionVersion");
     const btnContinuarDuplicarReceta = document.getElementById("btnContinuarDuplicarReceta");
@@ -857,6 +858,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             btn.disabled = true;
+            if (recetaVersionLoading) recetaVersionLoading.classList.remove("d-none");
+            if (btnContinuarDuplicarReceta) btnContinuarDuplicarReceta.disabled = true;
+            if (duplicacionNormalRadio) duplicacionNormalRadio.disabled = true;
+            if (duplicacionVersionRadio) duplicacionVersionRadio.disabled = true;
+            recetaVersionModal?.show();
             const res = await fetch("controller/duplicar_receta.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -864,10 +870,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             const json = await res.json();
 
-            if (!res.ok || !json.ok) {
-                alertify.error(json.message || "No se pudo duplicar la receta");
-                return;
-            }
+            if (!res.ok || !json.ok) throw new Error(json.message || "No se pudo duplicar la receta");
 
             const versiones = Array.isArray(json.versiones) ? json.versiones : [];
             if (!versiones.length || !recetaVersionModal || !recetaVersionSourceSelect) {
@@ -891,10 +894,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             if (duplicacionNormalRadio) duplicacionNormalRadio.checked = true;
             recetaVersionOptions?.classList.add("d-none");
-            recetaVersionModal.show();
+            if (recetaVersionLoading) recetaVersionLoading.classList.add("d-none");
+            if (btnContinuarDuplicarReceta) btnContinuarDuplicarReceta.disabled = false;
+            if (duplicacionNormalRadio) duplicacionNormalRadio.disabled = false;
+            if (duplicacionVersionRadio) duplicacionVersionRadio.disabled = false;
         } catch (error) {
             console.error("Error al preparar duplicación:", error);
             alertify.error(error.message || "Error de conexión al duplicar receta");
+            recetaVersionModal?.hide();
         } finally {
             btn.disabled = false;
         }
@@ -916,7 +923,11 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const params = new URLSearchParams({ duplicar: md5(String(sourceId)), modo_duplicacion: modo });
+        const params = new URLSearchParams({
+            duplicar: md5(String(sourceId)),
+            duplicar_id: String(sourceId),
+            modo_duplicacion: modo
+        });
         if (modo === "version") {
             if (!versionDuplicacionPendiente.raizId) {
                 alertify.error("No se pudo identificar la receta raíz de la versión");

@@ -12,8 +12,17 @@ try {
     }
 
     $recetaModel = new Receta();
+    $esDuplicacion = (string)($_GET['duplicar'] ?? '') === '1';
+    $recetaIdDuplicar = $esDuplicacion ? (int)($_GET['receta_id'] ?? 0) : 0;
+    if ($recetaIdDuplicar > 0 && !hash_equals(md5((string)$recetaIdDuplicar), strtolower((string)$hash))) {
+        http_response_code(400);
+        echo json_encode(['error' => true, 'message' => 'ID de receta no coincide']);
+        exit;
+    }
 
-    $receta = $recetaModel->obtenerPorHash($hash);
+    $receta = $recetaIdDuplicar > 0
+        ? $recetaModel->obtenerPorIdParaDuplicar($recetaIdDuplicar)
+        : $recetaModel->obtenerPorHash($hash);
 
     if (!$receta) {
         http_response_code(404);
@@ -21,7 +30,7 @@ try {
         exit;
     }
 
-    if ((string)($_GET['duplicar'] ?? '') === '1') {
+    if ($esDuplicacion) {
         if (session_status() !== PHP_SESSION_ACTIVE) session_start();
         $cargo = (int)($_SESSION['session_cargo'] ?? 0);
         $usuarioId = (int)($_SESSION['session_id'] ?? 0);
@@ -35,9 +44,11 @@ try {
         }
     }
 
-    $detalle = $recetaModel->obtenerDetallePorHash($hash);
-    $cambiosPrecio = $recetaModel->obtenerCambiosPrecio((int)$receta['id']);
-    $categorias = $recetaModel->obtenerCategoriasParaEdicion((int)$receta['id']);
+    $detalle = $recetaIdDuplicar > 0
+        ? $recetaModel->obtenerDetallePorRecetaId($recetaIdDuplicar)
+        : $recetaModel->obtenerDetallePorHash($hash);
+    $cambiosPrecio = $esDuplicacion ? [] : $recetaModel->obtenerCambiosPrecio((int)$receta['id']);
+    $categorias = $esDuplicacion ? [] : $recetaModel->obtenerCategoriasParaEdicion((int)$receta['id']);
 
     $cliente = null;
     if (

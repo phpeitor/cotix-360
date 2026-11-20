@@ -1123,7 +1123,6 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
 
     public function contextoVersionParaDuplicar(int $recetaOrigenId, int $usuarioId, bool $esAdmin): array
     {
-        $this->asegurarColumnasVersionReceta();
         $raizId = $this->raizVersionReceta($recetaOrigenId);
         $raizStmt = $this->conn->prepare("SELECT id, usuario_id, nombre FROM recetas WHERE id = :id LIMIT 1");
         $raizStmt->bindValue(':id', $raizId, PDO::PARAM_INT);
@@ -1139,17 +1138,25 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         ]];
         $frontier = [$raizId];
         while ($frontier) {
-            $parentId = array_shift($frontier);
+            $frontier = array_values(array_unique(array_filter(array_map('intval', $frontier), static fn($id) => $id > 0)));
+            if (!$frontier) break;
+            $placeholders = implode(',', array_fill(0, count($frontier), '?'));
             $stmt = $this->conn->prepare("SELECT id, usuario_id, nombre, created_at, id_receta_duplicada, version_raiz_id, version_numero
-                                          FROM recetas WHERE id_receta_duplicada = :parent_id ORDER BY id ASC");
-            $stmt->bindValue(':parent_id', $parentId, PDO::PARAM_INT);
+                                          FROM recetas
+                                          WHERE id_receta_duplicada IN ($placeholders)
+                                          ORDER BY id ASC");
+            foreach ($frontier as $index => $parentId) {
+                $stmt->bindValue($index + 1, $parentId, PDO::PARAM_INT);
+            }
             $stmt->execute();
+            $nextFrontier = [];
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $child) {
                 $childId = (int)$child['id'];
                 if (isset($rowsById[$childId])) continue;
                 $rowsById[$childId] = $child;
-                $frontier[] = $childId;
+                $nextFrontier[] = $childId;
             }
+            $frontier = $nextFrontier;
         }
 
         $explicitVersions = [];
@@ -1448,11 +1455,22 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     }
 
     public function obtenerPorHash(string $hash): ?array {
+        return $this->obtenerRecetaPorIdentificador($hash, null);
+    }
+
+    public function obtenerPorIdParaDuplicar(int $id): ?array
+    {
+        return $this->obtenerRecetaPorIdentificador(null, $id);
+    }
+
+    private function obtenerRecetaPorIdentificador(?string $hash, ?int $id): ?array
+    {
         $this->asegurarColumnaAsignacionReceta();
         $this->asegurarColumnaNombreInternoReceta();
         $this->asegurarColumnaAdicionalesImportadosReceta();
         $this->asegurarColumnasVersionReceta();
         $versionLabelSql = $this->etiquetaVersionSql('c');
+        $where = $id !== null ? 'c.id = :id' : 'MD5(c.id) = :hash';
         $sql = "SELECT c.*,
                        {$versionLabelSql} AS version_label,
                        p.usuario,
@@ -1482,10 +1500,14 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                 LEFT JOIN personal p on p.IDPERSONAL=c.usuario_id
                 LEFT JOIN personal p2 on p2.IDPERSONAL=c.usuario_upd
                 LEFT JOIN receta_cliente rc ON rc.id_receta = c.id
-                WHERE MD5(c.id) = :hash
-                LIMIT 1";
+                 WHERE {$where}
+                 LIMIT 1";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':hash', $hash);
+        if ($id !== null) {
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':hash', (string)$hash);
+        }
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
@@ -1699,15 +1721,30 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     }
 
     public function obtenerDetallePorHash(string $hash): array {
+        return $this->obtenerDetallePorIdentificador($hash, null);
+    }
+
+    public function obtenerDetallePorRecetaId(int $recetaId): array
+    {
+        return $this->obtenerDetallePorIdentificador(null, $recetaId);
+    }
+
+    private function obtenerDetallePorIdentificador(?string $hash, ?int $recetaId): array
+    {
         $this->asegurarColumnasAdicionalesImportadosRecetaDetalle();
+        $where = $recetaId !== null ? 'a.receta_id = :receta_id' : 'MD5(a.receta_id) = :hash';
         $sql = "SELECT a.*, b.orden, b.icon AS sub_cat_1_icon, r.updated_at AS precio_updated_at
                 FROM receta_detalle a
                 LEFT JOIN vw_receta_items_orden b on a.tipo=b.tipo and a.sub_cat_1=b.sub_cat_1
                 LEFT JOIN receta_items r on r.id = a.item_id
-                WHERE MD5(receta_id) = :hash
+                WHERE {$where}
                 order by tipo asc, COALESCE(b.orden, 9999) asc, a.sub_cat_1 asc, sub_cat_2 asc";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':hash', $hash);
+        if ($recetaId !== null) {
+            $stmt->bindValue(':receta_id', $recetaId, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue(':hash', (string)$hash);
+        }
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

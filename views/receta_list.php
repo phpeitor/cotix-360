@@ -197,6 +197,10 @@ require_once ROOT . '/controller/check_session.php';
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="alert alert-info d-none mb-3" id="recetaVersionLoading" role="status" aria-live="polite">
+                        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                        Cargando versiones de la receta…
+                    </div>
                     <div class="d-grid gap-2 mb-3">
                         <label class="form-check border rounded-3 p-3 ps-5 mb-0">
                             <input class="form-check-input" type="radio" name="modoDuplicacionReceta" id="duplicacionNormal" value="normal" checked>
@@ -292,7 +296,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
-    <script src="./assets/js/table-gridjs-receta.js?v=4.2"></script>
+    <script src="./assets/js/table-gridjs-receta.js?v=4.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
