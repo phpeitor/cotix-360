@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		const renderRadialChart = (selector, legendSelector, donutData) => {
 				const chartHost = document.querySelector(selector);
 				const legend = document.querySelector(legendSelector);
-				const wrapper = chartHost ? chartHost.closest(".col-xxl-4") : null;
+				const wrapper = chartHost ? chartHost.closest(".col-xxl-6") : null;
 
 				if (!chartHost || !legend || !Array.isArray(donutData) || donutData.length === 0) {
 					if (wrapper) {
@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		const renderOverviewChart = (selector, lineData) => {
 			const chartHost = document.querySelector(selector);
-			const wrapper = chartHost ? chartHost.closest('.col-xxl-8') : null;
+			const wrapper = chartHost ? chartHost.closest('.dashboard-chart-card') : null;
 
 			if (!chartHost || !Array.isArray(lineData) || lineData.length === 0) {
 				if (wrapper) wrapper.style.display = 'none';
@@ -124,7 +124,8 @@ document.addEventListener("DOMContentLoaded", function () {
 				chart: {
 					height: 300,
 					type: "line",
-					toolbar: { show: false }
+					toolbar: { show: false },
+					zoom: { enabled: false }
 				},
 				stroke: {
 					curve: "smooth",
@@ -161,8 +162,73 @@ document.addEventListener("DOMContentLoaded", function () {
 				}
 			});
 
-			chart.render();
+			const fullSeries = series.map(item => ({ ...item, data: [...item.data] }));
+			let visibleStart = 0;
+			let visibleEnd = monthLabels.length - 1;
+			const card = chartHost.closest(".dashboard-chart-card");
+			const controls = card?.querySelector(".dashboard-chart-controls");
+			const applyVisibleRange = () => {
+				const categories = monthLabels.slice(visibleStart, visibleEnd + 1);
+				const visibleSeries = fullSeries.map(item => ({
+					...item,
+					data: item.data.slice(visibleStart, visibleEnd + 1)
+				}));
+				chart.updateOptions({ xaxis: { categories }, series: visibleSeries }, false, true);
+				if (controls) {
+					const count = visibleEnd - visibleStart + 1;
+					controls.querySelector('[data-dashboard-chart-action="zoom-in"]').disabled = count <= 1;
+					controls.querySelector('[data-dashboard-chart-action="zoom-out"]').disabled = count >= monthLabels.length;
+					controls.querySelector('[data-dashboard-chart-action="reset"]').disabled = count >= monthLabels.length;
+				}
+			};
+
+			controls?.addEventListener("click", event => {
+				const button = event.target.closest("[data-dashboard-chart-action]");
+				if (!button || button.disabled) return;
+				const action = button.dataset.dashboardChartAction;
+				const count = visibleEnd - visibleStart + 1;
+				if (action === "zoom-in") {
+					const nextCount = Math.max(1, Math.floor(count / 1.5));
+					const center = (visibleStart + visibleEnd) / 2;
+					visibleStart = Math.max(0, Math.min(monthLabels.length - nextCount, Math.round(center - (nextCount - 1) / 2)));
+					visibleEnd = visibleStart + nextCount - 1;
+					applyVisibleRange();
+				} else if (action === "zoom-out") {
+					const nextCount = Math.min(monthLabels.length, Math.ceil(count * 1.5));
+					const center = (visibleStart + visibleEnd) / 2;
+					visibleStart = Math.max(0, Math.min(monthLabels.length - nextCount, Math.round(center - (nextCount - 1) / 2)));
+					visibleEnd = visibleStart + nextCount - 1;
+					applyVisibleRange();
+				} else if (action === "reset") {
+					visibleStart = 0;
+					visibleEnd = monthLabels.length - 1;
+					applyVisibleRange();
+				} else if (action === "fullscreen" && card) {
+					const expanded = card.classList.toggle("dashboard-chart-fullscreen");
+					document.body.classList.toggle("dashboard-chart-open", expanded);
+					button.title = expanded ? "Reducir" : "Ampliar";
+					button.setAttribute("aria-label", button.title);
+					button.innerHTML = `<i class="ti ${expanded ? "ti-minimize" : "ti-maximize"}"></i>`;
+					chart.updateOptions({ chart: { height: expanded ? Math.max(420, window.innerHeight - 150) : 300 } });
+					window.dispatchEvent(new Event("resize"));
+				}
+			});
+
+			chart.render().then(() => {
+				if (controls) {
+					controls.querySelector('[data-dashboard-chart-action="zoom-in"]').disabled = monthLabels.length <= 1;
+					controls.querySelector('[data-dashboard-chart-action="zoom-out"]').disabled = true;
+					controls.querySelector('[data-dashboard-chart-action="reset"]').disabled = true;
+				}
+			});
 		};
+
+		document.addEventListener("keydown", event => {
+			if (event.key !== "Escape") return;
+			const openCard = document.querySelector(".dashboard-chart-fullscreen");
+			if (!openCard) return;
+			openCard.querySelector('[data-dashboard-chart-action="fullscreen"]')?.click();
+		});
 
 		renderOverviewChart("#revenue-chart", resp.data.line);
 		renderOverviewChart("#receta-chart", resp.data.line_receta);

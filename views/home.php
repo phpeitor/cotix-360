@@ -15,7 +15,7 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/branding.css?v=1.7" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/dashboard.css?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/dashboard.css?v=1.2" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
@@ -49,16 +49,12 @@ require_once ROOT . '/controller/check_session.php';
                     <div class="col-12">
                         <div class="page-title-head d-flex align-items-sm-center flex-sm-row flex-column">
                             <div class="flex-grow-1">
-                                <h4 class="fs-18 text-uppercase fw-bold m-0">Dashboard</h4>
+                                <h4 class="fs-18 text-uppercase fw-bold m-0">Resumen general</h4>
+                                <p class="text-muted mb-0 mt-1">Indicadores y actividad reciente</p>
                             </div>
                             <div class="mt-3 mt-sm-0">
                                 <form action="javascript:void(0);">
                                     <div class="row g-2 mb-0 align-items-center">
-                                        <div class="col-auto">
-                                            <a href="javascript: void(0);" class="btn btn-outline-primary">
-                                                <i class="ti ti-sort-ascending me-1"></i> Sort By
-                                            </a>
-                                        </div>
                                         <div class="col-sm-auto">
                                             <div class="input-group">
                                                <input
@@ -81,9 +77,9 @@ require_once ROOT . '/controller/check_session.php';
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col">
-                        <div class="row row-cols-xxl-4 row-cols-md-2 row-cols-1 text-center">
+                <div class="row g-3 dashboard-layout">
+                    <div class="col-xxl-9 col-lg-8 dashboard-main">
+                        <div class="row g-3 row-cols-xxl-4 row-cols-md-2 row-cols-1 text-center">
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
@@ -238,20 +234,11 @@ require_once ROOT . '/controller/check_session.php';
 
                         </div><!-- end row -->
 
-                        <div class="row">
-                            <div class="col-xxl-4">
+                        <div class="row g-3">
+                            <div class="col-xxl-6 col-lg-6">
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between align-items-center border-bottom border-dashed">
-                                        <h4 class="header-title"> Status Cotizaciones</h4>
-                                        <div class="dropdown">
-                                            <a href="#" class="dropdown-toggle drop-arrow-none card-drop p-0" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="ti ti-dots-vertical"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-end">
-                                                <a href="javascript:void(0);" class="dropdown-item">Refresh Report</a>
-                                                <a href="javascript:void(0);" class="dropdown-item">Export Report</a>
-                                            </div>
-                                        </div>
+                                        <h4 class="header-title">Cotizaciones por estado</h4>
                                     </div>
 
                                     <div class="card-body">
@@ -264,10 +251,10 @@ require_once ROOT . '/controller/check_session.php';
                                 </div> <!-- end card-->
                             </div> <!-- end col-->
 
-                            <div class="col-xxl-4">
+                            <div class="col-xxl-6 col-lg-6">
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between align-items-center border-bottom border-dashed">
-                                        <h4 class="header-title"> Status Recetas</h4>
+                                        <h4 class="header-title">Recetas por estado</h4>
                                     </div>
 
                                     <div class="card-body">
@@ -280,19 +267,15 @@ require_once ROOT . '/controller/check_session.php';
                                 </div> <!-- end card-->
                             </div> <!-- end col-->
 
-                            <div class="col-xxl-8">
-                                <div class="card">
+                            <div class="col-xxl-6 col-lg-6">
+                                <div class="card dashboard-chart-card" data-dashboard-chart-card="revenue-chart">
                                     <div class="card-header d-flex justify-content-between align-items-center">
-                                        <h4 class="header-title">Overview Cotizaciones</h4>
-                                        <div class="dropdown">
-                                            <a href="#" class="dropdown-toggle drop-arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="ti ti-dots-vertical"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-end">
-                                                <a href="javascript:void(0);" class="dropdown-item">Export Report</a>
-                                                <a href="javascript:void(0);" class="dropdown-item">Profit</a>
-                                                <a href="javascript:void(0);" class="dropdown-item">Action</a>
-                                            </div>
+                                        <h4 class="header-title">Tendencia de cotizaciones</h4>
+                                        <div class="dashboard-chart-controls" role="group" aria-label="Controles del gráfico de cotizaciones">
+                                            <button type="button" class="btn btn-sm btn-light" data-dashboard-chart-action="zoom-in" title="Acercar" aria-label="Acercar"><i class="ti ti-zoom-in"></i></button>
+                                            <button type="button" class="btn btn-sm btn-light" data-dashboard-chart-action="zoom-out" title="Alejar" aria-label="Alejar"><i class="ti ti-zoom-out"></i></button>
+                                            <button type="button" class="btn btn-sm btn-light" data-dashboard-chart-action="reset" title="Restablecer" aria-label="Restablecer"><i class="ti ti-home"></i></button>
+                                            <button type="button" class="btn btn-sm btn-light" data-dashboard-chart-action="fullscreen" title="Ampliar" aria-label="Ampliar"><i class="ti ti-maximize"></i></button>
                                         </div>
                                     </div>
                                     
@@ -304,19 +287,15 @@ require_once ROOT . '/controller/check_session.php';
                                 </div> <!-- end card-->
                             </div> <!-- end col-->
 
-                            <div class="col-xxl-8">
-                                <div class="card">
+                            <div class="col-xxl-6 col-lg-6">
+                                <div class="card dashboard-chart-card" data-dashboard-chart-card="receta-chart">
                                     <div class="card-header d-flex justify-content-between align-items-center">
-                                        <h4 class="header-title">Overview Recetas</h4>
-                                        <div class="dropdown">
-                                            <a href="#" class="dropdown-toggle drop-arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="ti ti-dots-vertical"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-end">
-                                                <a href="javascript:void(0);" class="dropdown-item">Export Report</a>
-                                                <a href="javascript:void(0);" class="dropdown-item">Profit</a>
-                                                <a href="javascript:void(0);" class="dropdown-item">Action</a>
-                                            </div>
+                                        <h4 class="header-title">Tendencia de recetas</h4>
+                                        <div class="dashboard-chart-controls" role="group" aria-label="Controles del gráfico de recetas">
+                                            <button type="button" class="btn btn-sm btn-light" data-dashboard-chart-action="zoom-in" title="Acercar" aria-label="Acercar"><i class="ti ti-zoom-in"></i></button>
+                                            <button type="button" class="btn btn-sm btn-light" data-dashboard-chart-action="zoom-out" title="Alejar" aria-label="Alejar"><i class="ti ti-zoom-out"></i></button>
+                                            <button type="button" class="btn btn-sm btn-light" data-dashboard-chart-action="reset" title="Restablecer" aria-label="Restablecer"><i class="ti ti-home"></i></button>
+                                            <button type="button" class="btn btn-sm btn-light" data-dashboard-chart-action="fullscreen" title="Ampliar" aria-label="Ampliar"><i class="ti ti-maximize"></i></button>
                                         </div>
                                     </div>
                                     
@@ -331,11 +310,11 @@ require_once ROOT . '/controller/check_session.php';
 
                     </div> <!-- end col-->
 
-                    <div class="col-auto info-sidebar">
+                    <div class="col-xxl-3 col-lg-4 info-sidebar">
                         <div class="card">
                             <div class="card-body">
                                 <div class="d-flex mb-3 justify-content-between align-items-center">
-                                    <h4 class="header-title">Recent Cotizaciones:</h4>
+                                    <h4 class="header-title">Cotizaciones recientes</h4>
                                     <div>
                                         <a href="calculo.php" class="btn btn-sm btn-primary rounded-circle btn-icon"><i class="ti ti-plus"></i></a>
                                     </div>
@@ -344,13 +323,13 @@ require_once ROOT . '/controller/check_session.php';
                                 <div id="dashboard-cotizaciones"></div>
 
                                 <div class="mt-3 text-center">
-                                    <a href="cotizaciones.php" class="text-decoration-underline fw-semibold ms-auto link-offset-2 link-dark">View All</a>
+                                    <a href="cotizaciones.php" class="text-decoration-underline fw-semibold ms-auto link-offset-2 link-dark">Ver todas</a>
                                 </div>
                             </div>
 
                             <div class="card-body p-0 border-top border-dashed">
                                 <div class="px-3 pt-3 d-flex mb-3 justify-content-between align-items-center">
-                                    <h4 class="header-title mb-0">Recent Recetas:</h4>
+                                    <h4 class="header-title mb-0">Recetas recientes</h4>
                                     <div>
                                         <a href="receta.php" class="btn btn-sm btn-primary rounded-circle btn-icon"><i class="ti ti-plus"></i></a>
                                     </div>
@@ -359,12 +338,12 @@ require_once ROOT . '/controller/check_session.php';
                                 <div class="px-3" id="dashboard-recetas"></div>
 
                                 <div class="mt-3 mb-3 text-center">
-                                    <a href="receta_list.php" class="text-decoration-underline fw-semibold ms-auto link-offset-2 link-dark">View All</a>
+                                    <a href="receta_list.php" class="text-decoration-underline fw-semibold ms-auto link-offset-2 link-dark">Ver todas</a>
                                 </div>
                             </div>
 
                             <div class="card-body p-0 border-top border-dashed">
-                                <h4 class="header-title px-3 mb-2 mt-3">Recent Items:</h4>
+                                <h4 class="header-title px-3 mb-2 mt-3">Ítems recientes</h4>
                                 <div class="my-3 px-3 dashboard-recent-items-scroll" data-simplebar>
                                     <div id="dashboard-items" class="timeline-alt py-0"></div>
                                 </div> 
@@ -395,7 +374,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/dashboard-sales.js"></script>
+    <script src="./assets/js/dashboard-sales.js?v=1.2"></script>
     <script src="./assets/js/dashboard.js?v=1.4"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>

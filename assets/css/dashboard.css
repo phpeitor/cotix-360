@@ -46,3 +46,141 @@
 .dashboard-card-change i {
     font-size: 0.9rem;
 }
+
+.dashboard-layout {
+    align-items: flex-start;
+}
+
+.dashboard-main {
+    min-width: 0;
+}
+
+.dashboard-main .row > [class*="col-"] > .card {
+    height: 100%;
+    margin-bottom: 0;
+    border: 1px solid rgba(47, 55, 68, .14);
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(33, 43, 54, .045);
+}
+
+.dashboard-main > .row > .col > .row + .row {
+    row-gap: .25rem;
+}
+
+.dashboard-main .card-header {
+    padding: 1rem 1.15rem;
+}
+
+.dashboard-main .header-title {
+    margin: 0;
+    font-size: .95rem;
+    font-weight: 700;
+}
+
+.dashboard-main .apex-charts {
+    min-width: 0;
+}
+
+.info-sidebar {
+    min-width: 0;
+}
+
+.info-sidebar > .card {
+    border: 1px solid rgba(47, 55, 68, .14);
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(33, 43, 54, .045);
+}
+
+.dashboard-recent-item {
+    padding: .65rem;
+    border: 1px solid rgba(47, 55, 68, .08);
+    border-radius: 9px;
+    background: rgba(248, 250, 252, .65);
+}
+
+.dashboard-recent-item:last-child {
+    margin-bottom: 0 !important;
+}
+
+.dashboard-recent-items-scroll {
+    max-height: 320px;
+}
+
+.dashboard-chart-card .card-header {
+    gap: .75rem;
+}
+
+.dashboard-chart-controls {
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: .25rem;
+}
+
+.dashboard-chart-controls .btn {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid rgba(47, 55, 68, .12);
+    border-radius: 8px;
+    color: #53657d;
+}
+
+.dashboard-chart-controls .btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+body.dashboard-chart-open::before {
+    position: fixed;
+    z-index: 1070;
+    inset: 0;
+    background: rgba(19, 27, 38, .55);
+    content: "";
+}
+
+body.dashboard-chart-open {
+    overflow: hidden;
+}
+
+.dashboard-chart-card.dashboard-chart-fullscreen {
+    position: fixed !important;
+    z-index: 1080;
+    inset: 1rem;
+    display: flex;
+    width: auto;
+    height: auto;
+    max-height: calc(100vh - 2rem);
+    flex-direction: column;
+    margin: 0;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, .25);
+}
+
+.dashboard-chart-fullscreen .card-body {
+    min-height: 0;
+    flex: 1 1 auto;
+}
+
+.dashboard-chart-fullscreen .apex-charts {
+    height: 100%;
+}
+
+@media (max-width: 991.98px) {
+    .dashboard-layout > .dashboard-main,
+    .dashboard-layout > .info-sidebar {
+        width: 100%;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .dashboard-main .card-header {
+        padding: .85rem 1rem;
+    }
+
+    .dashboard-main #multiple-radialbar,
+    .dashboard-main #multiple-radialbar-receta {
+        min-height: 260px;
+    }
+}

@@ -149,22 +149,14 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
                                     </div>
                                     <div class="border border-dashed p-2 rounded text-center isadmin">
                                         <div class="row">
-                                            <div class="col-lg-2 col-6 border-end">
+                                            <div class="col-lg-3 col-6 border-end">
                                                 <p class="text-muted fw-medium fs-14 mb-0"><span class="text-dark">SubTotal S/. </span> <span id="total_soles">0.00</span></p>
                                             </div>
-                                            <div class="col-lg-2 col-6 border-end">
+                                            <div class="col-lg-3 col-6 border-end">
                                                 <p class="text-muted fw-medium fs-14 mb-0"><span class="text-dark">SubTotal $ </span> <span id="total_dolares">0.00</span></p>
                                             </div>
 
-                                            <div class="col-lg-2 col-6 border-end">
-                                                <label class="text-dark fw-medium fs-12 mb-1" for="monedaVistaReceta">Mostrar precios en</label>
-                                                <select class="form-select form-select-sm mx-auto" id="monedaVistaReceta" style="max-width: 120px;">
-                                                    <option value="SOL">Soles (S/.)</option>
-                                                    <option value="DOLLAR">Dólares ($)</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col-lg-2 col-6 border-end">
+                                            <div class="col-lg-3 col-6 border-end">
                                                 <p class="tipo-cambio-highlight text-muted fw-medium fs-12 mb-1">
                                                     <span class="tipo-cambio-label">Tipo de Cambio SUNAT (Venta)</span>
                                                     <span id="tipo_cambio_sunat" class="external-event fc-event bg-warning-subtle text-warning-emphasis tipo-cambio-pulse">0.000</span>
@@ -173,7 +165,7 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
                                                 </p>
                                             </div>
                                             
-                                            <div class="col-lg-4 col-12">
+                                            <div class="col-lg-3 col-12">
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:money-bag-outline" class="text-success"></iconify-icon> <span class="text-dark">Total S/.</span> <span id="total_peru">0.00</span></p>
                                                 <p class="text-muted fw-medium fs-14 mb-0"><iconify-icon icon="solar:dollar-minimalistic-outline" class="text-success"></iconify-icon> <span class="text-dark">Total $</span> <span id="total_peru_dolares">0.00</span></p>
                                             </div>
@@ -575,7 +567,7 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
-    <script src="./assets/js/receta_form.js?v=4.5"></script>
+    <script src="./assets/js/receta_form.js?v=4.6"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

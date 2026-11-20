@@ -16,8 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const tipoCambioEl = document.getElementById("tipo_cambio_sunat");
     const btnEditTipoCambio = document.getElementById("btnEditTipoCambio");
     const tipoCambioInputEl = document.getElementById("tipo_cambio_input");
-    const monedaVistaRecetaEl = document.getElementById("monedaVistaReceta");
-    let monedaVistaReceta = "SOL";
     const btnReloadPrecios = document.getElementById("btnReloadPrecios");
     const alertPrecioCambioEl = document.getElementById("alertPrecioCambio");
     const infoCategoriaModalEl = document.getElementById("info-categoria-modal");
@@ -461,12 +459,6 @@ document.addEventListener("DOMContentLoaded", () => {
         subCat2Select?.addEventListener("change", onSubCat2Change);
         marcaSelect?.addEventListener("change", onMarcaChange);
         modeloSelect?.addEventListener("change", onModeloChange);
-        const actualizarMonedaVistaReceta = () => {
-            monedaVistaReceta = monedaVistaRecetaEl.value === "DOLLAR" ? "DOLLAR" : "SOL";
-            renderBody();
-            renderPagination();
-        };
-        monedaVistaRecetaEl?.addEventListener("change", actualizarMonedaVistaReceta);
         recetaSubcat1Search?.addEventListener("input", () => {
             currentPage = 1;
             renderBody();
@@ -1475,7 +1467,7 @@ fd.append("condiciones_economicas_dias", payload.condiciones_economicas_dias);
     }
 
     function getMonedaVistaItem(item) {
-        return monedaVistaReceta;
+        return String(item?.moneda || "").toUpperCase() === "DOLLAR" ? "DOLLAR" : "SOL";
     }
 
     function convertirPrecioAmoneda(precio, monedaOrigen, monedaDestino) {
