@@ -30,8 +30,9 @@ try {
     if (!$ingenieria) {
         throw new Exception('Receta de ingeniería no encontrada');
     }
-    if (in_array(strtolower(trim((string)($ingenieria['estado'] ?? ''))), ['aprobada', 'validado'], true)) {
-        throw new Exception('La ingeniería validada no permite modificar items');
+    $cargo = (int)($_SESSION['session_cargo'] ?? 0);
+    if (!$receta->usuarioPuedeEditarIngenieria($cargo, (string)($ingenieria['estado'] ?? ''))) {
+        throw new RuntimeException('No tienes permisos para modificar la ingeniería en este estado');
     }
     $usuarioId = (int)$_SESSION['session_id'];
     $receta->begin();
@@ -42,6 +43,9 @@ try {
         $cantidad = (int)($_POST['cantidad'] ?? 1);
         $esAdicional = (int)($_POST['es_adicional'] ?? 0) === 1;
         $adicionalSigno = trim((string)($_POST['adicional_signo'] ?? 'positivo')) === 'negativo' ? 'negativo' : 'positivo';
+        if ($cargo === 6 && $esAdicional) {
+            throw new RuntimeException('Ingeniería solo puede agregar items normales durante la prevalidación');
+        }
         if ($itemId <= 0) {
             throw new Exception('Item inválido');
         }

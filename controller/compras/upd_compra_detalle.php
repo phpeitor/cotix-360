@@ -33,6 +33,10 @@ try {
     if (!$compra) {
         throw new Exception('Compra no encontrada');
     }
+    if ($cargo === 5 && (int)($compra['asignado_usuario_id'] ?? 0) > 0 && (int)$compra['asignado_usuario_id'] !== (int)$_SESSION['session_id']) {
+        http_response_code(403);
+        throw new RuntimeException('Esta compra no está asignada a tu usuario');
+    }
     if (!in_array(strtolower(trim((string)($compra['estado'] ?? ''))), ['pendiente', 'validado'], true)) {
         throw new Exception('Solo se pueden modificar compras en estado Pendiente o Validado');
     }

@@ -34,6 +34,22 @@
                 : '';
         }
 
+        if (['ingenieria_prevalidacion', 'ingenieria_validada'].includes(tipo)) {
+            const ingenieriaId = meta.ingenieria_id;
+            const ingenieriaHash = meta.ingenieria_hash || (ingenieriaId && typeof md5 === 'function' ? md5(String(ingenieriaId)) : '');
+            return ingenieriaHash
+                ? `ingenieria_form.php?id=${encodeURIComponent(String(ingenieriaHash))}`
+                : '';
+        }
+
+        if (tipo === 'compra_asignada') {
+            const compraId = meta.compra_id;
+            const compraHash = meta.compra_hash || (compraId && typeof md5 === 'function' ? md5(String(compraId)) : '');
+            return compraHash
+                ? `compras_detalle.php?id=${encodeURIComponent(String(compraHash))}`
+                : '';
+        }
+
         if (tipo === 'receta') {
             const cargo = Number(window.PERMISOS_STATE?.cargo ?? (typeof CARGO !== 'undefined' ? CARGO : 0));
             const recetaId = item.receta_id || meta.receta_id;

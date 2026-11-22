@@ -27,6 +27,10 @@ try {
     if (!in_array($cargo, Compras::CARGOS_EDITABLES, true)) {
         throw new RuntimeException('No tiene permisos para gestionar actividades de compras');
     }
+    if ($cargo === 5 && (int)($compra['asignado_usuario_id'] ?? 0) > 0 && (int)$compra['asignado_usuario_id'] !== (int)$_SESSION['session_id']) {
+        http_response_code(403);
+        throw new RuntimeException('Esta compra no está asignada a tu usuario');
+    }
 
     $recetaId = (int)($compra['id_receta_duplicada'] ?? 0);
     if ($recetaId <= 0) {

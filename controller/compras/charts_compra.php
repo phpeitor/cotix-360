@@ -20,8 +20,13 @@ try {
     }
 
     $compras = new Compras();
-    if (!$compras->obtenerCompraPorHash($hash)) {
+    $compra = $compras->obtenerCompraPorHash($hash);
+    if (!$compra) {
         throw new Exception('Compra no encontrada');
+    }
+    if ((int)($_SESSION['session_cargo'] ?? 0) === 5 && (int)($compra['asignado_usuario_id'] ?? 0) > 0 && (int)$compra['asignado_usuario_id'] !== (int)$_SESSION['session_id']) {
+        http_response_code(403);
+        throw new RuntimeException('Esta compra no está asignada a tu usuario');
     }
 
     $data = $compras->datosGraficosPorHash($hash);

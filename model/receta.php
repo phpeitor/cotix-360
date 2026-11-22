@@ -449,8 +449,6 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
 
     public function tableIngenieria(string $fec_ini, string $fec_fin, string $subCat1 = ''): array
     {
-        $this->crearTablaHistorialIngenieria();
-
         $subCat1 = trim($subCat1);
         $filtroSubCat1 = '';
         if ($subCat1 !== '') {
@@ -475,7 +473,6 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
                 c.created_at,
                 c.updated_at,
                 COALESCE(SUM(cd.cantidad), 0) AS total_items,
-                COALESCE(h.historial_count, 0) AS historial_count,
                 GROUP_CONCAT(
                     CONCAT(cd.nombre, ' x ', COALESCE(cd.cantidad, 0))
                     ORDER BY cd.nombre
@@ -483,11 +480,6 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
                 ) AS items
             FROM recetas_ingenieria c
             LEFT JOIN detalle_ingenieria cd ON cd.receta_id = c.id
-            LEFT JOIN (
-                SELECT ingenieria_id, COUNT(*) AS historial_count
-                FROM ingenieria_historial
-                GROUP BY ingenieria_id
-            ) h ON h.ingenieria_id = c.id
             LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
             LEFT JOIN personal p2 ON p2.IDPERSONAL = c.usuario_upd
             LEFT JOIN receta_cliente rc ON rc.id_receta = c.id_receta_duplicada
@@ -503,8 +495,7 @@ $stmt->bindValue(':condiciones_economicas_dias', (int)($data['condiciones_econom
                 rc.razon_social_empresa,
                 c.estado,
                 c.created_at,
-                c.updated_at,
-                h.historial_count
+                c.updated_at
             ORDER BY c.id DESC
         ";
 
@@ -583,11 +574,55 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         $this->crearTablaHistorialIngenieria();
         $this->asegurarColumnasAdicionalesIngenieria();
         $this->asegurarColumnasAdicionalesCompras();
+        $this->asegurarColumna('receta_compras', 'asignado_usuario_id', "ALTER TABLE receta_compras ADD COLUMN asignado_usuario_id INT NULL DEFAULT NULL AFTER usuario_id");
+        $this->asegurarColumna('header_notifications', 'destinatario_id', "ALTER TABLE header_notifications ADD COLUMN destinatario_id INT NULL DEFAULT NULL AFTER usuario_id");
     }
 
-    public function aprobarIngenieriaParaCompras(int $ingenieriaId, int $usuarioId): int
+    public function prevalidarIngenieria(int $ingenieriaId, int $usuarioId): void
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM recetas_ingenieria WHERE id = :id FOR UPDATE");
+        $stmt->bindValue(':id', $ingenieriaId, PDO::PARAM_INT);
+        $stmt->execute();
+        $ingenieria = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$ingenieria) throw new RuntimeException('Ingeniería no encontrada');
+        if (trim((string)($ingenieria['estado'] ?? '')) !== 'GANADO') {
+            throw new RuntimeException('Solo se puede prevalidar una ingeniería en estado GANADO');
+        }
+
+        $stmtEstado = $this->conn->prepare("UPDATE recetas_ingenieria
+                                            SET estado = 'GANADO - PREVALIDACION', updated_at = :updated_at, usuario_upd = :usuario_upd
+                                            WHERE id = :id AND estado = 'GANADO'");
+        $stmtEstado->bindValue(':updated_at', $this->nowLima);
+        $stmtEstado->bindValue(':usuario_upd', $usuarioId, PDO::PARAM_INT);
+        $stmtEstado->bindValue(':id', $ingenieriaId, PDO::PARAM_INT);
+        $stmtEstado->execute();
+        if ($stmtEstado->rowCount() !== 1) throw new RuntimeException('La ingeniería cambió de estado. Actualiza la página.');
+
+        $this->registrarHistorialIngenieria(
+            $ingenieriaId,
+            'prevalidar_ingenieria',
+            null,
+            null,
+            ['estado' => 'GANADO'],
+            ['estado' => 'GANADO - PREVALIDACION'],
+            $usuarioId
+        );
+        $supervisores = $this->usuariosActivosPorCargo([1, 3]);
+        $this->notificarUsuariosIngenieria(
+            $supervisores,
+            'ingenieria_prevalidacion',
+            'Ingeniería lista para validar',
+            'La ingeniería #' . $ingenieriaId . ' fue prevalidada y requiere revisión.',
+            ['ingenieria_id' => $ingenieriaId, 'ingenieria_hash' => md5((string)$ingenieriaId)]
+        );
+    }
+
+    public function aprobarIngenieriaParaCompras(int $ingenieriaId, int $usuarioId, int $compradorId): int
     {
         $this->asegurarEstadoValidadoIngenieria();
+        if (!$this->esUsuarioComprasActivo($compradorId)) {
+            throw new RuntimeException('Selecciona un usuario activo del área de Compras');
+        }
 
         $stmtHistorial = $this->conn->prepare("SELECT COUNT(*) FROM ingenieria_historial WHERE ingenieria_id = :ingenieria_id");
         $stmtHistorial->bindValue(':ingenieria_id', $ingenieriaId, PDO::PARAM_INT);
@@ -597,7 +632,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
             throw new RuntimeException('No se puede validar ingeniería porque no tiene historial registrado');
         }
 
-        $stmtIngenieria = $this->conn->prepare("SELECT * FROM recetas_ingenieria WHERE id = :id LIMIT 1");
+        $stmtIngenieria = $this->conn->prepare("SELECT * FROM recetas_ingenieria WHERE id = :id FOR UPDATE");
         $stmtIngenieria->bindValue(':id', $ingenieriaId, PDO::PARAM_INT);
         $stmtIngenieria->execute();
         $ingenieria = $stmtIngenieria->fetch(PDO::FETCH_ASSOC);
@@ -606,14 +641,11 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
             throw new RuntimeException('Ingeniería no encontrada');
         }
 
-        if (!in_array(($ingenieria['estado'] ?? ''), ['Aprobada', 'Validado'], true)) {
-            $stmtEstado = $this->conn->prepare("UPDATE recetas_ingenieria
-                                                SET estado = 'Validado', updated_at = :updated_at, usuario_upd = :usuario_upd
-                                                WHERE id = :id");
-            $stmtEstado->bindValue(':updated_at', $this->nowLima);
-            $stmtEstado->bindValue(':usuario_upd', $usuarioId, PDO::PARAM_INT);
-            $stmtEstado->bindValue(':id', $ingenieriaId, PDO::PARAM_INT);
-            $stmtEstado->execute();
+        if (trim((string)($ingenieria['estado'] ?? '')) !== 'GANADO - PREVALIDACION') {
+            throw new RuntimeException('La ingeniería debe estar prevalidada antes de enviarse a Compras');
+        }
+        if (!$this->ingenieriaTieneDetalleBase($ingenieriaId)) {
+            throw new RuntimeException('La ingeniería debe conservar al menos un item normal antes de enviarse a Compras');
         }
 
         $stmtCompra = $this->conn->prepare("SELECT id FROM receta_compras WHERE ingenieria_id = :ingenieria_id LIMIT 1");
@@ -621,14 +653,22 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         $stmtCompra->execute();
         $compraId = (int)($stmtCompra->fetchColumn() ?: 0);
 
-        if ($compraId > 0) {
-            return $compraId;
-        }
+        if ($compraId > 0) throw new RuntimeException('Esta ingeniería ya fue enviada a Compras');
+
+        $stmtEstado = $this->conn->prepare("UPDATE recetas_ingenieria
+                                            SET estado = 'PREVALIDACION - VALIDADO', updated_at = :updated_at, usuario_upd = :usuario_upd
+                                            WHERE id = :id AND estado = 'GANADO - PREVALIDACION'");
+        $stmtEstado->bindValue(':updated_at', $this->nowLima);
+        $stmtEstado->bindValue(':usuario_upd', $usuarioId, PDO::PARAM_INT);
+        $stmtEstado->bindValue(':id', $ingenieriaId, PDO::PARAM_INT);
+        $stmtEstado->execute();
+        if ($stmtEstado->rowCount() !== 1) throw new RuntimeException('La ingeniería cambió de estado. Actualiza la página.');
 
         $sqlCabecera = "INSERT INTO receta_compras (
                             ingenieria_id,
                             id_receta_duplicada,
                             usuario_id,
+                            asignado_usuario_id,
                             estado,
                             created_at,
                             updated_at,
@@ -640,7 +680,8 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                             id,
                             id_receta_duplicada,
                             usuario_id,
-                            'Validado',
+                            :asignado_usuario_id,
+                            'Pendiente',
                             :created_at,
                             :updated_at,
                             :usuario_upd,
@@ -653,6 +694,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         $stmtCabecera->bindValue(':created_at', $this->nowLima);
         $stmtCabecera->bindValue(':updated_at', $this->nowLima);
         $stmtCabecera->bindValue(':usuario_upd', $usuarioId, PDO::PARAM_INT);
+        $stmtCabecera->bindValue(':asignado_usuario_id', $compradorId, PDO::PARAM_INT);
         $stmtCabecera->bindValue(':ingenieria_id', $ingenieriaId, PDO::PARAM_INT);
         $stmtCabecera->execute();
 
@@ -706,6 +748,45 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         $stmtDetalle->bindValue(':created_at', $this->nowLima);
         $stmtDetalle->bindValue(':ingenieria_id', $ingenieriaId, PDO::PARAM_INT);
         $stmtDetalle->execute();
+
+        $this->registrarHistorialIngenieria(
+            $ingenieriaId,
+            'validar_ingenieria',
+            null,
+            null,
+            ['estado' => 'GANADO - PREVALIDACION'],
+            ['estado' => 'PREVALIDACION - VALIDADO', 'compra_id' => $compraId, 'asignado_usuario_id' => $compradorId],
+            $usuarioId
+        );
+        $stmtIngeniero = $this->conn->prepare("SELECT r.asignado_usuario_id, p.CARGO AS cargo_asignado
+                                               FROM recetas_ingenieria i
+                                               INNER JOIN recetas r ON r.id = i.id_receta_duplicada
+                                               LEFT JOIN personal p ON p.IDPERSONAL = r.asignado_usuario_id
+                                               WHERE i.id = :id LIMIT 1");
+        $stmtIngeniero->bindValue(':id', $ingenieriaId, PDO::PARAM_INT);
+        $stmtIngeniero->execute();
+        $asignacionIngenieria = $stmtIngeniero->fetch(PDO::FETCH_ASSOC) ?: [];
+        $ingenieroId = (int)($asignacionIngenieria['asignado_usuario_id'] ?? 0);
+        $ingenieros = [(int)($ingenieria['usuario_upd'] ?? 0)];
+        if ($ingenieroId > 0 && (int)($asignacionIngenieria['cargo_asignado'] ?? 0) === 6) {
+            $ingenieros[] = $ingenieroId;
+        } else {
+            $ingenieros = array_merge($ingenieros, $this->usuariosActivosPorCargo([6]));
+        }
+        $this->notificarUsuariosIngenieria(
+            $ingenieros,
+            'ingenieria_validada',
+            'Ingeniería validada',
+            'La ingeniería #' . $ingenieriaId . ' fue validada y enviada a Compras.',
+            ['ingenieria_id' => $ingenieriaId, 'ingenieria_hash' => md5((string)$ingenieriaId), 'compra_id' => $compraId, 'compra_hash' => md5((string)$compraId)]
+        );
+        $this->notificarUsuariosIngenieria(
+            [$compradorId],
+            'compra_asignada',
+            'Nueva compra asignada',
+            'La compra #' . $compraId . ' fue asignada para su gestión.',
+            ['ingenieria_id' => $ingenieriaId, 'ingenieria_hash' => md5((string)$ingenieriaId), 'compra_id' => $compraId, 'compra_hash' => md5((string)$compraId)]
+        );
 
         return $compraId;
     }
@@ -873,7 +954,10 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
 
     public function registrarHistorialIngenieria(int $ingenieriaId, string $accion, ?int $detalleId, ?int $itemId, array $antes, array $despues, int $usuarioId): bool
     {
-        $this->crearTablaHistorialIngenieria();
+        $tablaExiste = (int)$this->conn->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'ingenieria_historial'")->fetchColumn() > 0;
+        if (!$tablaExiste) {
+            $this->crearTablaHistorialIngenieria();
+        }
 
         $sql = "INSERT INTO ingenieria_historial (
                     ingenieria_id,
@@ -940,6 +1024,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                             ingenieria_id BIGINT UNSIGNED NOT NULL,
                             id_receta_duplicada INT NULL DEFAULT NULL,
                             usuario_id BIGINT UNSIGNED NOT NULL,
+                            asignado_usuario_id INT NULL DEFAULT NULL,
                             estado ENUM('Pendiente','Validado','Aprobada','Anulada') NULL DEFAULT 'Validado',
                             created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
                             updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -950,9 +1035,15 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                             PRIMARY KEY (id),
                             UNIQUE KEY uq_receta_compras_ingenieria (ingenieria_id),
                             KEY idx_receta_compras_origen (id_receta_duplicada),
+                            KEY idx_receta_compras_asignado (asignado_usuario_id),
                             KEY idx_receta_compras_estado (estado)
                         )";
         $this->conn->exec($sqlCabecera);
+        $this->asegurarColumna('receta_compras', 'asignado_usuario_id', "ALTER TABLE receta_compras ADD COLUMN asignado_usuario_id INT NULL DEFAULT NULL AFTER usuario_id");
+        $stmtIndiceAsignacion = $this->conn->query("SHOW INDEX FROM receta_compras WHERE Key_name = 'idx_receta_compras_asignado'");
+        if (!$stmtIndiceAsignacion->fetch(PDO::FETCH_ASSOC)) {
+            $this->conn->exec("ALTER TABLE receta_compras ADD KEY idx_receta_compras_asignado (asignado_usuario_id)");
+        }
         $this->asegurarEstadoValidadoCompras();
 
         $sqlDetalle = "CREATE TABLE IF NOT EXISTS detalle_compras (
@@ -998,8 +1089,9 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     {
         $stmt = $this->conn->query("SHOW COLUMNS FROM recetas_ingenieria LIKE 'estado'");
         $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
-        if (strpos((string)($row['Type'] ?? ''), "'Validado'") === false) {
-            $this->conn->exec("ALTER TABLE recetas_ingenieria MODIFY estado ENUM('Borrador','Enviada','Aprobada','Validado','Rechazada','Anulada','GANADO') NULL DEFAULT 'GANADO'");
+        $type = (string)($row['Type'] ?? '');
+        if (strpos($type, "'GANADO - PREVALIDACION'") === false || strpos($type, "'PREVALIDACION - VALIDADO'") === false) {
+            $this->conn->exec("ALTER TABLE recetas_ingenieria MODIFY estado ENUM('Borrador','Enviada','Aprobada','Validado','Rechazada','Anulada','GANADO','GANADO - PREVALIDACION','PREVALIDACION - VALIDADO') NULL DEFAULT 'GANADO'");
         }
     }
 
@@ -1307,6 +1399,90 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         $stmt->bindValue(':online_since', $onlineSince);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function obtenerUsuariosComprasActivos(): array
+    {
+        $stmt = $this->conn->prepare("SELECT IDPERSONAL AS id,
+                                             TRIM(CONCAT_WS(' ', NULLIF(TRIM(NOMBRES), ''), NULLIF(TRIM(APELLIDOS), ''))) AS nombre,
+                                             USUARIO AS usuario
+                                      FROM personal
+                                      WHERE CARGO = 5 AND IDESTADO = 1
+                                      ORDER BY NOMBRES, APELLIDOS");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function esUsuarioComprasActivo(int $usuarioId): bool
+    {
+        if ($usuarioId <= 0) return false;
+        $stmt = $this->conn->prepare("SELECT 1 FROM personal WHERE IDPERSONAL = :id AND CARGO = 5 AND IDESTADO = 1 LIMIT 1");
+        $stmt->bindValue(':id', $usuarioId, PDO::PARAM_INT);
+        $stmt->execute();
+        return (bool)$stmt->fetchColumn();
+    }
+
+    public function usuarioPuedeEditarIngenieria(int $cargo, string $estado): bool
+    {
+        $estadoNormalizado = mb_strtolower(trim($estado), 'UTF-8');
+        if ($estadoNormalizado === 'ganado') return $cargo === 6;
+        if ($estadoNormalizado === 'ganado - prevalidacion') return in_array($cargo, [1, 3], true);
+        return false;
+    }
+
+    public function ingenieriaTieneDetalleBase(int $ingenieriaId): bool
+    {
+        $stmt = $this->conn->prepare("SELECT 1 FROM detalle_ingenieria WHERE receta_id = :id AND COALESCE(es_adicional, 0) = 0 LIMIT 1");
+        $stmt->bindValue(':id', $ingenieriaId, PDO::PARAM_INT);
+        $stmt->execute();
+        return (bool)$stmt->fetchColumn();
+    }
+
+    private function usuariosActivosPorCargo(array $cargos): array
+    {
+        $cargos = array_values(array_unique(array_filter(array_map('intval', $cargos), static fn($cargo) => $cargo > 0)));
+        if (!$cargos) return [];
+        $placeholders = implode(',', array_fill(0, count($cargos), '?'));
+        $stmt = $this->conn->prepare("SELECT IDPERSONAL FROM personal WHERE IDESTADO = 1 AND CARGO IN ($placeholders)");
+        foreach ($cargos as $index => $cargo) {
+            $stmt->bindValue($index + 1, $cargo, PDO::PARAM_INT);
+        }
+        $stmt->execute();
+        return array_values(array_unique(array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [])));
+    }
+
+    private function notificarUsuariosIngenieria(array $destinatarios, string $tipo, string $titulo, string $detalle, array $meta): void
+    {
+        $destinatarios = array_values(array_unique(array_filter(array_map('intval', $destinatarios), static fn($id) => $id > 0)));
+        if (!$destinatarios) return;
+
+        $this->asegurarColumna(
+            'header_notifications',
+            'destinatario_id',
+            "ALTER TABLE header_notifications ADD COLUMN destinatario_id INT NULL DEFAULT NULL AFTER usuario_id"
+        );
+        $stmt = $this->conn->prepare("INSERT INTO header_notifications (
+                                         tipo, usuario_id, destinatario_id, usuario, titulo, detalle, icon, tone, meta_json, estado, created_at
+                                     ) VALUES (
+                                         :tipo, :usuario_id, :destinatario_id, :usuario, :titulo, :detalle, :icon, :tone, :meta_json, 1, :created_at
+                                     )");
+        $actorId = (int)($_SESSION['session_id'] ?? 0);
+        $actor = trim((string)($_SESSION['session_usuario'] ?? $_SESSION['session_nombre'] ?? 'Sistema'));
+        foreach ($destinatarios as $destinatarioId) {
+            if ($destinatarioId === $actorId) continue;
+            $stmt->execute([
+                ':tipo' => $tipo,
+                ':usuario_id' => $actorId,
+                ':destinatario_id' => $destinatarioId,
+                ':usuario' => $actor !== '' ? $actor : 'Sistema',
+                ':titulo' => $titulo,
+                ':detalle' => $detalle,
+                ':icon' => $tipo === 'compra_asignada' ? 'ti-truck-delivery' : 'ti-checklist',
+                ':tone' => $tipo === 'ingenieria_prevalidacion' ? 'warning' : 'success',
+                ':meta_json' => json_encode($meta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                ':created_at' => $this->nowLima,
+            ]);
+        }
     }
 
     public function esUsuarioAsignableReceta(int $usuarioId): bool

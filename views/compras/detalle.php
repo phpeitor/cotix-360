@@ -77,6 +77,14 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                     <div class="col-lg-3">
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="avatar-lg bg-light d-flex align-items-center justify-content-center rounded">
+                                                <iconify-icon icon="solar:cart-check-bold" class="fs-28 text-info"></iconify-icon>
+                                            </div>
+                                            <div><p class="text-dark fw-medium fs-12 mb-0">Compras: <span id="usuario_asignado"></span></p></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-lg bg-light d-flex align-items-center justify-content-center rounded">
                                                 <iconify-icon icon="solar:calendar-date-broken" class="fs-28 text-primary"></iconify-icon>
                                             </div>
                                             <div><p class="text-dark fw-medium fs-12 mb-0"><span id="fecha"></span></p></div>
@@ -569,7 +577,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/compras_detalle.js?v=4.0"></script>
+    <script src="./assets/js/compras_detalle.js?v=4.1"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/compras_charts.js?v=2.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>

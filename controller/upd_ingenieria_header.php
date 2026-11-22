@@ -49,6 +49,9 @@ try {
         if (!$ingenieria) {
             throw new Exception('Receta de ingeniería no encontrada');
         }
+        if (!$receta->usuarioPuedeEditarIngenieria((int)($_SESSION['session_cargo'] ?? 0), (string)($ingenieria['estado'] ?? ''))) {
+            throw new RuntimeException('No tienes permisos para modificar esta ingeniería en su estado actual');
+        }
 
         $receta->begin();
         $ok = $receta->actualizarTipoCambioIngenieria($hash, $tipoCambio);

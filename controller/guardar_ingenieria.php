@@ -28,8 +28,8 @@ try {
     if (!$ingenieria) {
         throw new Exception('Receta de ingeniería no encontrada');
     }
-    if (in_array(strtolower(trim((string)($ingenieria['estado'] ?? ''))), ['aprobada', 'validado'], true)) {
-        throw new Exception('La ingeniería validada no permite guardar cambios');
+    if (!$receta->usuarioPuedeEditarIngenieria((int)($_SESSION['session_cargo'] ?? 0), (string)($ingenieria['estado'] ?? ''))) {
+        throw new RuntimeException('No tienes permisos para guardar cambios de ingeniería en este estado');
     }
 
     $totalIngenieria = $receta->totalIngenieriaDolaresPorHash($hash);

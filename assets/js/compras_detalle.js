@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
         nombre: document.getElementById("compra_nombre_display"),
         usuario: document.getElementById("usuario"),
         aprobador: document.getElementById("usuario_aprobador"),
+        usuarioAsignado: document.getElementById("usuario_asignado"),
         estado: document.getElementById("estado"),
         fecha: document.getElementById("fecha"),
         totalItem: document.getElementById("total_item"),
@@ -286,6 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fields.nombre.textContent = compra.nombre || "Sin nombre";
         fields.usuario.textContent = compra.usuario || "-";
         fields.aprobador.textContent = compra.usuario_aprobador || "-";
+        if (fields.usuarioAsignado) fields.usuarioAsignado.textContent = compra.usuario_asignado || "-";
         fields.estado.innerHTML = renderEstado(compra.estado || "Validado");
         fields.fecha.textContent = compra.created_at || "-";
         fields.tipoCambio.textContent = Number(totales?.tipo_cambio || compra.tipo_cambio || 0).toFixed(3);

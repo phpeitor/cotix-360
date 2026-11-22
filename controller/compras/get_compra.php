@@ -20,6 +20,10 @@ try {
     }
 
     $cargo = (int)($_SESSION['session_cargo'] ?? 0);
+    if ($cargo === 5 && (int)($compra['asignado_usuario_id'] ?? 0) > 0 && (int)$compra['asignado_usuario_id'] !== (int)($_SESSION['session_id'] ?? 0)) {
+        http_response_code(403);
+        throw new RuntimeException('Esta compra no está asignada a tu usuario');
+    }
     $puedeVerMontos = in_array($cargo, Compras::CARGOS_VER_MONTOS, true);
     $detalle = $compras->obtenerDetallePorHash($hash);
     if (!$puedeVerMontos) {

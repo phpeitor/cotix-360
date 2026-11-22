@@ -32,6 +32,48 @@
     max-width: 840px;
 }
 
+.ingenieria-estado-badge {
+    display: inline-block;
+    max-width: 150px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.ingenieria-receta-meta-row {
+    min-width: 0;
+}
+
+@media (max-width: 1199.98px) {
+    .receta-form-header {
+        align-items: flex-start !important;
+    }
+
+    .receta-form-header .receta-title-wrap,
+    .receta-form-header .ingenieria-receta-meta-row,
+    .receta-form-header .receta-header-actions {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    .receta-form-header .receta-header-actions {
+        justify-content: flex-start !important;
+    }
+
+    .receta-form-header .ingenieria-receta-meta-row > [class*="col-"] {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .receta-form-header .ingenieria-receta-meta-row > [class*="col-"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
 @media (max-width: 991.98px) {
     .ingenieria-detalle-table td,
     .ingenieria-detalle-table th {

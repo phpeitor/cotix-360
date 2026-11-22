@@ -37,9 +37,10 @@ class Compras
         }
     }
 
-    public function tableCompras(string $fecIni, string $fecFin): array
+    public function tableCompras(string $fecIni, string $fecFin, int $cargo = 0, int $usuarioId = 0): array
     {
         $this->crearTablasSiNoExisten();
+        $filtroAsignacion = $cargo === 5 ? ' AND (c.asignado_usuario_id = :asignado_usuario_id OR c.asignado_usuario_id IS NULL)' : '';
 
         $sql = "SELECT
                     c.id,
@@ -47,6 +48,7 @@ class Compras
                     c.id_receta_duplicada,
                     p.usuario,
                     p2.usuario AS usuario_aprobador,
+                    p3.usuario AS usuario_asignado,
                     c.nombre,
                     rc.ruc AS cliente_ruc,
                     rc.razon_social_empresa AS cliente_razon_social_empresa,
@@ -100,14 +102,17 @@ class Compras
                 LEFT JOIN detalle_compras d ON d.compra_id = c.id
                 LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
                 LEFT JOIN personal p2 ON p2.IDPERSONAL = c.usuario_upd
+                LEFT JOIN personal p3 ON p3.IDPERSONAL = c.asignado_usuario_id
                 LEFT JOIN receta_cliente rc ON rc.id_receta = c.id_receta_duplicada
                 WHERE c.created_at BETWEEN :fec_ini AND DATE_ADD(:fec_fin, INTERVAL 1 DAY)
+                $filtroAsignacion
                 GROUP BY
                     c.id,
                     c.ingenieria_id,
                     c.id_receta_duplicada,
                     p.usuario,
                     p2.usuario,
+                    p3.usuario,
                     c.nombre,
                     rc.ruc,
                     rc.razon_social_empresa,
@@ -119,6 +124,7 @@ class Compras
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':fec_ini', $fecIni);
         $stmt->bindValue(':fec_fin', $fecFin);
+        if ($cargo === 5) $stmt->bindValue(':asignado_usuario_id', $usuarioId, PDO::PARAM_INT);
         $stmt->execute();
 
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
@@ -147,6 +153,7 @@ class Compras
         $sql = "SELECT c.*,
                        p.usuario,
                        p2.usuario AS usuario_aprobador,
+                       p3.usuario AS usuario_asignado,
                        rc.ruc AS cliente_ruc,
                        rc.razon_social_empresa AS cliente_razon_social_empresa,
                        rc.direccion AS cliente_direccion,
@@ -163,10 +170,11 @@ class Compras
                        rc.vendedor_telefono AS cliente_vendedor_telefono,
                        rc.condiciones_economicas_dias AS cliente_condiciones_economicas_dias,
                        rc.condiciones_economicas_visible AS cliente_condiciones_economicas_visible
-                FROM receta_compras c
-                LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
-                LEFT JOIN personal p2 ON p2.IDPERSONAL = c.usuario_upd
-                LEFT JOIN receta_cliente rc ON rc.id_receta = c.id_receta_duplicada
+                 FROM receta_compras c
+                 LEFT JOIN personal p ON p.IDPERSONAL = c.usuario_id
+                 LEFT JOIN personal p2 ON p2.IDPERSONAL = c.usuario_upd
+                 LEFT JOIN personal p3 ON p3.IDPERSONAL = c.asignado_usuario_id
+                 LEFT JOIN receta_cliente rc ON rc.id_receta = c.id_receta_duplicada
                 WHERE MD5(c.id) = :hash
                 LIMIT 1";
         $stmt = $this->conn->prepare($sql);
@@ -648,6 +656,7 @@ class Compras
             ingenieria_id BIGINT UNSIGNED NOT NULL,
             id_receta_duplicada INT NULL DEFAULT NULL,
             usuario_id BIGINT UNSIGNED NOT NULL,
+            asignado_usuario_id INT NULL DEFAULT NULL,
             estado ENUM('Pendiente','Validado','Aprobada','Anulada') NULL DEFAULT 'Validado',
             created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -658,8 +667,15 @@ class Compras
             PRIMARY KEY (id),
             UNIQUE KEY uq_receta_compras_ingenieria (ingenieria_id),
             KEY idx_receta_compras_origen (id_receta_duplicada),
+            KEY idx_receta_compras_asignado (asignado_usuario_id),
             KEY idx_receta_compras_estado (estado)
         )");
+
+        $this->asegurarColumna('receta_compras', 'asignado_usuario_id', "ALTER TABLE receta_compras ADD COLUMN asignado_usuario_id INT NULL DEFAULT NULL AFTER usuario_id");
+        $stmtIndiceAsignacion = $this->conn->query("SHOW INDEX FROM receta_compras WHERE Key_name = 'idx_receta_compras_asignado'");
+        if (!$stmtIndiceAsignacion->fetch(PDO::FETCH_ASSOC)) {
+            $this->conn->exec("ALTER TABLE receta_compras ADD KEY idx_receta_compras_asignado (asignado_usuario_id)");
+        }
 
         $this->asegurarEstadoValidadoCompras();
 

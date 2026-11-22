@@ -8,6 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const historialCount = document.getElementById("historialIngenieriaCount");
     const historialInfo = document.getElementById("ingenieriaHistorialInfo");
     const historialPagination = document.getElementById("ingenieriaHistorialPagination");
+    const btnPrevalidarIngenieria = document.getElementById("btnPrevalidarIngenieria");
+    const btnAbrirValidarIngenieria = document.getElementById("btnAbrirValidarIngenieria");
+    const validarIngenieriaModalEl = document.getElementById("validarIngenieriaModal");
+    const usuarioComprasAsignado = document.getElementById("usuarioComprasAsignado");
+    const usuarioComprasMensaje = document.getElementById("usuarioComprasMensaje");
+    const btnConfirmarValidarIngenieria = document.getElementById("btnConfirmarValidarIngenieria");
+    const validarIngenieriaModal = validarIngenieriaModalEl ? new bootstrap.Modal(validarIngenieriaModalEl) : null;
 
     const baseSelect = document.getElementById("filterBase");
     const categoriaSelect = document.getElementById("categoria");
@@ -112,6 +119,13 @@ document.addEventListener("DOMContentLoaded", () => {
             event.preventDefault();
             guardarIngenieria();
         });
+        btnPrevalidarIngenieria?.addEventListener("click", prevalidarIngenieria);
+        btnAbrirValidarIngenieria?.addEventListener("click", () => validarIngenieriaModal?.show());
+        validarIngenieriaModalEl?.addEventListener("show.bs.modal", cargarUsuariosCompras);
+        usuarioComprasAsignado?.addEventListener("change", () => {
+            if (btnConfirmarValidarIngenieria) btnConfirmarValidarIngenieria.disabled = !usuarioComprasAsignado.value;
+        });
+        btnConfirmarValidarIngenieria?.addEventListener("click", validarYAsignarCompra);
 
         fields.condicionesModal?.addEventListener("show.bs.modal", renderCondicionesModal);
         fields.btnGuardarCondiciones?.addEventListener("click", guardarCondicionesComerciales);
@@ -234,13 +248,20 @@ document.addEventListener("DOMContentLoaded", () => {
         return Math.min(MAX_CANTIDAD, Math.max(1, parsed));
     }
 
+    function puedeEditarIngenieria() {
+        return Boolean(receta) && (
+            (userCargo === 6 && String(receta.estado || "").trim() === "GANADO")
+            || ([1, 3].includes(userCargo) && String(receta.estado || "").trim() === "GANADO - PREVALIDACION")
+        );
+    }
+
     function isIngenieriaAprobada() {
-        return ["aprobada", "validado"].includes(String(receta?.estado || "").trim().toLowerCase());
+        return !puedeEditarIngenieria();
     }
 
     function validarIngenieriaEditable() {
-        if (!isIngenieriaAprobada()) return true;
-        alertify.error("La ingeniería validada no permite modificar items");
+        if (puedeEditarIngenieria()) return true;
+        alertify.error("No tienes permisos para modificar la ingeniería en este estado");
         return false;
     }
 
@@ -279,6 +300,8 @@ document.addEventListener("DOMContentLoaded", () => {
             eliminar_item: "Eliminar item",
             cambiar_cantidad: "Cambiar cantidad",
             guardar_ingenieria: "Guardar ingeniería",
+            prevalidar_ingenieria: "Prevalidar ingeniería",
+            validar_ingenieria: "Validar y enviar a Compras",
         };
         return map[accion] || String(accion || "-").replace(/_/g, " ");
     }
@@ -289,6 +312,8 @@ document.addEventListener("DOMContentLoaded", () => {
             eliminar_item: "bg-danger-subtle text-danger",
             cambiar_cantidad: "bg-warning-subtle text-warning-emphasis",
             guardar_ingenieria: "bg-info-subtle text-info",
+            prevalidar_ingenieria: "bg-warning-subtle text-warning-emphasis",
+            validar_ingenieria: "bg-success-subtle text-success",
         };
         return map[accion] || "bg-secondary-subtle text-secondary";
     }
@@ -320,6 +345,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const totalOrigen = Number(antes.total_origen_dolares || 0).toFixed(2);
             const totalIngenieria = Number(despues.total_ingenieria_dolares || 0).toFixed(2);
             return `Total origen: $ ${escapeHtml(totalOrigen)}<br>Total ingeniería: $ ${escapeHtml(totalIngenieria)}`;
+        }
+
+        if (["prevalidar_ingenieria", "validar_ingenieria"].includes(accion)) {
+            const estado = despues.estado || "-";
+            const compra = despues.compra_id ? `<br>Compra asignada: #${escapeHtml(despues.compra_id)}` : "";
+            return `Estado: ${escapeHtml(estado)}${compra}`;
         }
 
         return "-";
@@ -390,7 +421,19 @@ document.addEventListener("DOMContentLoaded", () => {
         setText(fields.nombre, receta.nombre || "-");
         setText(fields.usuario, receta.usuario);
         setText(fields.aprobador, receta.usuario_aprobador);
-        if (fields.estado) fields.estado.innerHTML = `<span class="badge badge-outline-success">${escapeHtml(receta.estado || "GANADO")}</span>`;
+        const estadoActual = String(receta.estado || "GANADO").trim();
+        const estadoNormalizado = estadoActual.toLocaleUpperCase("es");
+        const claseEstado = estadoNormalizado === "GANADO"
+            ? "badge-outline-info"
+            : estadoNormalizado === "GANADO - PREVALIDACION"
+                ? "badge-outline-warning"
+                : "badge-outline-success";
+        const etiquetaEstado = estadoNormalizado === "GANADO - PREVALIDACION"
+            ? "Prevalidar"
+            : estadoNormalizado === "PREVALIDACION - VALIDADO"
+                ? "Validado"
+                : estadoActual;
+        if (fields.estado) fields.estado.innerHTML = `<span class="badge ingenieria-estado-badge ${claseEstado}" title="${escapeHtml(estadoActual)}">${escapeHtml(etiquetaEstado)}</span>`;
         setText(fields.fecha, receta.created_at);
         setText(fields.tipoCambio, Number(receta.tipo_cambio || 0).toFixed(3));
 
@@ -401,10 +444,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (fields.btnGuardarIngenieria) {
-            fields.btnGuardarIngenieria.disabled = isIngenieriaAprobada();
-            fields.btnGuardarIngenieria.classList.toggle("disabled", isIngenieriaAprobada());
-            fields.btnGuardarIngenieria.setAttribute("aria-disabled", isIngenieriaAprobada() ? "true" : "false");
+            fields.btnGuardarIngenieria.disabled = !puedeEditarIngenieria();
+            fields.btnGuardarIngenieria.classList.toggle("disabled", !puedeEditarIngenieria());
+            fields.btnGuardarIngenieria.setAttribute("aria-disabled", !puedeEditarIngenieria() ? "true" : "false");
         }
+        btnPrevalidarIngenieria?.classList.toggle("d-none", !(userCargo === 6 && String(receta.estado || "").trim() === "GANADO"));
+        btnAbrirValidarIngenieria?.classList.toggle("d-none", !([1, 3].includes(userCargo) && String(receta.estado || "").trim() === "GANADO - PREVALIDACION"));
+        tipoAgregadoRadios.forEach(radio => {
+            radio.disabled = !puedeEditarIngenieria() || (userCargo === 6 && radio.value !== "normal");
+        });
 
         if (fields.clienteRuc) fields.clienteRuc.value = cliente?.ruc || "";
         if (fields.clienteRazonSocial) fields.clienteRazonSocial.value = cliente?.razon_social_empresa || "";
@@ -725,6 +773,96 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    async function prevalidarIngenieria() {
+        if (userCargo !== 6 || String(receta?.estado || "").trim() !== "GANADO") {
+            alertify.error("Solo Ingeniería puede prevalidar recetas en estado GANADO");
+            return;
+        }
+        alertify.confirm(
+            "Prevalidar ingeniería",
+            "Se guardarán los cambios y la ingeniería quedará pendiente de validación por Administración o Supervisión. ¿Continuar?",
+            async () => {
+                btnPrevalidarIngenieria.disabled = true;
+                try {
+                    await guardarCantidadesPendientes();
+                    await post("controller/guardar_ingenieria.php", { hash });
+                    await post("controller/prevalidar_ingenieria.php", { hash });
+                    alertify.success("Ingeniería prevalidada y enviada a revisión");
+                    await loadIngenieria();
+                    if (historialBody) await cargarHistorialIngenieria(1);
+                } catch (error) {
+                    alertify.error(error.message || "No se pudo prevalidar la ingeniería");
+                } finally {
+                    btnPrevalidarIngenieria.disabled = false;
+                    renderHeader();
+                }
+            },
+            () => {}
+        );
+    }
+
+    async function cargarUsuariosCompras() {
+        if (!usuarioComprasAsignado) return;
+        usuarioComprasAsignado.replaceChildren(new Option("Cargando usuarios...", ""));
+        usuarioComprasAsignado.disabled = true;
+        if (usuarioComprasMensaje) usuarioComprasMensaje.textContent = "";
+        if (btnConfirmarValidarIngenieria) btnConfirmarValidarIngenieria.disabled = true;
+        try {
+            const response = await fetch("controller/get_usuarios_compras.php");
+            const data = await response.json();
+            if (!response.ok || !data.success || !Array.isArray(data.usuarios)) {
+                throw new Error(data.message || "No se pudieron cargar los usuarios de Compras");
+            }
+            usuarioComprasAsignado.replaceChildren(new Option("Selecciona un usuario...", ""));
+            data.usuarios.forEach(usuario => {
+                const label = String(usuario.nombre || usuario.usuario || `Usuario ${usuario.id}`).trim();
+                const cuenta = usuario.usuario ? ` · ${usuario.usuario}` : "";
+                usuarioComprasAsignado.add(new Option(`${label}${cuenta}`, String(usuario.id)));
+            });
+            usuarioComprasAsignado.disabled = data.usuarios.length === 0;
+            if (!data.usuarios.length) {
+                usuarioComprasAsignado.replaceChildren(new Option("No hay usuarios activos de Compras", ""));
+                if (usuarioComprasMensaje) usuarioComprasMensaje.textContent = "Activa o agrega un usuario con cargo Compras para continuar.";
+            }
+        } catch (error) {
+            usuarioComprasAsignado.replaceChildren(new Option("No se pudieron cargar usuarios", ""));
+            if (usuarioComprasMensaje) usuarioComprasMensaje.textContent = error.message || "Error al cargar usuarios";
+        }
+    }
+
+    async function validarYAsignarCompra() {
+        const compradorId = Number(usuarioComprasAsignado?.value || 0);
+        if (![1, 3].includes(userCargo) || String(receta?.estado || "").trim() !== "GANADO - PREVALIDACION") {
+            alertify.error("Solo Administración o Supervisión pueden validar una prevalidación");
+            return;
+        }
+        if (!compradorId) {
+            alertify.error("Selecciona un usuario de Compras");
+            return;
+        }
+
+        btnConfirmarValidarIngenieria.disabled = true;
+        const contenido = btnConfirmarValidarIngenieria.innerHTML;
+        btnConfirmarValidarIngenieria.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Validando...';
+        try {
+            await guardarCantidadesPendientes();
+            await post("controller/guardar_ingenieria.php", { hash });
+            const result = await post("controller/aprobar_ingenieria.php", {
+                id: String(receta.id),
+                comprador_id: String(compradorId)
+            });
+            alertify.success(`Ingeniería validada y asignada a Compras #${result.compra_id}`);
+            validarIngenieriaModal?.hide();
+            await loadIngenieria();
+            if (historialBody) await cargarHistorialIngenieria(1);
+        } catch (error) {
+            alertify.error(error.message || "No se pudo validar la ingeniería");
+        } finally {
+            btnConfirmarValidarIngenieria.innerHTML = contenido;
+            btnConfirmarValidarIngenieria.disabled = !usuarioComprasAsignado?.value;
+        }
+    }
+
     async function toggleNombre(save = false) {
         const editing = fields.nombreInput && !fields.nombreInput.classList.contains("d-none");
         if (!editing && !save) {
@@ -843,6 +981,22 @@ document.addEventListener("DOMContentLoaded", () => {
             alertify.error(error.message);
             await loadIngenieria();
             if (historialBody) await cargarHistorialIngenieria(1);
+        }
+    }
+
+    async function guardarCantidadesPendientes() {
+        const pendientes = Array.from(cantidadTimers.entries());
+        for (const [detalleId, timer] of pendientes) {
+            clearTimeout(timer);
+            cantidadTimers.delete(detalleId);
+            const item = detalle.find(row => Number(row.id) === Number(detalleId));
+            if (!item) continue;
+            await post("controller/upd_ingenieria_detalle.php", {
+                hash,
+                accion: "cantidad",
+                detalle_id: String(detalleId),
+                cantidad: String(clampCantidad(item.cantidad))
+            });
         }
     }
 

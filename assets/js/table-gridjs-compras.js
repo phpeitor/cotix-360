@@ -73,6 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             { id: "total_items", name: "", hidden: true },
             { id: "created_at", name: "Fecha", width: "170px" },
+            { id: "usuario_asignado", name: "Asignado a", width: "140px" },
             {
                 id: "acciones",
                 name: "Opciones",

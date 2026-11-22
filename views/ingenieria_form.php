@@ -2,7 +2,9 @@
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once ROOT . '/controller/check_session.php';
 $ocultarPreciosIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), [3, 6], true);
-$puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 8], true);
+$esCargoIngenieria = (int)($_SESSION['session_cargo'] ?? 0) === 6;
+$puedeValidarIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3], true);
+$puedeVerHistorialIngenieria = in_array((int)($_SESSION['session_cargo'] ?? 0), [1, 3, 8], true);
 $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
 ?>
 <!DOCTYPE html>
@@ -21,7 +23,7 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
     <link href="./assets/css/branding.css?v=1.7" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta.css?v=1.6" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/ingenieria_form.css?v=1.0" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/ingenieria_form.css?v=1.1" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -63,7 +65,7 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
                                     <input type="text" id="inputRecetaNombre" class="form-control form-control-sm d-none ingenieria-receta-name-input" placeholder="Nombre de la receta" <?= $puedeEditarNombreReceta ? '' : 'readonly' ?>>
                                 </div>
 
-                                <div class="row g-3 flex-grow-1 justify-content-center receta-meta-row">
+                                <div class="row g-3 flex-grow-1 justify-content-center receta-meta-row ingenieria-receta-meta-row">
                                     <div class="col-lg-3">
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="avatar-lg bg-light d-flex align-items-center justify-content-center rounded">
@@ -158,6 +160,12 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
                                     </div>
                                 </div>
                                 <div class="card-footer border-0 text-end">
+                                    <?php if ($esCargoIngenieria): ?>
+                                    <button type="button" class="btn btn-info me-2 d-none" id="btnPrevalidarIngenieria"><i class="ti ti-send me-1"></i>Prevalidar</button>
+                                    <?php endif; ?>
+                                    <?php if ($puedeValidarIngenieria): ?>
+                                    <button type="button" class="btn btn-primary me-2 d-none" id="btnAbrirValidarIngenieria"><i class="ti ti-check me-1"></i>Validar y enviar a Compras</button>
+                                    <?php endif; ?>
                                     <button type="submit" class="btn btn-success btn-icon" id="btnGuardarIngenieria" data-bs-toggle="tooltip" data-bs-title="Guardar receta">
                                         <i class="ti ti-device-floppy"></i>
                                     </button>
@@ -207,6 +215,29 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
         </div>
     </div>
 
+    <?php if ($puedeValidarIngenieria): ?>
+    <div class="modal fade" id="validarIngenieriaModal" tabindex="-1" aria-labelledby="validarIngenieriaModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header text-bg-primary border-0">
+                    <h5 class="modal-title" id="validarIngenieriaModalTitle">Validar prevalidación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Asigna la compra a un usuario activo del área de Compras. La ingeniería quedará validada y se creará su registro de compras.</p>
+                    <label class="form-label" for="usuarioComprasAsignado">Usuario de Compras</label>
+                    <select class="form-select" id="usuarioComprasAsignado"><option value="">Cargando usuarios...</option></select>
+                    <div class="small text-muted mt-2" id="usuarioComprasMensaje"></div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnConfirmarValidarIngenieria" disabled><i class="ti ti-check me-1"></i>Validar y asignar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
         <div class="modal-dialog ingenieria-search-dialog">
             <div class="modal-content">
@@ -238,13 +269,15 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
                                 <input type="radio" class="btn-check" name="tipoAgregadoIngenieria" id="tipoAgregadoNormal" value="normal" checked>
                                 <label class="btn btn-outline-dark" for="tipoAgregadoNormal"><i class="ti ti-circle me-1"></i> Normal</label>
 
+                                <?php if (!$esCargoIngenieria): ?>
                                 <input type="radio" class="btn-check" name="tipoAgregadoIngenieria" id="tipoAgregadoPositivo" value="adicional_positivo">
                                 <label class="btn btn-outline-success" for="tipoAgregadoPositivo"><i class="ti ti-plus me-1"></i> Adicional positivo</label>
 
                                 <input type="radio" class="btn-check" name="tipoAgregadoIngenieria" id="tipoAgregadoNegativo" value="adicional_negativo">
                                 <label class="btn btn-outline-danger" for="tipoAgregadoNegativo"><i class="ti ti-minus me-1"></i> Adicional negativo</label>
+                                <?php endif; ?>
                             </div>
-                            <span class="text-muted fs-12 d-block mt-2">Los adicionales se marcan para cálculos posteriores y no afectan el total validado de ingeniería.</span>
+                            <?php if (!$esCargoIngenieria): ?><span class="text-muted fs-12 d-block mt-2">Los adicionales se marcan para cálculos posteriores y no afectan el total validado de ingeniería.</span><?php endif; ?>
                         </div>
                         <div class="col-12">
                             <div id="productoFiltersWrap" class="row d-none">
@@ -409,6 +442,6 @@ $puedeEditarNombreReceta = (int)($_SESSION['session_cargo'] ?? 0) === 1;
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js?v=1.7"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="./assets/js/ingenieria_form.js?v=3.2"></script>
+    <script src="./assets/js/ingenieria_form.js?v=3.5"></script>
 </body>
 </html>
