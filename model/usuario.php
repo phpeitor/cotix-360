@@ -108,7 +108,14 @@ class Usuario {
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':online_since', $onlineSince);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($usuarios as &$usuario) {
+            $usuario['presence_search'] = ((int)$usuario['online'] === 1)
+                ? 'online en línea conectado'
+                : 'offline desconectado';
+        }
+        unset($usuario);
+        return $usuarios;
     }
 
     public function registrarPresencia(int $usuarioId): void

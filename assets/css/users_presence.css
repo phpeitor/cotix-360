@@ -14,33 +14,32 @@
 .user-presence-status {
     display: inline-flex;
     align-items: center;
-    gap: .3rem;
+    justify-content: center;
     flex: 0 0 auto;
-    padding: .18rem .4rem;
-    border-radius: 999px;
-    font-size: .68rem;
-    font-weight: 700;
-    line-height: 1.2;
-    white-space: nowrap;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 50%;
 }
 
 .user-presence-status.is-online {
-    color: #18794e;
     background: #e8f7ef;
 }
 
 .user-presence-status.is-offline {
-    color: #b42318;
     background: #fff0ee;
 }
 
 .user-presence-dot {
-    width: .45rem;
-    height: .45rem;
+    width: .48rem;
+    height: .48rem;
     border-radius: 50%;
-    background: currentColor;
 }
 
 .user-presence-status.is-online .user-presence-dot {
+    background: #18794e;
     box-shadow: 0 0 0 3px rgba(24, 121, 78, .12);
+}
+
+.user-presence-status.is-offline .user-presence-dot {
+    background: #b42318;
 }

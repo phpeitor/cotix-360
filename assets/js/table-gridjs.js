@@ -75,8 +75,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     return gridjs.html(`
                         <div class="user-presence-cell">
                             <span class="user-presence-name">${escapeHtml(cell || "-")}</span>
-                            <span class="user-presence-status ${online ? "is-online" : "is-offline"}" title="${label}" aria-label="${label}">
-                                <span class="user-presence-dot"></span>${label}
+                            <span class="user-presence-status ${online ? "is-online" : "is-offline"}"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="left"
+                                data-bs-title="${label}"
+                                aria-label="${label}">
+                                <span class="user-presence-dot"></span>
                             </span>
                         </div>
                     `);
@@ -179,6 +183,11 @@ document.addEventListener("DOMContentLoaded", () => {
             {
                 id: "online",
                 name: "Online",
+                hidden: true
+            },
+            {
+                id: "presence_search",
+                name: "Estado de presencia",
                 hidden: true
             }
         ],
