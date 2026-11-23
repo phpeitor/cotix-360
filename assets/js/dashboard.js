@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 puzzleSlot.classList.remove("has-tab-right", "has-tab-bottom", "is-ready", "is-snapping");
                 puzzleSlot.style.gridRow = "";
                 puzzleSlot.style.gridColumn = "";
-                puzzleSlot.setAttribute("aria-label", "Espacio para una pieza de COTIX360");
+                puzzleSlot.setAttribute("aria-label", "Espacio vacío para completar COTIX360");
             }
             if (movingLetter) movingLetter.textContent = "?";
             if (slotLetter) slotLetter.textContent = "";
@@ -42,8 +42,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             puzzleSlot.style.gridColumn = String(missingTile.dataset.puzzleColumn || "1");
             puzzleSlot.classList.toggle("has-tab-right", missingTile.classList.contains("has-tab-right"));
             puzzleSlot.classList.toggle("has-tab-bottom", missingTile.classList.contains("has-tab-bottom"));
-            puzzleSlot.setAttribute("aria-label", `Espacio para la pieza ${letter} de COTIX360`);
-            slotLetter.textContent = letter;
+            puzzleSlot.setAttribute("aria-label", `Espacio vacío para la pieza ${letter} de COTIX360`);
+            slotLetter.textContent = "";
             movingLetter.textContent = letter;
         };
 
@@ -79,6 +79,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             const actionLabel = upgradeButton.querySelector(".dashboard-upgrade-action-label");
             if (actionLabel) actionLabel.textContent = "Listo";
             if (upgradeHint) upgradeHint.textContent = "Reto completado. Contacta a Administración para confirmar la activación.";
+            if (slotLetter && movingLetter) {
+                slotLetter.textContent = movingLetter.textContent;
+                puzzleSlot?.setAttribute("aria-label", `COTIX360 completado, pieza ${movingLetter.textContent} encajada`);
+            }
         };
 
         const snapPieceIntoSlot = () => {
