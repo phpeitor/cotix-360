@@ -221,6 +221,7 @@ un botón o una columna en la interfaz nunca reemplaza la autorización del endp
 - `controller/get_perfil.php`: consulta el perfil del usuario autenticado.
 - `controller/upd_perfil.php`: actualiza datos permitidos y contraseña.
 - `controller/presence_ping.php`: actualiza presencia.
+- `controller/global_search.php`: buscador global; las consultas están centralizadas en `model/global_search.php`.
 
 ### Recetas
 

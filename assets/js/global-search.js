@@ -29,7 +29,8 @@
         cotizaciones: "Cotizaciones",
         recetas: "Recetas",
         items: "Items",
-        compras: "Compras"
+        compras: "Compras",
+        tracking: "Trackings"
     };
 
     const normalize = value => String(value || "")
