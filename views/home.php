@@ -15,7 +15,7 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/branding.css?v=1.9" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/dashboard.css?v=2.7" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/dashboard.css?v=2.8" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
@@ -364,6 +364,7 @@ require_once ROOT . '/controller/check_session.php';
                                                 <span class="dashboard-puzzle-piece piece-c has-tab-right has-tab-bottom" data-puzzle-letter="T" data-puzzle-row="1" data-puzzle-column="3">T</span>
                                                 <span class="dashboard-puzzle-piece piece-d has-tab-bottom" data-puzzle-letter="I" data-puzzle-row="1" data-puzzle-column="4">I</span>
                                                 <span class="dashboard-puzzle-piece piece-e has-tab-right" data-puzzle-letter="X" data-puzzle-row="2" data-puzzle-column="1">X</span>
+                                                <span class="dashboard-puzzle-piece piece-h has-tab-right" data-puzzle-letter="3" data-puzzle-row="2" data-puzzle-column="2">3</span>
                                                 <span class="dashboard-puzzle-piece piece-f has-tab-right" data-puzzle-letter="6" data-puzzle-row="2" data-puzzle-column="3">6</span>
                                                 <span class="dashboard-puzzle-piece piece-g" data-puzzle-letter="0" data-puzzle-row="2" data-puzzle-column="4">0</span>
                                                 <button type="button" class="dashboard-puzzle-slot has-tab-right" id="dashboardPuzzleSlot" aria-label="Espacio vacío para completar COTIX360" hidden><span class="dashboard-puzzle-slot-letter"></span><i class="ti ti-check"></i></button>
