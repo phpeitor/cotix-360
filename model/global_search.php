@@ -100,14 +100,51 @@ class GlobalSearch
     public function buscarCompras(string $like): array
     {
         $stmt = $this->conn->prepare(
-            "SELECT MD5(c.id) AS hash_id, c.id, c.estado
+            "SELECT MD5(c.id) AS hash_id, c.id, c.estado,
+                    c.nombre,
+                    rc.razon_social_empresa,
+                    rc.ruc
              FROM receta_compras c
+             LEFT JOIN receta_cliente rc ON rc.id_receta = c.id_receta_duplicada
              WHERE CAST(c.id AS CHAR) LIKE :q
                 OR c.estado LIKE :q
+                OR c.nombre LIKE :q
+                OR rc.razon_social_empresa LIKE :q
+                OR rc.ruc LIKE :q
              ORDER BY c.id DESC
              LIMIT 5"
         );
         $stmt->execute(['q' => $like]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function buscarIngenieria(string $like, int $cargo, int $usuarioId): array
+    {
+        $where = "(CAST(i.id AS CHAR) LIKE :q
+                   OR i.nombre LIKE :q
+                   OR i.estado LIKE :q
+                   OR p.usuario LIKE :q
+                   OR rc.razon_social_empresa LIKE :q
+                   OR rc.ruc LIKE :q)";
+        $params = ['q' => $like];
+        if (!in_array($cargo, [1, 3, 8], true)) {
+            $where .= " AND i.usuario_id = :usuario_id";
+            $params['usuario_id'] = $usuarioId;
+        }
+
+        $stmt = $this->conn->prepare(
+            "SELECT MD5(i.id) AS hash_id, i.id, i.nombre, i.estado,
+                    p.usuario,
+                    rc.razon_social_empresa,
+                    rc.ruc
+             FROM recetas_ingenieria i
+             LEFT JOIN personal p ON p.IDPERSONAL = i.usuario_id
+             LEFT JOIN receta_cliente rc ON rc.id_receta = i.id_receta_duplicada
+             WHERE $where
+             ORDER BY i.id DESC
+             LIMIT 5"
+        );
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

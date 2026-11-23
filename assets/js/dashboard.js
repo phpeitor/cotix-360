@@ -1,5 +1,216 @@
 document.addEventListener("DOMContentLoaded", async () => {
 
+    const upgradeCard = document.getElementById("dashboardUpgradeCard");
+    const upgradeButton = document.getElementById("dashboardUpgradeActivate");
+    const puzzlePiece = document.getElementById("dashboardPuzzlePiece");
+    const upgradeHint = document.getElementById("dashboardUpgradeHint");
+    if (upgradeCard && upgradeButton && puzzlePiece) {
+        const puzzleSlot = upgradeCard.querySelector(".dashboard-puzzle-slot");
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        let dragging = false;
+        let dragGhost = null;
+        let snapTimer = 0;
+        let puzzleIntroTimer = 0;
+        const snapDuration = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? 60 : 460;
+        const puzzleIntroDuration = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? 0 : 180;
+
+        const resetPiece = () => {
+            puzzlePiece.classList.remove("is-dragging", "is-snapping");
+            puzzlePiece.style.opacity = "";
+            puzzlePiece.style.left = "";
+            puzzlePiece.style.top = "";
+            puzzlePiece.style.position = "";
+            puzzlePiece.style.transform = "";
+            puzzlePiece.style.right = "";
+            puzzlePiece.style.bottom = "";
+            if (dragGhost) {
+                dragGhost.remove();
+                dragGhost = null;
+            }
+        };
+
+        const completePuzzle = () => {
+            if (upgradeCard.classList.contains("is-complete")) return;
+            window.clearTimeout(snapTimer);
+            window.clearTimeout(puzzleIntroTimer);
+            dragging = false;
+            upgradeCard.classList.remove("is-puzzle-ready", "is-activating", "is-completing");
+            upgradeCard.classList.add("is-complete");
+            puzzlePiece.disabled = true;
+            puzzlePiece.classList.remove("is-dragging", "is-wrong", "is-snapping");
+            puzzlePiece.style.opacity = "";
+            dragGhost?.remove();
+            dragGhost = null;
+            puzzleSlot?.classList.remove("is-ready");
+            upgradeButton.disabled = true;
+            const actionLabel = upgradeButton.querySelector(".dashboard-upgrade-action-label");
+            if (actionLabel) actionLabel.textContent = "Listo";
+            if (upgradeHint) upgradeHint.textContent = "Reto completado. Contacta a Administración para confirmar la activación.";
+        };
+
+        const snapPieceIntoSlot = () => {
+            if (upgradeCard.classList.contains("is-completing") || upgradeCard.classList.contains("is-complete")) return;
+            const slotRect = puzzleSlot?.getBoundingClientRect();
+            if (!slotRect) {
+                resetPiece();
+                return;
+            }
+            dragging = false;
+            upgradeCard.classList.add("is-completing");
+            upgradeButton.disabled = true;
+            puzzleSlot.classList.add("is-ready", "is-snapping");
+            if (upgradeHint) upgradeHint.textContent = "Encajando la ficha…";
+
+            const puzzleRect = upgradeCard.querySelector(".dashboard-puzzle").getBoundingClientRect();
+            const hadGhost = Boolean(dragGhost);
+            if (!hadGhost) {
+                puzzlePiece.style.position = "absolute";
+                puzzlePiece.style.left = `${slotRect.left - puzzleRect.left}px`;
+                puzzlePiece.style.top = `${slotRect.top - puzzleRect.top}px`;
+                puzzlePiece.style.transform = "none";
+                puzzlePiece.style.opacity = "1";
+                puzzlePiece.classList.add("is-snapping");
+            } else {
+                puzzlePiece.style.opacity = ".18";
+                const targetLeft = slotRect.left + (slotRect.width - dragGhost.offsetWidth) / 2;
+                const targetTop = slotRect.top + (slotRect.height - dragGhost.offsetHeight) / 2;
+                dragGhost.classList.add("is-snapping");
+                requestAnimationFrame(() => {
+                    if (!dragGhost) return;
+                    dragGhost.style.left = `${targetLeft}px`;
+                    dragGhost.style.top = `${targetTop}px`;
+                    dragGhost.style.transform = "rotate(180deg) scale(.86)";
+                });
+            }
+
+            snapTimer = window.setTimeout(() => {
+                dragGhost?.remove();
+                dragGhost = null;
+                if (hadGhost) {
+                    const finalPuzzleRect = upgradeCard.querySelector(".dashboard-puzzle").getBoundingClientRect();
+                    puzzlePiece.style.position = "absolute";
+                    puzzlePiece.style.left = `${slotRect.left - finalPuzzleRect.left}px`;
+                    puzzlePiece.style.top = `${slotRect.top - finalPuzzleRect.top}px`;
+                    puzzlePiece.style.transform = "none";
+                    puzzlePiece.style.opacity = "1";
+                }
+                puzzleSlot.classList.remove("is-snapping");
+                completePuzzle();
+            }, snapDuration);
+        };
+
+        upgradeButton.addEventListener("click", () => {
+            if (upgradeCard.classList.contains("is-complete") || upgradeCard.classList.contains("is-completing")) return;
+            if (upgradeCard.classList.contains("is-puzzle-ready")) {
+                window.clearTimeout(puzzleIntroTimer);
+                upgradeCard.classList.remove("is-puzzle-ready", "is-activating");
+                puzzleSlot?.classList.remove("is-ready");
+                puzzlePiece.disabled = false;
+                upgradeButton.querySelector(".dashboard-upgrade-action-label").textContent = "Activar";
+                if (upgradeHint) upgradeHint.textContent = "Completa el reto visual para continuar con tu actualización.";
+                resetPiece();
+                return;
+            }
+            upgradeCard.classList.add("is-puzzle-ready");
+            upgradeCard.classList.add("is-activating");
+            upgradeButton.querySelector(".dashboard-upgrade-action-label").textContent = "Cancelar";
+            puzzleSlot?.classList.add("is-ready");
+            if (upgradeHint) upgradeHint.textContent = puzzleIntroDuration ? "Preparando el rompecabezas…" : "Arrastra la ficha dorada al espacio vacío o pulsa Enter.";
+            puzzlePiece.disabled = true;
+            puzzleIntroTimer = window.setTimeout(() => {
+                if (!upgradeCard.classList.contains("is-puzzle-ready") || upgradeCard.classList.contains("is-complete")) return;
+                puzzlePiece.disabled = false;
+                if (upgradeHint) upgradeHint.textContent = "Arrastra la ficha dorada al espacio vacío o pulsa Enter.";
+                puzzlePiece.focus();
+            }, puzzleIntroDuration);
+        });
+
+        puzzlePiece.addEventListener("pointerdown", event => {
+            if (upgradeCard.classList.contains("is-complete")) return;
+            if (!upgradeCard.classList.contains("is-puzzle-ready")) return;
+            event.preventDefault();
+            dragging = true;
+            const rect = puzzlePiece.getBoundingClientRect();
+            dragOffsetX = event.clientX - rect.left;
+            dragOffsetY = event.clientY - rect.top;
+            puzzlePiece.classList.add("is-dragging");
+            puzzlePiece.style.opacity = ".28";
+            dragGhost = puzzlePiece.cloneNode(true);
+            dragGhost.removeAttribute("id");
+            dragGhost.setAttribute("aria-hidden", "true");
+            dragGhost.className = "dashboard-puzzle-moving is-dragging dashboard-puzzle-ghost";
+            dragGhost.disabled = true;
+            dragGhost.style.left = `${rect.left}px`;
+            dragGhost.style.top = `${rect.top}px`;
+            dragGhost.style.position = "fixed";
+            dragGhost.style.zIndex = "1200";
+            dragGhost.style.transform = "none";
+            dragGhost.style.opacity = "1";
+            dragGhost.style.pointerEvents = "none";
+            document.body.appendChild(dragGhost);
+            puzzlePiece.setPointerCapture?.(event.pointerId);
+        });
+
+        puzzlePiece.addEventListener("pointermove", event => {
+            if (!dragging) return;
+            event.preventDefault();
+            if (dragGhost) {
+                dragGhost.style.left = `${event.clientX - dragOffsetX}px`;
+                dragGhost.style.top = `${event.clientY - dragOffsetY}px`;
+            }
+
+            const slotRect = puzzleSlot?.getBoundingClientRect();
+            if (slotRect) {
+                const ghostRect = dragGhost?.getBoundingClientRect();
+                const pieceCenterX = ghostRect ? ghostRect.left + ghostRect.width / 2 : event.clientX;
+                const pieceCenterY = ghostRect ? ghostRect.top + ghostRect.height / 2 : event.clientY;
+                const nearSlot = pieceCenterX >= slotRect.left - 15
+                    && pieceCenterX <= slotRect.right + 15
+                    && pieceCenterY >= slotRect.top - 15
+                    && pieceCenterY <= slotRect.bottom + 15;
+                puzzleSlot.classList.toggle("is-ready", nearSlot);
+            }
+        });
+
+        puzzlePiece.addEventListener("pointerup", event => {
+            if (!dragging) return;
+            puzzlePiece.releasePointerCapture?.(event.pointerId);
+            dragging = false;
+            const slotRect = puzzleSlot?.getBoundingClientRect();
+            const ghostRect = dragGhost?.getBoundingClientRect();
+            const pieceCenterX = ghostRect ? ghostRect.left + ghostRect.width / 2 : event.clientX;
+            const pieceCenterY = ghostRect ? ghostRect.top + ghostRect.height / 2 : event.clientY;
+            if (slotRect
+                && pieceCenterX >= slotRect.left - 18
+                && pieceCenterX <= slotRect.right + 18
+                && pieceCenterY >= slotRect.top - 18
+                && pieceCenterY <= slotRect.bottom + 18) {
+                snapPieceIntoSlot();
+            } else {
+                resetPiece();
+                if (upgradeHint) upgradeHint.textContent = "Casi. Prueba encajar la ficha en el espacio vacío.";
+            }
+        });
+
+        puzzlePiece.addEventListener("pointercancel", () => {
+            if (upgradeCard.classList.contains("is-completing")) return;
+            dragging = false;
+            resetPiece();
+        });
+
+        puzzlePiece.addEventListener("keydown", event => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            if (upgradeCard.classList.contains("is-puzzle-ready")) snapPieceIntoSlot();
+        });
+
+        puzzleSlot?.addEventListener("click", () => {
+            if (!upgradeCard.classList.contains("is-puzzle-ready")) return;
+            snapPieceIntoSlot();
+        });
+    }
+
     const cotizacionesContainer = document.getElementById("dashboard-cotizaciones");
     const recetasContainer      = document.getElementById("dashboard-recetas");
     const itemsContainer        = document.getElementById("dashboard-items");

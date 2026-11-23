@@ -28,10 +28,373 @@
 }
 
 .dashboard-upgrade-card {
+    position: relative;
+    isolation: isolate;
+    min-height: 238px;
+    overflow: hidden;
+    transition: background-color .35s ease, transform .25s ease;
     background-image: url("../images/png/arrows.svg");
     background-repeat: no-repeat;
     background-position: right bottom;
     background-size: contain;
+}
+
+.dashboard-upgrade-content,
+.dashboard-upgrade-action,
+.dashboard-upgrade-success {
+    position: relative;
+    z-index: 3;
+}
+
+.dashboard-upgrade-content {
+    transition: opacity .25s ease, transform .35s ease;
+}
+
+.dashboard-upgrade-content > p {
+    max-width: 260px;
+    line-height: 1.45;
+}
+
+.dashboard-upgrade-action {
+    min-width: 82px;
+    transition: opacity .2s ease, transform .25s ease, background-color .25s ease;
+}
+
+.dashboard-upgrade-action-loading {
+    display: none;
+}
+
+.dashboard-upgrade-action-loading i {
+    display: inline-block;
+}
+
+.dashboard-upgrade-success {
+    display: flex;
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 34px;
+    border: 1px solid rgba(25, 135, 84, .18);
+    border-radius: 999px;
+    background: rgba(255,255,255,.82);
+    color: #198754;
+    font-size: .82rem;
+    font-weight: 800;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity .25s ease, transform .35s cubic-bezier(.2,.8,.2,1);
+}
+
+.dashboard-puzzle {
+    position: absolute;
+    z-index: 2;
+    right: -16px;
+    bottom: -12px;
+    width: 170px;
+    height: 142px;
+    opacity: .32;
+    transform: scale(.92) rotate(-4deg);
+    transition: opacity .35s ease, transform .5s cubic-bezier(.2,.8,.2,1);
+}
+
+.dashboard-puzzle-board {
+    display: grid;
+    position: absolute;
+    right: 20px;
+    bottom: 18px;
+    grid-template-columns: repeat(3, 38px);
+    grid-template-rows: repeat(3, 38px);
+    gap: 3px;
+    transform: rotate(2deg);
+}
+
+.dashboard-puzzle-piece,
+.dashboard-puzzle-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(122, 91, 0, .12);
+    border-radius: 8px 10px 8px 11px;
+    background: rgba(255, 193, 7, .34);
+    box-shadow: 0 5px 12px -9px rgba(122, 91, 0, .55);
+}
+
+.dashboard-puzzle-piece:nth-child(3n + 1) { border-radius: 11px 8px 12px 7px; }
+.dashboard-puzzle-piece:nth-child(2n) { background: rgba(255, 205, 57, .42); }
+
+.piece-a { grid-area: 1 / 1; }
+.piece-b { grid-area: 1 / 2; }
+.piece-c { grid-area: 1 / 3; }
+.piece-d { grid-area: 2 / 1; }
+.piece-e { grid-area: 2 / 2; }
+.piece-f { grid-area: 2 / 3; }
+.piece-g { grid-area: 3 / 1; }
+.piece-h { grid-area: 3 / 2; }
+
+.dashboard-puzzle-slot {
+    grid-area: 3 / 3;
+    border: 1px dashed rgba(122, 91, 0, .32);
+    background: rgba(255,255,255,.25);
+    color: #198754;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.dashboard-puzzle-slot i {
+    font-size: 16px;
+    opacity: 0;
+    transform: scale(.4);
+}
+
+.dashboard-puzzle-moving {
+    display: flex;
+    position: absolute;
+    z-index: 5;
+    left: 20px;
+    top: 18px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(122, 91, 0, .18);
+    border-radius: 8px 11px 7px 12px;
+    background: #ffd966;
+    overflow: visible;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    transform: none;
+    transition: opacity .25s ease;
+}
+
+.dashboard-puzzle-moving::before,
+.dashboard-puzzle-moving::after {
+    position: absolute;
+    z-index: 2;
+    width: 11px;
+    height: 11px;
+    border: 1px solid rgba(122, 91, 0, .18);
+    border-radius: 50%;
+    background: #ffd966;
+    content: "";
+    pointer-events: none;
+}
+
+.dashboard-puzzle-moving::before { top: -6px; left: 12px; border-bottom-color: transparent; }
+.dashboard-puzzle-moving::after { top: 12px; right: -6px; border-left-color: transparent; }
+
+.dashboard-puzzle-moving i {
+    display: flex;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(122, 91, 0, .18);
+    border-radius: 8px 11px 7px 12px;
+    background: #ffd966;
+    color: #7a5b00;
+    box-shadow: 0 10px 18px -12px rgba(122, 91, 0, .7);
+    font-size: 17px;
+    pointer-events: none;
+}
+
+.dashboard-puzzle-moving:active {
+    cursor: grabbing;
+}
+
+.dashboard-puzzle-moving:focus-visible {
+    outline: 3px solid rgba(49,95,147,.22);
+    outline-offset: 3px;
+}
+
+.dashboard-puzzle-moving.is-dragging {
+    z-index: 12;
+    transition: none;
+}
+
+.dashboard-puzzle-moving.is-snapping {
+    transition: left .42s cubic-bezier(.2,.85,.25,1), top .42s cubic-bezier(.2,.85,.25,1), transform .42s cubic-bezier(.2,.85,.25,1), opacity .2s ease;
+}
+
+.dashboard-puzzle-moving.is-dragging i {
+    box-shadow: 0 14px 24px -10px rgba(122,91,0,.48);
+    transform: scale(1.08) rotate(3deg);
+}
+
+.dashboard-puzzle-moving.is-snapping i,
+.dashboard-puzzle-ghost.is-snapping {
+    transition: left .42s cubic-bezier(.2,.85,.25,1), top .42s cubic-bezier(.2,.85,.25,1), transform .42s cubic-bezier(.2,.85,.25,1);
+}
+
+.dashboard-puzzle-moving.is-snapping i {
+    transform: rotate(180deg) scale(.86);
+}
+
+.dashboard-puzzle-ghost {
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(122,91,0,.18);
+    border-radius: 8px 11px 7px 12px;
+    background: #ffd966;
+    box-shadow: 0 14px 24px -10px rgba(122,91,0,.48);
+    cursor: grabbing;
+    pointer-events: none;
+}
+
+.dashboard-puzzle-moving.is-wrong {
+    animation: puzzle-piece-wrong .42s ease;
+}
+
+.dashboard-puzzle-slot.is-ready {
+    border-style: solid;
+    background: rgba(255,255,255,.55);
+    box-shadow: 0 0 0 5px rgba(25,135,84,.08);
+}
+
+.dashboard-puzzle-slot.is-snapping {
+    background: rgba(25,135,84,.18);
+    border-color: rgba(25,135,84,.6);
+    transform: scale(1.08);
+    animation: puzzle-slot-pulse .42s ease-in-out infinite alternate;
+}
+
+.dashboard-upgrade-card.is-activating {
+    background-color: rgba(255, 193, 7, .12);
+}
+
+.dashboard-upgrade-card.is-activating .dashboard-upgrade-content {
+    transform: translateY(-2px);
+}
+
+.dashboard-upgrade-card.is-completing {
+    background-color: rgba(61, 144, 107, .12);
+}
+
+.dashboard-upgrade-card.is-complete {
+    background-color: rgba(61, 144, 107, .1);
+}
+
+.dashboard-upgrade-card.is-activating .dashboard-puzzle,
+.dashboard-upgrade-card.is-puzzle-ready .dashboard-puzzle,
+.dashboard-upgrade-card.is-completing .dashboard-puzzle,
+.dashboard-upgrade-card.is-complete .dashboard-puzzle {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    z-index: 4;
+    width: 170px;
+    height: 142px;
+    margin: 0 0 8px auto;
+    pointer-events: auto;
+    opacity: 1;
+    transform: none;
+}
+
+.dashboard-upgrade-card.is-puzzle-ready .dashboard-puzzle,
+.dashboard-upgrade-card.is-complete .dashboard-puzzle {
+    opacity: 1;
+}
+
+.dashboard-upgrade-card.is-puzzle-ready .dashboard-puzzle-moving,
+.dashboard-upgrade-card.is-complete .dashboard-puzzle-moving {
+    opacity: 1;
+}
+
+.dashboard-upgrade-card.is-puzzle-ready .dashboard-upgrade-action-label {
+    display: inline;
+}
+
+.dashboard-upgrade-card.is-puzzle-ready .dashboard-upgrade-action {
+    min-width: 112px;
+    opacity: .92;
+    background: #fff;
+    color: #7a5b00;
+}
+
+.dashboard-upgrade-card.is-puzzle-ready .dashboard-upgrade-action::before {
+    content: none;
+}
+
+.dashboard-upgrade-card.is-puzzle-ready .dashboard-upgrade-action-loading {
+    display: none;
+}
+
+.dashboard-upgrade-card.is-complete .dashboard-upgrade-action {
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+}
+
+.dashboard-upgrade-card.is-complete .dashboard-puzzle-moving {
+    opacity: 0;
+}
+
+.dashboard-upgrade-card.is-complete .dashboard-puzzle-slot i {
+    animation: puzzle-check .35s cubic-bezier(.2,.9,.3,1.2) .1s forwards;
+}
+
+.dashboard-upgrade-card.is-complete .dashboard-puzzle-board {
+    animation: puzzle-board-success .55s cubic-bezier(.2,.8,.2,1);
+}
+
+.dashboard-upgrade-card.is-complete .dashboard-puzzle-slot {
+    border-color: rgba(25,135,84,.4);
+    background: rgba(25,135,84,.14);
+    animation: none;
+}
+
+.dashboard-upgrade-card.is-complete .dashboard-upgrade-content {
+    transform: translateY(-3px);
+}
+
+.dashboard-upgrade-card.is-complete .dashboard-upgrade-success {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes puzzle-check {
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes puzzle-board-success {
+    35% { filter: drop-shadow(0 0 10px rgba(25,135,84,.42)); transform: rotate(-2deg) scale(1.08); }
+    100% { filter: drop-shadow(0 0 0 rgba(25,135,84,0)); transform: rotate(2deg) scale(1); }
+}
+
+@keyframes puzzle-slot-pulse {
+    to { box-shadow: 0 0 0 7px rgba(25,135,84,.14); }
+}
+
+@keyframes puzzle-piece-wrong {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-7px) rotate(-4deg); }
+    55% { transform: translateX(7px) rotate(4deg); }
+    80% { transform: translateX(-3px) rotate(-2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-upgrade-card,
+    .dashboard-upgrade-content,
+    .dashboard-upgrade-action,
+    .dashboard-upgrade-success,
+    .dashboard-puzzle,
+    .dashboard-puzzle-slot,
+    .dashboard-puzzle-slot i,
+    .dashboard-puzzle-moving.is-snapping,
+    .dashboard-puzzle-ghost.is-snapping {
+        transition-duration: .01ms;
+        animation-duration: .01ms;
+        animation-iteration-count: 1;
+    }
+
+    .dashboard-puzzle-moving.is-wrong {
+        animation: none;
+    }
 }
 .dashboard-card-change {
     display: inline-flex;

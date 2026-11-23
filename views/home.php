@@ -15,7 +15,7 @@ require_once ROOT . '/controller/check_session.php';
     <link href="./assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/branding.css?v=1.9" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/dashboard.css?v=1.2" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/dashboard.css?v=2.6" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
@@ -351,11 +351,38 @@ require_once ROOT . '/controller/check_session.php';
 
                             <div class="card-body">
                                 <div class="card mb-0 bg-warning bg-opacity-25">
-                                    <div class="card-body dashboard-upgrade-card">
-                                        <h1><i class="ti ti-receipt-tax text-warning"></i></h1>
-                                        <h4 class="text-warning">Actualizar a Profesional</h4>
-                                        <p class="text-warning text-opacity-75">Le recomendamos que revise sus transacciones recientes.</p>
-                                        <a href="#!" class="btn btn-sm rounded-pill btn-info">Activar</a>
+                                    <div class="card-body dashboard-upgrade-card" id="dashboardUpgradeCard">
+                                        <div class="dashboard-upgrade-content">
+                                            <h1><i class="ti ti-receipt-tax text-warning"></i></h1>
+                                            <h4 class="text-warning">Actualizar a Profesional</h4>
+                                            <p class="text-warning text-opacity-75" id="dashboardUpgradeHint" aria-live="polite">Completa el reto visual para continuar con tu actualización.</p>
+                                        </div>
+                                        <div class="dashboard-puzzle">
+                                            <div class="dashboard-puzzle-board">
+                                                <span class="dashboard-puzzle-piece piece-a"></span>
+                                                <span class="dashboard-puzzle-piece piece-b"></span>
+                                                <span class="dashboard-puzzle-piece piece-c"></span>
+                                                <span class="dashboard-puzzle-piece piece-d"></span>
+                                                <span class="dashboard-puzzle-piece piece-e"></span>
+                                                <span class="dashboard-puzzle-piece piece-f"></span>
+                                                <span class="dashboard-puzzle-piece piece-g"></span>
+                                                <span class="dashboard-puzzle-piece piece-h"></span>
+                                                <button type="button" class="dashboard-puzzle-slot" id="dashboardPuzzleSlot" aria-label="Encajar la ficha en el espacio vacío"><i class="ti ti-check"></i></button>
+                                            </div>
+                                            <button type="button" class="dashboard-puzzle-moving" id="dashboardPuzzlePiece" aria-label="Arrastra esta ficha al espacio vacío o pulsa Enter" title="Arrastra la ficha al espacio vacío" disabled>
+                                                <i class="ti ti-puzzle"></i>
+                                            </button>
+                                        </div>
+                                        <button type="button" class="btn btn-sm rounded-pill btn-info dashboard-upgrade-action" id="dashboardUpgradeActivate">
+                                            <span class="dashboard-upgrade-action-label">Activar</span>
+                                            <span class="dashboard-upgrade-action-loading" aria-hidden="true">
+                                                <i class="ti ti-loader-2"></i>
+                                            </span>
+                                        </button>
+                                        <div class="dashboard-upgrade-success" aria-live="polite">
+                                            <i class="ti ti-circle-check-filled"></i>
+                                            <span>Reto completado</span>
+                                        </div>
                                     </div> <!-- end card-body-->
                                 </div> <!-- end card-->
                             </div>
@@ -375,7 +402,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
     <script src="./assets/js/dashboard-sales.js?v=1.2"></script>
-    <script src="./assets/js/dashboard.js?v=1.4"></script>
+    <script src="./assets/js/dashboard.js?v=2.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>

@@ -43,6 +43,13 @@ document.addEventListener("DOMContentLoaded", () => {
         defaultDate: [pastDate, today]
     });
     dateInput.value = `${formatFlatpickr(pastDate)} to ${formatFlatpickr(today)}`;
+    const initialParams = new URLSearchParams(window.location.search);
+    if (!codigoInput?.value) {
+        codigoInput.value = String(initialParams.get("cod_tracking") || "").trim();
+    }
+    if (!rucInput?.value) {
+        rucInput.value = String(initialParams.get("ruc") || "").trim();
+    }
 
     const grid = new gridjs.Grid({
         columns: [

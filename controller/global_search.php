@@ -73,17 +73,26 @@ try {
     if (tieneAcceso('compras.php')) {
         $data['compras'] = array_map(static fn(array $row) => [
             'title' => 'Compra #' . $row['id'],
-            'subtitle' => $row['estado'] ?: 'Compra',
+            'subtitle' => trim(($row['nombre'] ?: '') . ($row['razon_social_empresa'] ? ' · ' . $row['razon_social_empresa'] : '') . ($row['estado'] ? ' · ' . $row['estado'] : '')),
             'href' => 'compras_detalle.php?id=' . $row['hash_id'],
             'icon' => 'ti ti-shopping-cart'
         ], $model->buscarCompras($like));
+    }
+
+    if (tieneAcceso('ingenieria.php')) {
+        $data['ingenieria'] = array_map(static fn(array $row) => [
+            'title' => $row['nombre'] ?: 'Ingeniería #' . $row['id'],
+            'subtitle' => trim(($row['razon_social_empresa'] ?: '') . ($row['ruc'] ? ' · RUC ' . $row['ruc'] : '') . ($row['estado'] ? ' · ' . $row['estado'] : '')),
+            'href' => 'ingenieria_form.php?id=' . $row['hash_id'],
+            'icon' => 'ti ti-tools'
+        ], $model->buscarIngenieria($like, $cargo, $usuarioId));
     }
 
     if (tieneAcceso('tracking.php')) {
         $data['tracking'] = array_map(static fn(array $row) => [
             'title' => $row['nombre'] ?: 'Tracking #' . $row['id'],
             'subtitle' => trim(($row['razon_social_empresa'] ?: '') . ($row['cod_tracking'] ? ' · ' . $row['cod_tracking'] : '')),
-            'href' => 'tracking.php',
+            'href' => 'tracking.php?cod_tracking=' . rawurlencode((string)($row['cod_tracking'] ?: $row['id'])),
             'icon' => 'ti ti-truck'
         ], $model->buscarTrackings($like));
     }

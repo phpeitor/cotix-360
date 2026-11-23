@@ -88,6 +88,22 @@ require_once ROOT . '/controller/check_session.php';
         </div>
     </div>
 
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="card mb-0 shadow-none">
+                    <div class="px-3 py-2 d-flex flex-row align-items-center" id="top-search">
+                        <i class="ti ti-search fs-22" aria-hidden="true"></i>
+                        <input type="search" class="form-control border-0" id="search-modal-input"
+                            placeholder="Buscar en Cotix360..."
+                            aria-label="Buscar páginas, usuarios y registros">
+                        <button type="button" class="btn p-0" data-bs-dismiss="modal" aria-label="Cerrar búsqueda">Esc</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php include ROOT . '/layout/theme.html'; ?>
 
     <script src="./assets/js/vendor.min.js"></script>

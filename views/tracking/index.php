@@ -113,6 +113,22 @@ $trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
 
     <?php include ROOT . '/layout/theme.html'; ?>
 
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="card mb-0 shadow-none">
+                    <div class="px-3 py-2 d-flex flex-row align-items-center" id="top-search">
+                        <i class="ti ti-search fs-22" aria-hidden="true"></i>
+                        <input type="search" class="form-control border-0" id="search-modal-input"
+                            placeholder="Buscar en Cotix360..."
+                            aria-label="Buscar páginas, usuarios y registros">
+                        <button type="button" class="btn p-0" data-bs-dismiss="modal" aria-label="Cerrar búsqueda">Esc</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="modalActividadesTracking" tabindex="-1" aria-labelledby="modalActividadesTrackingLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
@@ -293,7 +309,7 @@ $trackingIconUrl = trim((string)($_ENV['TRACKING_ICON'] ?? ''));
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/table-gridjs-tracking.js?v=1.13"></script>
+    <script src="./assets/js/table-gridjs-tracking.js?v=1.14"></script>
     <script src="./assets/js/tracking-actividades.js?v=1.21"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>

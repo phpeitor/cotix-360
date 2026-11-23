@@ -6,8 +6,33 @@
         document.head.appendChild(stylesheet);
     }
 
+    let modal = document.getElementById("searchModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "searchModal";
+        modal.className = "modal fade";
+        modal.tabIndex = -1;
+        modal.setAttribute("aria-labelledby", "globalSearchModalLabel");
+        modal.setAttribute("aria-hidden", "true");
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="card mb-0 shadow-none">
+                        <div class="px-3 py-2 d-flex flex-row align-items-center" id="top-search">
+                            <i class="ti ti-search fs-22" aria-hidden="true"></i>
+                            <input type="search" class="form-control border-0" id="search-modal-input"
+                                placeholder="Buscar en Cotix360..."
+                                aria-label="Buscar páginas, usuarios y registros">
+                            <button type="button" class="btn p-0" data-bs-dismiss="modal" aria-label="Cerrar búsqueda">Esc</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
     const input = document.getElementById("search-modal-input");
-    const modal = document.getElementById("searchModal");
     if (!input || !modal) return;
     input.setAttribute("aria-label", "Buscar páginas, usuarios y registros");
 
@@ -30,6 +55,7 @@
         recetas: "Recetas",
         items: "Items",
         compras: "Compras",
+        ingenieria: "Ingeniería",
         tracking: "Trackings"
     };
 
@@ -147,7 +173,12 @@
         if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
             event.preventDefault();
             if (window.bootstrap?.Modal) {
-                bootstrap.Modal.getOrCreateInstance(modal).show();
+                try {
+                    bootstrap.Modal.getOrCreateInstance(modal).show();
+                } catch (_) {
+                    modal.classList.add("show");
+                    modal.style.display = "block";
+                }
             }
         }
         if (event.key === "Enter" && document.activeElement === input && modal.classList.contains("show")) {
