@@ -72,9 +72,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 formatter: (cell, row) => {
                     const online = String(row?.cells?.[10]?.data ?? "0") === "1";
                     const label = online ? "En línea" : "Desconectado";
+                    const username = String(cell || "").split("\u0007")[0];
                     return gridjs.html(`
                         <div class="user-presence-cell">
-                            <span class="user-presence-name">${escapeHtml(cell || "-")}</span>
+                            <span class="user-presence-name">${escapeHtml(username || "-")}</span>
                             <span class="user-presence-status ${online ? "is-online" : "is-offline"}"
                                 data-bs-toggle="tooltip"
                                 data-bs-placement="left"
@@ -195,7 +196,10 @@ document.addEventListener("DOMContentLoaded", () => {
         server: {
             url: "controller/table_usuario.php",
             method: "GET",
-            then: (data) => data 
+            then: (data) => data.map((usuario) => ({
+                ...usuario,
+                USUARIO: `${String(usuario.USUARIO || "")}\u0007${String(usuario.presence_search || "")}`
+            }))
         },
 
         search: true,
