@@ -20,11 +20,11 @@
             <i class="ti ti-menu-deep fs-22"></i>
         </button>
 
-        <div class="topbar-search text-muted d-none d-xl-flex gap-2 align-items-center" data-bs-toggle="modal" data-bs-target="#searchModal" type="button">
+        <button type="button" class="topbar-search btn text-muted d-none d-xl-flex gap-2 align-items-center" data-bs-toggle="modal" data-bs-target="#searchModal" aria-label="Abrir búsqueda global">
             <i class="ti ti-search fs-18"></i>
-            <span class="me-2">Search something..</span>
-            <button type="submit" class="ms-auto btn btn-sm btn-primary shadow-none">⌘K</span>
-        </div>
+            <span class="me-2">Buscar en Cotix360</span>
+            <span class="ms-auto btn btn-sm btn-primary shadow-none">⌘K</span>
+        </button>
         <!--Pages Dropdown
         <div class="topbar-item d-none d-md-flex">
             <div class="dropdown">

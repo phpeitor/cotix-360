@@ -586,7 +586,7 @@ html[data-bs-theme="dark"] .app-topbar .topbar-menu > div {
 
 .tooltip.cotix-sidebar-tooltip .tooltip-inner {
     max-width: 260px;
-    padding: .55rem .75rem;
+    padding: .45rem .65rem;
     border: 1px solid rgba(255,255,255,.09);
     border-radius: .55rem;
     color: #f8fafc;
@@ -594,6 +594,76 @@ html[data-bs-theme="dark"] .app-topbar .topbar-menu > div {
     font-size: .82rem;
     font-weight: 600;
     box-shadow: 0 .5rem 1rem rgba(0,0,0,.2);
+}
+
+.tooltip.cotix-sidebar-tooltip {
+    margin: 0 !important;
+}
+
+.tooltip.cotix-sidebar-tooltip.bs-tooltip-end .tooltip-arrow,
+.tooltip.cotix-sidebar-tooltip[data-popper-placement="right"] .tooltip-arrow {
+    left: -3px !important;
+}
+
+.cotix-sidebar-flyout {
+    position: fixed;
+    z-index: 1090;
+    width: min(238px, calc(100vw - 16px));
+    max-height: min(72vh, 480px);
+    overflow: auto;
+    padding: 8px;
+    border: 1px solid #292e38;
+    border-radius: 12px;
+    background: #111318;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, .34);
+    scrollbar-width: thin;
+}
+
+.cotix-sidebar-flyout-title {
+    padding: 8px 10px 9px;
+    border-bottom: 1px solid rgba(255, 255, 255, .09);
+    color: #778395;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.cotix-sidebar-flyout-links {
+    display: grid;
+    gap: 3px;
+    padding-top: 6px;
+}
+
+.cotix-sidebar-flyout-link {
+    display: flex;
+    min-height: 38px;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 8px;
+    color: #bac5d3;
+    font-size: 13px;
+    line-height: 1.3;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    transition: color .14s ease, background-color .14s ease;
+}
+
+.cotix-sidebar-flyout-link:hover,
+.cotix-sidebar-flyout-link:focus-visible {
+    outline: 0;
+    background: #252a34;
+    color: #fff;
+}
+
+html[data-bs-theme="dark"] .cotix-sidebar-flyout {
+    border-color: rgba(148, 163, 184, .2);
+    background: #20242d;
+}
+
+html[data-bs-theme="dark"] .cotix-sidebar-flyout-link:hover,
+html[data-bs-theme="dark"] .cotix-sidebar-flyout-link:focus-visible {
+    background: #303746;
 }
 
 html[data-sidenav-size="condensed"] .cotix-sidebar-search-wrap,

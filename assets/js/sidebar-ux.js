@@ -23,6 +23,81 @@
         if (!sidebar || !nav) return;
 
         const menuItems = Array.from(nav.querySelectorAll(".side-nav-item"));
+        let submenuFlyout = null;
+        let submenuFlyoutControl = null;
+
+        const closeSubmenuFlyout = () => {
+            submenuFlyout?.remove();
+            submenuFlyout = null;
+            submenuFlyoutControl?.setAttribute("aria-expanded", "false");
+            submenuFlyoutControl = null;
+        };
+
+        const openSubmenuFlyout = (control, panel) => {
+            if (submenuFlyoutControl === control) {
+                closeSubmenuFlyout();
+                return true;
+            }
+
+            const childLinks = Array.from(panel.querySelectorAll(".side-nav-link"))
+                .filter(link => !link.matches('[data-bs-toggle="collapse"]') && link.getAttribute("href"));
+            if (!childLinks.length) return false;
+
+            closeSubmenuFlyout();
+            const flyout = document.createElement("div");
+            flyout.className = "cotix-sidebar-flyout";
+            flyout.dataset.cotixSidebarFlyout = "true";
+            flyout.setAttribute("role", "menu");
+
+            const heading = document.createElement("div");
+            heading.className = "cotix-sidebar-flyout-title";
+            heading.textContent = control.querySelector(".menu-text")?.textContent?.trim() || "Menú";
+            flyout.appendChild(heading);
+
+            const list = document.createElement("div");
+            list.className = "cotix-sidebar-flyout-links";
+            childLinks.forEach(source => {
+                const link = document.createElement("a");
+                link.className = "cotix-sidebar-flyout-link";
+                link.href = source.getAttribute("href");
+                link.setAttribute("role", "menuitem");
+                const label = source.querySelector(".menu-text")?.textContent?.trim() || source.textContent.trim();
+                link.textContent = label;
+                link.addEventListener("click", closeSubmenuFlyout, { once: true });
+                list.appendChild(link);
+            });
+            flyout.appendChild(list);
+            document.body.appendChild(flyout);
+
+            const icon = control.querySelector(":scope > .menu-icon") || control;
+            const iconRect = icon.getBoundingClientRect();
+            const flyoutRect = flyout.getBoundingClientRect();
+            const left = iconRect.right + 9 + flyoutRect.width <= window.innerWidth - 8
+                ? iconRect.right + 9
+                : Math.max(8, iconRect.left - flyoutRect.width - 9);
+            const top = Math.max(8, Math.min(iconRect.top - 8, window.innerHeight - flyoutRect.height - 8));
+            flyout.style.left = `${Math.round(left)}px`;
+            flyout.style.top = `${Math.round(top)}px`;
+            submenuFlyout = flyout;
+            submenuFlyoutControl = control;
+            control.setAttribute("aria-expanded", "true");
+            window.bootstrap?.Tooltip?.getInstance(control)?.hide();
+            return true;
+        };
+
+        document.addEventListener("pointerdown", event => {
+            if (!submenuFlyout) return;
+            if (submenuFlyout.contains(event.target) || submenuFlyoutControl?.contains(event.target)) return;
+            closeSubmenuFlyout();
+        });
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape" && submenuFlyout) {
+                const control = submenuFlyoutControl;
+                closeSubmenuFlyout();
+                control?.focus();
+            }
+        });
+        window.addEventListener("resize", closeSubmenuFlyout);
 
         const expandSidebarForSearch = () => {
             const size = root.getAttribute("data-sidenav-size");
@@ -45,6 +120,7 @@
             const enabled = customLayoutAllowed();
             root.classList.toggle("cotix-sidebar-resizable", enabled);
             const compact = ["condensed", "sm-hover"].includes(root.getAttribute("data-sidenav-size"));
+            if (!compact) closeSubmenuFlyout();
             menuItems.forEach(item => {
                 const link = item.querySelector(":scope > .side-nav-link");
                 const label = item.querySelector(":scope > .side-nav-link .menu-text")?.textContent?.trim();
@@ -55,7 +131,50 @@
                     link.setAttribute("data-bs-custom-class", "cotix-sidebar-tooltip");
                     link.setAttribute("data-bs-title", label);
                     if (window.bootstrap?.Tooltip) {
-                        bootstrap.Tooltip.getOrCreateInstance(link, { trigger: "hover focus", container: "body" });
+                        if (link._cotixPositionHandler) {
+                            link.removeEventListener("shown.bs.tooltip", link._cotixPositionHandler);
+                        }
+                        // Dispose any theme-created instance first: getOrCreateInstance
+                        // does not apply new placement options to an existing tooltip.
+                        window.bootstrap.Tooltip.getInstance(link)?.dispose();
+                        const tooltipInstance = bootstrap.Tooltip.getOrCreateInstance(link, {
+                            trigger: "hover focus",
+                            container: "body",
+                            placement: "right",
+                            offset: ({ placement }) => {
+                                const icon = link.querySelector(":scope > .menu-icon");
+                                if (!icon || !String(placement).startsWith("right")) return [0, 8];
+                                const linkRect = link.getBoundingClientRect();
+                                const iconRect = icon.getBoundingClientRect();
+                                const verticalAlign = iconRect.top + iconRect.height / 2 - (linkRect.top + linkRect.height / 2);
+                                const horizontalGap = 8 + iconRect.right - linkRect.right;
+                                return [verticalAlign, horizontalGap];
+                            },
+                            fallbackPlacements: ["right"],
+                            boundary: "viewport"
+                        });
+                        const positionTooltip = () => {
+                            const describedBy = link.getAttribute("aria-describedby");
+                            const tooltipElement = tooltipInstance.getTipElement?.()
+                                || tooltipInstance._getTipElement?.()
+                                || (describedBy ? document.getElementById(describedBy) : null);
+                            if (!tooltipElement || !tooltipElement.classList.contains("show")) return;
+                            // In condensed mode the anchor can retain the expanded
+                            // sidebar width while being visually clipped. Position from
+                            // the visible icon, not the full-width anchor box.
+                            const anchor = link.querySelector(":scope > .menu-icon") || link;
+                            const rect = anchor.getBoundingClientRect();
+                            const tooltipRect = tooltipElement.getBoundingClientRect();
+                            const left = Math.max(8, Math.min(rect.right + 8, window.innerWidth - tooltipRect.width - 8));
+                            const top = Math.max(8, Math.min(rect.top + (rect.height - tooltipRect.height) / 2, window.innerHeight - tooltipRect.height - 8));
+                            tooltipElement.style.setProperty("position", "fixed", "important");
+                            tooltipElement.style.setProperty("inset", "auto", "important");
+                            tooltipElement.style.setProperty("transform", "none", "important");
+                            tooltipElement.style.left = `${Math.round(left)}px`;
+                            tooltipElement.style.top = `${Math.round(top)}px`;
+                        };
+                        link._cotixPositionHandler = () => requestAnimationFrame(() => requestAnimationFrame(positionTooltip));
+                        link.addEventListener("shown.bs.tooltip", link._cotixPositionHandler);
                     }
                 } else {
                     window.bootstrap?.Tooltip?.getInstance(link)?.dispose();
@@ -121,7 +240,15 @@
 
             event.preventDefault();
             event.stopPropagation();
-            const shouldOpen = !panel.classList.contains("show");
+            const compact = ["condensed", "sm-hover", "sm-hover-active"].includes(root.getAttribute("data-sidenav-size"));
+            if (compact && openSubmenuFlyout(control, panel)) return;
+            closeSubmenuFlyout();
+            const shouldOpen = compact || !panel.classList.contains("show");
+            if (compact) {
+                root.setAttribute("data-sidenav-size", "default");
+                if (window.config?.sidenav) window.config.sidenav.size = "default";
+                if (desktop.matches) root.classList.add("cotix-sidebar-resizable");
+            }
             if (window.bootstrap?.Collapse) {
                 const collapse = bootstrap.Collapse.getOrCreateInstance(panel, { toggle: false });
                 shouldOpen ? collapse.show() : collapse.hide();
@@ -132,7 +259,7 @@
             if (window.location.hash === selector) {
                 history.replaceState(null, "", `${location.pathname}${location.search}`);
             }
-        });
+        }, true);
 
         function setCollapse(collapse, open) {
             collapse.classList.toggle("show", open);

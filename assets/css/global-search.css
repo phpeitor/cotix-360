@@ -1,0 +1,113 @@
+.global-search-results {
+    max-height: min(520px, 65vh);
+    overflow-y: auto;
+    border-top: 1px solid #edf0f4;
+}
+
+.global-search-section {
+    padding: 10px 12px 6px;
+}
+
+.global-search-section h6 {
+    margin: 3px 6px 7px;
+    color: #8794a3;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.global-search-result {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    border-radius: 9px;
+    color: #344054;
+    padding: 7px 8px;
+    text-decoration: none;
+    transition: background .12s ease, color .12s ease;
+}
+
+.global-search-result:hover,
+.global-search-result:focus-visible {
+    background: #f2f6fb;
+    color: #315f93;
+    outline: none;
+}
+
+.global-search-icon {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #edf3f9;
+    color: #55769a;
+    font-size: 17px;
+}
+
+.global-search-copy {
+    display: grid;
+    min-width: 0;
+    flex: 1;
+}
+
+.global-search-copy strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: .88rem;
+}
+
+.global-search-copy small {
+    overflow: hidden;
+    margin-top: 2px;
+    color: #8a96a5;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.global-search-arrow {
+    color: #aab4bf;
+    font-size: 14px;
+}
+
+.global-search-empty,
+.global-search-loading {
+    display: flex;
+    min-height: 112px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #98a4b3;
+    font-size: .82rem;
+}
+
+.global-search-empty i {
+    font-size: 20px;
+}
+
+.topbar-search.btn {
+    min-width: 238px;
+    height: 42px;
+    border: 1px solid #dde5ef;
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: none;
+}
+
+.topbar-search.btn:hover,
+.topbar-search.btn:focus {
+    border-color: #cbd8e7;
+    background: #fff;
+    color: #315f93;
+}
+
+.topbar-search.btn > span:last-child {
+    min-width: 36px;
+    padding: 4px 7px;
+    border-radius: 7px;
+}
