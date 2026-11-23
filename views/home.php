@@ -366,7 +366,7 @@ require_once ROOT . '/controller/check_session.php';
                                                 <span class="dashboard-puzzle-piece piece-e has-tab-right" data-puzzle-letter="X" data-puzzle-row="2" data-puzzle-column="1">X</span>
                                                 <span class="dashboard-puzzle-piece piece-f has-tab-right" data-puzzle-letter="6" data-puzzle-row="2" data-puzzle-column="3">6</span>
                                                 <span class="dashboard-puzzle-piece piece-g" data-puzzle-letter="0" data-puzzle-row="2" data-puzzle-column="4">0</span>
-                                                <button type="button" class="dashboard-puzzle-slot has-tab-right" id="dashboardPuzzleSlot" aria-label="Espacio para una pieza de COTIX360" hidden><span class="dashboard-puzzle-slot-letter"></span><i class="ti ti-check"></i></button>
+                                                <button type="button" class="dashboard-puzzle-slot has-tab-right" id="dashboardPuzzleSlot" aria-label="Espacio vacío para completar COTIX360" hidden><span class="dashboard-puzzle-slot-letter"></span><i class="ti ti-check"></i></button>
                                             </div>
                                             <button type="button" class="dashboard-puzzle-moving" id="dashboardPuzzlePiece" aria-label="Arrastra esta ficha al espacio vacío o pulsa Enter" title="Arrastra la ficha al espacio vacío" disabled>
                                                 <span class="dashboard-puzzle-moving-letter">?</span>
@@ -401,7 +401,7 @@ require_once ROOT . '/controller/check_session.php';
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/formUtils.js?v=2.1"></script>
     <script src="./assets/js/dashboard-sales.js?v=1.2"></script>
-    <script src="./assets/js/dashboard.js?v=2.9"></script>
+    <script src="./assets/js/dashboard.js?v=2.10"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </body>
