@@ -22,7 +22,7 @@ $csrf = $_SESSION['csrf_permisos'];
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/branding.css?v=1.7" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/permisos.css?v=1.2" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/permisos.css?v=1.3" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css" />
 </head>
@@ -51,17 +51,33 @@ $csrf = $_SESSION['csrf_permisos'];
                             <h4 class="header-title mb-1">Roles y accesos</h4>
                             <p class="text-muted mb-0">Administra qué páginas puede abrir cada rol.</p>
                         </div>
-                        <button type="button" class="btn btn-primary" id="btnGuardarPermisos">
-                            <i class="ti ti-device-floppy me-1"></i> Guardar cambios
-                        </button>
+                        <div class="permission-save-toolbar">
+                            <span id="permissionsDirtyState" class="permissions-dirty-state" data-state="clean">
+                                <i class="ti ti-circle-check"></i>
+                                <span>Sin cambios pendientes</span>
+                            </span>
+                            <button type="button" class="btn btn-primary" id="btnGuardarPermisos">
+                                <i class="ti ti-device-floppy me-1"></i> Guardar cambios
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <div class="alert alert-info border-0">
-                            El rol Administrador conserva acceso total para evitar bloquear la gestión del sistema.
+                        <div class="permission-admin-notice">
+                            <span><i class="ti ti-shield-check"></i></span>
+                            <div>
+                                <strong>Protección del sistema</strong>
+                                <p>El rol Administrador conserva acceso total para evitar bloquear la gestión.</p>
+                            </div>
                         </div>
 
                         <section class="permission-new-role mb-4" aria-labelledby="newRoleHeading">
-                            <h5 id="newRoleHeading" class="mb-3">Agregar rol</h5>
+                            <div class="permission-new-role-heading">
+                                <span class="permission-section-icon"><i class="ti ti-shield-plus"></i></span>
+                                <div>
+                                    <h5 id="newRoleHeading" class="mb-1">Agregar rol</h5>
+                                    <p class="text-muted mb-0">Crea una función nueva y define sus accesos.</p>
+                                </div>
+                            </div>
                             <div class="row g-2 align-items-end">
                                 <div class="col-sm-3 col-md-2">
                                     <label class="form-label" for="newRoleId">ID del rol</label>
@@ -89,6 +105,10 @@ $csrf = $_SESSION['csrf_permisos'];
                                     <h5 class="mb-0">Cargos</h5>
                                     <span class="badge bg-light text-dark" id="permissionRoleCount">0</span>
                                 </div>
+                                <label class="permission-role-search" for="permissionRoleSearch">
+                                    <i class="ti ti-search" aria-hidden="true"></i>
+                                    <input id="permissionRoleSearch" type="search" placeholder="Buscar cargo" autocomplete="off">
+                                </label>
                                 <div id="permissionRoleList" class="permission-role-list" role="tablist" aria-label="Seleccionar cargo"></div>
                             </aside>
                             <section id="permissionRolePanel" class="permission-role-panel" aria-live="polite"></section>
@@ -103,7 +123,7 @@ $csrf = $_SESSION['csrf_permisos'];
     <?php include ROOT . '/layout/theme.html'; ?>
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
-    <script src="./assets/js/permisos.js?v=1.2"></script>
+    <script src="./assets/js/permisos.js?v=1.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
 </html>

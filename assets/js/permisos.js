@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const roleCount = document.getElementById("permissionRoleCount");
     const loading = document.getElementById("permissionsLoading");
     const saveButton = document.getElementById("btnGuardarPermisos");
+    const dirtyState = document.getElementById("permissionsDirtyState");
+    const roleSearch = document.getElementById("permissionRoleSearch");
     const addButton = document.getElementById("btnAgregarRol");
     const newRoleId = document.getElementById("newRoleId");
     const newRoleName = document.getElementById("newRoleName");
@@ -17,6 +19,22 @@ document.addEventListener("DOMContentLoaded", () => {
     let userCounts = {};
     let roleData = {};
     let selectedRoleId = null;
+    let isDirty = false;
+
+    function setDirty(dirty) {
+        isDirty = Boolean(dirty);
+        if (!dirtyState) return;
+        dirtyState.dataset.state = isDirty ? "dirty" : "clean";
+        dirtyState.innerHTML = isDirty
+            ? '<i class="ti ti-point-filled"></i><span>Cambios pendientes</span>'
+            : '<i class="ti ti-circle-check"></i><span>Sin cambios pendientes</span>';
+        if (saveButton) saveButton.classList.toggle("is-pending", isDirty);
+    }
+
+    roleSearch?.addEventListener("input", () => {
+        saveActiveRole();
+        renderRoleNavigation(Object.entries(roleData).sort(([idA], [idB]) => Number(idA) - Number(idB)));
+    });
 
     fetch(apiUrl)
         .then(async response => {
@@ -25,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
             availablePages = Array.isArray(data.paginas) ? data.paginas : [];
             userCounts = data.usuarios_por_cargo || {};
             renderRoles(data.roles || {});
+            setDirty(false);
             loading?.classList.add("d-none");
             rolesContainer.classList.remove("d-none");
         })
@@ -61,7 +80,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!roleList) return;
         roleList.innerHTML = "";
         if (roleCount) roleCount.textContent = String(entries.length);
-        entries.forEach(([id, role]) => {
+        const query = String(roleSearch?.value || "").trim().toLowerCase();
+        const visibleEntries = query
+            ? entries.filter(([id, role]) => String(role.nombre || "").toLowerCase().includes(query))
+            : entries;
+        if (!visibleEntries.length) {
+            roleList.innerHTML = '<div class="permission-role-empty"><i class="ti ti-search-off"></i><span>Sin coincidencias</span></div>';
+            return;
+        }
+        visibleEntries.forEach(([id, role]) => {
             const userCount = Number(userCounts[id] || 0);
             const button = document.createElement("button");
             button.type = "button";
@@ -123,20 +150,39 @@ document.addEventListener("DOMContentLoaded", () => {
         card.innerHTML = `
             <div class="permission-role-header">
                 <div class="permission-role-heading">
-                    <input class="form-control permission-role-name" type="text" maxlength="80" value="${escapeHtml(role.nombre || "")}" aria-label="Nombre del rol ${escapeHtml(id)}" ${isAdmin ? "readonly" : ""}>
+                    <span class="permission-role-avatar ${isAdmin ? "is-admin" : ""}" aria-hidden="true">
+                        <i class="ti ${isAdmin ? "ti-shield-check" : "ti-user-shield"}"></i>
+                    </span>
+                    <div class="permission-role-heading-copy">
+                        <span class="permission-role-kicker">${isAdmin ? "Rol protegido" : "Rol seleccionado"}</span>
+                        <input class="form-control permission-role-name" type="text" maxlength="80" value="${escapeHtml(role.nombre || "")}" aria-label="Nombre del rol ${escapeHtml(id)}" ${isAdmin ? "readonly" : ""}>
+                        <span class="permission-role-user-count"><i class="ti ti-users"></i>${assignedUsers} usuario${assignedUsers === 1 ? "" : "s"} asignado${assignedUsers === 1 ? "" : "s"}</span>
+                    </div>
                 </div>
-                <div class="d-flex align-items-center gap-3">
+                <div class="permission-role-actions">
                     <label class="form-check permission-all-access mb-0">
                         <input class="form-check-input permission-all-check" type="checkbox" ${allAccess ? "checked" : ""} ${isAdmin ? "disabled" : ""}>
                         <span class="form-check-label">Acceso total</span>
                     </label>
                     ${isAdmin
                         ? '<span class="badge bg-primary-subtle text-primary">Protegido</span>'
-                        : `<button type="button" class="btn btn-sm btn-outline-danger permission-delete-role" ${assignedUsers > 0 ? "disabled title=\"Reasigna primero los usuarios que tienen este cargo\"" : ""}>Eliminar rol</button>`}
+                        : `<button type="button" class="btn btn-sm btn-outline-danger permission-delete-role" ${assignedUsers > 0 ? 'disabled aria-label="Reasigna primero los usuarios de este cargo"' : ""}><i class="ti ti-trash me-1"></i>Eliminar</button>`}
                 </div>
             </div>
             <div class="permission-role-pages ${allAccess ? "is-all-access" : ""}">
-                <div class="permission-pages-heading">Páginas permitidas</div>
+                <div class="permission-pages-toolbar">
+                    <div>
+                        <div class="permission-pages-heading">Páginas permitidas</div>
+                        <span class="permission-pages-summary">${allowed.size} de ${availablePages.length} seleccionadas</span>
+                    </div>
+                    <div class="permission-page-tools">
+                        <label class="permission-page-search" for="permissionPageSearch-${escapeHtml(id)}">
+                            <i class="ti ti-search"></i>
+                            <input id="permissionPageSearch-${escapeHtml(id)}" type="search" placeholder="Buscar página" autocomplete="off">
+                        </label>
+                        ${isAdmin ? "" : '<button type="button" class="btn btn-sm btn-light permission-select-all">Todas</button><button type="button" class="btn btn-sm btn-light permission-select-none">Ninguna</button>'}
+                    </div>
+                </div>
                 <div class="permission-pages-grid">${pageChoices}</div>
             </div>
         `;
@@ -147,6 +193,46 @@ document.addEventListener("DOMContentLoaded", () => {
                 input.disabled = allAccessInput.checked;
             });
             card.querySelector(".permission-role-pages")?.classList.toggle("is-all-access", allAccessInput.checked);
+            setDirty(true);
+            updatePageSummary();
+        });
+
+        const updatePageSummary = () => {
+            if (allAccessInput?.checked) {
+                const summary = card.querySelector(".permission-pages-summary");
+                if (summary) summary.textContent = `${availablePages.length} de ${availablePages.length} seleccionadas`;
+                return;
+            }
+            const checked = card.querySelectorAll(".permission-page-check:checked").length;
+            const summary = card.querySelector(".permission-pages-summary");
+            if (summary) summary.textContent = `${checked} de ${availablePages.length} seleccionadas`;
+        };
+
+        card.querySelector(".permission-role-name")?.addEventListener("input", () => setDirty(true));
+        card.querySelectorAll(".permission-page-check").forEach(input => {
+            input.addEventListener("change", () => {
+                updatePageSummary();
+                setDirty(true);
+            });
+        });
+
+        const pageSearch = card.querySelector(".permission-page-search input");
+        pageSearch?.addEventListener("input", () => {
+            const query = String(pageSearch.value || "").trim().toLowerCase();
+            card.querySelectorAll(".permission-page-option").forEach(option => {
+                option.hidden = query !== "" && !String(option.textContent || "").toLowerCase().includes(query);
+            });
+        });
+
+        card.querySelector(".permission-select-all")?.addEventListener("click", () => {
+            card.querySelectorAll(".permission-page-check:not(:disabled)").forEach(input => { input.checked = true; });
+            updatePageSummary();
+            setDirty(true);
+        });
+        card.querySelector(".permission-select-none")?.addEventListener("click", () => {
+            card.querySelectorAll(".permission-page-check:not(:disabled)").forEach(input => { input.checked = false; });
+            updatePageSummary();
+            setDirty(true);
         });
 
         card.querySelector(".permission-delete-role")?.addEventListener("click", () => {
@@ -161,6 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     saveActiveRole();
                     delete roleData[id];
                     selectedRoleId = Object.keys(roleData).sort((a, b) => Number(a) - Number(b))[0] || null;
+                    setDirty(true);
                     renderRoles(roleData);
                 },
                 () => {}
@@ -190,6 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
         roleData[id] = { nombre: name, acceso: [] };
         userCounts[id] = Number(userCounts[id] || 0);
         selectedRoleId = id;
+        setDirty(true);
         renderRoles(roleData);
         newRoleId.value = "";
         newRoleName.value = "";
@@ -212,6 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json();
             if (!response.ok || !data.success) throw new Error(data.message || "No se pudieron guardar los permisos");
             renderRoleNavigation(Object.entries(roleData).sort(([idA], [idB]) => Number(idA) - Number(idB)));
+            setDirty(false);
             alertify.success(data.message || "Permisos guardados correctamente");
         } catch (error) {
             alertify.error(error.message || "Error al guardar los permisos");

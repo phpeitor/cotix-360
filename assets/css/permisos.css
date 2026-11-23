@@ -1,8 +1,83 @@
 .permission-new-role {
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    background: #f8fafc;
-    padding: 18px;
+    border: 1px solid #e5ebf3;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f8fafc 0%, #fff 100%);
+    padding: 16px 18px;
+}
+
+.permission-new-role-heading,
+.permission-save-toolbar,
+.permission-role-actions,
+.permission-page-tools {
+    display: flex;
+    align-items: center;
+}
+
+.permission-new-role-heading {
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.permission-section-icon {
+    display: inline-flex;
+    width: 38px;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: #eaf2ff;
+    color: #315f93;
+    font-size: 1.15rem;
+}
+
+.permission-admin-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    margin-bottom: 18px;
+    border: 1px solid #d8e8fa;
+    border-radius: 12px;
+    background: #f3f7fc;
+    padding: 12px 14px;
+    color: #53677f;
+}
+
+.permission-admin-notice > span {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: #dfeafa;
+    color: #315f93;
+}
+
+.permission-admin-notice strong {
+    color: #31506f;
+}
+
+.permission-admin-notice p {
+    margin: 2px 0 0;
+    font-size: .86rem;
+}
+
+.permission-save-toolbar {
+    gap: 10px;
+}
+
+.permissions-dirty-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    color: #8794a3;
+    font-size: .78rem;
+}
+
+.permissions-dirty-state[data-state="dirty"] {
+    color: #b7791f;
 }
 
 .permission-manager-layout {
@@ -30,6 +105,32 @@
     justify-content: space-between;
     margin: 2px 4px 8px;
     color: #334155;
+}
+
+.permission-role-search,
+.permission-page-search {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid #dde5ef;
+    background: #fff;
+    color: #8a99aa;
+}
+
+.permission-role-search {
+    margin: 0 2px 8px;
+    border-radius: 9px;
+    padding: 7px 9px;
+}
+
+.permission-role-search input,
+.permission-page-search input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #334155;
+    font-size: .82rem;
 }
 
 .permission-role-list {
@@ -63,6 +164,18 @@
     background: #eaf2ff;
     color: #1454a3;
     font-weight: 600;
+    box-shadow: inset 3px 0 0 #315f93;
+}
+
+.permission-role-empty {
+    display: flex;
+    min-height: 82px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: #98a5b3;
+    font-size: .78rem;
 }
 
 .permission-role-nav-name {
@@ -107,6 +220,9 @@
 .permission-role-card {
     margin-bottom: 0;
     overflow: hidden;
+    border: 1px solid #e3e9f1;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px -24px rgba(30, 52, 82, .38);
 }
 
 .permission-role-header {
@@ -115,21 +231,77 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 12px;
-    border-bottom: 1px solid #e2e8f0;
-    background: #f8fafc;
-    padding: 14px 18px;
+    border-bottom: 1px solid #edf1f6;
+    background: #fff;
+    padding: 16px 18px;
 }
 
 .permission-role-heading {
     display: flex;
     min-width: min(100%, 300px);
     align-items: center;
-    gap: 12px;
+    gap: 11px;
+}
+
+.permission-role-avatar {
+    display: inline-flex;
+    width: 46px;
+    height: 46px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: 13px;
+    background: #edf3f9;
+    color: #55769a;
+    font-size: 1.25rem;
+}
+
+.permission-role-avatar.is-admin {
+    background: #e8eff8;
+    color: #315f93;
+}
+
+.permission-role-heading-copy {
+    display: grid;
+    min-width: 220px;
+    gap: 3px;
+}
+
+.permission-role-kicker {
+    color: #94a1b1;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
 }
 
 .permission-role-name {
+    height: 34px;
     max-width: 300px;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
     font-weight: 600;
+    padding: 4px 6px;
+}
+
+.permission-role-name:not([readonly]):hover,
+.permission-role-name:not([readonly]):focus {
+    border-color: #cfdbea;
+    background: #f8fafc;
+}
+
+.permission-role-user-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #7d8a99;
+    font-size: .74rem;
+}
+
+.permission-role-actions {
+    gap: 10px;
 }
 
 .permission-all-access {
@@ -140,19 +312,43 @@
 }
 
 .permission-role-pages {
-    padding: 16px 18px 18px;
+    padding: 18px;
 }
 
 .permission-role-pages.is-all-access {
-    opacity: .55;
+    background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
 }
 
 .permission-pages-heading {
-    margin-bottom: 12px;
+    margin-bottom: 3px;
     color: #475569;
     font-size: .85rem;
     font-weight: 700;
     text-transform: uppercase;
+}
+
+.permission-pages-summary {
+    color: #94a1b1;
+    font-size: .76rem;
+}
+
+.permission-pages-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.permission-page-tools {
+    gap: 7px;
+}
+
+.permission-page-search {
+    width: 190px;
+    border-radius: 8px;
+    padding: 7px 9px;
 }
 
 .permission-pages-grid {
@@ -167,13 +363,20 @@
     align-items: flex-start;
     gap: 8px;
     border: 1px solid #e8edf3;
-    border-radius: 7px;
+    border-radius: 9px;
     background: #fff;
-    padding: 8px 10px;
+    padding: 9px 10px;
     color: #475569;
     font-size: .88rem;
     overflow-wrap: anywhere;
     cursor: pointer;
+    transition: border-color .15s ease, background .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+
+.permission-page-option:hover {
+    border-color: #cbd8e7;
+    box-shadow: 0 6px 16px -14px rgba(37, 68, 104, .55);
+    transform: translateY(-1px);
 }
 
 .permission-page-option:has(input:checked) {
