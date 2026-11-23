@@ -156,6 +156,7 @@
 .piece-c { grid-area: 1 / 3; }
 .piece-d { grid-area: 1 / 4; }
 .piece-e { grid-area: 2 / 1; }
+.piece-h { grid-area: 2 / 2; }
 .piece-f { grid-area: 2 / 3; }
 .piece-g { grid-area: 2 / 4; }
 
