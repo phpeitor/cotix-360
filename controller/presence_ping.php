@@ -15,6 +15,12 @@ if ($usuarioId <= 0) {
 
 try {
     $usuario = new Usuario();
+    $accion = strtolower(trim((string)($_POST['accion'] ?? $_GET['accion'] ?? '')));
+    if ($accion === 'offline') {
+        $usuario->desconectarUsuario($usuarioId);
+        echo json_encode(['ok' => true, 'online' => false]);
+        exit;
+    }
     $usuario->registrarPresencia($usuarioId);
     echo json_encode(['ok' => true]);
 } catch (Throwable $e) {

@@ -132,7 +132,7 @@ $recaptchaSiteKey = htmlspecialchars((string)($_ENV['RECAPTCHA_SITE_KEY'] ?? '')
             <div class="bear-panel-glow"></div>
             <div class="bear-chips" aria-hidden="true"><span>Cotizaciones</span><span>Recetas</span><span>Compras</span><span>Ingeniería</span></div>
             <canvas id="bear-canvas" aria-hidden="true"></canvas>
-            <div class="bear-caption"><span class="bear-caption-mark"><img src="./assets/images/mg-indusol-logo.svg" alt="" width="30" height="30"></span><span><strong>Cotix360</strong><small>Gestión para avanzar</small></span></div>
+            <div class="bear-caption"><span><strong>Cotix360</strong><small>Gestión para avanzar</small></span></div>
         </aside>
     </main>
 

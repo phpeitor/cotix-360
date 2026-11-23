@@ -109,8 +109,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .verify-button-label,
 .login-submit,
 .login-help,
-.bear-caption,
-.bear-caption-mark {
+.bear-caption {
     display: flex;
     align-items: center;
 }
@@ -428,9 +427,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .bear-panel canvas { position: absolute; z-index: 1; inset: 0; display: block; width: 100%; height: 100%; background: transparent; pointer-events: none; }
 .bear-chips { position: absolute; z-index: 4; top: 18px; right: 18px; left: 18px; display: flex; flex-wrap: wrap; gap: 7px; }
 .bear-chips span { padding: 6px 10px; border: 1px solid rgba(255,255,255,.45); border-radius: 999px; background: rgba(27,53,79,.34); color: #fff; font-size: 10px; font-weight: 500; backdrop-filter: blur(8px); }
-.bear-caption { position: absolute; z-index: 4; bottom: 17px; left: 17px; gap: 9px; padding: 7px 13px 7px 7px; border: 1px solid rgba(255,255,255,.2); border-radius: 13px; background: rgba(22,36,54,.58); color: #fff; backdrop-filter: blur(9px); }
-.bear-caption-mark { width: 34px; height: 34px; justify-content: center; border-radius: 9px; background: #fff; }
-.bear-caption-mark img { width: 26px; height: 26px; object-fit: contain; }
+.bear-caption { position: absolute; z-index: 4; bottom: 17px; left: 17px; display: flex; align-items: center; min-width: 132px; padding: 9px 12px; border: 1px solid rgba(255,255,255,.18); border-radius: 11px; background: rgba(22,36,54,.52); color: #fff; backdrop-filter: blur(9px); }
 .bear-caption > span:last-child { display: flex; flex-direction: column; line-height: 1.2; }
 .bear-caption strong { font-family: "Figtree", sans-serif; font-size: 12px; }
 .bear-caption small { margin-top: 3px; color: rgba(255,255,255,.76); font-size: 10px; }

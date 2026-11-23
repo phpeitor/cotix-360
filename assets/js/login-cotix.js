@@ -139,8 +139,9 @@
         const canvas = byId("bear-canvas");
         if (!canvas) return;
         try {
+            const teddyNumber = Math.random() < 0.5 ? 1 : 2;
             riveInstance = new window.rive.Rive({
-                src: "./assets/resources/login-teddy1.riv",
+                src: `./assets/resources/login-teddy${teddyNumber}.riv`,
                 canvas,
                 stateMachines: "Login Machine",
                 autoplay: true,

@@ -44,6 +44,7 @@ if (isset($_SESSION['session_id'])) {
         'id_user' => $_SESSION['session_id'],
         'ip' => $ip
     ]);
+    $obj->desconectarUsuario((int)$_SESSION['session_id']);
 }
 
 // Eliminar la sesión

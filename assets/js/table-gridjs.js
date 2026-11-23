@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .render(document.getElementById("table-gridjs"));
 
     grid.on("ready", initTooltips);
-    const presenceRefreshTimer = window.setInterval(() => grid.forceRender(), 60000);
+    const presenceRefreshTimer = window.setInterval(() => grid.forceRender(), 30000);
     window.addEventListener("beforeunload", () => window.clearInterval(presenceRefreshTimer), { once: true });
 
     document.addEventListener("click", async (e) => {

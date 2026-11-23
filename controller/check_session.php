@@ -3,6 +3,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 require_once __DIR__ . '/../config/permisos.php';
+require_once __DIR__ . '/../model/usuario.php';
 
 $max_inactive = 90 * 60;
 
@@ -17,6 +18,11 @@ if (isset($_SESSION['session_time'])) {
     $inactive = time() - $_SESSION['session_time'];
 
     if ($inactive > $max_inactive) {
+        $usuarioId = (int)$_SESSION['session_id'];
+        if ($usuarioId > 0) {
+            $obj = new Usuario();
+            $obj->desconectarUsuario($usuarioId);
+        }
         session_unset();
         session_destroy();
         header('Location: ./index.php');

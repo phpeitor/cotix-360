@@ -96,7 +96,7 @@ class Usuario {
     public function table_personal(): array{
          $this->asegurarTablaPresencia();
          $onlineSince = (new DateTimeImmutable('now', new DateTimeZone('America/Lima')))
-             ->sub(new DateInterval('PT3M'))
+             ->sub(new DateInterval('PT90S'))
              ->format('Y-m-d H:i:s');
          $sql = "SELECT
                     p.*,
@@ -122,6 +122,16 @@ class Usuario {
                 ON DUPLICATE KEY UPDATE ultima_actividad = VALUES(ultima_actividad)";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':ultima_actividad', $this->nowLima);
+        $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
+    public function desconectarUsuario(int $usuarioId): void
+    {
+        if ($usuarioId <= 0) return;
+        $this->asegurarTablaPresencia();
+        $sql = "DELETE FROM usuario_presencia WHERE usuario_id = :usuario_id";
+        $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
         $stmt->execute();
     }

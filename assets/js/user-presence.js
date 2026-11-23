@@ -10,7 +10,9 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         sendPresence();
-        window.setInterval(sendPresence, 60000);
-        document.addEventListener("visibilitychange", sendPresence);
+        window.setInterval(sendPresence, 30000);
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") sendPresence();
+        });
     });
 })();

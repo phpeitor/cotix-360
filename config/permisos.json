@@ -28,13 +28,13 @@
             "items_receta.php",
             "pdf_cotizacion.php",
             "pdf_receta.php",
+            "perfil.php",
             "receta.php",
             "receta_form.php",
             "receta_list.php",
             "tracking.php",
             "tracking_crear.php",
-            "upd_item_receta.php",
-            "perfil.php"
+            "upd_item_receta.php"
         ]
     },
     "4": {
@@ -44,13 +44,13 @@
             "home.php",
             "items_receta.php",
             "pdf_receta.php",
+            "perfil.php",
             "receta.php",
             "receta_form.php",
             "receta_list.php",
             "tracking.php",
             "tracking_crear.php",
-            "upd_item_receta.php",
-            "perfil.php"
+            "upd_item_receta.php"
         ]
     },
     "5": {
@@ -66,10 +66,10 @@
             "items_receta.php",
             "pdf_cotizacion.php",
             "pdf_receta.php",
+            "perfil.php",
             "receta_form.php",
             "receta_item_categorias.php",
-            "upd_item_receta.php",
-            "perfil.php"
+            "upd_item_receta.php"
         ]
     },
     "6": {
@@ -81,23 +81,23 @@
             "ingenieria_form.php",
             "items_receta.php",
             "pdf_receta.php",
+            "perfil.php",
             "receta.php",
             "receta_form.php",
             "receta_list.php",
             "tracking.php",
             "tracking_crear.php",
-            "upd_item_receta.php",
-            "perfil.php"
+            "upd_item_receta.php"
         ]
     },
     "7": {
         "nombre": "Vendedor",
         "acceso": [
             "home.php",
+            "perfil.php",
             "receta.php",
             "receta_form.php",
-            "receta_list.php",
-            "perfil.php"
+            "receta_list.php"
         ]
     },
     "8": {
