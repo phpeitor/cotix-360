@@ -70,7 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
             button.setAttribute("aria-selected", String(id) === String(selectedRoleId) ? "true" : "false");
             button.innerHTML = `
                 <span class="permission-role-nav-name">${escapeHtml(role.nombre || `Rol ${id}`)}</span>
-                <span class="permission-role-nav-meta">${escapeHtml(id)} · ${userCount} usuario${userCount === 1 ? "" : "s"}</span>
+                <span class="permission-role-nav-meta" aria-label="${userCount} usuario${userCount === 1 ? "" : "s"}">
+                    <i class="ti ti-users" aria-hidden="true"></i>
+                    <strong>${userCount}</strong>
+                </span>
             `;
             button.addEventListener("click", () => {
                 if (String(id) === String(selectedRoleId)) return;
@@ -120,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
         card.innerHTML = `
             <div class="permission-role-header">
                 <div class="permission-role-heading">
-                    <span class="permission-role-id">Rol ${escapeHtml(id)}</span>
                     <input class="form-control permission-role-name" type="text" maxlength="80" value="${escapeHtml(role.nombre || "")}" aria-label="Nombre del rol ${escapeHtml(id)}" ${isAdmin ? "readonly" : ""}>
                 </div>
                 <div class="d-flex align-items-center gap-3">
