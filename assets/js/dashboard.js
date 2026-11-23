@@ -6,6 +6,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const upgradeHint = document.getElementById("dashboardUpgradeHint");
     if (upgradeCard && upgradeButton && puzzlePiece) {
         const puzzleSlot = upgradeCard.querySelector(".dashboard-puzzle-slot");
+        const puzzleTiles = Array.from(upgradeCard.querySelectorAll(".dashboard-puzzle-piece[data-puzzle-letter]"));
+        const movingLetter = puzzlePiece.querySelector(".dashboard-puzzle-moving-letter");
+        const slotLetter = puzzleSlot?.querySelector(".dashboard-puzzle-slot-letter");
         let dragOffsetX = 0;
         let dragOffsetY = 0;
         let dragging = false;
@@ -14,6 +17,35 @@ document.addEventListener("DOMContentLoaded", async () => {
         let puzzleIntroTimer = 0;
         const snapDuration = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? 60 : 460;
         const puzzleIntroDuration = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? 0 : 180;
+
+        const resetPuzzleBoard = () => {
+            puzzleTiles.forEach(tile => { tile.hidden = false; });
+            if (puzzleSlot) {
+                puzzleSlot.hidden = true;
+                puzzleSlot.classList.remove("has-tab-right", "has-tab-bottom", "is-ready", "is-snapping");
+                puzzleSlot.style.gridRow = "";
+                puzzleSlot.style.gridColumn = "";
+                puzzleSlot.setAttribute("aria-label", "Espacio para una pieza de COTIX360");
+            }
+            if (movingLetter) movingLetter.textContent = "?";
+            if (slotLetter) slotLetter.textContent = "";
+        };
+
+        const prepareRandomPuzzle = () => {
+            if (!puzzleTiles.length || !puzzleSlot || !slotLetter || !movingLetter) return;
+            puzzleTiles.forEach(tile => { tile.hidden = false; });
+            const missingTile = puzzleTiles[Math.floor(Math.random() * puzzleTiles.length)];
+            const letter = String(missingTile.dataset.puzzleLetter || "");
+            missingTile.hidden = true;
+            puzzleSlot.hidden = false;
+            puzzleSlot.style.gridRow = String(missingTile.dataset.puzzleRow || "1");
+            puzzleSlot.style.gridColumn = String(missingTile.dataset.puzzleColumn || "1");
+            puzzleSlot.classList.toggle("has-tab-right", missingTile.classList.contains("has-tab-right"));
+            puzzleSlot.classList.toggle("has-tab-bottom", missingTile.classList.contains("has-tab-bottom"));
+            puzzleSlot.setAttribute("aria-label", `Espacio para la pieza ${letter} de COTIX360`);
+            slotLetter.textContent = letter;
+            movingLetter.textContent = letter;
+        };
 
         const resetPiece = () => {
             puzzlePiece.classList.remove("is-dragging", "is-snapping");
@@ -105,7 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (upgradeCard.classList.contains("is-puzzle-ready")) {
                 window.clearTimeout(puzzleIntroTimer);
                 upgradeCard.classList.remove("is-puzzle-ready", "is-activating");
-                puzzleSlot?.classList.remove("is-ready");
+                resetPuzzleBoard();
                 puzzlePiece.disabled = false;
                 upgradeButton.querySelector(".dashboard-upgrade-action-label").textContent = "Activar";
                 if (upgradeHint) upgradeHint.textContent = "Completa el reto visual para continuar con tu actualización.";
@@ -114,6 +146,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
             upgradeCard.classList.add("is-puzzle-ready");
             upgradeCard.classList.add("is-activating");
+            prepareRandomPuzzle();
             upgradeButton.querySelector(".dashboard-upgrade-action-label").textContent = "Cancelar";
             puzzleSlot?.classList.add("is-ready");
             if (upgradeHint) upgradeHint.textContent = puzzleIntroDuration ? "Preparando el rompecabezas…" : "Arrastra la ficha dorada al espacio vacío o pulsa Enter.";
@@ -121,7 +154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             puzzleIntroTimer = window.setTimeout(() => {
                 if (!upgradeCard.classList.contains("is-puzzle-ready") || upgradeCard.classList.contains("is-complete")) return;
                 puzzlePiece.disabled = false;
-                if (upgradeHint) upgradeHint.textContent = "Arrastra la ficha dorada al espacio vacío o pulsa Enter.";
+                if (upgradeHint) upgradeHint.textContent = `Arrastra la pieza «${movingLetter?.textContent || "?"}» al hueco para completar COTIX360, o pulsa Enter.`;
                 puzzlePiece.focus();
             }, puzzleIntroDuration);
         });
