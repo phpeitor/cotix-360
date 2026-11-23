@@ -112,13 +112,17 @@
             "items_receta.php",
             "pdf_cotizacion.php",
             "pdf_receta.php",
+            "perfil.php",
             "receta.php",
             "receta_form.php",
             "receta_list.php",
             "tracking.php",
             "tracking_crear.php",
-            "upd_item_receta.php",
-            "perfil.php"
+            "upd_item_receta.php"
         ]
+    },
+    "9": {
+        "nombre": "test",
+        "acceso": []
     }
 }

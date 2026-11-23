@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const dirtyState = document.getElementById("permissionsDirtyState");
     const roleSearch = document.getElementById("permissionRoleSearch");
     const addButton = document.getElementById("btnAgregarRol");
-    const newRoleId = document.getElementById("newRoleId");
     const newRoleName = document.getElementById("newRoleName");
     if (!root || !rolesContainer) return;
 
@@ -141,9 +140,9 @@ document.addEventListener("DOMContentLoaded", () => {
         card.dataset.roleId = String(id);
 
         const pageChoices = availablePages.map(page => `
-            <label class="permission-page-option">
-                <input class="form-check-input permission-page-check" type="checkbox" value="${escapeHtml(page)}" ${allowed.has(page) ? "checked" : ""} ${allAccess ? "disabled" : ""}>
-                <span>${escapeHtml(page)}</span>
+            <label class="permission-page-option form-check form-switch">
+                <input class="form-check-input permission-page-check" type="checkbox" role="switch" value="${escapeHtml(page)}" ${allowed.has(page) ? "checked" : ""} ${allAccess ? "disabled" : ""}>
+                <span class="permission-page-label">${escapeHtml(page)}</span>
             </label>
         `).join("");
 
@@ -160,8 +159,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 </div>
                 <div class="permission-role-actions">
-                    <label class="form-check permission-all-access mb-0">
-                        <input class="form-check-input permission-all-check" type="checkbox" ${allAccess ? "checked" : ""} ${isAdmin ? "disabled" : ""}>
+                    <label class="form-check form-switch permission-all-access mb-0">
+                        <input class="form-check-input permission-all-check" type="checkbox" role="switch" ${allAccess ? "checked" : ""} ${isAdmin ? "disabled" : ""}>
                         <span class="form-check-label">Acceso total</span>
                     </label>
                     ${isAdmin
@@ -258,28 +257,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     addButton?.addEventListener("click", () => {
-        const id = String(newRoleId?.value || "").trim();
         const name = String(newRoleName?.value || "").trim();
-        if (!/^\d{1,6}$/.test(id) || Number(id) < 1) {
-            alertify.warning("Ingresa un ID numérico positivo para el rol");
-            return;
-        }
         if (!name || name.length > 80) {
             alertify.warning("Ingresa un nombre para el rol (máximo 80 caracteres)");
             return;
         }
-        if (Object.prototype.hasOwnProperty.call(roleData, id)) {
-            alertify.warning("Ya existe un rol con ese ID");
-            return;
+
+        const existingIds = Object.keys(roleData).map(Number).filter(Number.isInteger);
+        let id = 1;
+        while (existingIds.includes(id)) {
+            id++;
         }
 
+        id = String(id);
         saveActiveRole();
         roleData[id] = { nombre: name, acceso: [] };
         userCounts[id] = Number(userCounts[id] || 0);
         selectedRoleId = id;
         setDirty(true);
         renderRoles(roleData);
-        newRoleId.value = "";
         newRoleName.value = "";
         rolePanel?.scrollIntoView({ behavior: "smooth", block: "center" });
     });

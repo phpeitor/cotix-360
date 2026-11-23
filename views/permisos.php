@@ -22,7 +22,7 @@ $csrf = $_SESSION['csrf_permisos'];
     <link href="./assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
     <link href="./assets/css/branding.css?v=1.7" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/permisos.css?v=1.3" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/permisos.css?v=1.5" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css" />
 </head>
@@ -79,11 +79,7 @@ $csrf = $_SESSION['csrf_permisos'];
                                 </div>
                             </div>
                             <div class="row g-2 align-items-end">
-                                <div class="col-sm-3 col-md-2">
-                                    <label class="form-label" for="newRoleId">ID del rol</label>
-                                    <input type="number" class="form-control" id="newRoleId" min="1" step="1" placeholder="Ej. 7">
-                                </div>
-                                <div class="col-sm-6 col-md-5">
+                                <div class="col-sm-7 col-md-6">
                                     <label class="form-label" for="newRoleName">Nombre</label>
                                     <input type="text" class="form-control" id="newRoleName" maxlength="80" placeholder="Ej. Logística">
                                 </div>
@@ -123,7 +119,7 @@ $csrf = $_SESSION['csrf_permisos'];
     <?php include ROOT . '/layout/theme.html'; ?>
     <script src="./assets/js/vendor.min.js"></script>
     <script src="./assets/js/app.js"></script>
-    <script src="./assets/js/permisos.js?v=1.3"></script>
+    <script src="./assets/js/permisos.js?v=1.5"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
 </html>
