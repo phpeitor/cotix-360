@@ -1,5 +1,5 @@
 <?php
-require_once "../database/conexion.php";
+require_once __DIR__ . '/../database/conexion.php';
 
 class Usuario {
     private PDO $conn;
