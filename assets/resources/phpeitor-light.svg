@@ -2,13 +2,18 @@
   <title>Cotix360 · PHPeitor</title>
   <style>
     .phpeitor-trace {
-      fill: none; stroke: #A61B3B; stroke-opacity: 1; stroke-width: 1.8;
-      stroke-dasharray: 70 200; vector-effect: non-scaling-stroke;
-      filter: drop-shadow(0 0 3px #D43D61) drop-shadow(0 0 1px #fff);
-      animation: phpeitor-trace 5s linear infinite;
+      fill: none;
+      stroke: #A61B3B;
+      stroke-opacity: .78;
+      stroke-width: 1.15;
+      stroke-linejoin: round;
+      stroke-dasharray: 72 320;
+      vector-effect: non-scaling-stroke;
+      filter: drop-shadow(0 0 2px rgba(166, 27, 59, .28));
+      animation: phpeitor-trace 4.8s linear infinite;
     }
-    @keyframes phpeitor-trace { to { stroke-dashoffset: -270px; } }
-    @media (prefers-reduced-motion: reduce) { .phpeitor-trace { display: none; } }
+    @keyframes phpeitor-trace { to { stroke-dashoffset: -392; } }
+    @media (prefers-reduced-motion: reduce) { .phpeitor-trace { animation: none; } }
   </style>
   <text x="45" y="99" fill="#F6F0DF" font-family="Arial Black, Arial, sans-serif" font-size="130" font-style="italic" font-weight="900">Cotix360</text>
   <text x="45" y="99" class="phpeitor-trace" font-family="Arial Black, Arial, sans-serif" font-size="130" font-style="italic" font-weight="900">Cotix360</text>

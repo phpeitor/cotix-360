@@ -26,10 +26,31 @@ body {
     place-items: center;
     overflow-x: hidden;
     padding: 24px;
+    background: #dce6ef;
+}
+
+.login-page-video {
+    position: fixed;
+    z-index: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    filter: saturate(.62) contrast(.88) brightness(.62);
+}
+.login-page-overlay {
+    position: fixed;
+    z-index: 1;
+    inset: 0;
     background:
-        radial-gradient(900px 520px at 4% 0%, rgba(66, 129, 196, .11), transparent 65%),
-        radial-gradient(780px 520px at 100% 100%, rgba(69, 148, 111, .10), transparent 62%),
-        #eef3f8;
+        linear-gradient(90deg, rgba(238,243,248,.72) 0%, rgba(238,243,248,.28) 48%, rgba(18,38,58,.18) 100%),
+        radial-gradient(700px 420px at 12% 8%, rgba(255,255,255,.34), transparent 70%);
+    pointer-events: none;
+}
+.login-shell {
+    position: relative;
+    z-index: 2;
 }
 
 button,
@@ -106,10 +127,21 @@ button { -webkit-tap-highlight-color: transparent; }
     text-decoration: none;
 }
 
-.brand img { display: block; flex: none; object-fit: contain; }
-.brand span { display: flex; min-width: 0; flex-direction: column; line-height: 1.2; }
-.brand strong { font-family: "Figtree", sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
-.brand small { margin-top: 3px; color: var(--muted); font-size: 11px; }
+.brand-logo {
+    display: block;
+    width: clamp(125px, 16vw, 170px);
+    height: auto;
+    max-height: 34px;
+    flex: none;
+    object-fit: contain;
+    object-position: left center;
+    filter: drop-shadow(0 3px 8px rgba(36, 75, 120, .08));
+    transition: filter .2s ease, opacity .2s ease;
+}
+
+.brand:hover .brand-logo {
+    filter: drop-shadow(0 4px 10px rgba(36, 75, 120, .12));
+}
 
 .header-actions { gap: 9px; }
 .login-steps { gap: 6px; margin: 0; padding: 0; list-style: none; }
@@ -372,14 +404,31 @@ button { -webkit-tap-highlight-color: transparent; }
     overflow: hidden;
     isolation: isolate;
     border-radius: 20px;
-    background: linear-gradient(145deg, #d5e2ec 0%, #c5d6e5 52%, #b5cbe0 100%);
+    background: rgba(184, 203, 220, .12);
+    backdrop-filter: blur(2px);
 }
-.bear-panel-glow { position: absolute; z-index: -1; inset: 0; background: radial-gradient(500px 350px at 50% 42%, rgba(255,255,255,.55), transparent 72%); }
-.bear-panel::after { position: absolute; z-index: 1; inset: auto 0 0; height: 34%; background: linear-gradient(transparent, rgba(35,65,95,.18)); content: ""; pointer-events: none; }
-.bear-panel canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
-.bear-chips { position: absolute; z-index: 2; top: 18px; right: 18px; left: 18px; display: flex; flex-wrap: wrap; gap: 7px; }
+.bear-panel::before {
+    position: absolute;
+    z-index: 5;
+    inset: 0;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: inherit;
+    box-shadow: inset 0 0 38px rgba(12, 35, 58, .08);
+    content: "";
+    pointer-events: none;
+}
+.bear-panel-glow {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(18, 38, 58, .05) 0%, rgba(18, 38, 58, .08) 42%, rgba(18, 38, 58, .42) 100%);
+    pointer-events: none;
+}
+.bear-panel::after { position: absolute; z-index: 3; inset: auto 0 0; height: 24%; background: linear-gradient(transparent, rgba(18,38,58,.22)); content: ""; pointer-events: none; }
+.bear-panel canvas { position: absolute; z-index: 1; inset: 0; display: block; width: 100%; height: 100%; background: transparent; pointer-events: none; }
+.bear-chips { position: absolute; z-index: 4; top: 18px; right: 18px; left: 18px; display: flex; flex-wrap: wrap; gap: 7px; }
 .bear-chips span { padding: 6px 10px; border: 1px solid rgba(255,255,255,.45); border-radius: 999px; background: rgba(27,53,79,.34); color: #fff; font-size: 10px; font-weight: 500; backdrop-filter: blur(8px); }
-.bear-caption { position: absolute; z-index: 2; bottom: 17px; left: 17px; gap: 9px; padding: 7px 13px 7px 7px; border: 1px solid rgba(255,255,255,.2); border-radius: 13px; background: rgba(22,36,54,.58); color: #fff; backdrop-filter: blur(9px); }
+.bear-caption { position: absolute; z-index: 4; bottom: 17px; left: 17px; gap: 9px; padding: 7px 13px 7px 7px; border: 1px solid rgba(255,255,255,.2); border-radius: 13px; background: rgba(22,36,54,.58); color: #fff; backdrop-filter: blur(9px); }
 .bear-caption-mark { width: 34px; height: 34px; justify-content: center; border-radius: 9px; background: #fff; }
 .bear-caption-mark img { width: 26px; height: 26px; object-fit: contain; }
 .bear-caption > span:last-child { display: flex; flex-direction: column; line-height: 1.2; }

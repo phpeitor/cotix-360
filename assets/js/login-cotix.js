@@ -6,6 +6,34 @@
     if (!app) return;
 
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || false;
+    const backgroundVideo = byId("login-background-video");
+    if (backgroundVideo) {
+        const videoNumber = Math.floor(Math.random() * 4) + 1;
+        const source = document.createElement("source");
+        source.src = `./assets/resources/video${videoNumber}.mp4`;
+        source.type = "video/mp4";
+        source.addEventListener("error", () => { backgroundVideo.hidden = true; });
+        backgroundVideo.appendChild(source);
+        backgroundVideo.addEventListener("loadeddata", () => {
+            backgroundVideo.hidden = false;
+        }, { once: true });
+        backgroundVideo.addEventListener("error", () => {
+            backgroundVideo.hidden = true;
+        }, { once: true });
+        backgroundVideo.load();
+        if (reducedMotion) backgroundVideo.pause();
+        else backgroundVideo.play().catch(() => { backgroundVideo.hidden = true; });
+    }
+
+    window.setTimeout(() => {
+        if (window.cotixLoginReady) return;
+        window.cotixLoginFallback = true;
+        const form = byId("login-form");
+        const verification = byId("verification-step");
+        if (form) form.hidden = false;
+        if (verification) verification.hidden = true;
+    }, 2500);
+
     const themeKey = "cotix360_login_theme";
     const rememberedUserKey = "cotix360_login_user";
     const verificationStep = byId("verification-step");
@@ -51,6 +79,12 @@
         const dark = theme === "dark";
         app.classList.toggle("is-dark", dark);
         document.documentElement.classList.toggle("cotix-login-dark", dark);
+        const brandLogo = byId("brand-logo");
+        if (brandLogo) {
+            brandLogo.src = dark
+                ? "./assets/resources/phpeitor-light.svg?v=2.0"
+                : "./assets/resources/phpeitor-dark.svg?v=2.0";
+        }
         const button = byId("theme-toggle");
         button.setAttribute("aria-label", dark ? "Cambiar a tema claro" : "Cambiar a tema oscuro");
         button.title = dark ? "Tema claro" : "Tema oscuro";

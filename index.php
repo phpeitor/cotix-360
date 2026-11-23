@@ -17,7 +17,7 @@ $recaptchaSiteKey = htmlspecialchars((string)($_ENV['RECAPTCHA_SITE_KEY'] ?? '')
     <meta name="theme-color" content="#eef3f8">
     <meta name="description" content="Ingreso seguro a Cotix360">
     <title>Cotix360 | Iniciar sesión</title>
-    <link rel="icon" type="image/png" href="./assets/images/logo-sm.png">
+    <link rel="icon" type="image/x-icon" href="./assets/images/favicon.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -27,12 +27,13 @@ $recaptchaSiteKey = htmlspecialchars((string)($_ENV['RECAPTCHA_SITE_KEY'] ?? '')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css">
 </head>
 <body>
+    <video id="login-background-video" class="login-page-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>
+    <div class="login-page-overlay" aria-hidden="true"></div>
     <main id="login-app" class="login-shell" data-recaptcha-site-key="<?= $recaptchaSiteKey ?>">
         <section class="login-panel" aria-label="Acceso a Cotix360">
             <header class="login-header">
                 <a class="brand" href="./index.php" aria-label="Cotix360, inicio">
-                    <img src="./assets/images/logo-sm.png" alt="" width="40" height="40">
-                    <span><strong>Cotix360</strong><small>Gestión comercial y técnica</small></span>
+                    <img id="brand-logo" class="brand-logo" src="./assets/resources/phpeitor-dark.svg?v=2.0" alt="Cotix360" width="170" height="34">
                 </a>
                 <div class="header-actions">
                     <ol class="login-steps" aria-label="Pasos para ingresar">
@@ -100,13 +101,13 @@ $recaptchaSiteKey = htmlspecialchars((string)($_ENV['RECAPTCHA_SITE_KEY'] ?? '')
 
                     <label class="form-field" for="login-user">
                         <span>Usuario</span>
-                        <input id="login-user" name="usuario" type="text" placeholder="Tu usuario" maxlength="35" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+                        <input id="login-user" name="usuario" type="text" placeholder="cotix.user" maxlength="35" autocomplete="username" autocapitalize="none" spellcheck="false" required>
                     </label>
 
                     <label class="form-field" for="login-password">
                         <span>Contraseña</span>
                         <div class="password-control">
-                            <input id="login-password" name="password" type="password" placeholder="Ingresa tu contraseña" autocomplete="current-password" required>
+                            <input id="login-password" name="password" type="password" placeholder="*********" autocomplete="current-password" required>
                             <button type="button" id="toggle-password" class="password-toggle" aria-label="Mostrar contraseña" aria-pressed="false">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             </button>
@@ -136,16 +137,5 @@ $recaptchaSiteKey = htmlspecialchars((string)($_ENV['RECAPTCHA_SITE_KEY'] ?? '')
     </main>
 
     <script src="./assets/js/login-cotix.js?v=1.1" defer></script>
-    <script>
-        window.setTimeout(function () {
-            if (!window.cotixLoginReady) {
-                window.cotixLoginFallback = true;
-                var form = document.getElementById('login-form');
-                var verification = document.getElementById('verification-step');
-                if (form) form.hidden = false;
-                if (verification) verification.hidden = true;
-            }
-        }, 2500);
-    </script>
 </body>
 </html>
