@@ -89,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     /* ---------------------------------------------------
        📊 GRID
     --------------------------------------------------- */
+    const hiddenColumnsExcludedFromSearch = new Set([4, 5, 8, 11, 12, 13]);
     const grid = new gridjs.Grid({
         columns: [
             {
@@ -150,7 +151,10 @@ document.addEventListener("DOMContentLoaded", () => {
             limit: 10
         },
         sort: true,
-        search: true
+        search: {
+            ignoreHiddenColumns: false,
+            selector: (cell, rowIndex, cellIndex) => hiddenColumnsExcludedFromSearch.has(cellIndex) ? "" : cell
+        }
     }).render(document.getElementById("table-gridjs"));
 
     grid.on("ready", aplicarPermisosAdmin);
