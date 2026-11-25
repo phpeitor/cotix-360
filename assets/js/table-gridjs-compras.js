@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
             { id: "id", name: "ID", width: "70px" },
             { id: "id_receta_duplicada", name: "Origen", hidden: true },
             { id: "usuario", name: "Enviado por", width: "120px" },
-            { id: "usuario_aprobador", name: "Validado por", width: "120px" },
+            { id: "usuario_cierre", name: "Cerrado por", width: "120px" },
             {
                 id: "nombre",
                 name: "Receta",
@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const estado = String(value || "Pendiente").trim();
         const badgeClass = estado === "Aprobada"
             ? "badge-outline-success"
-            : estado === "Validado"
+            : estado === "Cerrado"
                 ? "badge-outline-info"
             : estado === "Anulada"
                 ? "badge-outline-danger"

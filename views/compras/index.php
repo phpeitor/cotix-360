@@ -112,7 +112,7 @@ $cargo = (int)($_SESSION['session_cargo'] ?? 0);
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/table-gridjs-compras.js?v=1.5"></script>
+    <script src="./assets/js/table-gridjs-compras.js?v=1.6"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 </body>
 </html>

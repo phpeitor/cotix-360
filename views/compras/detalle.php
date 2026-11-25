@@ -21,7 +21,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <link href="./assets/css/branding.css?v=1.9" rel="stylesheet" type="text/css" />
     <link href="./assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./assets/css/receta.css?v=1.6" rel="stylesheet" type="text/css" />
-    <link href="./assets/css/compras_detalle.css?v=2.8" rel="stylesheet" type="text/css" />
+    <link href="./assets/css/compras_detalle.css?v=2.9" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
@@ -71,7 +71,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                             <div class="avatar-lg bg-light d-flex align-items-center justify-content-center rounded">
                                                 <iconify-icon icon="solar:user-check-bold" class="fs-28 text-success"></iconify-icon>
                                             </div>
-                                            <div><p class="text-dark fw-medium fs-12 mb-0"><span id="usuario_aprobador"></span></p></div>
+                                            <div><p class="text-dark fw-medium fs-12 mb-0"><span id="usuario_cierre"></span></p></div>
                                         </div>
                                     </div>
                                     <div class="col-lg-3">
@@ -107,6 +107,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
                                     <button type="button" class="btn btn-dark btn-icon <?= $verMontos ? '' : 'd-none' ?>" id="btnToggleCharts" data-bs-toggle="tooltip" data-bs-title="Ver gráficos" data-bs-placement="bottom"><i class="ti ti-chart-arcs fs-18"></i></button>
                                     <button type="button" class="btn btn-primary btn-icon <?= $puedeEditar ? '' : 'd-none' ?>" id="btnComprasTrackingActividades" data-bs-toggle="tooltip" data-bs-title="Actividades de compras en tracking" data-bs-placement="bottom" aria-label="Gestionar actividades de compras en tracking"><i class="ti ti-truck-delivery fs-18"></i></button>
                                     <button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#info-header-modal" data-bs-title="Buscar items" data-bs-placement="bottom" id="btnBuscarItems"><i class="ti ti-search fs-18"></i></button>
+                                    <button type="button" class="btn btn-success d-none" id="btnCerrarCompra"><i class="ti ti-lock-check me-1"></i>Cerrar compra</button>
                                     <a href="compras.php" class="btn btn-dark btn-icon" data-bs-toggle="tooltip" data-bs-title="Volver" data-bs-placement="bottom"><i class="ti ti-corner-up-left-double fs-18"></i></a>
                                 </div>
                             </div>
@@ -577,7 +578,7 @@ $verMontos = in_array($cargo, [1, 3, 5], true);
     <script src="./assets/js/app.js"></script>
     <script src="./assets/js/gridjs.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
-    <script src="./assets/js/compras_detalle.js?v=4.1"></script>
+    <script src="./assets/js/compras_detalle.js?v=4.3"></script>
     <script src="./assets/js/apexcharts.min.js"></script>
     <script src="./assets/js/compras_charts.js?v=2.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>

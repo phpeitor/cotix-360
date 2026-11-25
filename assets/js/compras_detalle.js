@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
         id: document.getElementById("compra_id"),
         nombre: document.getElementById("compra_nombre_display"),
         usuario: document.getElementById("usuario"),
-        aprobador: document.getElementById("usuario_aprobador"),
+        usuarioCierre: document.getElementById("usuario_cierre"),
         usuarioAsignado: document.getElementById("usuario_asignado"),
         estado: document.getElementById("estado"),
         fecha: document.getElementById("fecha"),
@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
         totalPeruDolares: document.getElementById("total_peru_dolares"),
         tipoCambio: document.getElementById("tipo_cambio_sunat"),
         btnBuscarItems: document.getElementById("btnBuscarItems"),
+        btnCerrarCompra: document.getElementById("btnCerrarCompra"),
         clienteRuc: document.getElementById("clienteRuc"),
         clienteRazonSocial: document.getElementById("clienteRazonSocial"),
         clienteDireccion: document.getElementById("clienteDireccion"),
@@ -67,11 +68,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let totales = null;
     let semaforo = null;
     let condiciones = {};
-    let permisos = { puede_editar: false, puede_ver_montos: true, estado: "Validado" };
+    let permisos = { puede_editar: false, puede_ver_montos: true, estado: "Pendiente" };
+    let cierreEnCurso = false;
 
     const MAX_CANTIDAD = 5000;
     const cantidadTimers = new Map();
     const precioTimers = new Map();
+    const escriturasItemsPendientes = new Set();
     const dataAttr = {
         total_compra_dolares: 0,
         total_receta_dolares: 0,
@@ -141,6 +144,15 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         document.addEventListener("change", event => {
+            const origenSelect = event.target.closest("[data-origen-abastecimiento-detalle]");
+            if (origenSelect) {
+                guardarOrigenAbastecimiento(
+                    Number(origenSelect.dataset.origenAbastecimientoDetalle || 0),
+                    origenSelect.value
+                );
+                return;
+            }
+
             const input = event.target.closest("[data-qty-input-detalle]");
             if (input) {
                 input.value = String(clampCantidad(input.value));
@@ -176,6 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
         });
+        fields.btnCerrarCompra?.addEventListener("click", cerrarCompra);
         fields.detalleSearch?.addEventListener("input", filtrarDetalleCompra);
         fields.itemsDisponiblesSearch?.addEventListener("input", filtrarItemsDisponibles);
 
@@ -226,7 +239,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function puedeEditar() {
-        return Boolean(permisos.puede_editar) && ["pendiente", "validado"].includes(String(compra?.estado || "").trim().toLowerCase());
+        return !cierreEnCurso
+            && Boolean(permisos.puede_editar)
+            && String(compra?.estado || "").trim().toLowerCase() === "pendiente";
     }
 
     function verMontos() {
@@ -274,7 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderTotales();
             renderDetalle();
             renderAdicionales();
-            fields.btnTrackingActividades?.classList.toggle("d-none", !puedeEditar() || Number(compra?.id_receta_duplicada || 0) <= 0);
+            fields.btnTrackingActividades?.classList.toggle("d-none", !permisos.puede_editar || Number(compra?.id_receta_duplicada || 0) <= 0);
             initTooltips();
         } catch (error) {
             alertify.error(error.message || "No se pudo cargar la compra");
@@ -286,9 +301,9 @@ document.addEventListener("DOMContentLoaded", () => {
         fields.id.textContent = compra.id || "-";
         fields.nombre.textContent = compra.nombre || "Sin nombre";
         fields.usuario.textContent = compra.usuario || "-";
-        fields.aprobador.textContent = compra.usuario_aprobador || "-";
+        if (fields.usuarioCierre) fields.usuarioCierre.textContent = compra.usuario_cierre || "-";
         if (fields.usuarioAsignado) fields.usuarioAsignado.textContent = compra.usuario_asignado || "-";
-        fields.estado.innerHTML = renderEstado(compra.estado || "Validado");
+        fields.estado.innerHTML = renderEstado(compra.estado || "Pendiente");
         fields.fecha.textContent = compra.created_at || "-";
         fields.tipoCambio.textContent = Number(totales?.tipo_cambio || compra.tipo_cambio || 0).toFixed(3);
 
@@ -298,6 +313,14 @@ document.addEventListener("DOMContentLoaded", () => {
             fields.btnBuscarItems.classList.toggle("disabled", !habilitado);
             fields.btnBuscarItems.setAttribute("aria-disabled", habilitado ? "false" : "true");
         }
+        if (fields.btnCerrarCompra) {
+            const habilitado = puedeEditar();
+            fields.btnCerrarCompra.classList.toggle("d-none", !habilitado);
+            fields.btnCerrarCompra.disabled = !habilitado;
+        }
+        itemSearchBody?.querySelectorAll("[data-add-item]").forEach(button => {
+            button.disabled = !puedeEditar() || button.dataset.itemDuplicate === "1";
+        });
 
         if (fields.clienteRuc) fields.clienteRuc.value = compra.cliente_ruc || "";
         if (fields.clienteRazonSocial) fields.clienteRazonSocial.value = compra.cliente_razon_social_empresa || "";
@@ -539,9 +562,23 @@ document.addEventListener("DOMContentLoaded", () => {
             const simbolo = monedaSimbolo(moneda);
             const adicional = esAdicional(item);
             const adicionalSigno = signoAdicional(item);
+            const origenAbastecimiento = String(item.origen_abastecimiento || "");
             const adicionalBadge = adicional
                 ? `<span class="badge ${adicionalSigno === "negativo" ? "bg-danger-subtle text-danger" : "bg-success-subtle text-success"} mt-1 d-inline-flex flex-shrink-0">Adicional ${adicionalSigno === "negativo" ? "-" : "+"}</span>`
                 : "";
+            const origenAbastecimientoHtml = editable
+                ? `
+                    <div class="mt-2">
+                        <label class="form-label fs-12 mb-1" for="origen-abastecimiento-${item.id}">Origen</label>
+                        <select id="origen-abastecimiento-${item.id}" class="form-select form-select-sm compras-origen-select"
+                                data-origen-abastecimiento-detalle="${item.id}" aria-label="Origen del item ${escapeHtml(item.nombre || "")}">
+                            <option value="" ${origenAbastecimiento === "" ? "selected" : ""} disabled>Seleccionar Stock o Compras</option>
+                            <option value="Stock" ${origenAbastecimiento === "Stock" ? "selected" : ""}>Stock</option>
+                            <option value="Compras" ${origenAbastecimiento === "Compras" ? "selected" : ""}>Compras</option>
+                        </select>
+                    </div>
+                `
+                : `<div class="mt-2"><span class="badge ${origenAbastecimiento ? "bg-info-subtle text-info" : "bg-light text-muted"}">${escapeHtml(origenAbastecimiento || "Sin clasificar")}</span></div>`;
 
             const accionHtml = editable
                 ? `<button type="button" class="btn btn-sm btn-danger" data-delete-detalle="${item.id}" data-bs-toggle="tooltip" data-bs-title="Eliminar"><i class="ti ti-trash"></i></button>`
@@ -589,6 +626,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 item.modelo,
                 item.uni_medida,
                 tipo,
+                origenAbastecimiento,
                 adicional ? `adicional ${adicionalSigno}` : "normal"
             ].join(" ").toLowerCase());
 
@@ -608,6 +646,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 </div>
                                 <h5 class="fs-14 mt-1 item-description text-break mb-0">${itemDescripcion}</h5>
                                 ${adicional ? `<small class="text-muted d-block mt-1">${adicionalSigno === "negativo" ? "Descuenta del total y semáforo" : "No afecta el total ni semáforo"}</small>` : ""}
+                                ${origenAbastecimientoHtml}
                             </div>
                         </div>
                     </td>
@@ -786,17 +825,130 @@ document.addEventListener("DOMContentLoaded", () => {
         renderAdicionales();
     }
 
-    async function guardarCantidad(detalleId, cantidad) {
+    async function guardarCantidad(detalleId, cantidad, permitirDuranteCierre = false) {
         cantidadTimers.delete(detalleId);
+        if (!permitirDuranteCierre && !puedeEditar()) return false;
+        const escritura = (async () => {
+            try {
+                const json = await post("controller/compras/upd_compra_detalle.php", {
+                    hash, accion: "cantidad", detalle_id: String(detalleId), cantidad: String(cantidad)
+                });
+                aplicarResultado(json);
+                return true;
+            } catch (error) {
+                alertify.error(error.message);
+                await loadCompra();
+                return false;
+            }
+        })();
+        escriturasItemsPendientes.add(escritura);
         try {
-            const json = await post("controller/compras/upd_compra_detalle.php", {
-                hash, accion: "cantidad", detalle_id: String(detalleId), cantidad: String(cantidad)
-            });
-            aplicarResultado(json);
-        } catch (error) {
-            alertify.error(error.message);
-            await loadCompra();
+            return await escritura;
+        } finally {
+            escriturasItemsPendientes.delete(escritura);
         }
+    }
+
+    async function guardarOrigenAbastecimiento(detalleId, origen) {
+        if (!puedeEditar()) return false;
+        if (!["Stock", "Compras"].includes(origen)) {
+            alertify.error("Selecciona Stock o Compras");
+            await loadCompra();
+            return false;
+        }
+
+        const item = detalle.find(row => Number(row.id) === detalleId);
+        if (!item) return false;
+
+        const origenAnterior = String(item.origen_abastecimiento || "");
+        if (origenAnterior === origen) return true;
+        item.origen_abastecimiento = origen;
+        const select = tbody.querySelector(`[data-origen-abastecimiento-detalle="${CSS.escape(String(detalleId))}"]`);
+        if (select) select.disabled = true;
+
+        const escritura = (async () => {
+            try {
+                await post("controller/compras/upd_compra_detalle.php", {
+                    hash,
+                    accion: "origen_abastecimiento",
+                    detalle_id: String(detalleId),
+                    origen_abastecimiento: origen
+                });
+                return true;
+            } catch (error) {
+                item.origen_abastecimiento = origenAnterior;
+                alertify.error(error.message || "No se pudo guardar el origen del item");
+                await loadCompra();
+                return false;
+            }
+        })();
+        escriturasItemsPendientes.add(escritura);
+        try {
+            return await escritura;
+        } finally {
+            escriturasItemsPendientes.delete(escritura);
+            if (select) select.disabled = !puedeEditar();
+        }
+    }
+
+    async function guardarCambiosPendientes() {
+        const cantidadesPendientes = Array.from(cantidadTimers.keys());
+        const preciosPendientes = Array.from(precioTimers.keys());
+        cantidadTimers.forEach(timer => clearTimeout(timer));
+        precioTimers.forEach(timer => clearTimeout(timer));
+        cantidadTimers.clear();
+        precioTimers.clear();
+
+        const escriturasEnCurso = await Promise.all(Array.from(escriturasItemsPendientes));
+        if (escriturasEnCurso.some(ok => !ok)) return false;
+
+        for (const detalleId of cantidadesPendientes) {
+            const item = detalle.find(row => Number(row.id) === Number(detalleId));
+            if (item && !await guardarCantidad(detalleId, item.cantidad, true)) return false;
+        }
+
+        for (const detalleId of preciosPendientes) {
+            if (!detalle.some(row => Number(row.id) === Number(detalleId))) continue;
+            if (!await guardarPrecio(detalleId, true, true)) return false;
+        }
+
+        return true;
+    }
+
+    function cerrarCompra() {
+        if (!puedeEditar()) return;
+        if (detalle.some(item => !["Stock", "Compras"].includes(String(item.origen_abastecimiento || "")))) {
+            alertify.error("Selecciona Stock o Compras en todos los items antes de cerrar");
+            return;
+        }
+
+        alertify.confirm(
+            "Cerrar compra",
+            "Al cerrar la compra ya no se podrán agregar, eliminar ni modificar sus items. ¿Deseas continuar?",
+            async () => {
+                const button = fields.btnCerrarCompra;
+                cierreEnCurso = true;
+                renderHeader();
+                renderDetalle();
+                if (button) button.disabled = true;
+
+                try {
+                    if (!await guardarCambiosPendientes()) return;
+                    const json = await post("controller/compras/cerrar_compra.php", { hash });
+                    compra.estado = json.estado || "Cerrado";
+                    alertify.success("Compra cerrada. Sus items ya no se pueden modificar.");
+                    await loadCompra();
+                } catch (error) {
+                    alertify.error(error.message || "No se pudo cerrar la compra");
+                    await loadCompra();
+                } finally {
+                    cierreEnCurso = false;
+                    renderHeader();
+                    renderDetalle();
+                }
+            },
+            () => {}
+        ).set("labels", { ok: "Cerrar compra", cancel: "Cancelar" });
     }
 
     function cambiarCantidad(detalleId, cantidad, guardarAhora = false) {
@@ -836,9 +988,10 @@ document.addEventListener("DOMContentLoaded", () => {
         precioTimers.set(detalleId, setTimeout(() => guardarPrecio(detalleId, true), 550));
     }
 
-    async function guardarPrecio(detalleId, forzar = false) {
+    async function guardarPrecio(detalleId, forzar = false, permitirDuranteCierre = false) {
+        if (!permitirDuranteCierre && !puedeEditar()) return false;
         const item = detalle.find(row => Number(row.id) === detalleId);
-        if (!item) return;
+        if (!item) return false;
         const precio = Number(item.precio || 0);
         const moneda = String(item.moneda || "SOL").toUpperCase();
         const input = tbody.querySelector(`[data-precio-input-detalle="${CSS.escape(String(detalleId))}"]`);
@@ -848,7 +1001,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!Number.isFinite(valorInput) || valorInput < 0) {
             if (input) input.value = String(precio);
-            return;
+            return false;
         }
 
         item.precio = valorInput;
@@ -858,19 +1011,29 @@ document.addEventListener("DOMContentLoaded", () => {
         actualizarTotalesDetalle();
 
         if (!forzar && Number(item.precio) === precio && monedaNueva === moneda) {
-            return;
+            return true;
         }
 
         precioTimers.delete(detalleId);
+        const escritura = (async () => {
+            try {
+                const json = await post("controller/compras/upd_compra_detalle.php", {
+                    hash, accion: "precio", detalle_id: String(detalleId),
+                    precio: String(valorInput), moneda: monedaNueva
+                });
+                aplicarResultado(json);
+                return true;
+            } catch (error) {
+                alertify.error(error.message);
+                await loadCompra();
+                return false;
+            }
+        })();
+        escriturasItemsPendientes.add(escritura);
         try {
-            const json = await post("controller/compras/upd_compra_detalle.php", {
-                hash, accion: "precio", detalle_id: String(detalleId),
-                precio: String(valorInput), moneda: monedaNueva
-            });
-            aplicarResultado(json);
-        } catch (error) {
-            alertify.error(error.message);
-            await loadCompra();
+            return await escritura;
+        } finally {
+            escriturasItemsPendientes.delete(escritura);
         }
     }
 
@@ -1092,7 +1255,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                     <td class="text-end">${verMontos() ? `${simbolo} ${money(item.precio)}` : "-"}</td>
                     <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-primary" data-add-item="${item.id}" ${(!editable || bloquearDuplicado) ? "disabled" : ""}>
+                        <button type="button" class="btn btn-sm btn-primary" data-add-item="${item.id}" data-item-duplicate="${bloquearDuplicado ? "1" : "0"}" ${(!editable || bloquearDuplicado) ? "disabled" : ""}>
                             <i class="ti ti-plus"></i>
                         </button>
                         ${bloquearDuplicado ? `<small class="text-muted d-block mt-1">Ya existe; cambia cantidad</small>` : ""}
@@ -1143,9 +1306,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderEstado(value) {
-        const estado = String(value || "Validado").trim();
+        const estado = String(value || "Pendiente").trim();
         const badgeClass = estado === "Aprobada"
             ? "badge-outline-success"
+            : estado === "Cerrado"
+                ? "badge-outline-info"
             : estado === "Anulada"
                 ? "badge-outline-danger"
                 : "badge-outline-warning";

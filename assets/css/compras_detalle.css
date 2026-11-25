@@ -212,6 +212,10 @@
     line-height: 1.35;
 }
 
+.compras-origen-select {
+    max-width: 190px;
+}
+
 .compras-chart-card {
     min-height: 460px;
 }
