@@ -1025,7 +1025,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                             id_receta_duplicada INT NULL DEFAULT NULL,
                             usuario_id BIGINT UNSIGNED NOT NULL,
                             asignado_usuario_id INT NULL DEFAULT NULL,
-                            estado ENUM('Pendiente','Validado','Aprobada','Anulada') NULL DEFAULT 'Validado',
+                            estado ENUM('Pendiente','Cerrado','Aprobada','Anulada') NULL DEFAULT 'Pendiente',
                             created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
                             updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                             usuario_upd INT NULL DEFAULT NULL,
@@ -1044,7 +1044,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         if (!$stmtIndiceAsignacion->fetch(PDO::FETCH_ASSOC)) {
             $this->conn->exec("ALTER TABLE receta_compras ADD KEY idx_receta_compras_asignado (asignado_usuario_id)");
         }
-        $this->asegurarEstadoValidadoCompras();
+        $this->asegurarEstadoCerradoCompras();
 
         $sqlDetalle = "CREATE TABLE IF NOT EXISTS detalle_compras (
                            id INT NOT NULL AUTO_INCREMENT,
@@ -1066,6 +1066,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
                             cantidad INT NULL DEFAULT NULL,
                             es_adicional TINYINT(1) NOT NULL DEFAULT 0,
                             adicional_signo ENUM('positivo','negativo') NULL DEFAULT NULL,
+                            origen_abastecimiento ENUM('Stock','Compras') NULL DEFAULT NULL,
                             PRIMARY KEY (id),
                            KEY idx_detalle_compras_compra (compra_id),
                            KEY idx_detalle_compras_item (item_id)
@@ -1083,6 +1084,7 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
     {
         $this->asegurarColumna('detalle_compras', 'es_adicional', "ALTER TABLE detalle_compras ADD COLUMN es_adicional TINYINT(1) NOT NULL DEFAULT 0 AFTER cantidad");
         $this->asegurarColumna('detalle_compras', 'adicional_signo', "ALTER TABLE detalle_compras ADD COLUMN adicional_signo ENUM('positivo','negativo') NULL DEFAULT NULL AFTER es_adicional");
+        $this->asegurarColumna('detalle_compras', 'origen_abastecimiento', "ALTER TABLE detalle_compras ADD COLUMN origen_abastecimiento ENUM('Stock','Compras') NULL DEFAULT NULL AFTER adicional_signo");
     }
 
     private function asegurarEstadoValidadoIngenieria(): void
@@ -1095,12 +1097,19 @@ rc.tiempo_entrega AS cliente_tiempo_entrega,
         }
     }
 
-    private function asegurarEstadoValidadoCompras(): void
+    private function asegurarEstadoCerradoCompras(): void
     {
         $stmt = $this->conn->query("SHOW COLUMNS FROM receta_compras LIKE 'estado'");
         $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
-        if (strpos((string)($row['Type'] ?? ''), "'Validado'") === false) {
-            $this->conn->exec("ALTER TABLE receta_compras MODIFY estado ENUM('Pendiente','Validado','Aprobada','Anulada') NULL DEFAULT 'Validado'");
+        $type = (string)($row['Type'] ?? '');
+        if (
+            strpos($type, "'Cerrado'") === false
+            || strpos($type, "'Validado'") !== false
+            || ($row['Default'] ?? null) !== 'Pendiente'
+        ) {
+            $this->conn->exec("ALTER TABLE receta_compras MODIFY estado ENUM('Pendiente','Validado','Cerrado','Aprobada','Anulada') NULL DEFAULT 'Pendiente'");
+            $this->conn->exec("UPDATE receta_compras SET estado = 'Cerrado' WHERE estado = 'Validado'");
+            $this->conn->exec("ALTER TABLE receta_compras MODIFY estado ENUM('Pendiente','Cerrado','Aprobada','Anulada') NULL DEFAULT 'Pendiente'");
         }
     }
 

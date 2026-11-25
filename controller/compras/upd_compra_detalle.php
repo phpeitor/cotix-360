@@ -33,16 +33,22 @@ try {
     if (!$compra) {
         throw new Exception('Compra no encontrada');
     }
+
+    $compras->begin();
+    $transaccionIniciada = true;
+    $compra = $compras->bloquearCompraPorHash($hash);
+    if (!$compra) {
+        throw new Exception('Compra no encontrada');
+    }
     if ($cargo === 5 && (int)($compra['asignado_usuario_id'] ?? 0) > 0 && (int)$compra['asignado_usuario_id'] !== (int)$_SESSION['session_id']) {
         http_response_code(403);
         throw new RuntimeException('Esta compra no está asignada a tu usuario');
     }
-    if (!in_array(strtolower(trim((string)($compra['estado'] ?? ''))), ['pendiente', 'validado'], true)) {
-        throw new Exception('Solo se pueden modificar compras en estado Pendiente o Validado');
+    if (strtolower(trim((string)($compra['estado'] ?? ''))) !== 'pendiente') {
+        throw new Exception('Solo se pueden modificar compras en estado Pendiente');
     }
 
     $accion = trim((string)($_POST['accion'] ?? ''));
-    $transaccionIniciada = false;
 
     if ($accion === 'agregar') {
         $itemId = (int)($_POST['item_id'] ?? 0);
@@ -56,7 +62,7 @@ try {
             throw new Exception('La cantidad debe estar entre 1 y 5000');
         }
 
-        $detalleActual = $compras->obtenerDetallePorHash($hash);
+        $detalleActual = $compras->obtenerDetallePorHash($hash, false);
         foreach ($detalleActual as $row) {
             if ((int)($row['item_id'] ?? 0) !== $itemId) {
                 continue;
@@ -72,8 +78,6 @@ try {
             }
         }
 
-        $compras->begin();
-        $transaccionIniciada = true;
         $ok = $compras->agregarDetalleDesdeItem($hash, $itemId, $cantidad, $esAdicional, $adicionalSigno);
     } elseif ($accion === 'precio') {
         $detalleId = (int)($_POST['detalle_id'] ?? 0);
@@ -88,8 +92,6 @@ try {
         if ($moneda !== 'SOL' && $moneda !== 'DOLLAR') {
             throw new Exception('Moneda inválida');
         }
-        $compras->begin();
-        $transaccionIniciada = true;
         $ok = $compras->actualizarPrecioDetalle($hash, $detalleId, $precio, $moneda);
     } elseif ($accion === 'cantidad') {
         $detalleId = (int)($_POST['detalle_id'] ?? 0);
@@ -97,16 +99,22 @@ try {
         if ($detalleId <= 0) {
             throw new Exception('Detalle inválido');
         }
-        $compras->begin();
-        $transaccionIniciada = true;
         $ok = $compras->actualizarCantidadDetalle($hash, $detalleId, $cantidad);
+    } elseif ($accion === 'origen_abastecimiento') {
+        $detalleId = (int)($_POST['detalle_id'] ?? 0);
+        $origenAbastecimiento = trim((string)($_POST['origen_abastecimiento'] ?? ''));
+        if ($detalleId <= 0) {
+            throw new Exception('Detalle inválido');
+        }
+        if (!in_array($origenAbastecimiento, ['Stock', 'Compras'], true)) {
+            throw new Exception('Selecciona Stock o Compras');
+        }
+        $ok = $compras->actualizarOrigenAbastecimientoDetalle($hash, $detalleId, $origenAbastecimiento);
     } elseif ($accion === 'eliminar') {
         $detalleId = (int)($_POST['detalle_id'] ?? 0);
         if ($detalleId <= 0) {
             throw new Exception('Detalle inválido');
         }
-        $compras->begin();
-        $transaccionIniciada = true;
         $ok = $compras->eliminarDetalle($hash, $detalleId);
     } else {
         throw new Exception('Acción no permitida');

@@ -47,7 +47,7 @@ class Compras
                     c.ingenieria_id,
                     c.id_receta_duplicada,
                     p.usuario,
-                    p2.usuario AS usuario_aprobador,
+                    CASE WHEN c.estado = 'Cerrado' THEN p2.usuario END AS usuario_cierre,
                     p3.usuario AS usuario_asignado,
                     c.nombre,
                     rc.ruc AS cliente_ruc,
@@ -152,7 +152,7 @@ class Compras
 
         $sql = "SELECT c.*,
                        p.usuario,
-                       p2.usuario AS usuario_aprobador,
+                       CASE WHEN c.estado = 'Cerrado' THEN p2.usuario END AS usuario_cierre,
                        p3.usuario AS usuario_asignado,
                        rc.ruc AS cliente_ruc,
                        rc.razon_social_empresa AS cliente_razon_social_empresa,
@@ -184,9 +184,43 @@ class Compras
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
-    public function obtenerDetallePorHash(string $hash): array
+    public function bloquearCompraPorHash(string $hash): ?array
     {
-        $this->crearTablasSiNoExisten();
+        $stmt = $this->conn->prepare("SELECT * FROM receta_compras WHERE MD5(id) = :hash LIMIT 1 FOR UPDATE");
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    public function cerrarCompra(int $compraId, int $usuarioId): bool
+    {
+        $sql = "UPDATE receta_compras
+                SET estado = 'Cerrado',
+                    updated_at = :updated_at,
+                    usuario_upd = :usuario_upd
+                WHERE id = :id
+                  AND estado = 'Pendiente'
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM detalle_compras d
+                      WHERE d.compra_id = receta_compras.id
+                        AND (d.origen_abastecimiento IS NULL OR d.origen_abastecimiento NOT IN ('Stock', 'Compras'))
+                  )";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':updated_at', $this->nowLima);
+        $stmt->bindValue(':usuario_upd', $usuarioId, PDO::PARAM_INT);
+        $stmt->bindValue(':id', $compraId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() === 1;
+    }
+
+    public function obtenerDetallePorHash(string $hash, bool $asegurarTablas = true): array
+    {
+        if ($asegurarTablas) {
+            $this->crearTablasSiNoExisten();
+        }
 
         $sql = "SELECT d.*, o.icon AS sub_cat_1_icon
                 FROM detalle_compras d
@@ -201,6 +235,21 @@ class Compras
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function tieneDetalleSinOrigenAbastecimiento(string $hash): bool
+    {
+        $sql = "SELECT 1
+                FROM detalle_compras d
+                INNER JOIN receta_compras c ON c.id = d.compra_id
+                WHERE MD5(c.id) = :hash
+                  AND (d.origen_abastecimiento IS NULL OR d.origen_abastecimiento NOT IN ('Stock', 'Compras'))
+                LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->execute();
+
+        return (bool)$stmt->fetchColumn();
     }
 
     public function recetasConAdicionalesPositivos(): array
@@ -635,6 +684,26 @@ class Compras
         return $stmt->rowCount() > 0;
     }
 
+    public function actualizarOrigenAbastecimientoDetalle(string $hash, int $detalleId, string $origen): bool
+    {
+        if (!in_array($origen, ['Stock', 'Compras'], true)) {
+            return false;
+        }
+
+        $sql = "UPDATE detalle_compras d
+                INNER JOIN receta_compras c ON c.id = d.compra_id
+                SET d.origen_abastecimiento = :origen
+                WHERE MD5(c.id) = :hash
+                  AND c.estado = 'Pendiente'
+                  AND d.id = :detalle_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':origen', $origen);
+        $stmt->bindValue(':hash', $hash);
+        $stmt->bindValue(':detalle_id', $detalleId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
+    }
+
     public function eliminarDetalle(string $hash, int $detalleId): bool
     {
         $sql = "DELETE d
@@ -657,7 +726,7 @@ class Compras
             id_receta_duplicada INT NULL DEFAULT NULL,
             usuario_id BIGINT UNSIGNED NOT NULL,
             asignado_usuario_id INT NULL DEFAULT NULL,
-            estado ENUM('Pendiente','Validado','Aprobada','Anulada') NULL DEFAULT 'Validado',
+            estado ENUM('Pendiente','Cerrado','Aprobada','Anulada') NULL DEFAULT 'Pendiente',
             created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             usuario_upd INT NULL DEFAULT NULL,
@@ -677,7 +746,7 @@ class Compras
             $this->conn->exec("ALTER TABLE receta_compras ADD KEY idx_receta_compras_asignado (asignado_usuario_id)");
         }
 
-        $this->asegurarEstadoValidadoCompras();
+        $this->asegurarEstadoCerradoCompras();
 
         $this->conn->exec("CREATE TABLE IF NOT EXISTS detalle_compras (
             id INT NOT NULL AUTO_INCREMENT,
@@ -699,6 +768,7 @@ class Compras
             cantidad INT NULL DEFAULT NULL,
             es_adicional TINYINT(1) NOT NULL DEFAULT 0,
             adicional_signo ENUM('positivo','negativo') NULL DEFAULT NULL,
+            origen_abastecimiento ENUM('Stock','Compras') NULL DEFAULT NULL,
             PRIMARY KEY (id),
             KEY idx_detalle_compras_compra (compra_id),
             KEY idx_detalle_compras_item (item_id)
@@ -706,6 +776,7 @@ class Compras
 
         $this->asegurarColumna('detalle_compras', 'es_adicional', "ALTER TABLE detalle_compras ADD COLUMN es_adicional TINYINT(1) NOT NULL DEFAULT 0 AFTER cantidad");
         $this->asegurarColumna('detalle_compras', 'adicional_signo', "ALTER TABLE detalle_compras ADD COLUMN adicional_signo ENUM('positivo','negativo') NULL DEFAULT NULL AFTER es_adicional");
+        $this->asegurarColumna('detalle_compras', 'origen_abastecimiento', "ALTER TABLE detalle_compras ADD COLUMN origen_abastecimiento ENUM('Stock','Compras') NULL DEFAULT NULL AFTER adicional_signo");
         $this->asegurarColumna('detalle_ingenieria', 'es_adicional', "ALTER TABLE detalle_ingenieria ADD COLUMN es_adicional TINYINT(1) NOT NULL DEFAULT 0 AFTER cantidad");
         $this->asegurarColumna('detalle_ingenieria', 'adicional_signo', "ALTER TABLE detalle_ingenieria ADD COLUMN adicional_signo ENUM('positivo','negativo') NULL DEFAULT NULL AFTER es_adicional");
     }
@@ -720,12 +791,19 @@ class Compras
         }
     }
 
-    private function asegurarEstadoValidadoCompras(): void
+    private function asegurarEstadoCerradoCompras(): void
     {
         $stmt = $this->conn->query("SHOW COLUMNS FROM receta_compras LIKE 'estado'");
         $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
-        if (strpos((string)($row['Type'] ?? ''), "'Validado'") === false) {
-            $this->conn->exec("ALTER TABLE receta_compras MODIFY estado ENUM('Pendiente','Validado','Aprobada','Anulada') NULL DEFAULT 'Validado'");
+        $type = (string)($row['Type'] ?? '');
+        if (
+            strpos($type, "'Cerrado'") === false
+            || strpos($type, "'Validado'") !== false
+            || ($row['Default'] ?? null) !== 'Pendiente'
+        ) {
+            $this->conn->exec("ALTER TABLE receta_compras MODIFY estado ENUM('Pendiente','Validado','Cerrado','Aprobada','Anulada') NULL DEFAULT 'Pendiente'");
+            $this->conn->exec("UPDATE receta_compras SET estado = 'Cerrado' WHERE estado = 'Validado'");
+            $this->conn->exec("ALTER TABLE receta_compras MODIFY estado ENUM('Pendiente','Cerrado','Aprobada','Anulada') NULL DEFAULT 'Pendiente'");
         }
     }
 }
